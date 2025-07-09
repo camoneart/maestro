@@ -4,8 +4,10 @@ import ora from 'ora'
 import inquirer from 'inquirer'
 import { GitWorktreeManager } from '../core/git.js'
 import { CreateOptions } from '../types/index.js'
+import { ConfigManager } from '../core/config.js'
 import { execa } from 'execa'
 import path from 'path'
+import fs from 'fs/promises'
 
 export const createCommand = new Command('create')
   .description('新しい影分身（worktree）を作り出す')
@@ -18,12 +20,21 @@ export const createCommand = new Command('create')
 
     try {
       const gitManager = new GitWorktreeManager()
+      const configManager = new ConfigManager()
+      await configManager.loadProjectConfig()
+      
+      const config = configManager.getAll()
 
       // Gitリポジトリかチェック
       const isGitRepo = await gitManager.isGitRepository()
       if (!isGitRepo) {
         spinner.fail('このディレクトリはGitリポジトリではありません')
         process.exit(1)
+      }
+
+      // ブランチ名にプレフィックスを追加
+      if (config.worktrees?.branchPrefix && !branchName.startsWith(config.worktrees.branchPrefix)) {
+        branchName = config.worktrees.branchPrefix + branchName
       }
 
       // ブランチ名の確認
@@ -51,8 +62,8 @@ export const createCommand = new Command('create')
         `  📁 ${chalk.gray(worktreePath)}`
       )
 
-      // 環境セットアップ
-      if (options.setup) {
+      // 環境セットアップ（設定またはオプションで有効な場合）
+      if (options.setup || (options.setup === undefined && config.development?.autoSetup)) {
         const setupSpinner = ora('環境をセットアップ中...').start()
         
         // package.jsonが存在する場合はnpm install
@@ -62,23 +73,55 @@ export const createCommand = new Command('create')
         } catch (error) {
           setupSpinner.warn('npm install をスキップ')
         }
+
+        // 同期ファイルのコピー
+        if (config.development?.syncFiles) {
+          for (const file of config.development.syncFiles) {
+            try {
+              const sourcePath = path.join(process.cwd(), file)
+              const destPath = path.join(worktreePath, file)
+              await fs.copyFile(sourcePath, destPath)
+              setupSpinner.succeed(`${file} をコピーしました`)
+            } catch {
+              // ファイルが存在しない場合はスキップ
+            }
+          }
+        }
       }
 
-      // エディタで開く
-      if (options.open) {
+      // エディタで開く（設定またはオプションで有効な場合）
+      if (options.open || (options.open === undefined && config.development?.defaultEditor !== 'none')) {
         const openSpinner = ora('エディタで開いています...').start()
+        const editor = config.development?.defaultEditor || 'cursor'
+        
         try {
-          // まずCursorを試す
-          await execa('cursor', [worktreePath])
-          openSpinner.succeed('Cursorで開きました')
-        } catch {
-          // 次にVSCodeを試す
-          try {
+          if (editor === 'cursor') {
+            await execa('cursor', [worktreePath])
+            openSpinner.succeed('Cursorで開きました')
+          } else if (editor === 'vscode') {
             await execa('code', [worktreePath])
             openSpinner.succeed('VSCodeで開きました')
-          } catch {
-            openSpinner.warn('エディタが見つかりません')
           }
+        } catch {
+          openSpinner.warn(`${editor}が見つかりません`)
+        }
+      }
+
+      // フック実行（afterCreate）
+      if (config.hooks?.afterCreate) {
+        const hookSpinner = ora('フックを実行中...').start()
+        try {
+          await execa('sh', ['-c', config.hooks.afterCreate], {
+            cwd: worktreePath,
+            env: {
+              ...process.env,
+              SHADOW_CLONE: branchName,
+              SHADOW_CLONE_PATH: worktreePath,
+            },
+          })
+          hookSpinner.succeed('フックを実行しました')
+        } catch (error) {
+          hookSpinner.warn('フックの実行に失敗しました')
         }
       }
 
