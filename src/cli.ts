@@ -4,6 +4,9 @@ import chalk from 'chalk'
 import { createCommand } from './commands/create.js'
 import { listCommand } from './commands/list.js'
 import { deleteCommand } from './commands/delete.js'
+import { shellCommand } from './commands/shell.js'
+import { execCommand } from './commands/exec.js'
+import { attachCommand } from './commands/attach.js'
 
 const program = new Command()
 
@@ -16,6 +19,9 @@ program
 program.addCommand(createCommand)
 program.addCommand(listCommand)
 program.addCommand(deleteCommand)
+program.addCommand(shellCommand)
+program.addCommand(execCommand)
+program.addCommand(attachCommand)
 
 // エラーハンドリング
 program.exitOverride()
