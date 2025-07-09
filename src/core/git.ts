@@ -26,6 +26,17 @@ export class GitWorktreeManager {
     return path.resolve(worktreePath)
   }
 
+  async attachWorktree(existingBranch: string): Promise<string> {
+    // ワークツリーのパスを生成（ブランチ名からスラッシュを置換）
+    const safeBranchName = existingBranch.replace(/\//g, '-')
+    const worktreePath = path.join('.git', 'shadow-clones', safeBranchName)
+    
+    // 既存のブランチでワークツリーを作成
+    await this.git.raw(['worktree', 'add', worktreePath, existingBranch])
+    
+    return path.resolve(worktreePath)
+  }
+
   async listWorktrees(): Promise<Worktree[]> {
     const output = await this.git.raw(['worktree', 'list', '--porcelain'])
     const worktrees: Worktree[] = []
@@ -95,5 +106,19 @@ export class GitWorktreeManager {
     } catch {
       return false
     }
+  }
+
+  async getAllBranches(): Promise<{ local: string[]; remote: string[] }> {
+    const localBranches = await this.git.branchLocal()
+    const remoteBranches = await this.git.branch(['-r'])
+    
+    return {
+      local: localBranches.all.filter(b => !b.startsWith('remotes/')),
+      remote: remoteBranches.all.filter(b => b.startsWith('remotes/')).map(b => b.replace('remotes/', ''))
+    }
+  }
+
+  async fetchAll(): Promise<void> {
+    await this.git.fetch(['--all'])
   }
 }
