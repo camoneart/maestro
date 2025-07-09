@@ -9,6 +9,9 @@ import { execCommand } from './commands/exec.js'
 import { attachCommand } from './commands/attach.js'
 import { mcpCommand } from './commands/mcp.js'
 import { configCommand } from './commands/config.js'
+import { githubCommand } from './commands/github.js'
+import { completionCommand } from './commands/completion.js'
+import { tmuxCommand } from './commands/tmux.js'
 
 const program = new Command()
 
@@ -26,6 +29,9 @@ program.addCommand(execCommand)
 program.addCommand(attachCommand)
 program.addCommand(mcpCommand)
 program.addCommand(configCommand)
+program.addCommand(githubCommand)
+program.addCommand(completionCommand)
+program.addCommand(tmuxCommand)
 
 // エラーハンドリング
 program.exitOverride()
