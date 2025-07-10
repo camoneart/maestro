@@ -3,9 +3,12 @@ import chalk from 'chalk'
 import ora from 'ora'
 import inquirer from 'inquirer'
 import { GitWorktreeManager } from '../core/git.js'
+import { ConfigManager } from '../core/config.js'
 import { execa } from 'execa'
 import { spawn } from 'child_process'
 import cliProgress from 'cli-progress'
+import fs from 'fs/promises'
+import path from 'path'
 
 interface SyncOptions {
   all?: boolean
@@ -14,6 +17,9 @@ interface SyncOptions {
   rebase?: boolean
   dryRun?: boolean
   push?: boolean
+  files?: boolean
+  interactive?: boolean
+  preset?: string
 }
 
 interface SyncResult {
@@ -35,6 +41,9 @@ export const syncCommand = new Command('sync')
   .option('--rebase', 'マージの代わりにrebaseを使用')
   .option('--dry-run', '実行内容のみ表示（実際の同期は行わない）')
   .option('--push', 'merge/rebase後にgit pushを実施')
+  .option('-f, --files', '環境変数・設定ファイルを同期')
+  .option('-i, --interactive', 'インタラクティブモードで同期するファイルを選択')
+  .option('-p, --preset <name>', '同期プリセットを使用（env, config, all）')
   .action(async (branchName?: string, options: SyncOptions = {}) => {
     const spinner = ora('影分身を確認中...').start()
 
@@ -395,9 +404,156 @@ export const syncCommand = new Command('sync')
       if (options.push && successCount > 0) {
         console.log(chalk.cyan('\n🚀 リモートリポジトリにプッシュしました'))
       }
+
+      // 環境変数・設定ファイルの同期
+      if (options.files || options.interactive || options.preset) {
+        await syncEnvironmentFiles(worktrees, targetWorktrees, options)
+      }
     } catch (error) {
       spinner.fail('同期に失敗しました')
       console.error(chalk.red(error instanceof Error ? error.message : '不明なエラー'))
       process.exit(1)
     }
   })
+
+// 環境変数・設定ファイルの同期
+async function syncEnvironmentFiles(
+  allWorktrees: any[],
+  targetWorktrees: any[],
+  options: SyncOptions
+): Promise<void> {
+  console.log(chalk.bold('\n🔧 環境変数・設定ファイルの同期\n'))
+
+  const configManager = new ConfigManager()
+  await configManager.loadProjectConfig()
+  const config = configManager.getAll()
+
+  // プリセット定義
+  const presets = {
+    env: ['.env', '.env.local', '.env.development', '.env.production'],
+    config: ['config.json', 'settings.json', '.vscode/settings.json', 'tsconfig.json'],
+    all: [
+      '.env',
+      '.env.local',
+      '.env.development',
+      '.env.production',
+      'config.json',
+      'settings.json',
+      '.vscode/settings.json',
+      'tsconfig.json',
+      'package.json',
+      'pnpm-lock.yaml',
+      'yarn.lock',
+      'package-lock.json'
+    ]
+  }
+
+  // 同期するファイルを決定
+  let filesToSync: string[] = config.development?.syncFiles || ['.env', '.env.local']
+
+  if (options.preset && presets[options.preset]) {
+    filesToSync = presets[options.preset]
+  }
+
+  // メインワークツリーのパス
+  const mainWorktree = allWorktrees.find(wt => wt.path.endsWith('.'))
+  if (!mainWorktree) {
+    console.error(chalk.red('メインワークツリーが見つかりません'))
+    return
+  }
+
+  // インタラクティブモード
+  if (options.interactive) {
+    // メインワークツリーで利用可能なファイルを検索
+    const availableFiles: string[] = []
+    const potentialFiles = [
+      ...new Set([
+        ...filesToSync,
+        ...presets.all,
+        '.env',
+        '.env.local',
+        '.env.development',
+        '.env.production',
+        '.env.test',
+        'config.json',
+        'settings.json',
+        '.vscode/settings.json',
+        'tsconfig.json',
+        'jsconfig.json',
+        '.prettierrc',
+        '.eslintrc.json',
+        'CLAUDE.md'
+      ])
+    ]
+
+    for (const file of potentialFiles) {
+      try {
+        await fs.access(path.join(mainWorktree.path, file))
+        availableFiles.push(file)
+      } catch {
+        // ファイルが存在しない
+      }
+    }
+
+    if (availableFiles.length === 0) {
+      console.log(chalk.yellow('同期可能なファイルが見つかりません'))
+      return
+    }
+
+    const { selectedFiles } = await inquirer.prompt([
+      {
+        type: 'checkbox',
+        name: 'selectedFiles',
+        message: '同期するファイルを選択:',
+        choices: availableFiles.map(file => ({
+          name: file,
+          value: file,
+          checked: filesToSync.includes(file)
+        }))
+      }
+    ])
+
+    filesToSync = selectedFiles
+  }
+
+  // 同期実行
+  const syncSpinner = ora('ファイルを同期中...').start()
+  let syncedCount = 0
+  let failedCount = 0
+
+  for (const worktree of targetWorktrees) {
+    const branchName = worktree.branch?.replace('refs/heads/', '') || worktree.branch
+
+    for (const file of filesToSync) {
+      try {
+        const sourcePath = path.join(mainWorktree.path, file)
+        const destPath = path.join(worktree.path, file)
+
+        // ソースファイルが存在するか確認
+        await fs.access(sourcePath)
+
+        // ディレクトリを作成
+        await fs.mkdir(path.dirname(destPath), { recursive: true })
+
+        // ファイルをコピー
+        await fs.copyFile(sourcePath, destPath)
+        syncedCount++
+      } catch (error) {
+        failedCount++
+        // エラーは無視して続行
+      }
+    }
+  }
+
+  syncSpinner.succeed(
+    `ファイル同期完了: ${syncedCount}個成功, ${failedCount}個失敗`
+  )
+
+  // 同期したファイルの一覧を表示
+  if (filesToSync.length > 0) {
+    console.log(chalk.gray('\n同期したファイル:'))
+    filesToSync.forEach(file => {
+      console.log(chalk.gray(`  - ${file}`))
+    })
+  }
+}
