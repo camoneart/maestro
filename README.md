@@ -361,6 +361,61 @@ scj tpl
 - `experiment`: 実験的開発用（tmux統合）
 - `docs`: ドキュメント作成用（カスタムファイル付き）
 
+#### 自動コード同期機能（ファイル監視）
+
+```bash
+# 現在のworktreeでファイル変更を監視
+scj watch
+
+# 全てのworktreeに自動同期
+scj watch --all
+
+# 特定のパターンのみ監視
+scj watch --patterns "*.ts" "*.js" "*.json"
+
+# 除外パターンを指定
+scj watch --exclude "node_modules/**" "dist/**"
+
+# ドライラン（実際の同期は行わない）
+scj watch --dry
+
+# 確認なしで自動同期
+scj watch --auto
+
+# エイリアス
+scj w
+```
+
+#### worktree健全性チェック
+
+```bash
+# 全てのworktreeの健全性をチェック
+scj health
+
+# 修正可能な問題を自動修正
+scj health --fix
+
+# 古いworktreeを削除（デフォルト: 30日以上）
+scj health --prune
+
+# 古いと判定する日数を指定
+scj health --days 60
+
+# 詳細情報を表示
+scj health --verbose
+
+# エイリアス
+scj check
+```
+
+**検出される問題:**
+- `stale`: 長期間更新されていないworktree
+- `orphaned`: リモートブランチが存在しないworktree
+- `diverged`: メインブランチから大きく乖離したworktree
+- `uncommitted`: 未コミットの変更があるworktree
+- `conflict`: マージ競合が未解決のworktree
+- `missing`: ディレクトリが存在しないworktree
+
 ### 設定管理
 
 #### プロジェクト設定の初期化
