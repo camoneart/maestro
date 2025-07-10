@@ -33,6 +33,31 @@ export const ConfigSchema = z.object({
       enabled: z.boolean().default(false),
       // 新規ウィンドウかペインか
       openIn: z.enum(['window', 'pane']).default('window'),
+      // セッション名の命名規則
+      sessionNaming: z.string().default('{branch}'),
+    })
+    .optional(),
+
+  // Claude Code統合設定
+  claude: z
+    .object({
+      // 自動起動
+      autoStart: z.boolean().default(false),
+      // CLAUDE.mdの処理方法
+      markdownMode: z.enum(['shared', 'split']).default('shared'),
+      // 初期コマンド
+      initialCommands: z.array(z.string()).default([]),
+      // コスト最適化設定
+      costOptimization: z
+        .object({
+          // 停止時の自動コマンド
+          stopHooks: z.array(z.string()).default(['/compact', '/clear']),
+          // 最大出力トークン数
+          maxOutputTokens: z.number().optional(),
+          // セッション履歴の保存先
+          historyPath: z.string().default('~/.claude/history/{branch}.md'),
+        })
+        .optional(),
     })
     .optional(),
 
@@ -79,6 +104,16 @@ const DEFAULT_CONFIG: Config = {
   tmux: {
     enabled: false,
     openIn: 'window',
+    sessionNaming: '{branch}',
+  },
+  claude: {
+    autoStart: false,
+    markdownMode: 'shared',
+    initialCommands: [],
+    costOptimization: {
+      stopHooks: ['/compact', '/clear'],
+      historyPath: '~/.claude/history/{branch}.md',
+    },
   },
   github: {
     autoFetch: true,
@@ -105,6 +140,9 @@ export class ConfigManager {
         path.join(process.cwd(), '.scj.json'),
         path.join(process.cwd(), '.scjrc.json'),
         path.join(process.cwd(), 'scj.config.json'),
+        // グローバル設定ファイル
+        path.join(process.env.HOME || '~', '.scjrc'),
+        path.join(process.env.HOME || '~', '.scjrc.json'),
       ]
 
       for (const configPath of configPaths) {
@@ -161,6 +199,28 @@ export class ConfigManager {
         autoSetup: true,
         syncFiles: ['.env', '.env.local'],
         defaultEditor: 'cursor',
+      },
+      tmux: {
+        enabled: true,
+        openIn: 'window',
+        sessionNaming: '{branch}',
+      },
+      claude: {
+        autoStart: true,
+        markdownMode: 'shared',
+        initialCommands: ['/model sonnet-3.5'],
+        costOptimization: {
+          stopHooks: ['/compact', '/clear'],
+          maxOutputTokens: 5000,
+          historyPath: '~/.claude/history/{branch}.md',
+        },
+      },
+      github: {
+        autoFetch: true,
+        branchNaming: {
+          prTemplate: 'pr-{number}',
+          issueTemplate: 'issue-{number}',
+        },
       },
       hooks: {
         afterCreate: 'npm install',
