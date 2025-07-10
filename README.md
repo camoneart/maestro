@@ -199,6 +199,120 @@ scj tmux --split-pane
 scj t
 ```
 
+#### 複数の影分身を一括作成（バッチ処理）
+
+```bash
+# GitHub Issuesから複数選択して一括作成
+scj batch
+
+# ファイルから一括作成
+scj batch --from-file worktrees.txt
+
+# インタラクティブに複数入力
+scj batch --interactive
+
+# オプション
+scj batch -o              # 作成後にエディタで開く
+scj batch -s              # 環境セットアップを実行
+scj batch -b main         # ベースブランチを指定
+
+# エイリアス
+scj b
+```
+
+**バッチファイルフォーマット:**
+```
+# コメント行
+branch-name | description | issue/pr番号
+feature-auth | 認証機能の実装 | #123
+bugfix-login | ログインバグの修正 | pr-45
+refactor-api | APIのリファクタリング
+```
+
+#### Claude Code会話履歴の管理
+
+```bash
+# 全ての履歴を一覧表示
+scj history --list
+
+# 特定ブランチの履歴を表示
+scj history --show feature-auth
+
+# 履歴をエクスポート
+scj history --export all-histories.json
+scj history --export all-histories.md
+
+# 全履歴を1ファイルにマージ
+scj history --merge merged-history.md
+
+# 不要な履歴をクリーンアップ
+scj history --cleanup
+
+# 履歴パスを同期
+scj history --sync
+
+# エイリアス
+scj h
+```
+
+#### Claude Codeによるブランチ名・コミットメッセージ提案
+
+```bash
+# ブランチ名を提案
+scj suggest --branch
+scj suggest -b -d "認証機能の実装"
+scj suggest -b --issue 123
+
+# コミットメッセージを提案
+scj suggest --commit
+scj suggest -c --diff
+
+# 両方を提案
+scj suggest
+
+# Issueから情報を取得して提案
+scj suggest -b -i 123
+
+# PRから情報を取得して提案
+scj suggest -b -p 45
+
+# エイリアス
+scj sg
+```
+
+#### worktree間でのコード・ファイル同期
+
+```bash
+# メインブランチの変更を特定の影分身に同期
+scj sync feature-branch
+
+# 全ての影分身に同期
+scj sync --all
+
+# インタラクティブに選択
+scj sync
+
+# rebaseで同期（デフォルトはmerge）
+scj sync --rebase
+
+# 環境変数・設定ファイルを同期
+scj sync --files
+
+# インタラクティブにファイルを選択して同期
+scj sync --interactive
+
+# プリセットを使用してファイル同期
+scj sync --preset env     # .env系ファイルのみ
+scj sync --preset config  # 設定ファイルのみ
+scj sync --preset all     # 全ての設定ファイル
+
+# コード同期とファイル同期を同時に実行
+scj sync --all --files
+
+# エイリアス
+scj s
+```
+
 ### 設定管理
 
 #### プロジェクト設定の初期化
