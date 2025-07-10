@@ -1,0 +1,29 @@
+# Build outputs
+dist/
+*.js.map
+*.d.ts.map
+
+# Dependencies
+node_modules/
+pnpm-lock.yaml
+
+# IDE
+.idea/
+.vscode/
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+
+# Temporary
+tmp/
+temp/
+
+# Git
+.git/
+
+# Documentation
+_docs/
+.claude/
