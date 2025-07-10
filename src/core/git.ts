@@ -122,4 +122,24 @@ export class GitWorktreeManager {
   async fetchAll(): Promise<void> {
     await this.git.fetch(['--all'])
   }
+
+  async getLastCommit(
+    worktreePath: string
+  ): Promise<{ date: string; message: string; hash: string } | null> {
+    try {
+      const gitInWorktree = simpleGit(worktreePath)
+      const log = await gitInWorktree.log({ maxCount: 1 })
+
+      if (log.latest) {
+        return {
+          date: log.latest.date,
+          message: log.latest.message,
+          hash: log.latest.hash.substring(0, 7),
+        }
+      }
+      return null
+    } catch (error) {
+      return null
+    }
+  }
 }
