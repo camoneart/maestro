@@ -24,6 +24,7 @@ import { templateCommand } from './commands/template.js'
 import { watchCommand } from './commands/watch.js'
 import { healthCommand } from './commands/health.js'
 import { dashboardCommand } from './commands/dashboard.js'
+import { snapshotCommand } from './commands/snapshot.js'
 
 const program = new Command()
 
@@ -56,6 +57,7 @@ program.addCommand(templateCommand)
 program.addCommand(watchCommand)
 program.addCommand(healthCommand)
 program.addCommand(dashboardCommand)
+program.addCommand(snapshotCommand)
 
 // エラーハンドリング
 program.exitOverride()
