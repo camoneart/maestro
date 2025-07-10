@@ -23,6 +23,8 @@ export interface CreateOptions {
   base?: string
   open?: boolean
   setup?: boolean
+  tmux?: boolean
+  claude?: boolean
 }
 
 export interface DeleteOptions {
