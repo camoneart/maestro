@@ -3,6 +3,7 @@ import chalk from 'chalk'
 import { GitWorktreeManager } from '../core/git.js'
 import { Worktree } from '../types/index.js'
 import { spawn } from 'child_process'
+import fs from 'fs'
 
 export const listCommand = new Command('list')
   .alias('ls')
@@ -12,137 +13,182 @@ export const listCommand = new Command('list')
   .option('--filter <keyword>', 'ブランチ名またはパスでフィルタ')
   .option('--sort <field>', 'ソート順 (branch|age|size)', 'branch')
   .option('--last-commit', '最終コミット情報を表示')
-  .action(async (options: { json?: boolean; fzf?: boolean; filter?: string; sort?: string; lastCommit?: boolean } = {}) => {
-    try {
-      const gitManager = new GitWorktreeManager()
+  .action(
+    async (
+      options: {
+        json?: boolean
+        fzf?: boolean
+        filter?: string
+        sort?: string
+        lastCommit?: boolean
+      } = {}
+    ) => {
+      try {
+        const gitManager = new GitWorktreeManager()
 
-      // Gitリポジトリかチェック
-      const isGitRepo = await gitManager.isGitRepository()
-      if (!isGitRepo) {
-        console.error(chalk.red('エラー: このディレクトリはGitリポジトリではありません'))
-        process.exit(1)
-      }
+        // Gitリポジトリかチェック
+        const isGitRepo = await gitManager.isGitRepository()
+        if (!isGitRepo) {
+          console.error(chalk.red('エラー: このディレクトリはGitリポジトリではありません'))
+          process.exit(1)
+        }
 
-      let worktrees = await gitManager.listWorktrees()
+        let worktrees = await gitManager.listWorktrees()
 
-      // フィルタ処理
-      if (options.filter) {
-        const keyword = options.filter.toLowerCase()
-        worktrees = worktrees.filter(wt => 
-          wt.branch?.toLowerCase().includes(keyword) || 
-          wt.path.toLowerCase().includes(keyword)
-        )
-      }
+        // フィルタ処理
+        if (options.filter) {
+          const keyword = options.filter.toLowerCase()
+          worktrees = worktrees.filter(
+            wt =>
+              wt.branch?.toLowerCase().includes(keyword) || wt.path.toLowerCase().includes(keyword)
+          )
+        }
 
-      // 最終コミット情報を取得
-      if (options.lastCommit || options.json) {
-        for (const worktree of worktrees) {
-          try {
-            const lastCommit = await gitManager.getLastCommit(worktree.path)
-            ;(worktree as any).lastCommit = lastCommit
-          } catch (error) {
-            ;(worktree as any).lastCommit = null
+        // 最終コミット情報を取得
+        if (options.lastCommit || options.json) {
+          for (const worktree of worktrees) {
+            try {
+              const lastCommit = await gitManager.getLastCommit(worktree.path)
+              ;(worktree as any).lastCommit = lastCommit
+            } catch (error) {
+              ;(worktree as any).lastCommit = null
+            }
           }
         }
-      }
 
-      // ソート処理
-      if (options.sort) {
-        await sortWorktrees(worktrees, options.sort, gitManager)
-      }
+        // ソート処理
+        if (options.sort) {
+          await sortWorktrees(worktrees, options.sort, gitManager)
+        }
 
-      if (options?.json) {
-        // JSON出力時に追加フィールドを含める
-        const jsonWorktrees = worktrees.map(wt => ({
-          ...wt,
-          isCurrent: wt.path === process.cwd() || wt.path.endsWith('.'),
-          locked: wt.locked || false,
-          lastCommit: (wt as any).lastCommit || null
-        }))
-        console.log(JSON.stringify(jsonWorktrees, null, 2))
-        return
-      }
+        if (options?.json) {
+          // JSON出力時に追加フィールドを含める
+          const jsonWorktrees = worktrees.map(wt => ({
+            ...wt,
+            isCurrent: wt.path === process.cwd() || wt.path.endsWith('.'),
+            locked: wt.locked || false,
+            lastCommit: (wt as any).lastCommit || null,
+          }))
+          console.log(JSON.stringify(jsonWorktrees, null, 2))
+          return
+        }
 
-      if (worktrees.length === 0) {
-        console.log(chalk.yellow('影分身が存在しません'))
-        return
-      }
+        if (worktrees.length === 0) {
+          console.log(chalk.yellow('影分身が存在しません'))
+          return
+        }
 
-      // fzfで選択
-      if (options?.fzf) {
-        const fzfInput = worktrees
-          .map(w => {
-            const status = []
-            if (w.isCurrentDirectory) status.push(chalk.green('現在'))
-            if (w.locked) status.push(chalk.red('ロック'))
-            if (w.prunable) status.push(chalk.yellow('削除可能'))
+        // fzfで選択
+        if (options?.fzf) {
+          const fzfInput = worktrees
+            .map(w => {
+              const status = []
+              if (w.isCurrentDirectory) status.push(chalk.green('現在'))
+              if (w.locked) status.push(chalk.red('ロック'))
+              if (w.prunable) status.push(chalk.yellow('削除可能'))
 
-            const statusStr = status.length > 0 ? ` [${status.join(', ')}]` : ''
-            return `${w.branch}${statusStr} | ${w.path}`
+              const statusStr = status.length > 0 ? ` [${status.join(', ')}]` : ''
+              return `${w.branch}${statusStr} | ${w.path}`
+            })
+            .join('\n')
+
+          const fzfProcess = spawn(
+            'fzf',
+            [
+              '--ansi',
+              '--header=影分身を選択 (Ctrl-C でキャンセル)',
+              '--preview',
+              'echo {} | cut -d"|" -f2 | xargs ls -la',
+              '--preview-window=right:50%:wrap',
+            ],
+            {
+              stdio: ['pipe', 'pipe', 'inherit'],
+            }
+          )
+
+          // fzfにデータを送る
+          fzfProcess.stdin.write(fzfInput)
+          fzfProcess.stdin.end()
+
+          // 選択結果を取得
+          let selected = ''
+          fzfProcess.stdout.on('data', data => {
+            selected += data.toString()
           })
-          .join('\n')
 
-        const fzfProcess = spawn(
-          'fzf',
-          [
-            '--ansi',
-            '--header=影分身を選択 (Ctrl-C でキャンセル)',
-            '--preview',
-            'echo {} | cut -d"|" -f2 | xargs ls -la',
-            '--preview-window=right:50%:wrap',
-          ],
-          {
-            stdio: ['pipe', 'pipe', 'inherit'],
-          }
-        )
+          fzfProcess.on('close', code => {
+            if (code !== 0 || !selected.trim()) {
+              // キャンセルされた場合は何も出力しない
+              return
+            }
 
-        // fzfにデータを送る
-        fzfProcess.stdin.write(fzfInput)
-        fzfProcess.stdin.end()
+            // ブランチ名を抽出して出力
+            const selectedBranch = selected
+              .split('|')[0]
+              ?.trim()
+              .replace(/\[.*\]/, '')
+              .trim()
+            if (selectedBranch) {
+              console.log(selectedBranch.replace('refs/heads/', ''))
+            }
+          })
+          return
+        }
 
-        // 選択結果を取得
-        let selected = ''
-        fzfProcess.stdout.on('data', data => {
-          selected += data.toString()
-        })
+        console.log(chalk.bold('\n🥷 影分身一覧:\n'))
 
-        fzfProcess.on('close', code => {
-          if (code !== 0 || !selected.trim()) {
-            // キャンセルされた場合は何も出力しない
-            return
-          }
+        // メインワークツリーを先頭に表示
+        const mainWorktree = worktrees.find(wt => wt.path.endsWith('.'))
+        const cloneWorktrees = worktrees.filter(wt => !wt.path.endsWith('.'))
 
-          // ブランチ名を抽出して出力
-          const selectedBranch = selected
-            .split('|')[0]
-            ?.trim()
-            .replace(/\[.*\]/, '')
-            .trim()
-          if (selectedBranch) {
-            console.log(selectedBranch.replace('refs/heads/', ''))
-          }
-        })
-        return
+        if (mainWorktree) {
+          displayWorktree(mainWorktree, true, options.lastCommit)
+        }
+
+        cloneWorktrees.forEach(wt => displayWorktree(wt, false, options.lastCommit))
+
+        console.log(chalk.gray(`\n合計: ${worktrees.length} 個の影分身`))
+      } catch (error) {
+        console.error(chalk.red('エラー:'), error instanceof Error ? error.message : '不明なエラー')
+        process.exit(1)
       }
-
-      console.log(chalk.bold('\n🥷 影分身一覧:\n'))
-
-      // メインワークツリーを先頭に表示
-      const mainWorktree = worktrees.find(wt => wt.path.endsWith('.'))
-      const cloneWorktrees = worktrees.filter(wt => !wt.path.endsWith('.'))
-
-      if (mainWorktree) {
-        displayWorktree(mainWorktree, true, options.lastCommit)
-      }
-
-      cloneWorktrees.forEach(wt => displayWorktree(wt, false, options.lastCommit))
-
-      console.log(chalk.gray(`\n合計: ${worktrees.length} 個の影分身`))
-    } catch (error) {
-      console.error(chalk.red('エラー:'), error instanceof Error ? error.message : '不明なエラー')
-      process.exit(1)
     }
-  })
+  )
+
+async function sortWorktrees(
+  worktrees: Worktree[],
+  sortBy: string,
+  gitManager: GitWorktreeManager
+): Promise<void> {
+  switch (sortBy) {
+    case 'branch':
+      worktrees.sort((a, b) => (a.branch || '').localeCompare(b.branch || ''))
+      break
+    case 'age':
+      // lastCommit が設定されている場合は日付でソート
+      worktrees.sort((a, b) => {
+        const aCommit = (a as any).lastCommit
+        const bCommit = (b as any).lastCommit
+        if (!aCommit && !bCommit) return 0
+        if (!aCommit) return 1
+        if (!bCommit) return -1
+        return new Date(bCommit.date).getTime() - new Date(aCommit.date).getTime()
+      })
+      break
+    case 'size':
+      // ディレクトリサイズでソート
+      for (const worktree of worktrees) {
+        try {
+          const stats = fs.statSync(worktree.path)
+          ;(worktree as any).size = stats.size
+        } catch (error) {
+          ;(worktree as any).size = 0
+        }
+      }
+      worktrees.sort((a, b) => ((b as any).size || 0) - ((a as any).size || 0))
+      break
+  }
+}
 
 function displayWorktree(worktree: Worktree, isMain: boolean, showLastCommit?: boolean) {
   const prefix = isMain ? '📍' : '🥷'
@@ -160,7 +206,8 @@ function displayWorktree(worktree: Worktree, isMain: boolean, showLastCommit?: b
     status.push(chalk.yellow('⚠️  削除可能'))
   }
 
-  let output = `${prefix} ${chalk.cyan(branchName.padEnd(30))} ` +
+  let output =
+    `${prefix} ${chalk.cyan(branchName.padEnd(30))} ` +
     `${chalk.gray(worktree.path)} ` +
     `${status.join(' ')}`
 
