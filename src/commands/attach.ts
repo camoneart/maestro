@@ -13,7 +13,7 @@ export const attachCommand = new Command('attach')
   .option('-f, --fetch', '最初にfetchを実行')
   .option('-o, --open', 'VSCode/Cursorで開く')
   .option('-s, --setup', '環境セットアップを実行')
-  .action(async (branchName?: string, options: { remote?: boolean; fetch?: boolean; open?: boolean; setup?: boolean }) => {
+  .action(async (branchName?: string, options?: { remote?: boolean; fetch?: boolean; open?: boolean; setup?: boolean }) => {
     const spinner = ora('影分身の術！').start()
 
     try {
