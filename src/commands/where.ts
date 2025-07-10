@@ -9,7 +9,7 @@ export const whereCommand = new Command('where')
   .argument('[branch-name]', 'ブランチ名')
   .option('--fzf', 'fzfで選択')
   .option('--current', '現在のworktreeのパスを表示')
-  .action(async (branchName?: string, options?: { fzf?: boolean; current?: boolean }) => {
+  .action(async (branchName?: string, options: { fzf?: boolean; current?: boolean } = {}) => {
     try {
       const gitManager = new GitWorktreeManager()
 
@@ -40,8 +40,8 @@ export const whereCommand = new Command('where')
           .map(w => {
             const status = []
             if (w.isCurrentDirectory) status.push(chalk.green('現在'))
-            if (w.isLocked) status.push(chalk.red('ロック'))
-            if (w.isPrunable) status.push(chalk.yellow('削除可能'))
+            if (w.locked) status.push(chalk.red('ロック'))
+            if (w.prunable) status.push(chalk.yellow('削除可能'))
             
             const statusStr = status.length > 0 ? ` [${status.join(', ')}]` : ''
             return `${w.branch}${statusStr} | ${w.path}`

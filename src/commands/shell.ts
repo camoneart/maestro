@@ -2,7 +2,6 @@ import { Command } from 'commander'
 import chalk from 'chalk'
 import { GitWorktreeManager } from '../core/git.js'
 import { spawn } from 'child_process'
-import path from 'path'
 import inquirer from 'inquirer'
 
 export const shellCommand = new Command('shell')
@@ -10,7 +9,7 @@ export const shellCommand = new Command('shell')
   .description('影分身のシェルに入る')
   .argument('[branch-name]', 'ブランチ名（省略時は選択）')
   .option('--fzf', 'fzfで選択')
-  .action(async (branchName?: string, options?: { fzf?: boolean }) => {
+  .action(async (branchName?: string, options: { fzf?: boolean } = {}) => {
     try {
       const gitManager = new GitWorktreeManager()
 
@@ -41,8 +40,8 @@ export const shellCommand = new Command('shell')
           const fzfInput = shadowClones
             .map(w => {
               const status = []
-              if (w.isLocked) status.push(chalk.red('ロック'))
-              if (w.isPrunable) status.push(chalk.yellow('削除可能'))
+              if (w.locked) status.push(chalk.red('ロック'))
+              if (w.prunable) status.push(chalk.yellow('削除可能'))
               
               const statusStr = status.length > 0 ? ` [${status.join(', ')}]` : ''
               const branch = w.branch?.replace('refs/heads/', '') || w.branch
@@ -112,7 +111,7 @@ export const shellCommand = new Command('shell')
         
         // 類似した名前を提案
         const similarBranches = shadowClones
-          .filter(wt => wt.branch && wt.branch.includes(branchName))
+          .filter(wt => wt.branch && wt.branch.includes(branchName || ''))
           .map(wt => wt.branch)
         
         if (similarBranches.length > 0) {

@@ -1,7 +1,6 @@
 import simpleGit, { SimpleGit } from 'simple-git'
 import { Worktree } from '../types/index.js'
 import path from 'path'
-import fs from 'fs/promises'
 
 export class GitWorktreeManager {
   private git: SimpleGit

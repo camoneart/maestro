@@ -9,7 +9,7 @@ export const listCommand = new Command('list')
   .description('影分身（worktree）の一覧を表示')
   .option('-j, --json', 'JSON形式で出力')
   .option('--fzf', 'fzfで選択し、選択したブランチ名を出力')
-  .action(async (options: { json?: boolean; fzf?: boolean }) => {
+  .action(async (options: { json?: boolean; fzf?: boolean } = {}) => {
     try {
       const gitManager = new GitWorktreeManager()
 
@@ -22,7 +22,7 @@ export const listCommand = new Command('list')
 
       const worktrees = await gitManager.listWorktrees()
 
-      if (options.json) {
+      if (options?.json) {
         console.log(JSON.stringify(worktrees, null, 2))
         return
       }
@@ -33,13 +33,13 @@ export const listCommand = new Command('list')
       }
 
       // fzfで選択
-      if (options.fzf) {
+      if (options?.fzf) {
         const fzfInput = worktrees
           .map(w => {
             const status = []
             if (w.isCurrentDirectory) status.push(chalk.green('現在'))
-            if (w.isLocked) status.push(chalk.red('ロック'))
-            if (w.isPrunable) status.push(chalk.yellow('削除可能'))
+            if (w.locked) status.push(chalk.red('ロック'))
+            if (w.prunable) status.push(chalk.yellow('削除可能'))
             
             const statusStr = status.length > 0 ? ` [${status.join(', ')}]` : ''
             return `${w.branch}${statusStr} | ${w.path}`

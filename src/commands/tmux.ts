@@ -11,7 +11,7 @@ export const tmuxCommand = new Command('tmux')
   .option('-n, --new-window', '新しいウィンドウで開く')
   .option('-p, --split-pane', '現在のペインを分割して開く')
   .option('-v, --vertical', '垂直分割（-pと併用）')
-  .action(async (options: { newWindow?: boolean; splitPane?: boolean; vertical?: boolean }) => {
+  .action(async (options: { newWindow?: boolean; splitPane?: boolean; vertical?: boolean } = {}) => {
     const spinner = ora('影分身の術！').start()
 
     try {
@@ -63,8 +63,8 @@ export const tmuxCommand = new Command('tmux')
         .map(w => {
           const status = []
           if (w.isCurrentDirectory) status.push(chalk.green('現在'))
-          if (w.isLocked) status.push(chalk.red('ロック'))
-          if (w.isPrunable) status.push(chalk.yellow('削除可能'))
+          if (w.locked) status.push(chalk.red('ロック'))
+          if (w.prunable) status.push(chalk.yellow('削除可能'))
           
           const statusStr = status.length > 0 ? ` [${status.join(', ')}]` : ''
           return `${w.branch}${statusStr} | ${w.path}`
@@ -113,11 +113,11 @@ export const tmuxCommand = new Command('tmux')
           console.log(chalk.cyan(`\n新しいtmuxセッション '${selectedBranch}' を作成します...`))
           
           try {
-            await execa('tmux', ['new-session', '-s', selectedBranch, '-c', selectedPath])
+            await execa('tmux', ['new-session', '-s', selectedBranch || '', '-c', selectedPath])
           } catch (error) {
             // セッションが既に存在する場合はアタッチ
             try {
-              await execa('tmux', ['attach-session', '-t', selectedBranch])
+              await execa('tmux', ['attach-session', '-t', selectedBranch || ''])
             } catch {
               console.error(chalk.red('tmuxセッションの作成/アタッチに失敗しました'))
               process.exit(1)
@@ -125,15 +125,15 @@ export const tmuxCommand = new Command('tmux')
           }
         } else {
           // tmux内から実行された場合
-          if (options.newWindow) {
+          if (options?.newWindow) {
             // 新しいウィンドウで開く
-            await execa('tmux', ['new-window', '-n', selectedBranch, '-c', selectedPath])
+            await execa('tmux', ['new-window', '-n', selectedBranch || '', '-c', selectedPath])
             console.log(chalk.green(`✨ 新しいウィンドウ '${selectedBranch}' を開きました`))
-          } else if (options.splitPane) {
+          } else if (options?.splitPane) {
             // ペインを分割して開く
-            const splitOption = options.vertical ? '-h' : '-v'
+            const splitOption = options?.vertical ? '-h' : '-v'
             await execa('tmux', ['split-window', splitOption, '-c', selectedPath])
-            console.log(chalk.green(`✨ ペインを${options.vertical ? '垂直' : '水平'}分割して '${selectedBranch}' を開きました`))
+            console.log(chalk.green(`✨ ペインを${options?.vertical ? '垂直' : '水平'}分割して '${selectedBranch}' を開きました`))
           } else {
             // デフォルト: 現在のペインでディレクトリを変更
             console.log(chalk.green(`\n✨ 影分身 '${selectedBranch}' を選択しました`))

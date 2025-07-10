@@ -15,7 +15,7 @@ export const githubCommand = new Command('github')
   .argument('[number]', 'PR/Issue番号')
   .option('-o, --open', 'VSCode/Cursorで開く')
   .option('-s, --setup', '環境セットアップを実行')
-  .action(async (type?: string, number?: string, options?: { open?: boolean; setup?: boolean }) => {
+  .action(async (type?: string, number?: string, options: { open?: boolean; setup?: boolean } = {}) => {
     const spinner = ora('影分身の術！').start()
 
     try {
@@ -135,21 +135,21 @@ export const githubCommand = new Command('github')
         if (type === 'pr' || type === 'checkout') {
           // まずPRとして試す
           try {
-            const prInfo = await execa('gh', ['pr', 'view', number, '--json', 'number,title,headRefName'])
+            const prInfo = await execa('gh', ['pr', 'view', number || '', '--json', 'number,title,headRefName'])
             const pr = JSON.parse(prInfo.stdout)
             branchName = pr.headRefName
             title = pr.title
             type = 'pr'
           } catch {
             // PRでなければIssueとして試す
-            const issueInfo = await execa('gh', ['issue', 'view', number, '--json', 'number,title'])
+            const issueInfo = await execa('gh', ['issue', 'view', number || '', '--json', 'number,title'])
             const issue = JSON.parse(issueInfo.stdout)
             branchName = `issue-${number}`
             title = issue.title
             type = 'issue'
           }
         } else if (type === 'issue') {
-          const issueInfo = await execa('gh', ['issue', 'view', number, '--json', 'number,title'])
+          const issueInfo = await execa('gh', ['issue', 'view', number || '', '--json', 'number,title'])
           const issue = JSON.parse(issueInfo.stdout)
           branchName = `issue-${number}`
           title = issue.title
@@ -193,7 +193,7 @@ export const githubCommand = new Command('github')
         const tempBranch = `pr-${number}-checkout`
         
         // 一時的にcheckout
-        await execa('gh', ['pr', 'checkout', number, '-b', tempBranch])
+        await execa('gh', ['pr', 'checkout', number || '', '-b', tempBranch])
         
         // worktreeを作成
         worktreePath = await gitManager.attachWorktree(branchName)
