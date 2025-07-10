@@ -9,12 +9,109 @@ import { execa } from 'execa'
 import path from 'path'
 import fs from 'fs/promises'
 
+// Issue番号からブランチ名を生成する関数
+function parseIssueNumber(input: string): { isIssue: boolean; issueNumber?: string; branchName: string } {
+  // #123, 123, issue-123などの形式をサポート
+  const issueMatch = input.match(/^#?(\d+)$/) || input.match(/^issue-(\d+)$/i)
+  
+  if (issueMatch) {
+    const issueNumber = issueMatch[1]
+    return {
+      isIssue: true,
+      issueNumber,
+      branchName: `issue-${issueNumber}`
+    }
+  }
+  
+  return {
+    isIssue: false,
+    branchName: input
+  }
+}
+
+// tmuxセッションを作成してClaude Codeを起動する関数
+async function createTmuxSession(branchName: string, worktreePath: string, config: any): Promise<void> {
+  const sessionName = branchName.replace(/[^a-zA-Z0-9_-]/g, '-')
+  
+  try {
+    // 既存のセッションをチェック
+    try {
+      await execa('tmux', ['has-session', '-t', sessionName])
+      console.log(chalk.yellow(`tmuxセッション '${sessionName}' は既に存在します`))
+      return
+    } catch {
+      // セッションが存在しない場合は作成
+    }
+    
+    // tmuxセッションを作成
+    await execa('tmux', ['new-session', '-d', '-s', sessionName, '-c', worktreePath])
+    
+    // ウィンドウ名を設定
+    await execa('tmux', ['rename-window', '-t', sessionName, branchName])
+    
+    console.log(chalk.green(`✨ tmuxセッション '${sessionName}' を作成しました`))
+    
+    // Claude Codeを起動する場合
+    if (config.claude?.autoStart) {
+      await execa('tmux', ['send-keys', '-t', sessionName, 'claude', 'Enter'])
+      
+      // 初期コマンドを送信
+      if (config.claude?.initialCommands) {
+        for (const cmd of config.claude.initialCommands) {
+          await execa('tmux', ['send-keys', '-t', sessionName, cmd, 'Enter'])
+        }
+      }
+      
+      console.log(chalk.green(`✨ Claude Codeを起動しました`))
+    }
+    
+  } catch (error) {
+    console.error(chalk.red(`tmuxセッションの作成に失敗しました: ${error}`))
+  }
+}
+
+// Claude.mdの処理
+async function handleClaudeMarkdown(worktreePath: string, config: any): Promise<void> {
+  const claudeMode = config.claude?.markdownMode || 'shared'
+  const rootClaudePath = path.join(process.cwd(), 'CLAUDE.md')
+  const worktreeClaudePath = path.join(worktreePath, 'CLAUDE.md')
+  
+  try {
+    if (claudeMode === 'shared') {
+      // 共有モード: シンボリックリンクを作成
+      if (await fs.access(rootClaudePath).then(() => true).catch(() => false)) {
+        await fs.symlink(path.relative(worktreePath, rootClaudePath), worktreeClaudePath)
+        console.log(chalk.green(`✨ CLAUDE.md を共有モードで設定しました`))
+      }
+    } else if (claudeMode === 'split') {
+      // 分割モード: 専用のCLAUDE.mdを作成
+      const splitContent = `# ${path.basename(worktreePath)} - Claude Code Instructions
+
+This is a dedicated CLAUDE.md for this worktree.
+
+## Project Context
+- Branch: ${path.basename(worktreePath)}
+- Worktree Path: ${worktreePath}
+
+## Instructions
+Add specific instructions for this worktree here.
+`
+      await fs.writeFile(worktreeClaudePath, splitContent)
+      console.log(chalk.green(`✨ CLAUDE.md を分割モードで作成しました`))
+    }
+  } catch (error) {
+    console.warn(chalk.yellow(`CLAUDE.mdの処理に失敗しました: ${error}`))
+  }
+}
+
 export const createCommand = new Command('create')
   .description('新しい影分身（worktree）を作り出す')
-  .argument('<branch-name>', 'ブランチ名')
+  .argument('<branch-name>', 'ブランチ名または Issue# (例: 123, #123, issue-123)')
   .option('-b, --base <branch>', 'ベースブランチ (デフォルト: 現在のブランチ)')
   .option('-o, --open', 'VSCode/Cursorで開く')
   .option('-s, --setup', '環境セットアップを実行')
+  .option('-t, --tmux', 'tmuxセッションを作成してClaude Codeを起動')
+  .option('-c, --claude', 'Claude Codeを自動起動')
   .action(async (branchName: string, options: CreateOptions) => {
     const spinner = ora('影分身の術！').start()
 
@@ -32,9 +129,18 @@ export const createCommand = new Command('create')
         process.exit(1)
       }
 
+      // Issue番号またはブランチ名を解析
+      const { isIssue, issueNumber, branchName: parsedBranchName } = parseIssueNumber(branchName)
+      branchName = parsedBranchName
+
       // ブランチ名にプレフィックスを追加
       if (config.worktrees?.branchPrefix && !branchName.startsWith(config.worktrees.branchPrefix)) {
         branchName = config.worktrees.branchPrefix + branchName
+      }
+
+      // Issue番号が指定された場合の追加情報を表示
+      if (isIssue && issueNumber) {
+        console.log(chalk.blue(`📝 Issue #${issueNumber} に基づいてブランチを作成します`))
       }
 
       // ブランチ名の確認
@@ -107,6 +213,26 @@ export const createCommand = new Command('create')
           }
         } catch {
           openSpinner.warn(`${editor}が見つかりません`)
+        }
+      }
+
+      // CLAUDE.mdの処理
+      await handleClaudeMarkdown(worktreePath, config)
+
+      // tmuxセッションの作成（オプションまたは設定で有効な場合）
+      if (options.tmux || (options.tmux === undefined && config.tmux?.enabled)) {
+        await createTmuxSession(branchName, worktreePath, { ...config, claude: { autoStart: options.claude || config.claude?.autoStart } })
+      }
+
+      // Claude Codeの起動（tmuxセッションを使わない場合）
+      if ((options.claude || config.claude?.autoStart) && !options.tmux && !config.tmux?.enabled) {
+        const claudeSpinner = ora('Claude Codeを起動中...').start()
+        try {
+          // Claude Codeを起動（バックグラウンドで）
+          execa('claude', [], { cwd: worktreePath, detached: true })
+          claudeSpinner.succeed('Claude Codeを起動しました')
+        } catch {
+          claudeSpinner.warn('Claude Codeの起動に失敗しました')
         }
       }
 
