@@ -79,7 +79,11 @@ export class GitWorktreeManager {
 
   async deleteWorktree(branchName: string, force: boolean = false): Promise<void> {
     const worktrees = await this.listWorktrees()
-    const worktree = worktrees.find(wt => wt.branch === branchName)
+    const worktree = worktrees.find(wt => {
+      // refs/heads/プレフィックスを除去して比較
+      const branch = wt.branch?.replace('refs/heads/', '')
+      return branch === branchName
+    })
 
     if (!worktree) {
       throw new Error(`ワークツリー '${branchName}' が見つかりません`)
