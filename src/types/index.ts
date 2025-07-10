@@ -6,6 +6,9 @@ export interface Worktree {
   prunable: boolean
   locked: boolean
   reason?: string
+  isCurrentDirectory?: boolean
+  isLocked?: boolean
+  isPrunable?: boolean
 }
 
 export interface ScjConfig {
