@@ -110,12 +110,13 @@ function getEditorCommand(editor: string): string {
 export const tmuxCommand = new Command('tmux')
   .alias('t')
   .description('tmux/fzfで影分身を選択して開く')
+  .argument('[branch-name]', 'ブランチ名（省略時はfzfで選択）')
   .option('-n, --new-window', '新しいウィンドウで開く')
   .option('-p, --split-pane', '現在のペインを分割して開く')
   .option('-v, --vertical', '垂直分割（-pと併用）')
   .option('-e, --editor <editor>', 'エディタを自動起動 (nvim, vim, code, emacs)')
   .option('-d, --detach', '新セッション作成のみ (attachしない)')
-  .action(async (options: TmuxOptions = {}) => {
+  .action(async (branchName?: string, options: TmuxOptions = {}) => {
     const spinner = ora('影分身の術！').start()
 
     try {
@@ -162,7 +163,23 @@ export const tmuxCommand = new Command('tmux')
         process.exit(0)
       }
 
-      // fzfで選択
+      // ブランチ名が指定されている場合
+      if (branchName) {
+        const worktree = worktrees.find(wt => {
+          const branch = wt.branch?.replace('refs/heads/', '')
+          return branch === branchName
+        })
+        
+        if (!worktree) {
+          console.error(chalk.red(`ワークツリー '${branchName}' が見つかりません`))
+          process.exit(1)
+        }
+        
+        await openInTmux(worktree.path, branchName, options)
+        return
+      }
+
+      // ブランチ名が指定されていない場合、fzfで選択
       const fzfInput = worktrees
         .map(w => {
           const status = []
