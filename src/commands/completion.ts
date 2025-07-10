@@ -7,74 +7,74 @@ const BASH_COMPLETION = `#!/bin/bash
 _scj_completions() {
     local cur prev opts base
     COMPREPLY=()
-    cur="\${COMP_WORDS[COMP_CWORD]}"
-    prev="\${COMP_WORDS[COMP_CWORD-1]}"
+    cur="${COMP_WORDS[COMP_CWORD]}"
+    prev="${COMP_WORDS[COMP_CWORD - 1]}"
     
     # コマンド一覧
     local commands="create list delete shell exec attach github config mcp completion tmux where"
     local aliases="ls rm sh e a gh t w"
     
     # 最初の引数の場合
-    if [[ \${COMP_CWORD} -eq 1 ]]; then
-        COMPREPLY=( \$(compgen -W "\${commands} \${aliases}" -- \${cur}) )
+    if [[ ${COMP_CWORD} -eq 1 ]]; then
+        COMPREPLY=( $(compgen -W "${commands} ${aliases}" -- ${cur}) )
         return 0
     fi
     
     # サブコマンドごとの補完
-    case "\${COMP_WORDS[1]}" in
+    case "${COMP_WORDS[1]}" in
         create)
             # ブランチ名の補完（既存のローカルブランチを提案）
-            if [[ \${COMP_CWORD} -eq 2 ]]; then
-                local branches=\$(git branch 2>/dev/null | grep -v "^*" | sed 's/^ *//')
-                COMPREPLY=( \$(compgen -W "\${branches}" -- \${cur}) )
+            if [[ ${COMP_CWORD} -eq 2 ]]; then
+                local branches=$(git branch 2>/dev/null | grep -v "^*" | sed 's/^ *//')
+                COMPREPLY=( $(compgen -W "${branches}" -- ${cur}) )
             fi
             ;;
         shell|sh|exec|e|delete|rm)
             # worktreeのブランチ名を補完
-            if [[ \${COMP_CWORD} -eq 2 ]]; then
-                local worktrees=\$(git worktree list --porcelain 2>/dev/null | grep "^branch" | sed 's/^branch refs\\/heads\\///')
-                COMPREPLY=( \$(compgen -W "\${worktrees}" -- \${cur}) )
+            if [[ ${COMP_CWORD} -eq 2 ]]; then
+                local worktrees=$(git worktree list --porcelain 2>/dev/null | grep "^branch" | sed 's/^branch refs\\/heads\\///')
+                COMPREPLY=( $(compgen -W "${worktrees}" -- ${cur}) )
             fi
             ;;
         github|gh)
-            if [[ \${COMP_CWORD} -eq 2 ]]; then
-                COMPREPLY=( \$(compgen -W "checkout pr issue" -- \${cur}) )
+            if [[ ${COMP_CWORD} -eq 2 ]]; then
+                COMPREPLY=( $(compgen -W "checkout pr issue" -- ${cur}) )
             fi
             ;;
         config)
-            if [[ \${COMP_CWORD} -eq 2 ]]; then
-                COMPREPLY=( \$(compgen -W "init show path" -- \${cur}) )
+            if [[ ${COMP_CWORD} -eq 2 ]]; then
+                COMPREPLY=( $(compgen -W "init show path" -- ${cur}) )
             fi
             ;;
         mcp)
-            if [[ \${COMP_CWORD} -eq 2 ]]; then
-                COMPREPLY=( \$(compgen -W "serve" -- \${cur}) )
+            if [[ ${COMP_CWORD} -eq 2 ]]; then
+                COMPREPLY=( $(compgen -W "serve" -- ${cur}) )
             fi
             ;;
         completion)
-            if [[ \${COMP_CWORD} -eq 2 ]]; then
-                COMPREPLY=( \$(compgen -W "bash zsh fish" -- \${cur}) )
+            if [[ ${COMP_CWORD} -eq 2 ]]; then
+                COMPREPLY=( $(compgen -W "bash zsh fish" -- ${cur}) )
             fi
             ;;
         tmux|t)
             # worktreeのブランチ名を補完
-            if [[ \${COMP_CWORD} -eq 2 ]]; then
-                local worktrees=\$(git worktree list --porcelain 2>/dev/null | grep "^branch" | sed 's/^branch refs\\/heads\\///')
-                COMPREPLY=( \$(compgen -W "\${worktrees}" -- \${cur}) )
+            if [[ ${COMP_CWORD} -eq 2 ]]; then
+                local worktrees=$(git worktree list --porcelain 2>/dev/null | grep "^branch" | sed 's/^branch refs\\/heads\\///')
+                COMPREPLY=( $(compgen -W "${worktrees}" -- ${cur}) )
             fi
             ;;
         where|w)
             # worktreeのブランチ名を補完
-            if [[ \${COMP_CWORD} -eq 2 ]]; then
-                local worktrees=\$(git worktree list --porcelain 2>/dev/null | grep "^branch" | sed 's/^branch refs\\/heads\\///')
-                COMPREPLY=( \$(compgen -W "\${worktrees}" -- \${cur}) )
+            if [[ ${COMP_CWORD} -eq 2 ]]; then
+                local worktrees=$(git worktree list --porcelain 2>/dev/null | grep "^branch" | sed 's/^branch refs\\/heads\\///')
+                COMPREPLY=( $(compgen -W "${worktrees}" -- ${cur}) )
             fi
             ;;
     esac
     
     # オプションの補完
     if [[ "\${cur}" == -* ]]; then
-        case "\${COMP_WORDS[1]}" in
+        case "${COMP_WORDS[1]}" in
             create)
                 opts="--base --open --setup --help"
                 ;;
@@ -97,7 +97,7 @@ _scj_completions() {
                 opts="--help"
                 ;;
         esac
-        COMPREPLY=( \$(compgen -W "\${opts}" -- \${cur}) )
+        COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
     fi
 }
 
@@ -148,37 +148,37 @@ _scj() {
             if (( CURRENT == 3 )); then
                 _git_branch_names
             fi
-            _arguments \\
-                '-b[ベースブランチ]:branch:_git_branch_names' \\
-                '--base[ベースブランチ]:branch:_git_branch_names' \\
-                '-o[VSCode/Cursorで開く]' \\
-                '--open[VSCode/Cursorで開く]' \\
-                '-s[環境セットアップを実行]' \\
+            _arguments \
+                '-b[ベースブランチ]:branch:_git_branch_names' \
+                '--base[ベースブランチ]:branch:_git_branch_names' \
+                '-o[VSCode/Cursorで開く]' \
+                '--open[VSCode/Cursorで開く]' \
+                '-s[環境セットアップを実行]' \
                 '--setup[環境セットアップを実行]'
             ;;
         shell|sh|exec|e|delete|rm)
             if (( CURRENT == 3 )); then
                 local worktrees
-                worktrees=(\$(git worktree list --porcelain 2>/dev/null | grep "^branch" | sed 's/^branch refs\\/heads\\//' | tr '\\n' ' '))
-                _values 'worktrees' \$worktrees
+                worktrees=($(git worktree list --porcelain 2>/dev/null | grep "^branch" | sed 's/^branch refs\\/heads\\//' | tr '\\n' ' '))
+                _values 'worktrees' $worktrees
             fi
             ;;
         github|gh)
             if (( CURRENT == 3 )); then
                 _values 'type' 'checkout' 'pr' 'issue'
             fi
-            _arguments \\
-                '-o[VSCode/Cursorで開く]' \\
-                '--open[VSCode/Cursorで開く]' \\
-                '-s[環境セットアップを実行]' \\
+            _arguments \
+                '-o[VSCode/Cursorで開く]' \
+                '--open[VSCode/Cursorで開く]' \
+                '-s[環境セットアップを実行]' \
                 '--setup[環境セットアップを実行]'
             ;;
         config)
             if (( CURRENT == 3 )); then
                 _values 'action' 'init' 'show' 'path'
             fi
-            _arguments \\
-                '-g[グローバル設定を対象にする]' \\
+            _arguments \
+                '-g[グローバル設定を対象にする]' \
                 '--global[グローバル設定を対象にする]'
             ;;
         mcp)
@@ -192,28 +192,28 @@ _scj() {
             fi
             ;;
         tmux|t)
-            _arguments \\
-                '-n[新しいウィンドウで開く]' \\
-                '--new-window[新しいウィンドウで開く]' \\
-                '-p[現在のペインを分割して開く]' \\
-                '--split-pane[現在のペインを分割して開く]' \\
-                '-v[垂直分割]' \\
+            _arguments \
+                '-n[新しいウィンドウで開く]' \
+                '--new-window[新しいウィンドウで開く]' \
+                '-p[現在のペインを分割して開く]' \
+                '--split-pane[現在のペインを分割して開く]' \
+                '-v[垂直分割]' \
                 '--vertical[垂直分割]'
             ;;
         where|w)
             if (( CURRENT == 3 )); then
                 local worktrees
-                worktrees=(\\$(git worktree list --porcelain 2>/dev/null | grep "^branch" | sed 's/^branch refs\\\\/heads\\\\//' | tr '\\\\n' ' '))
+                worktrees=(\\$(git worktree list --porcelain 2>/dev/null | grep "^branch" | sed 's/^branch refs\\/heads\\//' | tr '\\n' ' '))
                 _values 'worktrees' \\$worktrees
             fi
-            _arguments \\
-                '--fzf[fzfで選択]' \\
+            _arguments \
+                '--fzf[fzfで選択]' \
                 '--current[現在のworktreeのパスを表示]'
             ;;
     esac
 }
 
-_scj "\$@"
+_scj "$@"
 `
 
 const FISH_COMPLETION = `# shadow-clone-jutsu fish completion
