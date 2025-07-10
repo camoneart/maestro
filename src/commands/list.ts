@@ -9,7 +9,10 @@ export const listCommand = new Command('list')
   .description('影分身（worktree）の一覧を表示')
   .option('-j, --json', 'JSON形式で出力')
   .option('--fzf', 'fzfで選択し、選択したブランチ名を出力')
-  .action(async (options: { json?: boolean; fzf?: boolean } = {}) => {
+  .option('--filter <keyword>', 'ブランチ名またはパスでフィルタ')
+  .option('--sort <field>', 'ソート順 (branch|age|size)', 'branch')
+  .option('--last-commit', '最終コミット情報を表示')
+  .action(async (options: { json?: boolean; fzf?: boolean; filter?: string; sort?: string; lastCommit?: boolean } = {}) => {
     try {
       const gitManager = new GitWorktreeManager()
 
@@ -20,10 +23,43 @@ export const listCommand = new Command('list')
         process.exit(1)
       }
 
-      const worktrees = await gitManager.listWorktrees()
+      let worktrees = await gitManager.listWorktrees()
+
+      // フィルタ処理
+      if (options.filter) {
+        const keyword = options.filter.toLowerCase()
+        worktrees = worktrees.filter(wt => 
+          wt.branch?.toLowerCase().includes(keyword) || 
+          wt.path.toLowerCase().includes(keyword)
+        )
+      }
+
+      // 最終コミット情報を取得
+      if (options.lastCommit || options.json) {
+        for (const worktree of worktrees) {
+          try {
+            const lastCommit = await gitManager.getLastCommit(worktree.path)
+            ;(worktree as any).lastCommit = lastCommit
+          } catch (error) {
+            ;(worktree as any).lastCommit = null
+          }
+        }
+      }
+
+      // ソート処理
+      if (options.sort) {
+        await sortWorktrees(worktrees, options.sort, gitManager)
+      }
 
       if (options?.json) {
-        console.log(JSON.stringify(worktrees, null, 2))
+        // JSON出力時に追加フィールドを含める
+        const jsonWorktrees = worktrees.map(wt => ({
+          ...wt,
+          isCurrent: wt.path === process.cwd() || wt.path.endsWith('.'),
+          locked: wt.locked || false,
+          lastCommit: (wt as any).lastCommit || null
+        }))
+        console.log(JSON.stringify(jsonWorktrees, null, 2))
         return
       }
 
@@ -96,10 +132,10 @@ export const listCommand = new Command('list')
       const cloneWorktrees = worktrees.filter(wt => !wt.path.endsWith('.'))
 
       if (mainWorktree) {
-        displayWorktree(mainWorktree, true)
+        displayWorktree(mainWorktree, true, options.lastCommit)
       }
 
-      cloneWorktrees.forEach(wt => displayWorktree(wt, false))
+      cloneWorktrees.forEach(wt => displayWorktree(wt, false, options.lastCommit))
 
       console.log(chalk.gray(`\n合計: ${worktrees.length} 個の影分身`))
     } catch (error) {
@@ -108,7 +144,7 @@ export const listCommand = new Command('list')
     }
   })
 
-function displayWorktree(worktree: Worktree, isMain: boolean) {
+function displayWorktree(worktree: Worktree, isMain: boolean, showLastCommit?: boolean) {
   const prefix = isMain ? '📍' : '🥷'
   const branchName = worktree.branch || '(detached)'
   const status = []
@@ -124,9 +160,14 @@ function displayWorktree(worktree: Worktree, isMain: boolean) {
     status.push(chalk.yellow('⚠️  削除可能'))
   }
 
-  console.log(
-    `${prefix} ${chalk.cyan(branchName.padEnd(30))} ` +
-      `${chalk.gray(worktree.path)} ` +
-      `${status.join(' ')}`
-  )
+  let output = `${prefix} ${chalk.cyan(branchName.padEnd(30))} ` +
+    `${chalk.gray(worktree.path)} ` +
+    `${status.join(' ')}`
+
+  if (showLastCommit && (worktree as any).lastCommit) {
+    const lastCommit = (worktree as any).lastCommit
+    output += `\n    ${chalk.gray('最終コミット:')} ${chalk.yellow(lastCommit.date)} ${chalk.gray(lastCommit.message)}`
+  }
+
+  console.log(output)
 }

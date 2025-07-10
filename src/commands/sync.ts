@@ -5,12 +5,15 @@ import inquirer from 'inquirer'
 import { GitWorktreeManager } from '../core/git.js'
 import { execa } from 'execa'
 import { spawn } from 'child_process'
+import cliProgress from 'cli-progress'
 
 interface SyncOptions {
   all?: boolean
   main?: string
   fzf?: boolean
   rebase?: boolean
+  dryRun?: boolean
+  push?: boolean
 }
 
 export const syncCommand = new Command('sync')
@@ -21,6 +24,8 @@ export const syncCommand = new Command('sync')
   .option('-m, --main <branch>', 'メインブランチを指定 (デフォルト: main または master)')
   .option('--fzf', 'fzfで同期する影分身を選択')
   .option('--rebase', 'マージの代わりにrebaseを使用')
+  .option('--dry-run', '実行内容のみ表示（実際の同期は行わない）')
+  .option('--push', 'merge/rebase後にgit pushを実施')
   .action(async (branchName?: string, options: SyncOptions = {}) => {
     const spinner = ora('影分身を確認中...').start()
 
@@ -175,11 +180,70 @@ export const syncCommand = new Command('sync')
 
       spinner.succeed(`${mainBranch} ブランチを最新に更新しました`)
 
-      // 各影分身を同期
+      // Dry-run処理
+      if (options.dryRun) {
+        console.log('\n' + chalk.bold('🔍 実行内容プレビュー:'))
+        console.log(chalk.gray(`メインブランチ: ${mainBranch}`))
+        console.log(chalk.gray(`同期方法: ${options.rebase ? 'rebase' : 'merge'}`))
+        console.log(chalk.gray(`同期後のpush: ${options.push ? 'あり' : 'なし'}`))
+        console.log('\n' + chalk.bold('同期予定の影分身:'))
+
+        for (const worktree of targetWorktrees) {
+          const branchName = worktree.branch?.replace('refs/heads/', '') || worktree.branch
+
+          try {
+            const { stdout: status } = await execa('git', ['status', '--porcelain'], {
+              cwd: worktree.path,
+            })
+
+            const { stdout: behind } = await execa(
+              'git',
+              ['rev-list', '--count', `${branchName}..${mainBranch}`],
+              {
+                cwd: worktree.path,
+              }
+            )
+
+            const behindCount = parseInt(behind.trim())
+
+            if (status.trim()) {
+              console.log(
+                `⏭️  ${chalk.cyan(branchName)} - ${chalk.yellow('スキップ')} (未コミットの変更)`
+              )
+            } else if (behindCount === 0) {
+              console.log(`✅ ${chalk.cyan(branchName)} - ${chalk.green('up-to-date')} (スキップ)`)
+            } else {
+              console.log(
+                `🔄 ${chalk.cyan(branchName)} - ${chalk.blue(`${behindCount}コミット遅れ`)} (${options.rebase ? 'rebase' : 'merge'})`
+              )
+            }
+          } catch (error) {
+            console.log(
+              `❌ ${chalk.cyan(branchName)} - ${chalk.red('エラー')} (${error instanceof Error ? error.message : '不明なエラー'})`
+            )
+          }
+        }
+
+        console.log(
+          '\n' + chalk.gray('実際に同期を実行するには --dry-run を外して再実行してください')
+        )
+        return
+      }
+
+      // 進捗バー設定
+      const progressBar = new cliProgress.SingleBar({
+        format: '同期進捗 |' + chalk.cyan('{bar}') + '| {percentage}% | {value}/{total} | {branch}',
+        barCompleteChar: '\u2588',
+        barIncompleteChar: '\u2591',
+        hideCursor: true,
+      })
+
+      // 各影分身を並列同期
       const results = []
-      for (const worktree of targetWorktrees) {
+      progressBar.start(targetWorktrees.length, 0)
+
+      const syncPromises = targetWorktrees.map(async (worktree, index) => {
         const branchName = worktree.branch?.replace('refs/heads/', '') || worktree.branch
-        const syncSpinner = ora(`${branchName} を同期中...`).start()
 
         try {
           // 現在のブランチの状態を保存
@@ -188,30 +252,73 @@ export const syncCommand = new Command('sync')
           })
 
           if (status.trim()) {
-            syncSpinner.warn(`${branchName} に未コミットの変更があります`)
-            results.push({ branch: branchName, status: 'skipped', reason: '未コミットの変更' })
-            continue
+            return { branch: branchName, status: 'skipped', reason: '未コミットの変更' }
+          }
+
+          // up-to-dateチェック
+          const { stdout: behind } = await execa(
+            'git',
+            ['rev-list', '--count', `${branchName}..${mainBranch}`],
+            {
+              cwd: worktree.path,
+            }
+          )
+
+          const behindCount = parseInt(behind.trim())
+
+          if (behindCount === 0) {
+            return { branch: branchName, status: 'up-to-date', reason: '既に最新' }
           }
 
           // 同期実行
           if (options.rebase) {
             await execa('git', ['rebase', mainBranch], { cwd: worktree.path })
-            syncSpinner.succeed(`${branchName} をrebaseしました`)
-            results.push({ branch: branchName, status: 'success', method: 'rebase' })
+
+            // pushオプション
+            if (options.push) {
+              await execa('git', ['push', '--force-with-lease'], { cwd: worktree.path })
+            }
+
+            return { branch: branchName, status: 'success', method: 'rebase', pushed: options.push }
           } else {
             await execa('git', ['merge', mainBranch, '--no-edit'], { cwd: worktree.path })
-            syncSpinner.succeed(`${branchName} をマージしました`)
-            results.push({ branch: branchName, status: 'success', method: 'merge' })
+
+            // pushオプション
+            if (options.push) {
+              await execa('git', ['push'], { cwd: worktree.path })
+            }
+
+            return { branch: branchName, status: 'success', method: 'merge', pushed: options.push }
           }
         } catch (error) {
-          syncSpinner.fail(`${branchName} の同期に失敗しました`)
-          results.push({
+          return {
             branch: branchName,
             status: 'failed',
             error: error instanceof Error ? error.message : '不明なエラー',
+          }
+        } finally {
+          progressBar.update(index + 1, { branch: branchName })
+        }
+      })
+
+      const syncResults = await Promise.allSettled(syncPromises)
+
+      syncResults.forEach((result, index) => {
+        if (result.status === 'fulfilled') {
+          results.push(result.value)
+        } else {
+          const branchName =
+            targetWorktrees[index].branch?.replace('refs/heads/', '') ||
+            targetWorktrees[index].branch
+          results.push({
+            branch: branchName,
+            status: 'failed',
+            error: result.reason instanceof Error ? result.reason.message : '不明なエラー',
           })
         }
-      }
+      })
+
+      progressBar.stop()
 
       // 結果サマリー
       console.log('\n' + chalk.bold('🥷 同期結果:\n'))
@@ -219,15 +326,25 @@ export const syncCommand = new Command('sync')
       const successCount = results.filter(r => r.status === 'success').length
       const failedCount = results.filter(r => r.status === 'failed').length
       const skippedCount = results.filter(r => r.status === 'skipped').length
+      const upToDateCount = results.filter(r => r.status === 'up-to-date').length
 
       results.forEach(result => {
-        const icon = result.status === 'success' ? '✅' : result.status === 'failed' ? '❌' : '⏭️'
+        const icon =
+          result.status === 'success'
+            ? '✅'
+            : result.status === 'failed'
+              ? '❌'
+              : result.status === 'up-to-date'
+                ? '🔄'
+                : '⏭️'
         const statusText =
           result.status === 'success'
-            ? chalk.green(`成功 (${result.method})`)
+            ? chalk.green(`成功 (${result.method}${result.pushed ? ' + push' : ''})`)
             : result.status === 'failed'
               ? chalk.red('失敗')
-              : chalk.yellow('スキップ')
+              : result.status === 'up-to-date'
+                ? chalk.blue('up-to-date')
+                : chalk.yellow('スキップ')
 
         console.log(`${icon} ${chalk.cyan(result.branch)} - ${statusText}`)
         if (result.reason) {
@@ -239,13 +356,19 @@ export const syncCommand = new Command('sync')
       })
 
       console.log(
-        chalk.gray(`\n合計: ${successCount} 成功, ${failedCount} 失敗, ${skippedCount} スキップ`)
+        chalk.gray(
+          `\n合計: ${successCount} 成功, ${failedCount} 失敗, ${skippedCount} スキップ, ${upToDateCount} up-to-date`
+        )
       )
 
       if (failedCount > 0) {
         console.log(
           chalk.yellow('\n💡 ヒント: 競合が発生した場合は、各影分身で手動で解決してください')
         )
+      }
+
+      if (options.push && successCount > 0) {
+        console.log(chalk.cyan('\n🚀 リモートリポジトリにプッシュしました'))
       }
     } catch (error) {
       spinner.fail('同期に失敗しました')
