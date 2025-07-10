@@ -410,6 +410,31 @@ scj watch --auto
 scj w
 ```
 
+#### 統合ダッシュボード（Web UI）
+
+```bash
+# ダッシュボードサーバーを起動（デフォルト: http://localhost:8765）
+scj dashboard
+
+# カスタムポートで起動
+scj dashboard --port 3000
+
+# ブラウザを自動で開かない
+scj dashboard --no-open
+
+# エイリアス
+scj ui
+```
+
+**ダッシュボードの機能:**
+- 全worktreeの状態を一覧表示
+- GitHub Issues/PR連携状況の表示
+- 健全性ステータスの可視化
+- 統計情報（総数、アクティブ数、要確認数）
+- エディタ・ターミナルで直接開く機能
+- 30秒ごとの自動更新
+- ダークテーマ対応
+
 #### worktree健全性チェック
 
 ```bash
