@@ -13,6 +13,7 @@ import { githubCommand } from './commands/github.js'
 import { completionCommand } from './commands/completion.js'
 import { tmuxCommand } from './commands/tmux.js'
 import { whereCommand } from './commands/where.js'
+import { syncCommand } from './commands/sync.js'
 
 const program = new Command()
 
@@ -34,6 +35,7 @@ program.addCommand(githubCommand)
 program.addCommand(completionCommand)
 program.addCommand(tmuxCommand)
 program.addCommand(whereCommand)
+program.addCommand(syncCommand)
 
 // エラーハンドリング
 program.exitOverride()
