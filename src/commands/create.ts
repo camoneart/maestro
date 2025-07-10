@@ -30,6 +30,86 @@ function parseIssueNumber(input: string): { isIssue: boolean; issueNumber?: stri
   }
 }
 
+// GitHub Issue/PRの情報を取得
+async function fetchGitHubMetadata(issueNumber: string): Promise<{
+  type: 'issue' | 'pr'
+  title: string
+  body: string
+  author: string
+  labels: string[]
+  assignees: string[]
+  milestone?: string
+  url: string
+} | null> {
+  try {
+    // まずPRとして試す
+    try {
+      const { stdout } = await execa('gh', [
+        'pr',
+        'view',
+        issueNumber,
+        '--json',
+        'number,title,body,author,labels,assignees,milestone,url'
+      ])
+      const pr = JSON.parse(stdout)
+      return {
+        type: 'pr',
+        title: pr.title,
+        body: pr.body || '',
+        author: pr.author?.login || '',
+        labels: pr.labels?.map((l: any) => l.name) || [],
+        assignees: pr.assignees?.map((a: any) => a.login) || [],
+        milestone: pr.milestone?.title,
+        url: pr.url
+      }
+    } catch {
+      // PRでなければIssueとして試す
+      const { stdout } = await execa('gh', [
+        'issue',
+        'view',
+        issueNumber,
+        '--json',
+        'number,title,body,author,labels,assignees,milestone,url'
+      ])
+      const issue = JSON.parse(stdout)
+      return {
+        type: 'issue',
+        title: issue.title,
+        body: issue.body || '',
+        author: issue.author?.login || '',
+        labels: issue.labels?.map((l: any) => l.name) || [],
+        assignees: issue.assignees?.map((a: any) => a.login) || [],
+        milestone: issue.milestone?.title,
+        url: issue.url
+      }
+    }
+  } catch {
+    // GitHub CLIが使えない、または認証されていない場合
+    return null
+  }
+}
+
+// worktreeメタデータをファイルに保存
+async function saveWorktreeMetadata(
+  worktreePath: string,
+  branchName: string,
+  metadata: any
+): Promise<void> {
+  const metadataPath = path.join(worktreePath, '.scj-metadata.json')
+  const metadataContent = {
+    createdAt: new Date().toISOString(),
+    branch: branchName,
+    worktreePath,
+    ...metadata
+  }
+  
+  try {
+    await fs.writeFile(metadataPath, JSON.stringify(metadataContent, null, 2))
+  } catch {
+    // メタデータの保存に失敗しても処理は続行
+  }
+}
+
 // tmuxセッションを作成してClaude Codeを起動する関数
 async function createTmuxSession(branchName: string, worktreePath: string, config: any): Promise<void> {
   const sessionName = branchName.replace(/[^a-zA-Z0-9_-]/g, '-')
@@ -174,9 +254,40 @@ export const createCommand = new Command('create')
         branchName = config.worktrees.branchPrefix + branchName
       }
 
-      // Issue番号が指定された場合の追加情報を表示
+      // Issue番号が指定された場合の追加情報を表示とメタデータ取得
+      let githubMetadata = null
       if (isIssue && issueNumber) {
         console.log(chalk.blue(`📝 Issue #${issueNumber} に基づいてブランチを作成します`))
+        
+        spinner.text = `GitHub Issue/PR #${issueNumber} の情報を取得中...`
+        githubMetadata = await fetchGitHubMetadata(issueNumber)
+        
+        if (githubMetadata) {
+          spinner.stop()
+          console.log(chalk.green(`✨ ${githubMetadata.type === 'pr' ? 'PR' : 'Issue'} の情報を取得しました`))
+          console.log(chalk.gray(`  タイトル: ${githubMetadata.title}`))
+          console.log(chalk.gray(`  作成者: ${githubMetadata.author}`))
+          if (githubMetadata.labels.length > 0) {
+            console.log(chalk.gray(`  ラベル: ${githubMetadata.labels.join(', ')}`))
+          }
+          if (githubMetadata.assignees.length > 0) {
+            console.log(chalk.gray(`  担当者: ${githubMetadata.assignees.join(', ')}`))
+          }
+          if (githubMetadata.milestone) {
+            console.log(chalk.gray(`  マイルストーン: ${githubMetadata.milestone}`))
+          }
+          console.log()
+          
+          // タイトルからより適切なブランチ名を生成
+          const sanitizedTitle = githubMetadata.title
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/^-+|-+$/g, '')
+            .substring(0, 30)
+          branchName = `${githubMetadata.type}-${issueNumber}-${sanitizedTitle}`
+        } else {
+          spinner.stop()
+        }
       }
 
       // ブランチ名の確認
@@ -203,6 +314,24 @@ export const createCommand = new Command('create')
         `影分身 '${chalk.cyan(branchName)}' を作り出しました！\n` +
           `  📁 ${chalk.gray(worktreePath)}`
       )
+
+      // メタデータを保存
+      if (githubMetadata || options.template) {
+        const metadata: any = {}
+        
+        if (githubMetadata) {
+          metadata.github = {
+            ...githubMetadata,
+            issueNumber: issueNumber
+          }
+        }
+        
+        if (options.template) {
+          metadata.template = options.template
+        }
+        
+        await saveWorktreeMetadata(worktreePath, branchName, metadata)
+      }
 
       // 環境セットアップ（設定またはオプションで有効な場合）
       if (options.setup || (options.setup === undefined && config.development?.autoSetup)) {

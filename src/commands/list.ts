@@ -4,6 +4,7 @@ import { GitWorktreeManager } from '../core/git.js'
 import { Worktree } from '../types/index.js'
 import { spawn } from 'child_process'
 import fs from 'fs'
+import path from 'path'
 
 export const listCommand = new Command('list')
   .alias('ls')
@@ -13,6 +14,7 @@ export const listCommand = new Command('list')
   .option('--filter <keyword>', 'ブランチ名またはパスでフィルタ')
   .option('--sort <field>', 'ソート順 (branch|age|size)', 'branch')
   .option('--last-commit', '最終コミット情報を表示')
+  .option('--metadata', 'メタデータ情報を表示')
   .action(
     async (
       options: {
@@ -21,6 +23,7 @@ export const listCommand = new Command('list')
         filter?: string
         sort?: string
         lastCommit?: boolean
+        metadata?: boolean
       } = {}
     ) => {
       try {
@@ -56,6 +59,19 @@ export const listCommand = new Command('list')
           }
         }
 
+        // メタデータ情報を取得
+        if (options.metadata || options.json) {
+          for (const worktree of worktrees) {
+            try {
+              const metadataPath = path.join(worktree.path, '.scj-metadata.json')
+              const metadataContent = await fs.promises.readFile(metadataPath, 'utf-8')
+              ;(worktree as any).metadata = JSON.parse(metadataContent)
+            } catch {
+              ;(worktree as any).metadata = null
+            }
+          }
+        }
+
         // ソート処理
         if (options.sort) {
           await sortWorktrees(worktrees, options.sort, gitManager)
@@ -68,6 +84,7 @@ export const listCommand = new Command('list')
             isCurrent: wt.path === process.cwd() || wt.path.endsWith('.'),
             locked: wt.locked || false,
             lastCommit: (wt as any).lastCommit || null,
+            metadata: (wt as any).metadata || null,
           }))
           console.log(JSON.stringify(jsonWorktrees, null, 2))
           return
@@ -142,10 +159,10 @@ export const listCommand = new Command('list')
         const cloneWorktrees = worktrees.filter(wt => !wt.path.endsWith('.'))
 
         if (mainWorktree) {
-          displayWorktree(mainWorktree, true, options.lastCommit)
+          displayWorktree(mainWorktree, true, options.lastCommit, options.metadata)
         }
 
-        cloneWorktrees.forEach(wt => displayWorktree(wt, false, options.lastCommit))
+        cloneWorktrees.forEach(wt => displayWorktree(wt, false, options.lastCommit, options.metadata))
 
         console.log(chalk.gray(`\n合計: ${worktrees.length} 個の影分身`))
       } catch (error) {
@@ -190,7 +207,7 @@ async function sortWorktrees(
   }
 }
 
-function displayWorktree(worktree: Worktree, isMain: boolean, showLastCommit?: boolean) {
+function displayWorktree(worktree: Worktree, isMain: boolean, showLastCommit?: boolean, showMetadata?: boolean) {
   const prefix = isMain ? '📍' : '🥷'
   const branchName = worktree.branch || '(detached)'
   const status = []
@@ -206,6 +223,19 @@ function displayWorktree(worktree: Worktree, isMain: boolean, showLastCommit?: b
     status.push(chalk.yellow('⚠️  削除可能'))
   }
 
+  // メタデータからGitHubバッジを追加
+  const metadata = (worktree as any).metadata
+  if (metadata?.github) {
+    if (metadata.github.type === 'pr') {
+      status.push(chalk.blue(`PR #${metadata.github.issueNumber}`))
+    } else {
+      status.push(chalk.green(`Issue #${metadata.github.issueNumber}`))
+    }
+  }
+  if (metadata?.template) {
+    status.push(chalk.magenta(`[${metadata.template}]`))
+  }
+
   let output =
     `${prefix} ${chalk.cyan(branchName.padEnd(30))} ` +
     `${chalk.gray(worktree.path)} ` +
@@ -214,6 +244,21 @@ function displayWorktree(worktree: Worktree, isMain: boolean, showLastCommit?: b
   if (showLastCommit && (worktree as any).lastCommit) {
     const lastCommit = (worktree as any).lastCommit
     output += `\n    ${chalk.gray('最終コミット:')} ${chalk.yellow(lastCommit.date)} ${chalk.gray(lastCommit.message)}`
+  }
+
+  if (showMetadata && metadata) {
+    if (metadata.github) {
+      output += `\n    ${chalk.gray('GitHub:')} ${metadata.github.title}`
+      if (metadata.github.labels.length > 0) {
+        output += `\n    ${chalk.gray('ラベル:')} ${metadata.github.labels.join(', ')}`
+      }
+      if (metadata.github.assignees.length > 0) {
+        output += `\n    ${chalk.gray('担当者:')} ${metadata.github.assignees.join(', ')}`
+      }
+    }
+    if (metadata.createdAt) {
+      output += `\n    ${chalk.gray('作成日時:')} ${new Date(metadata.createdAt).toLocaleString()}`
+    }
   }
 
   console.log(output)
