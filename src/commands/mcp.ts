@@ -42,12 +42,12 @@ export const mcpCommand = new Command('mcp')
       },
     })
 
-    serverProcess.on('error', (error) => {
+    serverProcess.on('error', error => {
       console.error(chalk.red('MCPサーバーの起動に失敗しました:'), error.message)
       process.exit(1)
     })
 
-    serverProcess.on('exit', (code) => {
+    serverProcess.on('exit', code => {
       if (code !== 0) {
         console.error(chalk.red(`MCPサーバーが異常終了しました (exit code: ${code})`))
         process.exit(code || 1)

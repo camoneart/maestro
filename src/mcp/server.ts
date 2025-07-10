@@ -111,7 +111,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
 })
 
 // ツール実行のハンドラー
-server.setRequestHandler(CallToolRequestSchema, async (request) => {
+server.setRequestHandler(CallToolRequestSchema, async request => {
   const { name, arguments: args } = request.params
 
   try {
@@ -134,10 +134,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
       case 'list_shadow_clones': {
         const worktrees = await gitManager.listWorktrees()
-        const shadowClones = worktrees.filter((wt) => !wt.path.endsWith('.'))
+        const shadowClones = worktrees.filter(wt => !wt.path.endsWith('.'))
 
         const list = shadowClones
-          .map((wt) => {
+          .map(wt => {
             const branchName = wt.branch?.replace('refs/heads/', '') || wt.branch
             return `• ${branchName} (${wt.path})`
           })
@@ -174,7 +174,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         const { execa } = await import('execa')
 
         const worktrees = await gitManager.listWorktrees()
-        const targetWorktree = worktrees.find((wt) => {
+        const targetWorktree = worktrees.find(wt => {
           const branch = wt.branch?.replace('refs/heads/', '')
           return branch === validatedArgs.branchName || wt.branch === validatedArgs.branchName
         })
@@ -219,7 +219,7 @@ async function main() {
   console.error('🥷 shadow-clone-jutsu MCP server started')
 }
 
-main().catch((error) => {
+main().catch(error => {
   console.error('Fatal error:', error)
   process.exit(1)
 })

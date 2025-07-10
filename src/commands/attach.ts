@@ -42,15 +42,15 @@ export const attachCommand = new Command('attach')
         // 既存のワークツリーを取得
         const worktrees = await gitManager.listWorktrees()
         const attachedBranches = worktrees
-          .map((wt) => wt.branch?.replace('refs/heads/', ''))
+          .map(wt => wt.branch?.replace('refs/heads/', ''))
           .filter(Boolean)
 
         // 利用可能なブランチをフィルタリング
-        let availableBranches = branches.local.filter((b) => !attachedBranches.includes(b))
+        let availableBranches = branches.local.filter(b => !attachedBranches.includes(b))
 
         if (options?.remote) {
           const remoteAvailable = branches.remote.filter(
-            (b) => !attachedBranches.includes(b.split('/').slice(1).join('/'))
+            b => !attachedBranches.includes(b.split('/').slice(1).join('/'))
           )
           availableBranches = [...availableBranches, ...remoteAvailable]
         }
@@ -70,7 +70,7 @@ export const attachCommand = new Command('attach')
               type: 'list',
               name: 'selectedBranch',
               message: 'どのブランチから影分身を作り出しますか？',
-              choices: availableBranches.map((branch) => ({
+              choices: availableBranches.map(branch => ({
                 name: branch.includes('origin/')
                   ? `${chalk.yellow('[remote]')} ${chalk.cyan(branch)}`
                   : `${chalk.green('[local]')} ${chalk.cyan(branch)}`,
@@ -86,10 +86,10 @@ export const attachCommand = new Command('attach')
             console.error(chalk.red(`エラー: ブランチ '${branchName}' が見つかりません`))
 
             // 類似した名前を提案
-            const similarBranches = availableBranches.filter((b) => b.includes(branchName || ''))
+            const similarBranches = availableBranches.filter(b => b.includes(branchName || ''))
             if (similarBranches.length > 0) {
               console.log(chalk.yellow('\n利用可能なブランチ:'))
-              similarBranches.forEach((branch) => {
+              similarBranches.forEach(branch => {
                 console.log(`  - ${chalk.cyan(branch)}`)
               })
             }

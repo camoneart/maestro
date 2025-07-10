@@ -23,7 +23,7 @@ export const shellCommand = new Command('shell')
       const worktrees = await gitManager.listWorktrees()
 
       // メインブランチを除外
-      const shadowClones = worktrees.filter((wt) => !wt.path.endsWith('.'))
+      const shadowClones = worktrees.filter(wt => !wt.path.endsWith('.'))
 
       if (shadowClones.length === 0) {
         console.log(chalk.yellow('影分身が存在しません'))
@@ -38,7 +38,7 @@ export const shellCommand = new Command('shell')
         // fzfオプションが指定されている場合
         if (options?.fzf) {
           const fzfInput = shadowClones
-            .map((w) => {
+            .map(w => {
               const status = []
               if (w.locked) status.push(chalk.red('ロック'))
               if (w.prunable) status.push(chalk.yellow('削除可能'))
@@ -69,12 +69,12 @@ export const shellCommand = new Command('shell')
 
           // 選択結果を取得
           let selected = ''
-          fzfProcess.stdout.on('data', (data) => {
+          fzfProcess.stdout.on('data', data => {
             selected += data.toString()
           })
 
-          await new Promise<void>((resolve) => {
-            fzfProcess.on('close', (code) => {
+          await new Promise<void>(resolve => {
+            fzfProcess.on('close', code => {
               if (code !== 0 || !selected.trim()) {
                 console.log(chalk.gray('キャンセルされました'))
                 process.exit(0)
@@ -96,7 +96,7 @@ export const shellCommand = new Command('shell')
               type: 'list',
               name: 'selectedBranch',
               message: 'どの影分身に入りますか？',
-              choices: shadowClones.map((wt) => {
+              choices: shadowClones.map(wt => {
                 const branchName = wt.branch?.replace('refs/heads/', '') || wt.branch
                 return {
                   name: `${chalk.cyan(branchName)} ${chalk.gray(wt.path)}`,
@@ -110,7 +110,7 @@ export const shellCommand = new Command('shell')
       }
 
       // 指定されたブランチのworktreeを探す
-      targetWorktree = shadowClones.find((wt) => {
+      targetWorktree = shadowClones.find(wt => {
         const branch = wt.branch?.replace('refs/heads/', '')
         return branch === branchName || wt.branch === branchName
       })
@@ -120,12 +120,12 @@ export const shellCommand = new Command('shell')
 
         // 類似した名前を提案
         const similarBranches = shadowClones
-          .filter((wt) => wt.branch && wt.branch.includes(branchName || ''))
-          .map((wt) => wt.branch)
+          .filter(wt => wt.branch && wt.branch.includes(branchName || ''))
+          .map(wt => wt.branch)
 
         if (similarBranches.length > 0) {
           console.log(chalk.yellow('\n類似した影分身:'))
-          similarBranches.forEach((branch) => {
+          similarBranches.forEach(branch => {
             console.log(`  - ${chalk.cyan(branch)}`)
           })
         }
@@ -149,7 +149,7 @@ export const shellCommand = new Command('shell')
         },
       })
 
-      shellProcess.on('exit', (code) => {
+      shellProcess.on('exit', code => {
         console.log(chalk.gray(`\n影分身から戻りました (exit code: ${code})`))
       })
     } catch (error) {
