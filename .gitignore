@@ -50,9 +50,3 @@ worktrees/
 
 # docs
 _docs/
-
-# o3とのやり取り
-_o3-advice/
-
-# issue list
-_issue/
