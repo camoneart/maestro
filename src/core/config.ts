@@ -41,6 +41,15 @@ export const ConfigSchema = z.object({
     .object({
       // 自動でfetchを実行
       autoFetch: z.boolean().default(true),
+      // ブランチ命名規則
+      branchNaming: z
+        .object({
+          // PR用のテンプレート (例: "pr-{number}-{title}")
+          prTemplate: z.string().default('pr-{number}'),
+          // Issue用のテンプレート (例: "issue-{number}-{title}")
+          issueTemplate: z.string().default('issue-{number}'),
+        })
+        .optional(),
     })
     .optional(),
 
