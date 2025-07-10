@@ -44,3 +44,15 @@ temp/
 .shadow-clones/
 worktrees/
 .scj-config.json
+
+# cc conversations
+.claude/_export-conversations/
+
+# docs
+_docs/
+
+# o3とのやり取り
+_o3-advice/
+
+# issue list
+_issue/
