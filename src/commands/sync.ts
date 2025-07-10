@@ -16,6 +16,15 @@ interface SyncOptions {
   push?: boolean
 }
 
+interface SyncResult {
+  branch: string
+  status: 'success' | 'failed' | 'skipped' | 'up-to-date'
+  method?: 'merge' | 'rebase'
+  reason?: string
+  error?: string
+  pushed?: boolean
+}
+
 export const syncCommand = new Command('sync')
   .alias('s')
   .description('メインブランチの変更を影分身に同期')
@@ -49,9 +58,14 @@ export const syncCommand = new Command('sync')
         } catch {
           // フォールバック
           mainBranch = 'main'
-          const branches = await gitManager.listBranches()
-          if (!branches.includes('main') && branches.includes('master')) {
-            mainBranch = 'master'
+          try {
+            const { stdout } = await execa('git', ['branch', '--list', '--format=%(refname:short)'])
+            const branchList = stdout.split('\n').filter(Boolean)
+            if (!branchList.includes('main') && branchList.includes('master')) {
+              mainBranch = 'master'
+            }
+          } catch {
+            // エラーが発生した場合はデフォルトのmainを使用
           }
         }
       }
@@ -239,7 +253,7 @@ export const syncCommand = new Command('sync')
       })
 
       // 各影分身を並列同期
-      const results = []
+      const results: SyncResult[] = []
       progressBar.start(targetWorktrees.length, 0)
 
       const syncPromises = targetWorktrees.map(async (worktree, index) => {
@@ -252,7 +266,7 @@ export const syncCommand = new Command('sync')
           })
 
           if (status.trim()) {
-            return { branch: branchName, status: 'skipped', reason: '未コミットの変更' }
+            return { branch: branchName, status: 'skipped' as const, reason: '未コミットの変更' }
           }
 
           // up-to-dateチェック
@@ -267,7 +281,7 @@ export const syncCommand = new Command('sync')
           const behindCount = parseInt(behind.trim())
 
           if (behindCount === 0) {
-            return { branch: branchName, status: 'up-to-date', reason: '既に最新' }
+            return { branch: branchName, status: 'up-to-date' as const, reason: '既に最新' }
           }
 
           // 同期実行
@@ -279,7 +293,12 @@ export const syncCommand = new Command('sync')
               await execa('git', ['push', '--force-with-lease'], { cwd: worktree.path })
             }
 
-            return { branch: branchName, status: 'success', method: 'rebase', pushed: options.push }
+            return {
+              branch: branchName,
+              status: 'success' as const,
+              method: 'rebase' as const,
+              pushed: options.push,
+            }
           } else {
             await execa('git', ['merge', mainBranch, '--no-edit'], { cwd: worktree.path })
 
@@ -288,12 +307,17 @@ export const syncCommand = new Command('sync')
               await execa('git', ['push'], { cwd: worktree.path })
             }
 
-            return { branch: branchName, status: 'success', method: 'merge', pushed: options.push }
+            return {
+              branch: branchName,
+              status: 'success' as const,
+              method: 'merge' as const,
+              pushed: options.push,
+            }
           }
         } catch (error) {
           return {
             branch: branchName,
-            status: 'failed',
+            status: 'failed' as const,
             error: error instanceof Error ? error.message : '不明なエラー',
           }
         } finally {
@@ -308,11 +332,12 @@ export const syncCommand = new Command('sync')
           results.push(result.value)
         } else {
           const branchName =
-            targetWorktrees[index].branch?.replace('refs/heads/', '') ||
-            targetWorktrees[index].branch
+            targetWorktrees[index]?.branch?.replace('refs/heads/', '') ||
+            targetWorktrees[index]?.branch ||
+            'unknown'
           results.push({
             branch: branchName,
-            status: 'failed',
+            status: 'failed' as const,
             error: result.reason instanceof Error ? result.reason.message : '不明なエラー',
           })
         }
