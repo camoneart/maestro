@@ -32,19 +32,19 @@ export const deleteCommand = new Command('delete')
 
         // ワークツリーの存在確認
         const worktrees = await gitManager.listWorktrees()
-        const targetWorktree = worktrees.find((wt) => wt.branch === branchName)
+        const targetWorktree = worktrees.find(wt => wt.branch === branchName)
 
         if (!targetWorktree) {
           spinner.fail(`影分身 '${branchName || ''}' が見つかりません`)
 
           // 類似した名前を提案
           const similarBranches = worktrees
-            .filter((wt) => wt.branch && wt.branch.includes(branchName || ''))
-            .map((wt) => wt.branch)
+            .filter(wt => wt.branch && wt.branch.includes(branchName || ''))
+            .map(wt => wt.branch)
 
           if (similarBranches.length > 0) {
             console.log(chalk.yellow('\n類似した影分身:'))
-            similarBranches.forEach((branch) => {
+            similarBranches.forEach(branch => {
               console.log(`  - ${chalk.cyan(branch)}`)
             })
           }

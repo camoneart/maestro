@@ -137,7 +137,7 @@ export const githubCommand = new Command('github')
               type: 'list',
               name: 'selectedNumber',
               message: `${type === 'pr' ? 'Pull Request' : 'Issue'}を選択:`,
-              choices: items.map((item) => ({
+              choices: items.map(item => ({
                 name: `#${item.number} ${item.title} ${chalk.gray(`by ${item.author.login}`)}${item.draft ? chalk.yellow(' [draft]') : ''}`,
                 value: item.number.toString(),
               })),

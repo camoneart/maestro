@@ -40,7 +40,7 @@ export class GitWorktreeManager {
     const output = await this.git.raw(['worktree', 'list', '--porcelain'])
     const worktrees: Worktree[] = []
 
-    const lines = output.split('\n').filter((line) => line.trim())
+    const lines = output.split('\n').filter(line => line.trim())
     let currentWorktree: Partial<Worktree> = {}
 
     for (const line of lines) {
@@ -79,7 +79,7 @@ export class GitWorktreeManager {
 
   async deleteWorktree(branchName: string, force: boolean = false): Promise<void> {
     const worktrees = await this.listWorktrees()
-    const worktree = worktrees.find((wt) => wt.branch === branchName)
+    const worktree = worktrees.find(wt => wt.branch === branchName)
 
     if (!worktree) {
       throw new Error(`ワークツリー '${branchName}' が見つかりません`)
@@ -112,10 +112,10 @@ export class GitWorktreeManager {
     const remoteBranches = await this.git.branch(['-r'])
 
     return {
-      local: localBranches.all.filter((b) => !b.startsWith('remotes/')),
+      local: localBranches.all.filter(b => !b.startsWith('remotes/')),
       remote: remoteBranches.all
-        .filter((b) => b.startsWith('remotes/'))
-        .map((b) => b.replace('remotes/', '')),
+        .filter(b => b.startsWith('remotes/'))
+        .map(b => b.replace('remotes/', '')),
     }
   }
 

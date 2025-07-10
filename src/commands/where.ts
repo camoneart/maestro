@@ -37,7 +37,7 @@ export const whereCommand = new Command('where')
 
         // fzfで選択
         const fzfInput = worktrees
-          .map((w) => {
+          .map(w => {
             const status = []
             if (w.isCurrentDirectory) status.push(chalk.green('現在'))
             if (w.locked) status.push(chalk.red('ロック'))
@@ -68,11 +68,11 @@ export const whereCommand = new Command('where')
 
         // 選択結果を取得
         let selected = ''
-        fzfProcess.stdout.on('data', (data) => {
+        fzfProcess.stdout.on('data', data => {
           selected += data.toString()
         })
 
-        fzfProcess.on('close', (code) => {
+        fzfProcess.on('close', code => {
           if (code !== 0 || !selected.trim()) {
             console.log(chalk.gray('キャンセルされました'))
             return
@@ -108,7 +108,7 @@ export const whereCommand = new Command('where')
 
       // 指定されたブランチのworktreeを検索
       const worktree = worktrees.find(
-        (w) =>
+        w =>
           w.branch === searchBranch ||
           w.branch === `refs/heads/${branchName}` ||
           w.branch.endsWith(`/${branchName}`)
@@ -119,12 +119,12 @@ export const whereCommand = new Command('where')
 
         // 類似した影分身を提案
         const suggestions = worktrees
-          .filter((w) => w.branch.toLowerCase().includes(branchName.toLowerCase()))
-          .map((w) => w.branch.replace('refs/heads/', ''))
+          .filter(w => w.branch.toLowerCase().includes(branchName.toLowerCase()))
+          .map(w => w.branch.replace('refs/heads/', ''))
 
         if (suggestions.length > 0) {
           console.log(chalk.yellow('\n類似した影分身:'))
-          suggestions.forEach((s) => console.log(`  - ${s}`))
+          suggestions.forEach(s => console.log(`  - ${s}`))
         }
 
         process.exit(1)

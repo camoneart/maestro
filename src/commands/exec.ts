@@ -28,7 +28,7 @@ export const execCommand = new Command('exec')
         }
 
         const worktrees = await gitManager.listWorktrees()
-        const shadowClones = worktrees.filter((wt) => !wt.path.endsWith('.'))
+        const shadowClones = worktrees.filter(wt => !wt.path.endsWith('.'))
 
         if (shadowClones.length === 0) {
           console.log(chalk.yellow('影分身が存在しません'))
@@ -76,7 +76,7 @@ export const execCommand = new Command('exec')
         }
 
         // 特定の影分身で実行
-        const targetWorktree = shadowClones.find((wt) => {
+        const targetWorktree = shadowClones.find(wt => {
           const branch = wt.branch?.replace('refs/heads/', '')
           return branch === branchName || wt.branch === branchName
         })
@@ -86,15 +86,15 @@ export const execCommand = new Command('exec')
 
           // 類似した名前を提案
           const similarBranches = shadowClones
-            .filter((wt) => {
+            .filter(wt => {
               const branch = wt.branch?.replace('refs/heads/', '') || ''
               return branch.includes(branchName)
             })
-            .map((wt) => wt.branch?.replace('refs/heads/', '') || wt.branch)
+            .map(wt => wt.branch?.replace('refs/heads/', '') || wt.branch)
 
           if (similarBranches.length > 0) {
             console.log(chalk.yellow('\n類似した影分身:'))
-            similarBranches.forEach((branch) => {
+            similarBranches.forEach(branch => {
               console.log(`  - ${chalk.cyan(branch)}`)
             })
           }

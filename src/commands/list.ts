@@ -35,7 +35,7 @@ export const listCommand = new Command('list')
       // fzfで選択
       if (options?.fzf) {
         const fzfInput = worktrees
-          .map((w) => {
+          .map(w => {
             const status = []
             if (w.isCurrentDirectory) status.push(chalk.green('現在'))
             if (w.locked) status.push(chalk.red('ロック'))
@@ -66,11 +66,11 @@ export const listCommand = new Command('list')
 
         // 選択結果を取得
         let selected = ''
-        fzfProcess.stdout.on('data', (data) => {
+        fzfProcess.stdout.on('data', data => {
           selected += data.toString()
         })
 
-        fzfProcess.on('close', (code) => {
+        fzfProcess.on('close', code => {
           if (code !== 0 || !selected.trim()) {
             // キャンセルされた場合は何も出力しない
             return
@@ -92,14 +92,14 @@ export const listCommand = new Command('list')
       console.log(chalk.bold('\n🥷 影分身一覧:\n'))
 
       // メインワークツリーを先頭に表示
-      const mainWorktree = worktrees.find((wt) => wt.path.endsWith('.'))
-      const cloneWorktrees = worktrees.filter((wt) => !wt.path.endsWith('.'))
+      const mainWorktree = worktrees.find(wt => wt.path.endsWith('.'))
+      const cloneWorktrees = worktrees.filter(wt => !wt.path.endsWith('.'))
 
       if (mainWorktree) {
         displayWorktree(mainWorktree, true)
       }
 
-      cloneWorktrees.forEach((wt) => displayWorktree(wt, false))
+      cloneWorktrees.forEach(wt => displayWorktree(wt, false))
 
       console.log(chalk.gray(`\n合計: ${worktrees.length} 個の影分身`))
     } catch (error) {

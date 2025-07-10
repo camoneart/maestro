@@ -61,7 +61,7 @@ export const tmuxCommand = new Command('tmux')
 
         // fzfで選択
         const fzfInput = worktrees
-          .map((w) => {
+          .map(w => {
             const status = []
             if (w.isCurrentDirectory) status.push(chalk.green('現在'))
             if (w.locked) status.push(chalk.red('ロック'))
@@ -92,11 +92,11 @@ export const tmuxCommand = new Command('tmux')
 
         // 選択結果を取得
         let selected = ''
-        fzfProcess.stdout.on('data', (data) => {
+        fzfProcess.stdout.on('data', data => {
           selected += data.toString()
         })
 
-        fzfProcess.on('close', async (code) => {
+        fzfProcess.on('close', async code => {
           if (code !== 0 || !selected.trim()) {
             console.log(chalk.gray('キャンセルされました'))
             return
