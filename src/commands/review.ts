@@ -14,6 +14,7 @@ interface ReviewOptions {
   requestChanges?: boolean
   comment?: string
   assign?: string
+  autoFlow?: boolean
 }
 
 interface GithubUser {
@@ -168,6 +169,97 @@ async function refreshStatus(prNumber: string): Promise<PullRequest> {
   }
 }
 
+// 自動レビュー&マージフロー
+async function autoReviewFlow(branchName: string, baseBranch: string = 'main'): Promise<void> {
+  const autoSpinner = ora('自動レビュー&マージフローを開始中...').start()
+  
+  try {
+    // 1. fetch origin main && rebase origin/main
+    autoSpinner.text = 'ベースブランチをフェッチ中...'
+    await execa('git', ['fetch', 'origin', baseBranch])
+    
+    autoSpinner.text = 'リベース中...'
+    try {
+      await execa('git', ['rebase', `origin/${baseBranch}`])
+      autoSpinner.succeed('リベースが完了しました')
+    } catch (rebaseError) {
+      autoSpinner.warn('競合が発生しました')
+      
+      // 2. 競合が出たらclaude /resolve-conflictを起動
+      console.log(chalk.yellow('\n🔧 競合を解決するためにClaude Codeを起動します...'))
+      console.log(chalk.gray('Claude Codeで以下のコマンドを実行してください:'))
+      console.log(chalk.cyan('  /resolve-conflict'))
+      
+      try {
+        await execa('claude', [], { stdio: 'inherit' })
+      } catch {
+        console.log(chalk.red('Claude Codeの起動に失敗しました'))
+        throw new ReviewCommandError('競合解決のためにClaude Codeを手動で起動してください')
+      }
+      
+      return
+    }
+    
+    // 3. claude /review --diff origin/main でコードレビュー
+    console.log(chalk.blue('\n📝 Claude Codeでコードレビューを実行します...'))
+    console.log(chalk.gray('Claude Codeで以下のコマンドを実行してください:'))
+    console.log(chalk.cyan(`  /review --diff origin/${baseBranch}`))
+    
+    try {
+      await execa('claude', [], { stdio: 'inherit' })
+    } catch {
+      console.log(chalk.yellow('Claude Codeの起動に失敗しました'))
+    }
+    
+    // 4. claude "Generate Conventional Commit message" でコミット作成
+    const { useConventionalCommit } = await inquirer.prompt([
+      {
+        type: 'confirm',
+        name: 'useConventionalCommit',
+        message: 'Conventional Commitメッセージを自動生成しますか？',
+        default: true,
+      },
+    ])
+    
+    if (useConventionalCommit) {
+      console.log(chalk.blue('\n💬 Conventional Commitメッセージを生成中...'))
+      console.log(chalk.gray('Claude Codeで以下のコマンドを実行してください:'))
+      console.log(chalk.cyan('  "Generate Conventional Commit message for current changes"'))
+      
+      try {
+        await execa('claude', [], { stdio: 'inherit' })
+      } catch {
+        console.log(chalk.yellow('Claude Codeの起動に失敗しました'))
+      }
+    }
+    
+    // 5. GitHub PR を API 経由で作成
+    const { createPR } = await inquirer.prompt([
+      {
+        type: 'confirm',
+        name: 'createPR',
+        message: 'GitHub PRを作成しますか？',
+        default: true,
+      },
+    ])
+    
+    if (createPR) {
+      const prSpinner = ora('GitHub PRを作成中...').start()
+      try {
+        await execa('gh', ['pr', 'create', '--fill'])
+        prSpinner.succeed('GitHub PRを作成しました')
+      } catch (error) {
+        prSpinner.fail('GitHub PRの作成に失敗しました')
+        console.error(chalk.red(error instanceof Error ? error.message : '不明なエラー'))
+      }
+    }
+    
+  } catch (error) {
+    autoSpinner.fail('自動レビューフローでエラーが発生しました')
+    throw new ReviewCommandError(error instanceof Error ? error.message : '不明なエラー')
+  }
+}
+
 export const reviewCommand = new Command('review')
   .alias('r')
   .description('PRレビューをサポート')
@@ -179,6 +271,7 @@ export const reviewCommand = new Command('review')
   .option('--request-changes', '変更を要求')
   .option('--comment <comment>', 'コメントを追加')
   .option('--assign <user>', 'レビュアーを追加')
+  .option('--auto-flow', '自動レビュー&マージフローを実行')
   .action(async (prNumber?: string, options: ReviewOptions = {}) => {
     const spinner = ora('PR情報を取得中...').start()
 
@@ -257,6 +350,12 @@ export const reviewCommand = new Command('review')
       console.log(chalk.gray(`Branch: ${pr.headRefName} → ${pr.baseRefName}`))
       console.log(chalk.gray(`URL: ${pr.url}`))
 
+      // 自動レビューフローの処理
+      if (options.autoFlow) {
+        await autoReviewFlow(pr.headRefName, pr.baseRefName)
+        return
+      }
+
       // コマンドラインオプションの処理
       if (options.checkout) {
         await checkoutPR(pr, gitManager)
@@ -308,6 +407,7 @@ export const reviewCommand = new Command('review')
             { name: '✅ PRを承認', value: 'approve' },
             { name: '🛠️  変更を要求', value: 'request-changes' },
             { name: '👥 レビュアーを追加', value: 'add-reviewer' },
+            { name: '🚀 自動レビュー&マージフロー', value: 'auto-flow' },
             { name: '🔄 ステータスを再取得', value: 'refresh' },
             { name: '❌ キャンセル', value: 'cancel' },
           ],
@@ -377,6 +477,9 @@ export const reviewCommand = new Command('review')
           await addReviewer(prNumber, reviewer)
           break
         }
+        case 'auto-flow':
+          await autoReviewFlow(pr.headRefName, pr.baseRefName)
+          break
         case 'refresh':
           await refreshStatus(prNumber)
           break

@@ -48,6 +48,17 @@ npm link
 # 新しい影分身を作成
 scj create feature/new-feature
 
+# Issue番号から影分身を作成
+scj create 123           # issue-123として作成
+scj create #123          # issue-123として作成
+scj create issue-123     # issue-123として作成
+
+# tmuxセッション付きで作成（Claude Code自動起動）
+scj create feature/new-feature --tmux --claude
+
+# 設定可能なオプション
+scj create feature/new-feature --base main --open --setup --tmux --claude
+
 # ベースブランチを指定して作成
 scj create feature/new-feature --base develop
 
@@ -123,6 +134,26 @@ scj rm feature/old-feature
 
 ### 高度な機能
 
+#### 自動レビュー&マージフロー
+
+```bash
+# 自動レビュー&マージフロー実行
+scj review --auto-flow
+
+# または特定のPRに対して
+scj review 123 --auto-flow
+
+# インタラクティブメニューから選択
+scj review 123  # メニューから「🚀 自動レビュー&マージフロー」を選択
+```
+
+**自動レビューフローの内容:**
+1. `git fetch origin main && git rebase origin/main`
+2. 競合発生時は`claude /resolve-conflict`でClaude Code起動
+3. `claude /review --diff origin/main`でコードレビュー実行
+4. Conventional Commitメッセージを自動生成
+5. GitHub PR作成
+
 #### GitHub統合
 
 ```bash
@@ -186,6 +217,39 @@ scj config show
 # グローバル設定を表示
 scj config show --global
 ```
+
+#### Claude Code統合設定
+
+プロジェクトまたはグローバル設定（`~/.scjrc`）で以下を設定可能:
+
+```json
+{
+  "claude": {
+    "autoStart": true,
+    "markdownMode": "shared",
+    "initialCommands": ["/model sonnet-3.5"],
+    "costOptimization": {
+      "stopHooks": ["/compact", "/clear"],
+      "maxOutputTokens": 5000,
+      "historyPath": "~/.claude/history/{branch}.md"
+    }
+  },
+  "tmux": {
+    "enabled": true,
+    "openIn": "window",
+    "sessionNaming": "{branch}"
+  }
+}
+```
+
+**CLAUDE.md処理モード:**
+- `shared`: ルートのCLAUDE.mdをシンボリックリンクで共有
+- `split`: 各worktreeに専用のCLAUDE.mdを作成
+
+**コスト最適化機能:**
+- `stopHooks`: Claude Code停止時の自動実行コマンド
+- `maxOutputTokens`: 最大出力トークン数制限
+- `historyPath`: ブランチ別セッション履歴保存先
 
 ### MCP統合（Claude Code連携）
 
