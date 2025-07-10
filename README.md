@@ -361,6 +361,30 @@ scj tpl
 - `experiment`: 実験的開発用（tmux統合）
 - `docs`: ドキュメント作成用（カスタムファイル付き）
 
+#### GitHub Issues/PR連携とメタデータ管理
+
+```bash
+# Issue番号から影分身を作成（自動的にGitHub情報を取得）
+scj create 123
+scj create #123
+scj create issue-123
+
+# 作成された影分身のメタデータを確認
+scj list --metadata
+
+# JSON形式でメタデータを含む一覧を取得
+scj list --json
+```
+
+**自動取得される情報:**
+- Issue/PRのタイトル、本文、作成者
+- ラベル、担当者、マイルストーン
+- 作成日時、worktree情報
+- 使用したテンプレート
+
+**メタデータの保存場所:**
+各worktreeの `.scj-metadata.json` ファイルに保存されます
+
 #### 自動コード同期機能（ファイル監視）
 
 ```bash
