@@ -5,6 +5,7 @@ import inquirer from 'inquirer'
 import { GitWorktreeManager } from '../core/git.js'
 import { execa } from 'execa'
 
+// 型定義
 interface IssueOptions {
   list?: boolean
   create?: boolean
@@ -13,6 +14,94 @@ interface IssueOptions {
   assign?: string
   label?: string
   milestone?: string
+}
+
+interface GithubLabel {
+  name: string
+  color: string
+}
+
+interface GithubUser {
+  login: string
+}
+
+interface GithubIssue {
+  number: number
+  title: string
+  author: GithubUser
+  body?: string
+  state: string
+  url: string
+  labels: GithubLabel[]
+  assignees: GithubUser[]
+}
+
+// エラークラス
+class IssueCommandError extends Error {
+  constructor(message: string) {
+    super(message)
+    this.name = 'IssueCommandError'
+  }
+}
+
+// ハンドラ関数
+async function closeIssue(issueNumber: string): Promise<void> {
+  const closeSpinner = ora('Issueをクローズ中...').start()
+  try {
+    await execa('gh', ['issue', 'close', issueNumber])
+    closeSpinner.succeed(`Issue #${issueNumber} をクローズしました`)
+  } catch (error) {
+    closeSpinner.fail('Issueのクローズに失敗しました')
+    throw new IssueCommandError(error instanceof Error ? error.message : '不明なエラー')
+  }
+}
+
+async function openInBrowser(issueNumber: string): Promise<void> {
+  console.log(chalk.cyan(`\n🌐 ブラウザでIssue #${issueNumber} を開いています...`))
+  await execa('gh', ['issue', 'view', issueNumber, '--web'])
+}
+
+async function assignUser(issueNumber: string, assignee: string): Promise<void> {
+  const assignSpinner = ora(`${assignee} にアサイン中...`).start()
+  try {
+    await execa('gh', ['issue', 'edit', issueNumber, '--add-assignee', assignee])
+    assignSpinner.succeed(`Issue #${issueNumber} を ${assignee} にアサインしました`)
+  } catch (error) {
+    assignSpinner.fail('アサインに失敗しました')
+    throw new IssueCommandError(error instanceof Error ? error.message : '不明なエラー')
+  }
+}
+
+async function addLabels(issueNumber: string, labels: string): Promise<void> {
+  const labelList = labels
+    .split(',')
+    .map(l => l.trim())
+    .filter(Boolean)
+  const labelSpinner = ora(`ラベル '${labelList.join(', ')}' を追加中...`).start()
+
+  try {
+    const args = ['issue', 'edit', issueNumber]
+    labelList.forEach(label => {
+      args.push('--add-label', label)
+    })
+
+    await execa('gh', args)
+    labelSpinner.succeed(`Issue #${issueNumber} にラベル '${labelList.join(', ')}' を追加しました`)
+  } catch (error) {
+    labelSpinner.fail('ラベルの追加に失敗しました')
+    throw new IssueCommandError(error instanceof Error ? error.message : '不明なエラー')
+  }
+}
+
+async function setMilestone(issueNumber: string, milestone: string): Promise<void> {
+  const milestoneSpinner = ora(`マイルストーン '${milestone}' を設定中...`).start()
+  try {
+    await execa('gh', ['issue', 'edit', issueNumber, '--milestone', milestone])
+    milestoneSpinner.succeed(`Issue #${issueNumber} にマイルストーン '${milestone}' を設定しました`)
+  } catch (error) {
+    milestoneSpinner.fail('マイルストーンの設定に失敗しました')
+    throw new IssueCommandError(error instanceof Error ? error.message : '不明なエラー')
+  }
 }
 
 export const issueCommand = new Command('issue')
@@ -24,7 +113,7 @@ export const issueCommand = new Command('issue')
   .option('--close', 'Issueをクローズ')
   .option('-w, --web', 'ブラウザでIssueを開く')
   .option('-a, --assign <user>', 'Issueをアサイン')
-  .option('--label <label>', 'ラベルを追加')
+  .option('--label <label>', 'ラベルを追加（カンマ区切りで複数指定可）')
   .option('--milestone <milestone>', 'マイルストーンを設定')
   .action(async (issueNumber?: string, options: IssueOptions = {}) => {
     const spinner = ora('Issue情報を取得中...').start()
@@ -35,8 +124,7 @@ export const issueCommand = new Command('issue')
       // Gitリポジトリかチェック
       const isGitRepo = await gitManager.isGitRepository()
       if (!isGitRepo) {
-        spinner.fail('このディレクトリはGitリポジトリではありません')
-        process.exit(1)
+        throw new IssueCommandError('このディレクトリはGitリポジトリではありません')
       }
 
       // GitHubリポジトリか確認
@@ -45,7 +133,7 @@ export const issueCommand = new Command('issue')
       } catch {
         spinner.fail('GitHubリポジトリではありません')
         console.log(chalk.yellow('gh CLIがインストールされていないか、認証されていません'))
-        process.exit(1)
+        throw new IssueCommandError('GitHubリポジトリへのアクセスに失敗しました')
       }
 
       // Issue一覧を表示
@@ -61,7 +149,7 @@ export const issueCommand = new Command('issue')
           '30',
         ])
 
-        const issues = JSON.parse(issueListJson)
+        const issues = JSON.parse(issueListJson) as GithubIssue[]
         spinner.stop()
 
         if (issues.length === 0) {
@@ -71,26 +159,18 @@ export const issueCommand = new Command('issue')
 
         console.log(chalk.bold('\n📋 Issue一覧:\n'))
 
-        issues.forEach(
-          (issue: {
-            number: number
-            title: string
-            author: { login: string }
-            labels: Array<{ name: string; color: string }>
-            assignees: Array<{ login: string }>
-          }) => {
-            const labels = issue.labels.map(l => chalk.hex(`#${l.color}`)(`[${l.name}]`)).join(' ')
-            const assignees =
-              issue.assignees.length > 0
-                ? chalk.gray(` → ${issue.assignees.map(a => a.login).join(', ')}`)
-                : ''
+        issues.forEach(issue => {
+          const labels = issue.labels.map(l => chalk.hex('#' + l.color)(`[${l.name}]`)).join(' ')
+          const assignees =
+            issue.assignees.length > 0
+              ? chalk.gray(` → ${issue.assignees.map(a => a.login).join(', ')}`)
+              : ''
 
-            console.log(
-              `#${chalk.cyan(issue.number.toString().padEnd(5))} ${issue.title} ${labels}${assignees}`
-            )
-            console.log(chalk.gray(`        by ${issue.author.login}\n`))
-          }
-        )
+          console.log(
+            `#${chalk.cyan(issue.number.toString().padEnd(5))} ${issue.title} ${labels}${assignees}`
+          )
+          console.log(chalk.gray(`        by ${issue.author.login}\n`))
+        })
 
         return
       }
@@ -156,7 +236,7 @@ export const issueCommand = new Command('issue')
           }
         } catch (error) {
           createSpinner.fail('Issueの作成に失敗しました')
-          console.error(chalk.red(error instanceof Error ? error.message : '不明なエラー'))
+          throw new IssueCommandError(error instanceof Error ? error.message : '不明なエラー')
         }
 
         return
@@ -175,11 +255,10 @@ export const issueCommand = new Command('issue')
           '30',
         ])
 
-        const issues = JSON.parse(issueListJson)
+        const issues = JSON.parse(issueListJson) as GithubIssue[]
 
         if (issues.length === 0) {
-          spinner.fail('オープンなIssueが見つかりません')
-          process.exit(0)
+          throw new IssueCommandError('オープンなIssueが見つかりません')
         }
 
         spinner.stop()
@@ -189,12 +268,10 @@ export const issueCommand = new Command('issue')
             type: 'list',
             name: 'selectedIssue',
             message: 'Issueを選択:',
-            choices: issues.map(
-              (issue: { number: number; title: string; author: { login: string } }) => ({
-                name: `#${issue.number} ${issue.title} ${chalk.gray(`by ${issue.author.login}`)}`,
-                value: issue.number.toString(),
-              })
-            ),
+            choices: issues.map(issue => ({
+              name: `#${issue.number} ${issue.title} ${chalk.gray(`by ${issue.author.login}`)}`,
+              value: issue.number.toString(),
+            })),
             pageSize: 15,
           },
         ])
@@ -214,52 +291,32 @@ export const issueCommand = new Command('issue')
           'number,title,author,body,state,url,labels,assignees',
         ])
 
-        const issue = JSON.parse(issueJson)
+        const issue = JSON.parse(issueJson) as GithubIssue
         spinner.stop()
 
-        // Issueをクローズ
+        // コマンドラインオプションの処理
         if (options.close) {
-          const closeSpinner = ora('Issueをクローズ中...').start()
-          try {
-            await execa('gh', ['issue', 'close', issueNumber])
-            closeSpinner.succeed(`Issue #${issueNumber} をクローズしました`)
-          } catch (error) {
-            closeSpinner.fail('Issueのクローズに失敗しました')
-            console.error(chalk.red(error instanceof Error ? error.message : '不明なエラー'))
-          }
+          await closeIssue(issueNumber)
           return
         }
 
-        // ブラウザで開く
         if (options.web) {
-          console.log(chalk.cyan(`\n🌐 ブラウザでIssue #${issueNumber} を開いています...`))
-          await execa('gh', ['issue', 'view', issueNumber, '--web'])
+          await openInBrowser(issueNumber)
           return
         }
 
-        // アサイン
         if (options.assign) {
-          const assignSpinner = ora(`${options.assign} にアサイン中...`).start()
-          try {
-            await execa('gh', ['issue', 'edit', issueNumber, '--add-assignee', options.assign])
-            assignSpinner.succeed(`Issue #${issueNumber} を ${options.assign} にアサインしました`)
-          } catch (error) {
-            assignSpinner.fail('アサインに失敗しました')
-            console.error(chalk.red(error instanceof Error ? error.message : '不明なエラー'))
-          }
+          await assignUser(issueNumber, options.assign)
           return
         }
 
-        // ラベル追加
         if (options.label) {
-          const labelSpinner = ora(`ラベル '${options.label}' を追加中...`).start()
-          try {
-            await execa('gh', ['issue', 'edit', issueNumber, '--add-label', options.label])
-            labelSpinner.succeed(`Issue #${issueNumber} にラベル '${options.label}' を追加しました`)
-          } catch (error) {
-            labelSpinner.fail('ラベルの追加に失敗しました')
-            console.error(chalk.red(error instanceof Error ? error.message : '不明なエラー'))
-          }
+          await addLabels(issueNumber, options.label)
+          return
+        }
+
+        if (options.milestone) {
+          await setMilestone(issueNumber, options.milestone)
           return
         }
 
@@ -269,18 +326,12 @@ export const issueCommand = new Command('issue')
         console.log(chalk.gray(`State: ${issue.state}`))
 
         if (issue.labels.length > 0) {
-          const labels = issue.labels
-            .map((l: { name: string; color: string }) => chalk.hex(`#${l.color}`)(`[${l.name}]`))
-            .join(' ')
+          const labels = issue.labels.map(l => chalk.hex('#' + l.color)(`[${l.name}]`)).join(' ')
           console.log(chalk.gray(`Labels: ${labels}`))
         }
 
         if (issue.assignees.length > 0) {
-          console.log(
-            chalk.gray(
-              `Assignees: ${issue.assignees.map((a: { login: string }) => a.login).join(', ')}`
-            )
-          )
+          console.log(chalk.gray(`Assignees: ${issue.assignees.map(a => a.login).join(', ')}`))
         }
 
         console.log(chalk.gray(`URL: ${issue.url}`))
@@ -303,6 +354,7 @@ export const issueCommand = new Command('issue')
               { name: '✅ Issueをクローズ', value: 'close' },
               { name: '👤 アサイン', value: 'assign' },
               { name: '🏷️  ラベルを追加', value: 'label' },
+              { name: '🏁 マイルストーンを設定', value: 'milestone' },
               { name: '❌ キャンセル', value: 'cancel' },
             ],
           },
@@ -319,15 +371,15 @@ export const issueCommand = new Command('issue')
               console.log(chalk.gray(`📁 ${worktreePath}`))
             } catch (error) {
               branchSpinner.fail('影分身の作成に失敗しました')
-              console.error(chalk.red(error instanceof Error ? error.message : '不明なエラー'))
+              throw new IssueCommandError(error instanceof Error ? error.message : '不明なエラー')
             }
             break
           }
           case 'web':
-            await issueCommand.parseAsync([issueNumber, '--web'], { from: 'user' })
+            await openInBrowser(issueNumber)
             break
           case 'close':
-            await issueCommand.parseAsync([issueNumber, '--close'], { from: 'user' })
+            await closeIssue(issueNumber)
             break
           case 'assign': {
             const { assignee } = await inquirer.prompt([
@@ -338,7 +390,7 @@ export const issueCommand = new Command('issue')
                 validate: input => input.trim().length > 0 || 'ユーザー名を入力してください',
               },
             ])
-            await issueCommand.parseAsync([issueNumber, '--assign', assignee], { from: 'user' })
+            await assignUser(issueNumber, assignee)
             break
           }
           case 'label': {
@@ -346,11 +398,23 @@ export const issueCommand = new Command('issue')
               {
                 type: 'input',
                 name: 'label',
-                message: 'ラベル名:',
+                message: 'ラベル名（カンマ区切りで複数指定可）:',
                 validate: input => input.trim().length > 0 || 'ラベル名を入力してください',
               },
             ])
-            await issueCommand.parseAsync([issueNumber, '--label', label], { from: 'user' })
+            await addLabels(issueNumber, label)
+            break
+          }
+          case 'milestone': {
+            const { milestone } = await inquirer.prompt([
+              {
+                type: 'input',
+                name: 'milestone',
+                message: 'マイルストーン名:',
+                validate: input => input.trim().length > 0 || 'マイルストーン名を入力してください',
+              },
+            ])
+            await setMilestone(issueNumber, milestone)
             break
           }
           case 'cancel':
@@ -360,7 +424,12 @@ export const issueCommand = new Command('issue')
       }
     } catch (error) {
       spinner.fail('エラーが発生しました')
-      console.error(chalk.red(error instanceof Error ? error.message : '不明なエラー'))
-      process.exit(1)
+      if (error instanceof IssueCommandError) {
+        console.error(chalk.red(error.message))
+        process.exitCode = 1
+      } else {
+        console.error(chalk.red(error instanceof Error ? error.message : '不明なエラー'))
+        process.exitCode = 1
+      }
     }
   })
