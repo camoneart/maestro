@@ -435,6 +435,39 @@ scj ui
 - 30秒ごとの自動更新
 - ダークテーマ対応
 
+#### worktreeスナップショット機能
+
+```bash
+# 現在のworktreeのスナップショットを作成
+scj snapshot
+scj snapshot -m "機能実装前の状態"
+
+# 変更をスタッシュに保存してスナップショット作成
+scj snapshot --stash
+
+# 全てのworktreeのスナップショットを作成
+scj snapshot --all
+
+# スナップショット一覧を表示
+scj snapshot --list
+
+# スナップショットを復元
+scj snapshot --restore snapshot-xxxxx
+
+# スナップショットを削除
+scj snapshot --delete snapshot-xxxxx
+
+# エイリアス
+scj snap
+```
+
+**スナップショットに保存される情報:**
+- Git状態（ブランチ、トラッキング、ahead/behind）
+- ステージング済み・変更・未追跡ファイル
+- 最終コミット情報
+- worktreeメタデータ
+- オプションでスタッシュ
+
 #### worktree健全性チェック
 
 ```bash
