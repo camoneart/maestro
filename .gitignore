@@ -44,6 +44,7 @@ temp/
 .shadow-clones/
 worktrees/
 .scj-config.json
+.scj/
 
 # cc conversations
 .claude/export-conversations/
