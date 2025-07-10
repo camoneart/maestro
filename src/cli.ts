@@ -14,6 +14,7 @@ import { completionCommand } from './commands/completion.js'
 import { tmuxCommand } from './commands/tmux.js'
 import { whereCommand } from './commands/where.js'
 import { syncCommand } from './commands/sync.js'
+import { reviewCommand } from './commands/review.js'
 
 const program = new Command()
 
@@ -36,6 +37,7 @@ program.addCommand(completionCommand)
 program.addCommand(tmuxCommand)
 program.addCommand(whereCommand)
 program.addCommand(syncCommand)
+program.addCommand(reviewCommand)
 
 // エラーハンドリング
 program.exitOverride()
