@@ -19,6 +19,8 @@ import { issueCommand } from './commands/issue.js'
 import { batchCommand } from './commands/batch.js'
 import { historyCommand } from './commands/history.js'
 import { suggestCommand } from './commands/suggest.js'
+import { graphCommand } from './commands/graph.js'
+import { templateCommand } from './commands/template.js'
 
 const program = new Command()
 
@@ -46,6 +48,8 @@ program.addCommand(issueCommand)
 program.addCommand(batchCommand)
 program.addCommand(historyCommand)
 program.addCommand(suggestCommand)
+program.addCommand(graphCommand)
+program.addCommand(templateCommand)
 
 // エラーハンドリング
 program.exitOverride()
