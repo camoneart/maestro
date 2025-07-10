@@ -5,6 +5,7 @@ import inquirer from 'inquirer'
 import { GitWorktreeManager } from '../core/git.js'
 import { CreateOptions } from '../types/index.js'
 import { ConfigManager } from '../core/config.js'
+import { getTemplateConfig } from './template.js'
 import { execa } from 'execa'
 import path from 'path'
 import fs from 'fs/promises'
@@ -112,7 +113,8 @@ export const createCommand = new Command('create')
   .option('-s, --setup', '環境セットアップを実行')
   .option('-t, --tmux', 'tmuxセッションを作成してClaude Codeを起動')
   .option('-c, --claude', 'Claude Codeを自動起動')
-  .action(async (branchName: string, options: CreateOptions) => {
+  .option('--template <name>', 'テンプレートを使用')
+  .action(async (branchName: string, options: CreateOptions & { template?: string }) => {
     const spinner = ora('影分身の術！').start()
 
     try {
@@ -120,7 +122,41 @@ export const createCommand = new Command('create')
       const configManager = new ConfigManager()
       await configManager.loadProjectConfig()
 
-      const config = configManager.getAll()
+      let config = configManager.getAll()
+
+      // テンプレートが指定されている場合は適用
+      if (options.template) {
+        spinner.text = 'テンプレートを適用中...'
+        const templateConfig = await getTemplateConfig(options.template)
+        
+        if (templateConfig) {
+          // テンプレート設定でオプションを上書き
+          if (templateConfig.autoSetup !== undefined) options.setup = templateConfig.autoSetup
+          if (templateConfig.editor !== 'none') options.open = true
+          if (templateConfig.tmux) options.tmux = true
+          if (templateConfig.claude) options.claude = true
+          
+          // 設定を一時的に上書き
+          config = {
+            ...config,
+            worktrees: {
+              ...config.worktrees,
+              branchPrefix: templateConfig.branchPrefix || config.worktrees?.branchPrefix
+            },
+            development: {
+              ...config.development,
+              autoSetup: templateConfig.autoSetup ?? config.development?.autoSetup,
+              syncFiles: templateConfig.syncFiles || config.development?.syncFiles,
+              defaultEditor: templateConfig.editor || config.development?.defaultEditor
+            },
+            hooks: templateConfig.hooks || config.hooks
+          }
+          
+          console.log(chalk.green(`\n✨ テンプレート '${options.template}' を適用しました\n`))
+        } else {
+          spinner.warn(`テンプレート '${options.template}' が見つかりません`)
+        }
+      }
 
       // Gitリポジトリかチェック
       const isGitRepo = await gitManager.isGitRepository()
@@ -218,6 +254,23 @@ export const createCommand = new Command('create')
 
       // CLAUDE.mdの処理
       await handleClaudeMarkdown(worktreePath, config)
+
+      // テンプレートのカスタムファイルを作成
+      if (options.template) {
+        const templateConfig = await getTemplateConfig(options.template)
+        if (templateConfig?.customFiles) {
+          for (const file of templateConfig.customFiles) {
+            try {
+              const filePath = path.join(worktreePath, file.path)
+              await fs.mkdir(path.dirname(filePath), { recursive: true })
+              await fs.writeFile(filePath, file.content)
+              console.log(chalk.green(`✨ ${file.path} を作成しました`))
+            } catch (error) {
+              console.warn(chalk.yellow(`${file.path} の作成に失敗しました`))
+            }
+          }
+        }
+      }
 
       // tmuxセッションの作成（オプションまたは設定で有効な場合）
       if (options.tmux || (options.tmux === undefined && config.tmux?.enabled)) {
