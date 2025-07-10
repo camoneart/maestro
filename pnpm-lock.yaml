@@ -17,6 +17,9 @@ importers:
       chalk:
         specifier: 5.4.1
         version: 5.4.1
+      chokidar:
+        specifier: 4.0.3
+        version: 4.0.3
       cli-progress:
         specifier: 3.12.0
         version: 3.12.0

@@ -21,6 +21,8 @@ import { historyCommand } from './commands/history.js'
 import { suggestCommand } from './commands/suggest.js'
 import { graphCommand } from './commands/graph.js'
 import { templateCommand } from './commands/template.js'
+import { watchCommand } from './commands/watch.js'
+import { healthCommand } from './commands/health.js'
 
 const program = new Command()
 
@@ -50,6 +52,8 @@ program.addCommand(historyCommand)
 program.addCommand(suggestCommand)
 program.addCommand(graphCommand)
 program.addCommand(templateCommand)
+program.addCommand(watchCommand)
+program.addCommand(healthCommand)
 
 // エラーハンドリング
 program.exitOverride()
