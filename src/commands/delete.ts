@@ -4,14 +4,17 @@ import ora from 'ora'
 import inquirer from 'inquirer'
 import { GitWorktreeManager } from '../core/git.js'
 import { DeleteOptions } from '../types/index.js'
+import { spawn } from 'child_process'
 
 export const deleteCommand = new Command('delete')
   .alias('rm')
   .description('影分身（worktree）を削除')
-  .argument('<branch-name>', '削除するブランチ名')
+  .argument('[branch-name]', '削除するブランチ名')
   .option('-f, --force', '強制削除')
   .option('-r, --remove-remote', 'リモートブランチも削除')
-  .action(async (branchName: string, options: DeleteOptions) => {
+  .option('--fzf', 'fzfで選択')
+  .option('--current', '現在のworktreeを削除')
+  .action(async (branchName?: string, options?: DeleteOptions & { fzf?: boolean; current?: boolean }) => {
     const spinner = ora('影分身を確認中...').start()
 
     try {
