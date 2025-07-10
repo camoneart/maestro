@@ -13,7 +13,7 @@ export const attachCommand = new Command('attach')
   .option('-f, --fetch', '最初にfetchを実行')
   .option('-o, --open', 'VSCode/Cursorで開く')
   .option('-s, --setup', '環境セットアップを実行')
-  .action(async (branchName?: string, options?: { remote?: boolean; fetch?: boolean; open?: boolean; setup?: boolean }) => {
+  .action(async (branchName?: string, options: { remote?: boolean; fetch?: boolean; open?: boolean; setup?: boolean } = {}) => {
     const spinner = ora('影分身の術！').start()
 
     try {
@@ -27,7 +27,7 @@ export const attachCommand = new Command('attach')
       }
 
       // fetchオプションが指定されている場合
-      if (options.fetch) {
+      if (options?.fetch) {
         spinner.text = 'リモートから最新情報を取得中...'
         await gitManager.fetchAll()
       }
@@ -42,7 +42,7 @@ export const attachCommand = new Command('attach')
       // 利用可能なブランチをフィルタリング
       let availableBranches = branches.local.filter(b => !attachedBranches.includes(b))
       
-      if (options.remote) {
+      if (options?.remote) {
         const remoteAvailable = branches.remote.filter(b => !attachedBranches.includes(b.split('/').slice(1).join('/')))
         availableBranches = [...availableBranches, ...remoteAvailable]
       }
@@ -78,7 +78,7 @@ export const attachCommand = new Command('attach')
           console.error(chalk.red(`エラー: ブランチ '${branchName}' が見つかりません`))
           
           // 類似した名前を提案
-          const similarBranches = availableBranches.filter(b => b.includes(branchName))
+          const similarBranches = availableBranches.filter(b => b.includes(branchName || ''))
           if (similarBranches.length > 0) {
             console.log(chalk.yellow('\n利用可能なブランチ:'))
             similarBranches.forEach(branch => {
@@ -93,7 +93,7 @@ export const attachCommand = new Command('attach')
       spinner.start(`影分身を作り出し中...`)
 
       // ワークツリーを作成
-      const worktreePath = await gitManager.attachWorktree(branchName)
+      const worktreePath = await gitManager.attachWorktree(branchName || '')
       
       spinner.succeed(
         `影分身 '${chalk.cyan(branchName)}' を作り出しました！\n` +
@@ -101,7 +101,7 @@ export const attachCommand = new Command('attach')
       )
 
       // 環境セットアップ
-      if (options.setup) {
+      if (options?.setup) {
         const setupSpinner = ora('環境をセットアップ中...').start()
         
         // package.jsonが存在する場合はnpm install
@@ -114,7 +114,7 @@ export const attachCommand = new Command('attach')
       }
 
       // エディタで開く
-      if (options.open) {
+      if (options?.open) {
         const openSpinner = ora('エディタで開いています...').start()
         try {
           // まずCursorを試す

@@ -2,7 +2,6 @@ import { z } from 'zod'
 import Conf from 'conf'
 import path from 'path'
 import fs from 'fs/promises'
-import os from 'os'
 
 // 設定ファイルのスキーマ定義
 export const ConfigSchema = z.object({

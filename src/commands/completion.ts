@@ -1,7 +1,5 @@
 import { Command } from 'commander'
 import chalk from 'chalk'
-import path from 'path'
-import os from 'os'
 
 const BASH_COMPLETION = `#!/bin/bash
 # shadow-clone-jutsu bash completion

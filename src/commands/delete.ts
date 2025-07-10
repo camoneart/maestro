@@ -4,7 +4,6 @@ import ora from 'ora'
 import inquirer from 'inquirer'
 import { GitWorktreeManager } from '../core/git.js'
 import { DeleteOptions } from '../types/index.js'
-import { spawn } from 'child_process'
 
 export const deleteCommand = new Command('delete')
   .alias('rm')
@@ -14,7 +13,7 @@ export const deleteCommand = new Command('delete')
   .option('-r, --remove-remote', 'リモートブランチも削除')
   .option('--fzf', 'fzfで選択')
   .option('--current', '現在のworktreeを削除')
-  .action(async (branchName?: string, options?: DeleteOptions & { fzf?: boolean; current?: boolean }) => {
+  .action(async (branchName?: string, options: DeleteOptions & { fzf?: boolean; current?: boolean } = {}) => {
     const spinner = ora('影分身を確認中...').start()
 
     try {
@@ -32,11 +31,11 @@ export const deleteCommand = new Command('delete')
       const targetWorktree = worktrees.find(wt => wt.branch === branchName)
 
       if (!targetWorktree) {
-        spinner.fail(`影分身 '${branchName}' が見つかりません`)
+        spinner.fail(`影分身 '${branchName || ''}' が見つかりません`)
         
         // 類似した名前を提案
         const similarBranches = worktrees
-          .filter(wt => wt.branch && wt.branch.includes(branchName))
+          .filter(wt => wt.branch && wt.branch.includes(branchName || ''))
           .map(wt => wt.branch)
         
         if (similarBranches.length > 0) {
@@ -52,7 +51,7 @@ export const deleteCommand = new Command('delete')
       spinner.stop()
 
       // 削除確認
-      if (!options.force) {
+      if (!options?.force) {
         const { confirmDelete } = await inquirer.prompt([
           {
             type: 'confirm',
@@ -74,12 +73,12 @@ export const deleteCommand = new Command('delete')
       spinner.start('影分身を削除中...')
 
       // ワークツリーを削除
-      await gitManager.deleteWorktree(branchName, options.force)
+      await gitManager.deleteWorktree(branchName || '', options?.force)
 
-      spinner.succeed(`影分身 '${chalk.cyan(branchName)}' を削除しました`)
+      spinner.succeed(`影分身 '${chalk.cyan(branchName || '')}' を削除しました`)
 
       // リモートブランチの削除
-      if (options.removeRemote) {
+      if (options?.removeRemote) {
         const remoteSpinner = ora('リモートブランチを削除中...').start()
         try {
           // TODO: リモートブランチの削除実装

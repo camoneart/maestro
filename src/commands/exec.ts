@@ -2,7 +2,6 @@ import { Command } from 'commander'
 import chalk from 'chalk'
 import { GitWorktreeManager } from '../core/git.js'
 import { execa } from 'execa'
-import inquirer from 'inquirer'
 import ora from 'ora'
 
 export const execCommand = new Command('exec')
@@ -12,7 +11,7 @@ export const execCommand = new Command('exec')
   .argument('<command...>', '実行するコマンド')
   .option('-s, --silent', '出力を抑制')
   .option('-a, --all', 'すべての影分身で実行')
-  .action(async (branchName: string, commandParts: string[], options: { silent?: boolean; all?: boolean }) => {
+  .action(async (branchName: string, commandParts: string[], options: { silent?: boolean; all?: boolean } = {}) => {
     try {
       const gitManager = new GitWorktreeManager()
 
@@ -36,7 +35,7 @@ export const execCommand = new Command('exec')
       const command = commandParts.join(' ')
 
       // すべての影分身で実行
-      if (options.all) {
+      if (options?.all) {
         console.log(chalk.bold(`\n🥷 すべての影分身でコマンドを実行: ${chalk.cyan(command)}\n`))
 
         for (const worktree of shadowClones) {
@@ -53,7 +52,7 @@ export const execCommand = new Command('exec')
               },
             })
 
-            if (!options.silent) {
+            if (!options?.silent) {
               if (result.stdout) console.log(result.stdout)
               if (result.stderr) console.error(chalk.yellow(result.stderr))
             }
@@ -61,7 +60,7 @@ export const execCommand = new Command('exec')
           } catch (error) {
             if (error instanceof Error && 'exitCode' in error) {
               console.error(chalk.red(`  エラー (exit code: ${error.exitCode})`))
-              if (!options.silent && 'stderr' in error && error.stderr) {
+              if (!options?.silent && 'stderr' in error && error.stderr) {
                 console.error(chalk.red(error.stderr))
               }
             }
@@ -100,13 +99,13 @@ export const execCommand = new Command('exec')
 
       const displayBranchName = targetWorktree.branch?.replace('refs/heads/', '') || targetWorktree.branch
 
-      if (!options.silent) {
+      if (!options?.silent) {
         console.log(chalk.green(`\n🥷 影分身 '${chalk.cyan(displayBranchName)}' でコマンドを実行`))
         console.log(chalk.gray(`📁 ${targetWorktree.path}`))
         console.log(chalk.gray(`$ ${command}\n`))
       }
 
-      const spinner = options.silent ? null : ora('実行中...').start()
+      const spinner = options?.silent ? null : ora('実行中...').start()
 
       try {
         const result = await execa('sh', ['-c', command], {
@@ -120,7 +119,7 @@ export const execCommand = new Command('exec')
 
         if (spinner) spinner.succeed('完了')
 
-        if (!options.silent) {
+        if (!options?.silent) {
           if (result.stdout) console.log('\n' + result.stdout)
           if (result.stderr) console.error('\n' + chalk.yellow(result.stderr))
         }
@@ -130,7 +129,7 @@ export const execCommand = new Command('exec')
         
         if (error instanceof Error && 'exitCode' in error) {
           console.error(chalk.red(`\nコマンドが失敗しました (exit code: ${error.exitCode})`))
-          if (!options.silent && 'stderr' in error && error.stderr) {
+          if (!options?.silent && 'stderr' in error && error.stderr) {
             console.error(chalk.red(error.stderr))
           }
           process.exit(error.exitCode as number)
