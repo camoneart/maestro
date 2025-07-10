@@ -23,6 +23,7 @@ import { graphCommand } from './commands/graph.js'
 import { templateCommand } from './commands/template.js'
 import { watchCommand } from './commands/watch.js'
 import { healthCommand } from './commands/health.js'
+import { dashboardCommand } from './commands/dashboard.js'
 
 const program = new Command()
 
@@ -54,6 +55,7 @@ program.addCommand(graphCommand)
 program.addCommand(templateCommand)
 program.addCommand(watchCommand)
 program.addCommand(healthCommand)
+program.addCommand(dashboardCommand)
 
 // エラーハンドリング
 program.exitOverride()
