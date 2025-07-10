@@ -33,7 +33,9 @@ export const configCommand = new Command('config')
         try {
           await configManager.createProjectConfig()
           console.log(chalk.green('✅ .scj.json を作成しました'))
-          console.log(chalk.gray('\n設定ファイルを編集して、プロジェクトに合わせてカスタマイズしてください'))
+          console.log(
+            chalk.gray('\n設定ファイルを編集して、プロジェクトに合わせてカスタマイズしてください')
+          )
         } catch (error) {
           console.error(chalk.red('設定ファイルの作成に失敗しました:'), error)
         }
@@ -45,7 +47,7 @@ export const configCommand = new Command('config')
         const config = configManager.getAll()
         console.log(chalk.bold('\n🥷 shadow-clone-jutsu 設定:\n'))
         console.log(JSON.stringify(config, null, 2))
-        
+
         if (options?.global) {
           console.log(chalk.gray(`\nグローバル設定: ${configManager.getConfigPath()}`))
         }
@@ -55,19 +57,15 @@ export const configCommand = new Command('config')
       case 'path': {
         // 設定ファイルのパスを表示
         console.log(chalk.bold('設定ファイルのパス:\n'))
-        
+
         // グローバル設定
         console.log(chalk.green('グローバル設定:'))
         console.log(`  ${configManager.getConfigPath()}`)
-        
+
         // プロジェクト設定
         console.log(chalk.green('\nプロジェクト設定 (優先度順):'))
-        const configPaths = [
-          '.scj.json',
-          '.scjrc.json',
-          'scj.config.json',
-        ]
-        
+        const configPaths = ['.scj.json', '.scjrc.json', 'scj.config.json']
+
         for (const configFile of configPaths) {
           const configPath = path.join(process.cwd(), configFile)
           try {

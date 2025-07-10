@@ -6,43 +6,53 @@ import fs from 'fs/promises'
 // 設定ファイルのスキーマ定義
 export const ConfigSchema = z.object({
   // Git worktree設定
-  worktrees: z.object({
-    // worktreeを作成するディレクトリ（デフォルト: .git/shadow-clones）
-    path: z.string().optional(),
-    // ブランチ名のプレフィックス
-    branchPrefix: z.string().optional(),
-  }).optional(),
+  worktrees: z
+    .object({
+      // worktreeを作成するディレクトリ（デフォルト: .git/shadow-clones）
+      path: z.string().optional(),
+      // ブランチ名のプレフィックス
+      branchPrefix: z.string().optional(),
+    })
+    .optional(),
 
   // 開発環境設定
-  development: z.object({
-    // 自動でnpm installを実行
-    autoSetup: z.boolean().default(true),
-    // 同期するファイル（.envなど）
-    syncFiles: z.array(z.string()).default(['.env', '.env.local']),
-    // デフォルトのエディタ
-    defaultEditor: z.enum(['vscode', 'cursor', 'none']).default('cursor'),
-  }).optional(),
+  development: z
+    .object({
+      // 自動でnpm installを実行
+      autoSetup: z.boolean().default(true),
+      // 同期するファイル（.envなど）
+      syncFiles: z.array(z.string()).default(['.env', '.env.local']),
+      // デフォルトのエディタ
+      defaultEditor: z.enum(['vscode', 'cursor', 'none']).default('cursor'),
+    })
+    .optional(),
 
   // tmux統合設定
-  tmux: z.object({
-    enabled: z.boolean().default(false),
-    // 新規ウィンドウかペインか
-    openIn: z.enum(['window', 'pane']).default('window'),
-  }).optional(),
+  tmux: z
+    .object({
+      enabled: z.boolean().default(false),
+      // 新規ウィンドウかペインか
+      openIn: z.enum(['window', 'pane']).default('window'),
+    })
+    .optional(),
 
   // GitHub統合設定
-  github: z.object({
-    // 自動でfetchを実行
-    autoFetch: z.boolean().default(true),
-  }).optional(),
+  github: z
+    .object({
+      // 自動でfetchを実行
+      autoFetch: z.boolean().default(true),
+    })
+    .optional(),
 
   // カスタムコマンド
-  hooks: z.object({
-    // worktree作成後に実行
-    afterCreate: z.string().optional(),
-    // worktree削除前に実行
-    beforeDelete: z.string().optional(),
-  }).optional(),
+  hooks: z
+    .object({
+      // worktree作成後に実行
+      afterCreate: z.string().optional(),
+      // worktree削除前に実行
+      beforeDelete: z.string().optional(),
+    })
+    .optional(),
 })
 
 export type Config = z.infer<typeof ConfigSchema>
@@ -149,10 +159,6 @@ export class ConfigManager {
       },
     }
 
-    await fs.writeFile(
-      targetPath,
-      JSON.stringify(exampleConfig, null, 2) + '\n',
-      'utf-8'
-    )
+    await fs.writeFile(targetPath, JSON.stringify(exampleConfig, null, 2) + '\n', 'utf-8')
   }
 }

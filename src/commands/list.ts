@@ -35,25 +35,30 @@ export const listCommand = new Command('list')
       // fzfで選択
       if (options?.fzf) {
         const fzfInput = worktrees
-          .map(w => {
+          .map((w) => {
             const status = []
             if (w.isCurrentDirectory) status.push(chalk.green('現在'))
             if (w.locked) status.push(chalk.red('ロック'))
             if (w.prunable) status.push(chalk.yellow('削除可能'))
-            
+
             const statusStr = status.length > 0 ? ` [${status.join(', ')}]` : ''
             return `${w.branch}${statusStr} | ${w.path}`
           })
           .join('\n')
 
-        const fzfProcess = spawn('fzf', [
-          '--ansi',
-          '--header=影分身を選択 (Ctrl-C でキャンセル)',
-          '--preview', 'echo {} | cut -d"|" -f2 | xargs ls -la',
-          '--preview-window=right:50%:wrap'
-        ], {
-          stdio: ['pipe', 'pipe', 'inherit']
-        })
+        const fzfProcess = spawn(
+          'fzf',
+          [
+            '--ansi',
+            '--header=影分身を選択 (Ctrl-C でキャンセル)',
+            '--preview',
+            'echo {} | cut -d"|" -f2 | xargs ls -la',
+            '--preview-window=right:50%:wrap',
+          ],
+          {
+            stdio: ['pipe', 'pipe', 'inherit'],
+          }
+        )
 
         // fzfにデータを送る
         fzfProcess.stdin.write(fzfInput)
@@ -72,7 +77,11 @@ export const listCommand = new Command('list')
           }
 
           // ブランチ名を抽出して出力
-          const selectedBranch = selected.split('|')[0]?.trim().replace(/\[.*\]/, '').trim()
+          const selectedBranch = selected
+            .split('|')[0]
+            ?.trim()
+            .replace(/\[.*\]/, '')
+            .trim()
           if (selectedBranch) {
             console.log(selectedBranch.replace('refs/heads/', ''))
           }
@@ -83,17 +92,16 @@ export const listCommand = new Command('list')
       console.log(chalk.bold('\n🥷 影分身一覧:\n'))
 
       // メインワークツリーを先頭に表示
-      const mainWorktree = worktrees.find(wt => wt.path.endsWith('.'))
-      const cloneWorktrees = worktrees.filter(wt => !wt.path.endsWith('.'))
+      const mainWorktree = worktrees.find((wt) => wt.path.endsWith('.'))
+      const cloneWorktrees = worktrees.filter((wt) => !wt.path.endsWith('.'))
 
       if (mainWorktree) {
         displayWorktree(mainWorktree, true)
       }
 
-      cloneWorktrees.forEach(wt => displayWorktree(wt, false))
+      cloneWorktrees.forEach((wt) => displayWorktree(wt, false))
 
       console.log(chalk.gray(`\n合計: ${worktrees.length} 個の影分身`))
-
     } catch (error) {
       console.error(chalk.red('エラー:'), error instanceof Error ? error.message : '不明なエラー')
       process.exit(1)
@@ -118,7 +126,7 @@ function displayWorktree(worktree: Worktree, isMain: boolean) {
 
   console.log(
     `${prefix} ${chalk.cyan(branchName.padEnd(30))} ` +
-    `${chalk.gray(worktree.path)} ` +
-    `${status.join(' ')}`
+      `${chalk.gray(worktree.path)} ` +
+      `${status.join(' ')}`
   )
 }

@@ -21,10 +21,10 @@ export const shellCommand = new Command('shell')
       }
 
       const worktrees = await gitManager.listWorktrees()
-      
+
       // メインブランチを除外
-      const shadowClones = worktrees.filter(wt => !wt.path.endsWith('.'))
-      
+      const shadowClones = worktrees.filter((wt) => !wt.path.endsWith('.'))
+
       if (shadowClones.length === 0) {
         console.log(chalk.yellow('影分身が存在しません'))
         console.log(chalk.gray('scj create <branch-name> で影分身を作り出してください'))
@@ -38,25 +38,30 @@ export const shellCommand = new Command('shell')
         // fzfオプションが指定されている場合
         if (options?.fzf) {
           const fzfInput = shadowClones
-            .map(w => {
+            .map((w) => {
               const status = []
               if (w.locked) status.push(chalk.red('ロック'))
               if (w.prunable) status.push(chalk.yellow('削除可能'))
-              
+
               const statusStr = status.length > 0 ? ` [${status.join(', ')}]` : ''
               const branch = w.branch?.replace('refs/heads/', '') || w.branch
               return `${branch}${statusStr} | ${w.path}`
             })
             .join('\n')
 
-          const fzfProcess = spawn('fzf', [
-            '--ansi',
-            '--header=影分身を選択してシェルに入る (Ctrl-C でキャンセル)',
-            '--preview', 'echo {} | cut -d"|" -f2 | xargs ls -la',
-            '--preview-window=right:50%:wrap'
-          ], {
-            stdio: ['pipe', 'pipe', 'inherit']
-          })
+          const fzfProcess = spawn(
+            'fzf',
+            [
+              '--ansi',
+              '--header=影分身を選択してシェルに入る (Ctrl-C でキャンセル)',
+              '--preview',
+              'echo {} | cut -d"|" -f2 | xargs ls -la',
+              '--preview-window=right:50%:wrap',
+            ],
+            {
+              stdio: ['pipe', 'pipe', 'inherit'],
+            }
+          )
 
           // fzfにデータを送る
           fzfProcess.stdin.write(fzfInput)
@@ -76,7 +81,11 @@ export const shellCommand = new Command('shell')
               }
 
               // ブランチ名を抽出
-              branchName = selected.split('|')[0]?.trim().replace(/\[.*\]/, '').trim()
+              branchName = selected
+                .split('|')[0]
+                ?.trim()
+                .replace(/\[.*\]/, '')
+                .trim()
               resolve()
             })
           })
@@ -87,7 +96,7 @@ export const shellCommand = new Command('shell')
               type: 'list',
               name: 'selectedBranch',
               message: 'どの影分身に入りますか？',
-              choices: shadowClones.map(wt => {
+              choices: shadowClones.map((wt) => {
                 const branchName = wt.branch?.replace('refs/heads/', '') || wt.branch
                 return {
                   name: `${chalk.cyan(branchName)} ${chalk.gray(wt.path)}`,
@@ -101,26 +110,26 @@ export const shellCommand = new Command('shell')
       }
 
       // 指定されたブランチのworktreeを探す
-      targetWorktree = shadowClones.find(wt => {
+      targetWorktree = shadowClones.find((wt) => {
         const branch = wt.branch?.replace('refs/heads/', '')
         return branch === branchName || wt.branch === branchName
       })
 
       if (!targetWorktree) {
         console.error(chalk.red(`エラー: 影分身 '${branchName}' が見つかりません`))
-        
+
         // 類似した名前を提案
         const similarBranches = shadowClones
-          .filter(wt => wt.branch && wt.branch.includes(branchName || ''))
-          .map(wt => wt.branch)
-        
+          .filter((wt) => wt.branch && wt.branch.includes(branchName || ''))
+          .map((wt) => wt.branch)
+
         if (similarBranches.length > 0) {
           console.log(chalk.yellow('\n類似した影分身:'))
-          similarBranches.forEach(branch => {
+          similarBranches.forEach((branch) => {
             console.log(`  - ${chalk.cyan(branch)}`)
           })
         }
-        
+
         process.exit(1)
       }
 
@@ -143,7 +152,6 @@ export const shellCommand = new Command('shell')
       shellProcess.on('exit', (code) => {
         console.log(chalk.gray(`\n影分身から戻りました (exit code: ${code})`))
       })
-
     } catch (error) {
       console.error(chalk.red('エラー:'), error instanceof Error ? error.message : '不明なエラー')
       process.exit(1)

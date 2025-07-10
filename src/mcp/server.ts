@@ -1,10 +1,7 @@
 #!/usr/bin/env node
 import { Server } from '@modelcontextprotocol/sdk/server/index.js'
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
-import {
-  CallToolRequestSchema,
-  ListToolsRequestSchema,
-} from '@modelcontextprotocol/sdk/types.js'
+import { CallToolRequestSchema, ListToolsRequestSchema } from '@modelcontextprotocol/sdk/types.js'
 import { z } from 'zod'
 import { GitWorktreeManager } from '../core/git.js'
 
@@ -137,20 +134,23 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
       case 'list_shadow_clones': {
         const worktrees = await gitManager.listWorktrees()
-        const shadowClones = worktrees.filter(wt => !wt.path.endsWith('.'))
-        
-        const list = shadowClones.map(wt => {
-          const branchName = wt.branch?.replace('refs/heads/', '') || wt.branch
-          return `• ${branchName} (${wt.path})`
-        }).join('\n')
+        const shadowClones = worktrees.filter((wt) => !wt.path.endsWith('.'))
+
+        const list = shadowClones
+          .map((wt) => {
+            const branchName = wt.branch?.replace('refs/heads/', '') || wt.branch
+            return `• ${branchName} (${wt.path})`
+          })
+          .join('\n')
 
         return {
           content: [
             {
               type: 'text',
-              text: shadowClones.length > 0
-                ? `🥷 影分身一覧:\n${list}\n\n合計: ${shadowClones.length} 個の影分身`
-                : '影分身が存在しません',
+              text:
+                shadowClones.length > 0
+                  ? `🥷 影分身一覧:\n${list}\n\n合計: ${shadowClones.length} 個の影分身`
+                  : '影分身が存在しません',
             },
           ],
         }
@@ -172,9 +172,9 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       case 'exec_in_shadow_clone': {
         const validatedArgs = ExecInWorktreeArgsSchema.parse(args)
         const { execa } = await import('execa')
-        
+
         const worktrees = await gitManager.listWorktrees()
-        const targetWorktree = worktrees.find(wt => {
+        const targetWorktree = worktrees.find((wt) => {
           const branch = wt.branch?.replace('refs/heads/', '')
           return branch === validatedArgs.branchName || wt.branch === validatedArgs.branchName
         })

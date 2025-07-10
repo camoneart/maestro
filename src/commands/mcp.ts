@@ -12,13 +12,16 @@ export const mcpCommand = new Command('mcp')
   .action(async (subcommand?: string) => {
     if (subcommand !== 'serve') {
       console.log(chalk.yellow('使い方: scj mcp serve'))
-      console.log(chalk.gray('\nMCPサーバーを起動して、Claude CodeやCursorから影分身を操作できるようにします'))
+      console.log(
+        chalk.gray('\nMCPサーバーを起動して、Claude CodeやCursorから影分身を操作できるようにします')
+      )
       process.exit(0)
     }
 
     console.log(chalk.green('🥷 shadow-clone-jutsu MCPサーバーを起動中...'))
     console.log(chalk.gray('\nClaude CodeやCursorの設定に以下を追加してください:'))
-    console.log(chalk.cyan(`
+    console.log(
+      chalk.cyan(`
 {
   "mcpServers": {
     "shadow-clone-jutsu": {
@@ -27,7 +30,8 @@ export const mcpCommand = new Command('mcp')
     }
   }
 }
-`))
+`)
+    )
 
     // MCPサーバーを起動
     const serverPath = path.join(__dirname, '..', '..', 'dist', 'mcp', 'server.js')

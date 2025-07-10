@@ -22,7 +22,7 @@ export const createCommand = new Command('create')
       const gitManager = new GitWorktreeManager()
       const configManager = new ConfigManager()
       await configManager.loadProjectConfig()
-      
+
       const config = configManager.getAll()
 
       // Gitリポジトリかチェック
@@ -56,21 +56,21 @@ export const createCommand = new Command('create')
 
       // ワークツリーを作成
       const worktreePath = await gitManager.createWorktree(branchName, options.base)
-      
+
       spinner.succeed(
         `影分身 '${chalk.cyan(branchName)}' を作り出しました！\n` +
-        `  📁 ${chalk.gray(worktreePath)}`
+          `  📁 ${chalk.gray(worktreePath)}`
       )
 
       // 環境セットアップ（設定またはオプションで有効な場合）
       if (options.setup || (options.setup === undefined && config.development?.autoSetup)) {
         const setupSpinner = ora('環境をセットアップ中...').start()
-        
+
         // package.jsonが存在する場合はnpm install
         try {
           await execa('npm', ['install'], { cwd: worktreePath })
           setupSpinner.succeed('npm install 完了')
-        } catch (error) {
+        } catch {
           setupSpinner.warn('npm install をスキップ')
         }
 
@@ -90,10 +90,13 @@ export const createCommand = new Command('create')
       }
 
       // エディタで開く（設定またはオプションで有効な場合）
-      if (options.open || (options.open === undefined && config.development?.defaultEditor !== 'none')) {
+      if (
+        options.open ||
+        (options.open === undefined && config.development?.defaultEditor !== 'none')
+      ) {
         const openSpinner = ora('エディタで開いています...').start()
         const editor = config.development?.defaultEditor || 'cursor'
-        
+
         try {
           if (editor === 'cursor') {
             await execa('cursor', [worktreePath])
@@ -120,14 +123,13 @@ export const createCommand = new Command('create')
             },
           })
           hookSpinner.succeed('フックを実行しました')
-        } catch (error) {
+        } catch {
           hookSpinner.warn('フックの実行に失敗しました')
         }
       }
 
       console.log(chalk.green('\n✨ 影分身を作り出しました！'))
       console.log(chalk.gray(`\ncd ${worktreePath} で移動できます`))
-
     } catch (error) {
       spinner.fail('影分身を作り出せませんでした')
       console.error(chalk.red(error instanceof Error ? error.message : '不明なエラー'))

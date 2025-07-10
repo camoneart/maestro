@@ -12,7 +12,7 @@ export class GitWorktreeManager {
   async createWorktree(branchName: string, baseBranch?: string): Promise<string> {
     // ワークツリーのパスを生成
     const worktreePath = path.join('.git', 'shadow-clones', branchName)
-    
+
     // ベースブランチが指定されていない場合は現在のブランチを使用
     if (!baseBranch) {
       const status = await this.git.status()
@@ -21,7 +21,7 @@ export class GitWorktreeManager {
 
     // ワークツリーを作成
     await this.git.raw(['worktree', 'add', '-b', branchName, worktreePath, baseBranch])
-    
+
     return path.resolve(worktreePath)
   }
 
@@ -29,18 +29,18 @@ export class GitWorktreeManager {
     // ワークツリーのパスを生成（ブランチ名からスラッシュを置換）
     const safeBranchName = existingBranch.replace(/\//g, '-')
     const worktreePath = path.join('.git', 'shadow-clones', safeBranchName)
-    
+
     // 既存のブランチでワークツリーを作成
     await this.git.raw(['worktree', 'add', worktreePath, existingBranch])
-    
+
     return path.resolve(worktreePath)
   }
 
   async listWorktrees(): Promise<Worktree[]> {
     const output = await this.git.raw(['worktree', 'list', '--porcelain'])
     const worktrees: Worktree[] = []
-    
-    const lines = output.split('\n').filter(line => line.trim())
+
+    const lines = output.split('\n').filter((line) => line.trim())
     let currentWorktree: Partial<Worktree> = {}
 
     for (const line of lines) {
@@ -79,7 +79,7 @@ export class GitWorktreeManager {
 
   async deleteWorktree(branchName: string, force: boolean = false): Promise<void> {
     const worktrees = await this.listWorktrees()
-    const worktree = worktrees.find(wt => wt.branch === branchName)
+    const worktree = worktrees.find((wt) => wt.branch === branchName)
 
     if (!worktree) {
       throw new Error(`ワークツリー '${branchName}' が見つかりません`)
@@ -89,7 +89,7 @@ export class GitWorktreeManager {
     const args = ['worktree', 'remove']
     if (force) args.push('--force')
     args.push(worktree.path)
-    
+
     await this.git.raw(args)
   }
 
@@ -110,10 +110,12 @@ export class GitWorktreeManager {
   async getAllBranches(): Promise<{ local: string[]; remote: string[] }> {
     const localBranches = await this.git.branchLocal()
     const remoteBranches = await this.git.branch(['-r'])
-    
+
     return {
-      local: localBranches.all.filter(b => !b.startsWith('remotes/')),
-      remote: remoteBranches.all.filter(b => b.startsWith('remotes/')).map(b => b.replace('remotes/', ''))
+      local: localBranches.all.filter((b) => !b.startsWith('remotes/')),
+      remote: remoteBranches.all
+        .filter((b) => b.startsWith('remotes/'))
+        .map((b) => b.replace('remotes/', '')),
     }
   }
 
