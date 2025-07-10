@@ -313,6 +313,54 @@ scj sync --all --files
 scj s
 ```
 
+#### worktree依存関係グラフの可視化
+
+```bash
+# テキスト形式で表示（デフォルト）
+scj graph
+
+# 最新コミットと日付を表示
+scj graph --show-commits --show-dates
+
+# Mermaid形式で出力
+scj graph --format mermaid
+
+# Graphviz DOT形式で出力して画像生成
+scj graph --format dot --output graph.dot
+
+# エイリアス
+scj g
+```
+
+#### worktreeテンプレート機能
+
+```bash
+# 利用可能なテンプレートを表示
+scj template --list
+
+# 現在の設定をテンプレートとして保存
+scj template --save my-template
+
+# グローバルテンプレートとして保存
+scj template --save my-template --global
+
+# テンプレートを適用して影分身を作成
+scj create feature-new --template feature
+scj create bug-fix --template bugfix
+
+# テンプレートを削除
+scj template --delete my-template
+
+# エイリアス
+scj tpl
+```
+
+**デフォルトテンプレート:**
+- `feature`: 新機能開発用（Claude Code自動起動）
+- `bugfix`: バグ修正用
+- `experiment`: 実験的開発用（tmux統合）
+- `docs`: ドキュメント作成用（カスタムファイル付き）
+
 ### 設定管理
 
 #### プロジェクト設定の初期化
