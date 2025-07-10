@@ -13,8 +13,8 @@ _scj_completions() {
     prev="\${COMP_WORDS[COMP_CWORD-1]}"
     
     # コマンド一覧
-    local commands="create list delete shell exec attach github config mcp completion tmux"
-    local aliases="ls rm sh e a gh t"
+    local commands="create list delete shell exec attach github config mcp completion tmux where"
+    local aliases="ls rm sh e a gh t w"
     
     # 最初の引数の場合
     if [[ \${COMP_CWORD} -eq 1 ]]; then
@@ -65,6 +65,13 @@ _scj_completions() {
                 COMPREPLY=( \$(compgen -W "\${worktrees}" -- \${cur}) )
             fi
             ;;
+        where|w)
+            # worktreeのブランチ名を補完
+            if [[ \${COMP_CWORD} -eq 2 ]]; then
+                local worktrees=\$(git worktree list --porcelain 2>/dev/null | grep "^branch" | sed 's/^branch refs\\/heads\\///')
+                COMPREPLY=( \$(compgen -W "\${worktrees}" -- \${cur}) )
+            fi
+            ;;
     esac
     
     # オプションの補完
@@ -84,6 +91,9 @@ _scj_completions() {
                 ;;
             tmux|t)
                 opts="--new-window --split-pane --vertical --help"
+                ;;
+            where|w)
+                opts="--fzf --current --help"
                 ;;
             *)
                 opts="--help"
@@ -114,6 +124,7 @@ _scj() {
         'mcp:MCPサーバーを起動'
         'completion:シェル補完スクリプトを生成'
         'tmux:tmux/fzfで影分身を選択して開く'
+        'where:影分身のパスを表示'
     )
     
     local -a aliases
@@ -125,6 +136,7 @@ _scj() {
         'a:attach'
         'gh:github'
         't:tmux'
+        'w:where'
     )
     
     if (( CURRENT == 2 )); then
@@ -190,6 +202,16 @@ _scj() {
                 '-v[垂直分割]' \\
                 '--vertical[垂直分割]'
             ;;
+        where|w)
+            if (( CURRENT == 3 )); then
+                local worktrees
+                worktrees=(\\$(git worktree list --porcelain 2>/dev/null | grep "^branch" | sed 's/^branch refs\\\\/heads\\\\//' | tr '\\\\n' ' '))
+                _values 'worktrees' \\$worktrees
+            fi
+            _arguments \\
+                '--fzf[fzfで選択]' \\
+                '--current[現在のworktreeのパスを表示]'
+            ;;
     esac
 }
 
@@ -214,6 +236,7 @@ complete -c scj -n "__fish_use_subcommand" -a "config" -d "設定を管理"
 complete -c scj -n "__fish_use_subcommand" -a "mcp" -d "MCPサーバーを起動"
 complete -c scj -n "__fish_use_subcommand" -a "completion" -d "シェル補完スクリプトを生成"
 complete -c scj -n "__fish_use_subcommand" -a "tmux t" -d "tmux/fzfで影分身を選択して開く"
+complete -c scj -n "__fish_use_subcommand" -a "where w" -d "影分身のパスを表示"
 
 # create コマンドのオプション
 complete -c scj -n "__fish_seen_subcommand_from create" -s b -l base -d "ベースブランチ"
@@ -240,6 +263,10 @@ complete -c scj -n "__fish_seen_subcommand_from tmux t" -s n -l new-window -d "�
 complete -c scj -n "__fish_seen_subcommand_from tmux t" -s p -l split-pane -d "現在のペインを分割して開く"
 complete -c scj -n "__fish_seen_subcommand_from tmux t" -s v -l vertical -d "垂直分割"
 
+# where コマンドのオプション
+complete -c scj -n "__fish_seen_subcommand_from where w" -l fzf -d "fzfで選択"
+complete -c scj -n "__fish_seen_subcommand_from where w" -l current -d "現在のworktreeのパスを表示"
+
 # サブコマンドの引数補完
 complete -c scj -n "__fish_seen_subcommand_from config; and __fish_is_nth_token 3" -a "init show path"
 complete -c scj -n "__fish_seen_subcommand_from mcp; and __fish_is_nth_token 3" -a "serve"
@@ -247,7 +274,7 @@ complete -c scj -n "__fish_seen_subcommand_from completion; and __fish_is_nth_to
 complete -c scj -n "__fish_seen_subcommand_from github gh; and __fish_is_nth_token 3" -a "checkout pr issue"
 
 # worktreeブランチ名の補完（動的）
-complete -c scj -n "__fish_seen_subcommand_from shell sh exec e delete rm" -a "(git worktree list --porcelain 2>/dev/null | grep '^branch' | sed 's/^branch refs\\/heads\\///')"
+complete -c scj -n "__fish_seen_subcommand_from shell sh exec e delete rm where w" -a "(git worktree list --porcelain 2>/dev/null | grep '^branch' | sed 's/^branch refs\\/heads\\///')"
 
 # shadow-clone-jutsuにも同じ補完を適用
 complete -c shadow-clone-jutsu -w scj

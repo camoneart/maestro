@@ -9,7 +9,8 @@ export const shellCommand = new Command('shell')
   .alias('sh')
   .description('影分身のシェルに入る')
   .argument('[branch-name]', 'ブランチ名（省略時は選択）')
-  .action(async (branchName?: string) => {
+  .option('--fzf', 'fzfで選択')
+  .action(async (branchName?: string, options?: { fzf?: boolean }) => {
     try {
       const gitManager = new GitWorktreeManager()
 
@@ -35,21 +36,69 @@ export const shellCommand = new Command('shell')
 
       // ブランチ名が指定されていない場合は選択
       if (!branchName) {
-        const { selectedBranch } = await inquirer.prompt([
-          {
-            type: 'list',
-            name: 'selectedBranch',
-            message: 'どの影分身に入りますか？',
-            choices: shadowClones.map(wt => {
-              const branchName = wt.branch?.replace('refs/heads/', '') || wt.branch
-              return {
-                name: `${chalk.cyan(branchName)} ${chalk.gray(wt.path)}`,
-                value: branchName,
+        // fzfオプションが指定されている場合
+        if (options?.fzf) {
+          const fzfInput = shadowClones
+            .map(w => {
+              const status = []
+              if (w.isLocked) status.push(chalk.red('ロック'))
+              if (w.isPrunable) status.push(chalk.yellow('削除可能'))
+              
+              const statusStr = status.length > 0 ? ` [${status.join(', ')}]` : ''
+              const branch = w.branch?.replace('refs/heads/', '') || w.branch
+              return `${branch}${statusStr} | ${w.path}`
+            })
+            .join('\n')
+
+          const fzfProcess = spawn('fzf', [
+            '--ansi',
+            '--header=影分身を選択してシェルに入る (Ctrl-C でキャンセル)',
+            '--preview', 'echo {} | cut -d"|" -f2 | xargs ls -la',
+            '--preview-window=right:50%:wrap'
+          ], {
+            stdio: ['pipe', 'pipe', 'inherit']
+          })
+
+          // fzfにデータを送る
+          fzfProcess.stdin.write(fzfInput)
+          fzfProcess.stdin.end()
+
+          // 選択結果を取得
+          let selected = ''
+          fzfProcess.stdout.on('data', (data) => {
+            selected += data.toString()
+          })
+
+          await new Promise<void>((resolve) => {
+            fzfProcess.on('close', (code) => {
+              if (code !== 0 || !selected.trim()) {
+                console.log(chalk.gray('キャンセルされました'))
+                process.exit(0)
               }
-            }),
-          },
-        ])
-        branchName = selectedBranch
+
+              // ブランチ名を抽出
+              branchName = selected.split('|')[0]?.trim().replace(/\[.*\]/, '').trim()
+              resolve()
+            })
+          })
+        } else {
+          // inquirerで選択
+          const { selectedBranch } = await inquirer.prompt([
+            {
+              type: 'list',
+              name: 'selectedBranch',
+              message: 'どの影分身に入りますか？',
+              choices: shadowClones.map(wt => {
+                const branchName = wt.branch?.replace('refs/heads/', '') || wt.branch
+                return {
+                  name: `${chalk.cyan(branchName)} ${chalk.gray(wt.path)}`,
+                  value: branchName,
+                }
+              }),
+            },
+          ])
+          branchName = selectedBranch
+        }
       }
 
       // 指定されたブランチのworktreeを探す
