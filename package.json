@@ -26,10 +26,6 @@
   ],
   "author": "",
   "license": "MIT",
-  "engines": {
-    "node": ">=18.0.0",
-    "pnpm": ">=8.0.0"
-  },
   "packageManager": "pnpm@10.13.1",
   "dependencies": {
     "@modelcontextprotocol/sdk": "1.15.0",
