@@ -46,7 +46,7 @@ worktrees/
 .scj-config.json
 
 # cc conversations
-.claude/_export-conversations/
+.claude/export-conversations/
 
 # docs
 _docs/
