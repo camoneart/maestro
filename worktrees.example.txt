@@ -1,0 +1,12 @@
+# Shadow Clone Jutsu バッチファイルサンプル
+# フォーマット: branch-name | description | issue/pr番号
+# 例:
+#   feature-auth | 認証機能の実装 | #123
+#   bugfix-login | ログインバグの修正 | pr-45
+#   refactor-api | APIのリファクタリング
+
+feature-auth | ユーザー認証機能の実装 | #123
+feature-dashboard | ダッシュボード画面の作成 | #124
+bugfix-memory-leak | メモリリークの修正 | #125
+docs-api | APIドキュメントの作成
+refactor-database | データベース構造の最適化 | #126
