@@ -16,6 +16,9 @@ import { whereCommand } from './commands/where.js'
 import { syncCommand } from './commands/sync.js'
 import { reviewCommand } from './commands/review.js'
 import { issueCommand } from './commands/issue.js'
+import { batchCommand } from './commands/batch.js'
+import { historyCommand } from './commands/history.js'
+import { suggestCommand } from './commands/suggest.js'
 
 const program = new Command()
 
@@ -40,6 +43,9 @@ program.addCommand(whereCommand)
 program.addCommand(syncCommand)
 program.addCommand(reviewCommand)
 program.addCommand(issueCommand)
+program.addCommand(batchCommand)
+program.addCommand(historyCommand)
+program.addCommand(suggestCommand)
 
 // エラーハンドリング
 program.exitOverride()
