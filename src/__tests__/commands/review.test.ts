@@ -20,24 +20,34 @@ vi.mock('ora', () => ({
 
 // GitWorktreeManagerのモック
 vi.mock('../../core/git', () => {
-  const mockGitManager = {
-    isGitRepository: vi.fn().mockResolvedValue(true),
-    createWorktree: vi.fn().mockResolvedValue('/path/to/worktree'),
-    attachWorktree: vi.fn().mockResolvedValue('/path/to/worktree'),
-  }
-
   return {
-    GitWorktreeManager: vi.fn().mockImplementation(() => mockGitManager),
+    GitWorktreeManager: vi.fn().mockImplementation(() => ({
+      isGitRepository: vi.fn().mockResolvedValue(true),
+      createWorktree: vi.fn().mockResolvedValue('/path/to/worktree'),
+      attachWorktree: vi.fn().mockResolvedValue('/path/to/worktree'),
+      listWorktrees: vi.fn().mockResolvedValue([]),
+    })),
   }
 })
 
-describe.skip('review command', () => {
+describe('review command', () => {
   let program: Command
   let mockExeca: any
   let mockInquirer: any
 
   beforeEach(async () => {
+    vi.clearAllMocks()
     vi.resetModules()
+    
+    // GitWorktreeManagerのモックをリセット
+    const { GitWorktreeManager } = await import('../../core/git')
+    vi.mocked(GitWorktreeManager).mockImplementation(() => ({
+      isGitRepository: vi.fn().mockResolvedValue(true),
+      createWorktree: vi.fn().mockResolvedValue('/path/to/worktree'),
+      attachWorktree: vi.fn().mockResolvedValue('/path/to/worktree'),
+      listWorktrees: vi.fn().mockResolvedValue([]),
+    } as any))
+    
     const { reviewCommand } = await import('../../commands/review')
 
     program = new Command()
@@ -46,7 +56,6 @@ describe.skip('review command', () => {
 
     mockExeca = vi.mocked(execa)
     mockInquirer = vi.mocked(inquirer)
-    vi.clearAllMocks()
 
     // デフォルトのモック設定
     mockExeca.mockImplementation((cmd: string, args: string[]) => {
@@ -166,9 +175,8 @@ describe.skip('review command', () => {
 
       expect(mockExeca).toHaveBeenCalledWith('gh', [
         'pr',
-        'review',
+        'comment',
         '123',
-        '--comment',
         '--body',
         'LGTM',
       ])

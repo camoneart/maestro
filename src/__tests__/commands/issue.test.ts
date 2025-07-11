@@ -19,22 +19,30 @@ vi.mock('ora', () => ({
 
 // GitWorktreeManagerのモック
 vi.mock('../../core/git', () => {
-  const mockGitManager = {
-    isGitRepository: vi.fn().mockResolvedValue(true),
-  }
-
   return {
-    GitWorktreeManager: vi.fn().mockImplementation(() => mockGitManager),
+    GitWorktreeManager: vi.fn().mockImplementation(() => ({
+      isGitRepository: vi.fn().mockResolvedValue(true),
+      createWorktree: vi.fn().mockResolvedValue('/path/to/worktree'),
+    })),
   }
 })
 
-describe.skip('issue command', () => {
+describe('issue command', () => {
   let program: Command
   let mockExeca: any
   let mockInquirer: any
 
   beforeEach(async () => {
+    vi.clearAllMocks()
     vi.resetModules()
+    
+    // GitWorktreeManagerのモックをリセット
+    const { GitWorktreeManager } = await import('../../core/git')
+    vi.mocked(GitWorktreeManager).mockImplementation(() => ({
+      isGitRepository: vi.fn().mockResolvedValue(true),
+      createWorktree: vi.fn().mockResolvedValue('/path/to/worktree'),
+    } as any))
+    
     const { issueCommand } = await import('../../commands/issue')
 
     program = new Command()
@@ -43,7 +51,6 @@ describe.skip('issue command', () => {
 
     mockExeca = vi.mocked(execa)
     mockInquirer = vi.mocked(inquirer)
-    vi.clearAllMocks()
 
     // デフォルトのモック設定
     mockExeca.mockImplementation((cmd: string, args: string[]) => {
@@ -110,24 +117,22 @@ describe.skip('issue command', () => {
 
   describe('create option', () => {
     it('should create an issue with interactive prompts', async () => {
-      mockInquirer.prompt.mockResolvedValueOnce({
-        title: 'New Issue',
-        body: 'Issue description',
-        labels: [],
-        assignees: [],
-      })
+      mockInquirer.prompt
+        .mockResolvedValueOnce({
+          title: 'New Issue',
+        })
+        .mockResolvedValueOnce({
+          body: 'Issue description',
+        })
+        .mockResolvedValueOnce({
+          createBranch: false,
+        })
 
       mockExeca.mockImplementation((cmd: string, args: string[]) => {
         if (cmd === 'gh' && args[0] === 'repo' && args[1] === 'view') {
           return Promise.resolve(mockGhRepoView())
         }
-        if (cmd === 'gh' && args[0] === 'label' && args[1] === 'list') {
-          return Promise.resolve({
-            stdout: JSON.stringify([{ name: 'bug', color: 'ff0000' }]),
-            stderr: '',
-            exitCode: 0,
-          } as any)
-        }
+        // Remove label list check as it's not in the current implementation
         if (cmd === 'gh' && args[0] === 'issue' && args[1] === 'create') {
           return Promise.resolve({
             stdout: 'https://github.com/owner/repo/issues/1',
@@ -140,7 +145,7 @@ describe.skip('issue command', () => {
 
       await program.parseAsync(['node', 'test', 'issue', '--create'])
 
-      expect(mockInquirer.prompt).toHaveBeenCalled()
+      expect(mockInquirer.prompt).toHaveBeenCalledTimes(3)
       expect(mockExeca).toHaveBeenCalledWith(
         'gh',
         expect.arrayContaining([
@@ -183,6 +188,9 @@ describe.skip('issue command', () => {
         return Promise.resolve({ stdout: '', stderr: '', exitCode: 0 } as any)
       })
 
+      // インタラクティブメニューで「キャンセル」を選択
+      mockInquirer.prompt.mockResolvedValueOnce({ action: 'cancel' })
+
       await program.parseAsync(['node', 'test', 'issue', '1'])
 
       expect(mockExeca).toHaveBeenCalledWith('gh', [
@@ -190,7 +198,7 @@ describe.skip('issue command', () => {
         'view',
         '1',
         '--json',
-        'number,title,state,body,labels,author,assignees,createdAt,updatedAt',
+        'number,title,author,body,state,url,labels,assignees',
       ])
     })
 
@@ -200,7 +208,20 @@ describe.skip('issue command', () => {
           return Promise.resolve(mockGhRepoView())
         }
         if (cmd === 'gh' && args[0] === 'issue' && args[1] === 'view') {
-          return Promise.resolve({ stdout: '', stderr: '', exitCode: 0 } as any)
+          return Promise.resolve({
+            stdout: JSON.stringify({
+              number: 1,
+              title: 'Issue Title',
+              state: 'OPEN',
+              body: 'Issue body',
+              author: { login: 'user1' },
+              labels: [],
+              assignees: [],
+              url: 'https://github.com/owner/repo/issues/1',
+            }),
+            stderr: '',
+            exitCode: 0,
+          } as any)
         }
         return Promise.resolve({ stdout: '', stderr: '', exitCode: 0 } as any)
       })
