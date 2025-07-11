@@ -38,7 +38,7 @@ async function loadBatchFile(filePath: string): Promise<BatchWorktree[]> {
       const description = parts[1]
       const issueOrPr = parts[2]
       
-      const result: BatchWorktree = { name }
+      const result: BatchWorktree = { name: name || '' }
       if (description) result.description = description
       
       if (issueOrPr) {
@@ -320,13 +320,15 @@ export const batchCommand = new Command('batch')
         ])
         
         switch (inputMethod) {
-          case 'issues':
+          case 'issues': {
             worktrees = await selectIssues()
             break
-          case 'manual':
+          }
+          case 'manual': {
             worktrees = await inputBatchWorktrees()
             break
-          case 'file':
+          }
+          case 'file': {
             const { filePath } = await inquirer.prompt([
               {
                 type: 'input',
@@ -337,6 +339,7 @@ export const batchCommand = new Command('batch')
             ])
             worktrees = await loadBatchFile(filePath)
             break
+          }
         }
       }
       

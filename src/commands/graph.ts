@@ -35,7 +35,7 @@ async function analyzeBranchRelations(worktrees: any[]): Promise<BranchRelation[
     
     try {
       // ブランチの親を特定（merge-baseを使用）
-      const { stdout: mergeBase } = await execa('git', [
+      await execa('git', [
         'merge-base',
         branch,
         'main'
@@ -70,9 +70,9 @@ async function analyzeBranchRelations(worktrees: any[]): Promise<BranchRelation[
         ahead: parseInt(ahead),
         behind: parseInt(behind),
         lastCommit: {
-          hash: hash.substring(0, 7),
-          date: new Date(date),
-          message: message.substring(0, 50)
+          hash: hash?.substring(0, 7) || '',
+          date: new Date(date || ''),
+          message: message?.substring(0, 50) || ''
         }
       })
       
@@ -84,7 +84,7 @@ async function analyzeBranchRelations(worktrees: any[]): Promise<BranchRelation[
         
         try {
           // 共通の祖先を確認
-          const { stdout: commonAncestor } = await execa('git', [
+          await execa('git', [
             'merge-base',
             branch,
             otherBranch
@@ -108,7 +108,7 @@ async function analyzeBranchRelations(worktrees: any[]): Promise<BranchRelation[
           // エラーは無視
         }
       }
-    } catch (error) {
+    } catch {
       // ブランチ分析エラーは無視
     }
   }

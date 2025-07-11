@@ -53,7 +53,7 @@ export const listCommand = new Command('list')
             try {
               const lastCommit = await gitManager.getLastCommit(worktree.path)
               ;(worktree as any).lastCommit = lastCommit
-            } catch (error) {
+            } catch {
               ;(worktree as any).lastCommit = null
             }
           }
@@ -74,7 +74,7 @@ export const listCommand = new Command('list')
 
         // ソート処理
         if (options.sort) {
-          await sortWorktrees(worktrees, options.sort, gitManager)
+          await sortWorktrees(worktrees, options.sort)
         }
 
         if (options?.json) {
@@ -174,8 +174,7 @@ export const listCommand = new Command('list')
 
 async function sortWorktrees(
   worktrees: Worktree[],
-  sortBy: string,
-  gitManager: GitWorktreeManager
+  sortBy: string
 ): Promise<void> {
   switch (sortBy) {
     case 'branch':
@@ -198,7 +197,7 @@ async function sortWorktrees(
         try {
           const stats = fs.statSync(worktree.path)
           ;(worktree as any).size = stats.size
-        } catch (error) {
+        } catch {
           ;(worktree as any).size = 0
         }
       }

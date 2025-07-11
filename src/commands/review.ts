@@ -170,7 +170,7 @@ async function refreshStatus(prNumber: string): Promise<PullRequest> {
 }
 
 // 自動レビュー&マージフロー
-async function autoReviewFlow(branchName: string, baseBranch: string = 'main'): Promise<void> {
+async function autoReviewFlow(_branchName: string, baseBranch: string = 'main'): Promise<void> {
   const autoSpinner = ora('自動レビュー&マージフローを開始中...').start()
   
   try {
@@ -182,7 +182,7 @@ async function autoReviewFlow(branchName: string, baseBranch: string = 'main'): 
     try {
       await execa('git', ['rebase', `origin/${baseBranch}`])
       autoSpinner.succeed('リベースが完了しました')
-    } catch (rebaseError) {
+    } catch {
       autoSpinner.warn('競合が発生しました')
       
       // 2. 競合が出たらclaude /resolve-conflictを起動
@@ -330,6 +330,10 @@ export const reviewCommand = new Command('review')
         ])
 
         prNumber = selectedPR
+      }
+
+      if (!prNumber) {
+        throw new ReviewCommandError('PR番号が指定されていません')
       }
 
       spinner.text = `PR #${prNumber} の情報を取得中...`
