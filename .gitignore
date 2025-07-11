@@ -59,3 +59,6 @@ _o3-chat/
 
 # issue
 _issues/
+
+# Homebrew tap (separate repository)
+homebrew-tap/
