@@ -194,6 +194,7 @@ export const createCommand = new Command('create')
   .option('-t, --tmux', 'tmuxセッションを作成してClaude Codeを起動')
   .option('-c, --claude', 'Claude Codeを自動起動')
   .option('--template <name>', 'テンプレートを使用')
+  .option('-y, --yes', '確認をスキップ')
   .action(async (branchName: string, options: CreateOptions & { template?: string }) => {
     const spinner = ora('影分身の術！').start()
 
@@ -291,18 +292,20 @@ export const createCommand = new Command('create')
       }
 
       // ブランチ名の確認
-      const { confirmCreate } = await inquirer.prompt([
-        {
-          type: 'confirm',
-          name: 'confirmCreate',
-          message: `ブランチ '${chalk.cyan(branchName)}' で影分身を作り出しますか？`,
-          default: true,
-        },
-      ])
+      if (!(options as any).yes) {
+        const { confirmCreate } = await inquirer.prompt([
+          {
+            type: 'confirm',
+            name: 'confirmCreate',
+            message: `ブランチ '${chalk.cyan(branchName)}' で影分身を作り出しますか？`,
+            default: true,
+          },
+        ])
 
-      if (!confirmCreate) {
-        spinner.info('キャンセルされました')
-        return
+        if (!confirmCreate) {
+          spinner.info('キャンセルされました')
+          return
+        }
       }
 
       spinner.text = '影分身を作り出し中...'
