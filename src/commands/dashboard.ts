@@ -8,7 +8,6 @@ import { execa } from 'execa'
 import open from 'open'
 import path from 'path'
 
-
 interface DashboardOptions {
   port?: number
   open?: boolean
@@ -400,15 +399,15 @@ const htmlTemplate = `
 async function getWorktreeData(): Promise<any> {
   const gitManager = new GitWorktreeManager()
   const worktrees = await gitManager.listWorktrees()
-  
+
   const enhancedWorktrees = await Promise.all(
-    worktrees.map(async (wt) => {
+    worktrees.map(async wt => {
       const result: any = {
         ...wt,
         isMain: wt.path.endsWith('.'),
-        branch: wt.branch?.replace('refs/heads/', '') || wt.branch
+        branch: wt.branch?.replace('refs/heads/', '') || wt.branch,
       }
-      
+
       // メタデータを取得
       try {
         const metadataPath = path.join(wt.path, '.scj-metadata.json')
@@ -417,14 +416,14 @@ async function getWorktreeData(): Promise<any> {
       } catch {
         result.metadata = null
       }
-      
+
       // 最終コミット情報を取得
       try {
         result.lastCommit = await gitManager.getLastCommit(wt.path)
       } catch {
         result.lastCommit = null
       }
-      
+
       // 健全性チェック（簡易版）
       result.health = []
       if (result.lastCommit) {
@@ -435,7 +434,7 @@ async function getWorktreeData(): Promise<any> {
           result.health.push('stale')
         }
       }
-      
+
       // 未コミットの変更をチェック
       try {
         const { stdout } = await execa('git', ['status', '--porcelain'], { cwd: wt.path })
@@ -445,21 +444,21 @@ async function getWorktreeData(): Promise<any> {
       } catch {
         // エラーは無視
       }
-      
+
       return result
     })
   )
-  
+
   // 統計情報を計算
   const stats = {
     active: enhancedWorktrees.filter(wt => !wt.health.includes('stale')).length,
     needsAttention: enhancedWorktrees.filter(wt => wt.health.length > 0).length,
-    githubLinked: enhancedWorktrees.filter(wt => wt.metadata?.github).length
+    githubLinked: enhancedWorktrees.filter(wt => wt.metadata?.github).length,
   }
-  
+
   return {
     worktrees: enhancedWorktrees,
-    stats
+    stats,
   }
 }
 
@@ -470,23 +469,23 @@ export const dashboardCommand = new Command('dashboard')
   .option('--no-open', 'ブラウザを自動で開かない')
   .action(async (options: DashboardOptions) => {
     const spinner = ora('ダッシュボードサーバーを起動中...').start()
-    
+
     try {
       const port = parseInt(options.port?.toString() || '8765')
-      
+
       // HTTPサーバーを作成
       const server = createServer(async (req, res) => {
         // CORS対応
         res.setHeader('Access-Control-Allow-Origin', '*')
         res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
         res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
-        
+
         if (req.method === 'OPTIONS') {
           res.writeHead(200)
           res.end()
           return
         }
-        
+
         try {
           if (req.url === '/' || req.url === '/index.html') {
             res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' })
@@ -497,7 +496,9 @@ export const dashboardCommand = new Command('dashboard')
             res.end(JSON.stringify(data))
           } else if (req.url === '/api/open-editor' && req.method === 'POST') {
             let body = ''
-            req.on('data', chunk => { body += chunk })
+            req.on('data', chunk => {
+              body += chunk
+            })
             req.on('end', async () => {
               const { path: worktreePath } = JSON.parse(body)
               try {
@@ -514,7 +515,9 @@ export const dashboardCommand = new Command('dashboard')
             })
           } else if (req.url === '/api/open-terminal' && req.method === 'POST') {
             let body = ''
-            req.on('data', chunk => { body += chunk })
+            req.on('data', chunk => {
+              body += chunk
+            })
             req.on('end', async () => {
               const { path: worktreePath } = JSON.parse(body)
               // macOS用のターミナル起動コマンド
@@ -532,22 +535,24 @@ export const dashboardCommand = new Command('dashboard')
           }
         } catch (error) {
           res.writeHead(500)
-          res.end(JSON.stringify({ error: error instanceof Error ? error.message : '不明なエラー' }))
+          res.end(
+            JSON.stringify({ error: error instanceof Error ? error.message : '不明なエラー' })
+          )
         }
       })
-      
+
       // サーバーを起動
       server.listen(port, () => {
         spinner.succeed(`ダッシュボードサーバーが起動しました`)
         console.log(chalk.cyan(`\n🌐 http://localhost:${port}\n`))
         console.log(chalk.gray('Ctrl+C で終了'))
-        
+
         // ブラウザを自動で開く
         if (options.open !== false) {
           open(`http://localhost:${port}`)
         }
       })
-      
+
       // 終了時の処理
       process.on('SIGINT', () => {
         console.log(chalk.yellow('\n\nダッシュボードサーバーを停止中...'))
@@ -556,7 +561,6 @@ export const dashboardCommand = new Command('dashboard')
           process.exit(0)
         })
       })
-      
     } catch (error) {
       spinner.fail('ダッシュボードサーバーの起動に失敗しました')
       console.error(chalk.red(error instanceof Error ? error.message : '不明なエラー'))

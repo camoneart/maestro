@@ -33,7 +33,7 @@ describe('GitWorktreeManager', () => {
       isCanceled: false,
       killed: false,
     } as any)
-    
+
     gitManager = new GitWorktreeManager()
     vi.clearAllMocks()
   })
@@ -138,7 +138,7 @@ locked reason`
 
     it('should throw error if worktree creation fails', async () => {
       const branchName = 'existing-branch'
-      
+
       // git.raw()をモックしてエラーを発生させる
       ;(gitManager as any).git.raw = vi.fn().mockRejectedValue(new Error('branch already exists'))
       ;(gitManager as any).git.status = vi.fn().mockResolvedValue({ current: 'main' })
@@ -188,7 +188,11 @@ locked reason`
 
       await gitManager.deleteWorktree(branchName)
 
-      expect((gitManager as any).git.raw).toHaveBeenCalledWith(['worktree', 'remove', '/path/to/feature'])
+      expect((gitManager as any).git.raw).toHaveBeenCalledWith([
+        'worktree',
+        'remove',
+        '/path/to/feature',
+      ])
     })
 
     it('should force delete when force option is true', async () => {
@@ -211,7 +215,12 @@ locked reason`
 
       await gitManager.deleteWorktree(branchName, true)
 
-      expect((gitManager as any).git.raw).toHaveBeenCalledWith(['worktree', 'remove', '--force', '/path/to/feature'])
+      expect((gitManager as any).git.raw).toHaveBeenCalledWith([
+        'worktree',
+        'remove',
+        '--force',
+        '/path/to/feature',
+      ])
     })
 
     it('should throw error if worktree not found', async () => {
@@ -221,7 +230,7 @@ locked reason`
       vi.spyOn(gitManager, 'listWorktrees').mockResolvedValueOnce([])
 
       await expect(gitManager.deleteWorktree(branchName)).rejects.toThrow(
-        'ワークツリー \'non-existent\' が見つかりません'
+        "ワークツリー 'non-existent' が見つかりません"
       )
     })
   })
@@ -232,7 +241,7 @@ locked reason`
       ;(gitManager as any).git.branchLocal = vi.fn().mockResolvedValue({
         all: ['main', 'feature-1', 'feature-2'],
       })
-      
+
       // git.branch()をモック
       ;(gitManager as any).git.branch = vi.fn().mockResolvedValue({
         all: ['remotes/origin/main', 'remotes/origin/develop'],
@@ -248,7 +257,6 @@ locked reason`
       ;(gitManager as any).git.branchLocal = vi.fn().mockResolvedValue({
         all: [],
       })
-      
       ;(gitManager as any).git.branch = vi.fn().mockResolvedValue({
         all: [],
       })

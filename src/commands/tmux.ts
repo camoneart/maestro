@@ -169,23 +169,23 @@ export const tmuxCommand = new Command('tmux')
           const branch = wt.branch?.replace('refs/heads/', '')
           return branch === branchName
         })
-        
+
         if (!worktree) {
           console.error(chalk.red(`ワークツリー '${branchName}' が見つかりません`))
           process.exit(1)
         }
-        
+
         // 直接tmuxセッションを作成
         const sessionName = branchName.replace(/[^a-zA-Z0-9_-]/g, '-')
         const editorCmd = options.editor ? getEditorCommand(options.editor) : ''
         const tmuxArgs = ['new-session', '-s', sessionName, '-c', worktree.path]
-        
+
         if (options.detach) {
           tmuxArgs.push('-d')
           if (editorCmd) {
             tmuxArgs.push(editorCmd)
           }
-          
+
           try {
             await execa('tmux', tmuxArgs)
             console.log(chalk.cyan(`\n新しいtmuxセッション '${sessionName}' を作成しました`))
@@ -202,7 +202,7 @@ export const tmuxCommand = new Command('tmux')
           }
         } else {
           console.log(chalk.cyan(`\n新しいtmuxセッション '${sessionName}' を作成します...`))
-          
+
           if (editorCmd) {
             spawn('tmux', [...tmuxArgs, editorCmd], { stdio: 'inherit' })
           } else {

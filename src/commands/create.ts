@@ -11,22 +11,26 @@ import path from 'path'
 import fs from 'fs/promises'
 
 // Issue番号からブランチ名を生成する関数
-function parseIssueNumber(input: string): { isIssue: boolean; issueNumber?: string; branchName: string } {
+function parseIssueNumber(input: string): {
+  isIssue: boolean
+  issueNumber?: string
+  branchName: string
+} {
   // #123, 123, issue-123などの形式をサポート
   const issueMatch = input.match(/^#?(\d+)$/) || input.match(/^issue-(\d+)$/i)
-  
+
   if (issueMatch) {
     const issueNumber = issueMatch[1]
     return {
       isIssue: true,
       issueNumber,
-      branchName: `issue-${issueNumber}`
+      branchName: `issue-${issueNumber}`,
     }
   }
-  
+
   return {
     isIssue: false,
-    branchName: input
+    branchName: input,
   }
 }
 
@@ -49,7 +53,7 @@ async function fetchGitHubMetadata(issueNumber: string): Promise<{
         'view',
         issueNumber,
         '--json',
-        'number,title,body,author,labels,assignees,milestone,url'
+        'number,title,body,author,labels,assignees,milestone,url',
       ])
       const pr = JSON.parse(stdout)
       return {
@@ -60,7 +64,7 @@ async function fetchGitHubMetadata(issueNumber: string): Promise<{
         labels: pr.labels?.map((l: any) => l.name) || [],
         assignees: pr.assignees?.map((a: any) => a.login) || [],
         milestone: pr.milestone?.title,
-        url: pr.url
+        url: pr.url,
       }
     } catch {
       // PRでなければIssueとして試す
@@ -69,7 +73,7 @@ async function fetchGitHubMetadata(issueNumber: string): Promise<{
         'view',
         issueNumber,
         '--json',
-        'number,title,body,author,labels,assignees,milestone,url'
+        'number,title,body,author,labels,assignees,milestone,url',
       ])
       const issue = JSON.parse(stdout)
       return {
@@ -80,7 +84,7 @@ async function fetchGitHubMetadata(issueNumber: string): Promise<{
         labels: issue.labels?.map((l: any) => l.name) || [],
         assignees: issue.assignees?.map((a: any) => a.login) || [],
         milestone: issue.milestone?.title,
-        url: issue.url
+        url: issue.url,
       }
     }
   } catch {
@@ -100,9 +104,9 @@ async function saveWorktreeMetadata(
     createdAt: new Date().toISOString(),
     branch: branchName,
     worktreePath,
-    ...metadata
+    ...metadata,
   }
-  
+
   try {
     await fs.writeFile(metadataPath, JSON.stringify(metadataContent, null, 2))
   } catch {
@@ -111,9 +115,13 @@ async function saveWorktreeMetadata(
 }
 
 // tmuxセッションを作成してClaude Codeを起動する関数
-async function createTmuxSession(branchName: string, worktreePath: string, config: any): Promise<void> {
+async function createTmuxSession(
+  branchName: string,
+  worktreePath: string,
+  config: any
+): Promise<void> {
   const sessionName = branchName.replace(/[^a-zA-Z0-9_-]/g, '-')
-  
+
   try {
     // 既存のセッションをチェック
     try {
@@ -123,29 +131,28 @@ async function createTmuxSession(branchName: string, worktreePath: string, confi
     } catch {
       // セッションが存在しない場合は作成
     }
-    
+
     // tmuxセッションを作成
     await execa('tmux', ['new-session', '-d', '-s', sessionName, '-c', worktreePath])
-    
+
     // ウィンドウ名を設定
     await execa('tmux', ['rename-window', '-t', sessionName, branchName])
-    
+
     console.log(chalk.green(`✨ tmuxセッション '${sessionName}' を作成しました`))
-    
+
     // Claude Codeを起動する場合
     if (config.claude?.autoStart) {
       await execa('tmux', ['send-keys', '-t', sessionName, 'claude', 'Enter'])
-      
+
       // 初期コマンドを送信
       if (config.claude?.initialCommands) {
         for (const cmd of config.claude.initialCommands) {
           await execa('tmux', ['send-keys', '-t', sessionName, cmd, 'Enter'])
         }
       }
-      
+
       console.log(chalk.green(`✨ Claude Codeを起動しました`))
     }
-    
   } catch (error) {
     console.error(chalk.red(`tmuxセッションの作成に失敗しました: ${error}`))
   }
@@ -156,11 +163,16 @@ async function handleClaudeMarkdown(worktreePath: string, config: any): Promise<
   const claudeMode = config.claude?.markdownMode || 'shared'
   const rootClaudePath = path.join(process.cwd(), 'CLAUDE.md')
   const worktreeClaudePath = path.join(worktreePath, 'CLAUDE.md')
-  
+
   try {
     if (claudeMode === 'shared') {
       // 共有モード: シンボリックリンクを作成
-      if (await fs.access(rootClaudePath).then(() => true).catch(() => false)) {
+      if (
+        await fs
+          .access(rootClaudePath)
+          .then(() => true)
+          .catch(() => false)
+      ) {
         await fs.symlink(path.relative(worktreePath, rootClaudePath), worktreeClaudePath)
         console.log(chalk.green(`✨ CLAUDE.md を共有モードで設定しました`))
       }
@@ -210,30 +222,30 @@ export const createCommand = new Command('create')
       if (options.template) {
         spinner.text = 'テンプレートを適用中...'
         const templateConfig = await getTemplateConfig(options.template)
-        
+
         if (templateConfig) {
           // テンプレート設定でオプションを上書き
           if (templateConfig.autoSetup !== undefined) options.setup = templateConfig.autoSetup
           if (templateConfig.editor !== 'none') options.open = true
           if (templateConfig.tmux) options.tmux = true
           if (templateConfig.claude) options.claude = true
-          
+
           // 設定を一時的に上書き
           config = {
             ...config,
             worktrees: {
               ...config.worktrees,
-              branchPrefix: templateConfig.branchPrefix || config.worktrees?.branchPrefix
+              branchPrefix: templateConfig.branchPrefix || config.worktrees?.branchPrefix,
             },
             development: {
               ...config.development,
               autoSetup: templateConfig.autoSetup ?? config.development?.autoSetup,
               syncFiles: templateConfig.syncFiles || config.development?.syncFiles,
-              defaultEditor: templateConfig.editor || config.development?.defaultEditor
+              defaultEditor: templateConfig.editor || config.development?.defaultEditor,
             },
-            hooks: templateConfig.hooks || config.hooks
+            hooks: templateConfig.hooks || config.hooks,
           }
-          
+
           console.log(chalk.green(`\n✨ テンプレート '${options.template}' を適用しました\n`))
         } else {
           spinner.warn(`テンプレート '${options.template}' が見つかりません`)
@@ -260,13 +272,15 @@ export const createCommand = new Command('create')
       let githubMetadata = null
       if (isIssue && issueNumber) {
         console.log(chalk.blue(`📝 Issue #${issueNumber} に基づいてブランチを作成します`))
-        
+
         spinner.text = `GitHub Issue/PR #${issueNumber} の情報を取得中...`
         githubMetadata = await fetchGitHubMetadata(issueNumber)
-        
+
         if (githubMetadata) {
           spinner.stop()
-          console.log(chalk.green(`✨ ${githubMetadata.type === 'pr' ? 'PR' : 'Issue'} の情報を取得しました`))
+          console.log(
+            chalk.green(`✨ ${githubMetadata.type === 'pr' ? 'PR' : 'Issue'} の情報を取得しました`)
+          )
           console.log(chalk.gray(`  タイトル: ${githubMetadata.title}`))
           console.log(chalk.gray(`  作成者: ${githubMetadata.author}`))
           if (githubMetadata.labels.length > 0) {
@@ -279,7 +293,7 @@ export const createCommand = new Command('create')
             console.log(chalk.gray(`  マイルストーン: ${githubMetadata.milestone}`))
           }
           console.log()
-          
+
           // タイトルからより適切なブランチ名を生成
           const sanitizedTitle = githubMetadata.title
             .toLowerCase()
@@ -322,18 +336,18 @@ export const createCommand = new Command('create')
       // メタデータを保存
       if (githubMetadata || options.template) {
         const metadata: any = {}
-        
+
         if (githubMetadata) {
           metadata.github = {
             ...githubMetadata,
-            issueNumber: issueNumber
+            issueNumber: issueNumber,
           }
         }
-        
+
         if (options.template) {
           metadata.template = options.template
         }
-        
+
         await saveWorktreeMetadata(worktreePath, branchName, metadata)
       }
 
@@ -407,7 +421,10 @@ export const createCommand = new Command('create')
 
       // tmuxセッションの作成（オプションまたは設定で有効な場合）
       if (options.tmux || (options.tmux === undefined && config.tmux?.enabled)) {
-        await createTmuxSession(branchName, worktreePath, { ...config, claude: { autoStart: options.claude || config.claude?.autoStart } })
+        await createTmuxSession(branchName, worktreePath, {
+          ...config,
+          claude: { autoStart: options.claude || config.claude?.autoStart },
+        })
       }
 
       // Claude Codeの起動（tmuxセッションを使わない場合）
@@ -446,11 +463,11 @@ export const createCommand = new Command('create')
         try {
           // まずブランチをpush
           await execa('git', ['push', '-u', 'origin', branchName], { cwd: worktreePath })
-          
+
           // Draft PRを作成
           let prTitle = branchName
           let prBody = '## 概要\n\n'
-          
+
           // GitHub Issue/PRメタデータがある場合は利用
           if (githubMetadata) {
             prTitle = githubMetadata.title
@@ -459,24 +476,34 @@ export const createCommand = new Command('create')
             prBody += `### ラベル\n${githubMetadata.labels.join(', ')}\n\n`
             prBody += `### リンク\n${githubMetadata.url}\n\n`
           }
-          
+
           prBody += '## 作業内容\n\n- [ ] TODO: 実装内容を記載\n\n'
           prBody += '## テスト\n\n- [ ] ユニットテスト追加\n- [ ] 動作確認完了\n\n'
           prBody += '---\n🥷 Created by shadow-clone-jutsu'
-          
-          const { stdout } = await execa('gh', [
-            'pr', 'create',
-            '--draft',
-            '--title', prTitle,
-            '--body', prBody,
-            '--base', options.base || 'main'
-          ], { cwd: worktreePath })
-          
+
+          const { stdout } = await execa(
+            'gh',
+            [
+              'pr',
+              'create',
+              '--draft',
+              '--title',
+              prTitle,
+              '--body',
+              prBody,
+              '--base',
+              options.base || 'main',
+            ],
+            { cwd: worktreePath }
+          )
+
           prSpinner.succeed('Draft PRを作成しました')
           console.log(chalk.cyan(`\nPR URL: ${stdout.trim()}`))
         } catch {
           prSpinner.fail('Draft PRの作成に失敗しました')
-          console.error(chalk.yellow('GitHub CLIがインストールされているか、認証されているか確認してください'))
+          console.error(
+            chalk.yellow('GitHub CLIがインストールされているか、認証されているか確認してください')
+          )
         }
       }
 
