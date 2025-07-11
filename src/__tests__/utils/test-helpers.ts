@@ -6,6 +6,7 @@ export const createMockWorktree = (overrides?: Partial<Worktree>): Worktree => (
   path: '/path/to/worktree',
   head: 'abcdef1234567890',
   branch: 'refs/heads/feature-branch',
+  detached: false,
   isCurrentDirectory: false,
   locked: false,
   prunable: false,
@@ -92,15 +93,15 @@ export const createMockSpinner = () => {
     isSpinning: false,
   }
   
-  spinner.start.mockImplementation(function(this: any, text?: string) {
-    if (text) this.text = text
-    this.isSpinning = true
-    return this
+  spinner.start.mockImplementation(function(text?: string) {
+    if (text) spinner.text = text
+    spinner.isSpinning = true
+    return spinner
   })
   
-  spinner.stop.mockImplementation(function(this: any) {
-    this.isSpinning = false
-    return this
+  spinner.stop.mockImplementation(function() {
+    spinner.isSpinning = false
+    return spinner
   })
   
   return spinner
