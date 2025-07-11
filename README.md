@@ -19,6 +19,12 @@ shadow-clone-jutsuは、Git Worktreeをより直感的に管理できるCLIツ�
 - 🎯 **tmux/fzf統合**: 効率的なワークフロー
 - 🎨 **インタラクティブUI**: 美しく使いやすいCLI体験
 
+## デモ
+
+<!-- デモGIFまたはasciinemaをここに追加 -->
+<!-- ![Demo](./docs/demo.gif) -->
+<!-- [![asciicast](https://asciinema.org/a/DEMO_ID.svg)](https://asciinema.org/a/DEMO_ID) -->
+
 ## インストール
 
 ### 前提条件
