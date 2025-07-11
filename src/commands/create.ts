@@ -398,7 +398,7 @@ export const createCommand = new Command('create')
               await fs.mkdir(path.dirname(filePath), { recursive: true })
               await fs.writeFile(filePath, file.content)
               console.log(chalk.green(`✨ ${file.path} を作成しました`))
-            } catch (error) {
+            } catch {
               console.warn(chalk.yellow(`${file.path} の作成に失敗しました`))
             }
           }
@@ -474,7 +474,7 @@ export const createCommand = new Command('create')
           
           prSpinner.succeed('Draft PRを作成しました')
           console.log(chalk.cyan(`\nPR URL: ${stdout.trim()}`))
-        } catch (error) {
+        } catch {
           prSpinner.fail('Draft PRの作成に失敗しました')
           console.error(chalk.yellow('GitHub CLIがインストールされているか、認証されているか確認してください'))
         }
