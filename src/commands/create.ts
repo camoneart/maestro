@@ -195,6 +195,7 @@ export const createCommand = new Command('create')
   .option('-c, --claude', 'Claude Codeを自動起動')
   .option('--template <name>', 'テンプレートを使用')
   .option('-y, --yes', '確認をスキップ')
+  .option('--draft-pr', 'Draft PRを自動作成')
   .action(async (branchName: string, options: CreateOptions & { template?: string }) => {
     const spinner = ora('影分身の術！').start()
 
@@ -436,6 +437,46 @@ export const createCommand = new Command('create')
           hookSpinner.succeed('フックを実行しました')
         } catch {
           hookSpinner.warn('フックの実行に失敗しました')
+        }
+      }
+
+      // Draft PR作成（オプションが有効な場合）
+      if (options.draftPr) {
+        const prSpinner = ora('Draft PRを作成中...').start()
+        try {
+          // まずブランチをpush
+          await execa('git', ['push', '-u', 'origin', branchName], { cwd: worktreePath })
+          
+          // Draft PRを作成
+          let prTitle = branchName
+          let prBody = '## 概要\n\n'
+          
+          // GitHub Issue/PRメタデータがある場合は利用
+          if (githubMetadata) {
+            prTitle = githubMetadata.title
+            prBody += `${githubMetadata.type === 'pr' ? 'PR' : 'Issue'} #${issueNumber} に関連する作業\n\n`
+            prBody += `### 元の${githubMetadata.type === 'pr' ? 'PR' : 'Issue'}の内容\n${githubMetadata.body}\n\n`
+            prBody += `### ラベル\n${githubMetadata.labels.join(', ')}\n\n`
+            prBody += `### リンク\n${githubMetadata.url}\n\n`
+          }
+          
+          prBody += '## 作業内容\n\n- [ ] TODO: 実装内容を記載\n\n'
+          prBody += '## テスト\n\n- [ ] ユニットテスト追加\n- [ ] 動作確認完了\n\n'
+          prBody += '---\n🥷 Created by shadow-clone-jutsu'
+          
+          const { stdout } = await execa('gh', [
+            'pr', 'create',
+            '--draft',
+            '--title', prTitle,
+            '--body', prBody,
+            '--base', options.base || 'main'
+          ], { cwd: worktreePath })
+          
+          prSpinner.succeed('Draft PRを作成しました')
+          console.log(chalk.cyan(`\nPR URL: ${stdout.trim()}`))
+        } catch (error) {
+          prSpinner.fail('Draft PRの作成に失敗しました')
+          console.error(chalk.yellow('GitHub CLIがインストールされているか、認証されているか確認してください'))
         }
       }
 
