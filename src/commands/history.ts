@@ -40,15 +40,18 @@ function getHistoryPathForBranch(branchName: string, config: any): string {
 }
 
 // 全ての履歴を検索
-async function findAllHistories(gitManager: GitWorktreeManager, config: any): Promise<ClaudeHistory[]> {
+async function findAllHistories(
+  gitManager: GitWorktreeManager,
+  config: any
+): Promise<ClaudeHistory[]> {
   const histories: ClaudeHistory[] = []
   const worktrees = await gitManager.listWorktrees()
-  
+
   for (const worktree of worktrees) {
     if (!worktree.branch) continue
-    
+
     const historyPath = getHistoryPathForBranch(worktree.branch, config)
-    
+
     try {
       const stats = await fs.stat(historyPath)
       histories.push({
@@ -56,26 +59,26 @@ async function findAllHistories(gitManager: GitWorktreeManager, config: any): Pr
         worktreePath: worktree.path,
         historyPath,
         lastModified: stats.mtime,
-        size: stats.size
+        size: stats.size,
       })
     } catch {
       // 履歴ファイルが存在しない場合はスキップ
     }
   }
-  
+
   // グローバル履歴ディレクトリも検索
   const historyDir = getClaudeHistoryDir()
   try {
     const files = await fs.readdir(historyDir)
     for (const file of files) {
       if (!file.endsWith('.md')) continue
-      
+
       const filePath = path.join(historyDir, file)
       const branchName = file.replace('.md', '').replace(/-/g, '/')
-      
+
       // 既に見つかっているものはスキップ
       if (histories.some(h => h.historyPath === filePath)) continue
-      
+
       try {
         const stats = await fs.stat(filePath)
         histories.push({
@@ -83,7 +86,7 @@ async function findAllHistories(gitManager: GitWorktreeManager, config: any): Pr
           worktreePath: '', // worktreeが削除されている可能性
           historyPath: filePath,
           lastModified: stats.mtime,
-          size: stats.size
+          size: stats.size,
         })
       } catch {
         // ファイルが読めない場合はスキップ
@@ -92,7 +95,7 @@ async function findAllHistories(gitManager: GitWorktreeManager, config: any): Pr
   } catch {
     // 履歴ディレクトリが存在しない場合
   }
-  
+
   return histories
 }
 
@@ -102,20 +105,20 @@ async function listHistories(histories: ClaudeHistory[]): Promise<void> {
     console.log(chalk.yellow('Claude Code履歴が見つかりません'))
     return
   }
-  
+
   console.log(chalk.bold('\n📚 Claude Code履歴一覧:\n'))
-  
+
   // 最終更新日でソート
   histories.sort((a, b) => {
     if (!a.lastModified || !b.lastModified) return 0
     return b.lastModified.getTime() - a.lastModified.getTime()
   })
-  
+
   histories.forEach((history, index) => {
     const sizeKB = history.size ? (history.size / 1024).toFixed(1) : '0'
     const modifiedStr = history.lastModified ? history.lastModified.toLocaleString() : 'Unknown'
     const worktreeInfo = history.worktreePath ? chalk.green(' ✓') : chalk.gray(' (削除済み)')
-    
+
     console.log(`${index + 1}. ${chalk.cyan(history.branch)}${worktreeInfo}`)
     console.log(chalk.gray(`   最終更新: ${modifiedStr} | サイズ: ${sizeKB} KB`))
     console.log(chalk.gray(`   パス: ${history.historyPath}`))
@@ -136,14 +139,14 @@ async function showHistory(historyPath: string): Promise<void> {
 // 履歴をエクスポート
 async function exportHistories(histories: ClaudeHistory[], outputPath: string): Promise<void> {
   const spinner = ora('履歴をエクスポート中...').start()
-  
+
   try {
     const exportData = {
       exportedAt: new Date().toISOString(),
       totalHistories: histories.length,
-      histories: [] as any[]
+      histories: [] as any[],
     }
-    
+
     for (const history of histories) {
       try {
         const content = await fs.readFile(history.historyPath, 'utf-8')
@@ -151,13 +154,13 @@ async function exportHistories(histories: ClaudeHistory[], outputPath: string): 
           branch: history.branch,
           worktreePath: history.worktreePath,
           lastModified: history.lastModified,
-          content
+          content,
         })
       } catch {
         // 読めない履歴はスキップ
       }
     }
-    
+
     // 出力形式を判定
     if (outputPath.endsWith('.json')) {
       await fs.writeFile(outputPath, JSON.stringify(exportData, null, 2))
@@ -165,7 +168,7 @@ async function exportHistories(histories: ClaudeHistory[], outputPath: string): 
       // Markdown形式でエクスポート
       let markdown = `# Claude Code履歴エクスポート\n\n`
       markdown += `エクスポート日時: ${exportData.exportedAt}\n\n`
-      
+
       for (const history of exportData.histories) {
         markdown += `## ${history.branch}\n\n`
         markdown += `最終更新: ${history.lastModified}\n\n`
@@ -173,10 +176,10 @@ async function exportHistories(histories: ClaudeHistory[], outputPath: string): 
         markdown += history.content
         markdown += `\n\n---\n\n`
       }
-      
+
       await fs.writeFile(outputPath, markdown)
     }
-    
+
     spinner.succeed(`履歴を ${outputPath} にエクスポートしました`)
   } catch (error) {
     spinner.fail('エクスポートに失敗しました')
@@ -187,17 +190,17 @@ async function exportHistories(histories: ClaudeHistory[], outputPath: string): 
 // 履歴をマージ
 async function mergeHistories(histories: ClaudeHistory[], outputPath: string): Promise<void> {
   const spinner = ora('履歴をマージ中...').start()
-  
+
   try {
     let mergedContent = `# Claude Code統合履歴\n\n`
     mergedContent += `マージ日時: ${new Date().toLocaleString()}\n\n`
-    
+
     // 時系列でソート
     histories.sort((a, b) => {
       if (!a.lastModified || !b.lastModified) return 0
       return a.lastModified.getTime() - b.lastModified.getTime()
     })
-    
+
     for (const history of histories) {
       try {
         const content = await fs.readFile(history.historyPath, 'utf-8')
@@ -208,7 +211,7 @@ async function mergeHistories(histories: ClaudeHistory[], outputPath: string): P
         // 読めない履歴はスキップ
       }
     }
-    
+
     await fs.writeFile(outputPath, mergedContent)
     spinner.succeed(`履歴を ${outputPath} にマージしました`)
   } catch (error) {
@@ -221,30 +224,30 @@ async function mergeHistories(histories: ClaudeHistory[], outputPath: string): P
 async function cleanupHistories(histories: ClaudeHistory[]): Promise<void> {
   // worktreeが削除されている履歴を検出
   const orphanedHistories = histories.filter(h => !h.worktreePath)
-  
+
   if (orphanedHistories.length === 0) {
     console.log(chalk.green('✨ クリーンアップする履歴はありません'))
     return
   }
-  
+
   console.log(chalk.bold('\n🗑️  以下の履歴は対応するworktreeが削除されています:\n'))
   orphanedHistories.forEach(h => {
     console.log(chalk.gray(`- ${h.branch} (${h.historyPath})`))
   })
-  
+
   const { confirmDelete } = await inquirer.prompt([
     {
       type: 'confirm',
       name: 'confirmDelete',
       message: `${orphanedHistories.length}個の履歴を削除しますか？`,
-      default: false
-    }
+      default: false,
+    },
   ])
-  
+
   if (confirmDelete) {
     const spinner = ora('履歴を削除中...').start()
     let deletedCount = 0
-    
+
     for (const history of orphanedHistories) {
       try {
         await fs.unlink(history.historyPath)
@@ -253,7 +256,7 @@ async function cleanupHistories(histories: ClaudeHistory[]): Promise<void> {
         // 削除に失敗してもスキップ
       }
     }
-    
+
     spinner.succeed(`${deletedCount}個の履歴を削除しました`)
   }
 }
@@ -262,13 +265,13 @@ async function cleanupHistories(histories: ClaudeHistory[]): Promise<void> {
 async function syncHistories(histories: ClaudeHistory[], config: any): Promise<void> {
   const spinner = ora('履歴を同期中...').start()
   let syncedCount = 0
-  
+
   for (const history of histories) {
     if (!history.worktreePath) continue
-    
+
     // 理想的なパスを計算
     const idealPath = getHistoryPathForBranch(history.branch, config)
-    
+
     if (history.historyPath !== idealPath) {
       try {
         // ディレクトリを作成
@@ -281,7 +284,7 @@ async function syncHistories(histories: ClaudeHistory[], config: any): Promise<v
       }
     }
   }
-  
+
   spinner.succeed(`${syncedCount}個の履歴を同期しました`)
 }
 
@@ -300,15 +303,18 @@ export const historyCommand = new Command('history')
       const configManager = new ConfigManager()
       await configManager.loadProjectConfig()
       const config = configManager.getAll()
-      
+
       // 全履歴を検索
       const histories = await findAllHistories(gitManager, config)
-      
-      if (options.list || (!options.show && !options.export && !options.merge && !options.cleanup && !options.sync)) {
+
+      if (
+        options.list ||
+        (!options.show && !options.export && !options.merge && !options.cleanup && !options.sync)
+      ) {
         // デフォルトは一覧表示
         await listHistories(histories)
       }
-      
+
       if (options.show) {
         // ブランチ名で履歴を検索
         const history = histories.find(h => h.branch === options.show)
@@ -319,23 +325,22 @@ export const historyCommand = new Command('history')
           process.exit(1)
         }
       }
-      
+
       if (options.export) {
         await exportHistories(histories, options.export)
       }
-      
+
       if (options.merge) {
         await mergeHistories(histories, 'merged-history.md')
       }
-      
+
       if (options.cleanup) {
         await cleanupHistories(histories)
       }
-      
+
       if (options.sync) {
         await syncHistories(histories, config)
       }
-      
     } catch (error) {
       console.error(chalk.red(error instanceof Error ? error.message : '不明なエラー'))
       process.exit(1)

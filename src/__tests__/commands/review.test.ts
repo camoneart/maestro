@@ -25,7 +25,7 @@ vi.mock('../../core/git', () => {
     createWorktree: vi.fn().mockResolvedValue('/path/to/worktree'),
     attachWorktree: vi.fn().mockResolvedValue('/path/to/worktree'),
   }
-  
+
   return {
     GitWorktreeManager: vi.fn().mockImplementation(() => mockGitManager),
   }
@@ -39,7 +39,7 @@ describe.skip('review command', () => {
   beforeEach(async () => {
     vi.resetModules()
     const { reviewCommand } = await import('../../commands/review')
-    
+
     program = new Command()
     program.exitOverride()
     program.addCommand(reviewCommand)
@@ -164,7 +164,14 @@ describe.skip('review command', () => {
 
       await program.parseAsync(['node', 'test', 'review', '123', '--comment', 'LGTM'])
 
-      expect(mockExeca).toHaveBeenCalledWith('gh', ['pr', 'review', '123', '--comment', '--body', 'LGTM'])
+      expect(mockExeca).toHaveBeenCalledWith('gh', [
+        'pr',
+        'review',
+        '123',
+        '--comment',
+        '--body',
+        'LGTM',
+      ])
     })
   })
 
@@ -200,10 +207,13 @@ describe.skip('review command', () => {
 
       await program.parseAsync(['node', 'test', 'review', '123'])
 
-      expect(mockExeca).toHaveBeenCalledWith(
-        'gh',
-        ['pr', 'view', '123', '--json', 'number,title,author,body,headRefName,baseRefName,state,url']
-      )
+      expect(mockExeca).toHaveBeenCalledWith('gh', [
+        'pr',
+        'view',
+        '123',
+        '--json',
+        'number,title,author,body,headRefName,baseRefName,state,url',
+      ])
       expect(mockInquirer.prompt).toHaveBeenCalled()
     })
   })

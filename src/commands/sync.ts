@@ -444,8 +444,8 @@ async function syncEnvironmentFiles(
       'package.json',
       'pnpm-lock.yaml',
       'yarn.lock',
-      'package-lock.json'
-    ]
+      'package-lock.json',
+    ],
   }
 
   // 同期するファイルを決定
@@ -482,8 +482,8 @@ async function syncEnvironmentFiles(
         'jsconfig.json',
         '.prettierrc',
         '.eslintrc.json',
-        'CLAUDE.md'
-      ])
+        'CLAUDE.md',
+      ]),
     ]
 
     for (const file of potentialFiles) {
@@ -508,9 +508,9 @@ async function syncEnvironmentFiles(
         choices: availableFiles.map(file => ({
           name: file,
           value: file,
-          checked: filesToSync.includes(file)
-        }))
-      }
+          checked: filesToSync.includes(file),
+        })),
+      },
     ])
 
     filesToSync = selectedFiles
@@ -543,9 +543,7 @@ async function syncEnvironmentFiles(
     }
   }
 
-  syncSpinner.succeed(
-    `ファイル同期完了: ${syncedCount}個成功, ${failedCount}個失敗`
-  )
+  syncSpinner.succeed(`ファイル同期完了: ${syncedCount}個成功, ${failedCount}個失敗`)
 
   // 同期したファイルの一覧を表示
   if (filesToSync.length > 0) {

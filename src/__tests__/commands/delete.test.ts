@@ -54,9 +54,7 @@ describe('delete command', () => {
     })
 
     it('should force delete when force option is true', async () => {
-      const worktrees = [
-        createMockWorktree({ branch: 'refs/heads/locked-feature', locked: true }),
-      ]
+      const worktrees = [createMockWorktree({ branch: 'refs/heads/locked-feature', locked: true })]
       mockGitManager.listWorktrees.mockResolvedValue(worktrees)
 
       const gitManager = new GitWorktreeManager()
@@ -68,9 +66,7 @@ describe('delete command', () => {
 
   describe('remote branch deletion', () => {
     it('should delete remote branch when removeRemote option is true', async () => {
-      const worktrees = [
-        createMockWorktree({ branch: 'refs/heads/feature-remote' }),
-      ]
+      const worktrees = [createMockWorktree({ branch: 'refs/heads/feature-remote' })]
       mockGitManager.listWorktrees.mockResolvedValue(worktrees)
 
       // リモートブランチの存在確認
@@ -79,22 +75,23 @@ describe('delete command', () => {
       )
 
       // リモートブランチ削除
-      vi.mocked(execa).mockResolvedValueOnce(
-        createMockExecaResponse() as any
-      )
+      vi.mocked(execa).mockResolvedValueOnce(createMockExecaResponse() as any)
 
       // deleteRemoteBranch関数のシミュレート
       const { stdout: remoteBranches } = await execa('git', ['branch', '-r'])
       expect(remoteBranches).toContain('origin/feature-remote')
 
       await execa('git', ['push', 'origin', '--delete', 'feature-remote'])
-      expect(execa).toHaveBeenLastCalledWith('git', ['push', 'origin', '--delete', 'feature-remote'])
+      expect(execa).toHaveBeenLastCalledWith('git', [
+        'push',
+        'origin',
+        '--delete',
+        'feature-remote',
+      ])
     })
 
     it('should skip remote deletion if branch does not exist', async () => {
-      vi.mocked(execa).mockResolvedValueOnce(
-        createMockExecaResponse('  origin/main') as any
-      )
+      vi.mocked(execa).mockResolvedValueOnce(createMockExecaResponse('  origin/main') as any)
 
       const { stdout: remoteBranches } = await execa('git', ['branch', '-r'])
       const remoteBranchExists = remoteBranches.includes('origin/non-existent')
@@ -105,9 +102,7 @@ describe('delete command', () => {
 
   describe('interactive selection', () => {
     it('should prompt for confirmation before deletion', async () => {
-      const worktrees = [
-        createMockWorktree({ branch: 'refs/heads/feature-to-delete' }),
-      ]
+      const worktrees = [createMockWorktree({ branch: 'refs/heads/feature-to-delete' })]
       mockGitManager.listWorktrees.mockResolvedValue(worktrees)
 
       vi.mocked(inquirer.prompt).mockResolvedValueOnce({
@@ -186,7 +181,7 @@ describe('delete command', () => {
     it('should handle multiple deletion with some failures', async () => {
       const worktrees = createMockWorktrees(3)
       mockGitManager.listWorktrees.mockResolvedValue(worktrees)
-      
+
       // 2番目の削除を失敗させる
       mockGitManager.deleteWorktree
         .mockResolvedValueOnce(undefined)

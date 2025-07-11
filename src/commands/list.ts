@@ -162,7 +162,9 @@ export const listCommand = new Command('list')
           displayWorktree(mainWorktree, true, options.lastCommit, options.metadata)
         }
 
-        cloneWorktrees.forEach(wt => displayWorktree(wt, false, options.lastCommit, options.metadata))
+        cloneWorktrees.forEach(wt =>
+          displayWorktree(wt, false, options.lastCommit, options.metadata)
+        )
 
         console.log(chalk.gray(`\n合計: ${worktrees.length} 個の影分身`))
       } catch (error) {
@@ -172,10 +174,7 @@ export const listCommand = new Command('list')
     }
   )
 
-async function sortWorktrees(
-  worktrees: Worktree[],
-  sortBy: string
-): Promise<void> {
+async function sortWorktrees(worktrees: Worktree[], sortBy: string): Promise<void> {
   switch (sortBy) {
     case 'branch':
       worktrees.sort((a, b) => (a.branch || '').localeCompare(b.branch || ''))
@@ -206,7 +205,12 @@ async function sortWorktrees(
   }
 }
 
-function displayWorktree(worktree: Worktree, isMain: boolean, showLastCommit?: boolean, showMetadata?: boolean) {
+function displayWorktree(
+  worktree: Worktree,
+  isMain: boolean,
+  showLastCommit?: boolean,
+  showMetadata?: boolean
+) {
   const prefix = isMain ? '📍' : '🥷'
   const branchName = worktree.branch || '(detached)'
   const status = []

@@ -42,7 +42,7 @@ describe('tmux command', () => {
   beforeEach(async () => {
     vi.resetModules()
     const { tmuxCommand } = await import('../../commands/tmux')
-    
+
     program = new Command()
     program.exitOverride()
     program.addCommand(tmuxCommand)
@@ -221,7 +221,7 @@ describe('tmux command', () => {
 
       // fzfが呼ばれないことを確認
       expect(mockSpawn).not.toHaveBeenCalledWith('fzf', expect.any(Array), expect.any(Object))
-      
+
       // 直接tmuxセッションが作成されることを確認
       expect(mockSpawn).toHaveBeenCalledWith(
         'tmux',
