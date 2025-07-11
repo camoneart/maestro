@@ -142,7 +142,7 @@ export class GitWorktreeManager {
         }
       }
       return null
-    } catch (error) {
+    } catch {
       return null
     }
   }

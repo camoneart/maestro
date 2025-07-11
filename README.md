@@ -1,5 +1,10 @@
 # 🥷 shadow-clone-jutsu
 
+[![CI](https://github.com/hashiramaendure/shadow-clone-jutsu/actions/workflows/ci.yml/badge.svg)](https://github.com/hashiramaendure/shadow-clone-jutsu/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/hashiramaendure/shadow-clone-jutsu/branch/main/graph/badge.svg)](https://codecov.io/gh/hashiramaendure/shadow-clone-jutsu)
+[![npm version](https://badge.fury.io/js/shadow-clone-jutsu.svg)](https://badge.fury.io/js/shadow-clone-jutsu)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 影分身の術（Git Worktree）で、Claude Codeとパラレル開発を実現するCLIツール
 
 ## 概要
@@ -14,21 +19,43 @@ shadow-clone-jutsuは、Git Worktreeをより直感的に管理できるCLIツ�
 - 🎯 **tmux/fzf統合**: 効率的なワークフロー
 - 🎨 **インタラクティブUI**: 美しく使いやすいCLI体験
 
+## デモ
+
+<!-- デモGIFまたはasciinemaをここに追加 -->
+<!-- ![Demo](./docs/demo.gif) -->
+<!-- [![asciicast](https://asciinema.org/a/DEMO_ID.svg)](https://asciinema.org/a/DEMO_ID) -->
+
 ## インストール
 
 ### 前提条件
 
-- Node.js >= 18.0.0
+- Node.js >= 20.0.0
 - Git >= 2.22.0
 - npm または yarn
 
-### グローバルインストール
+### インストール方法
+
+#### Homebrew (macOS)
+
+```bash
+brew tap hashiramaendure/tap
+brew install shadow-clone-jutsu
+```
+
+#### Scoop (Windows)
+
+```powershell
+scoop bucket add hashiramaendure https://github.com/hashiramaendure/scoop-bucket
+scoop install shadow-clone-jutsu
+```
+
+#### npm
 
 ```bash
 npm install -g shadow-clone-jutsu
 ```
 
-または
+#### ソースからインストール
 
 ```bash
 git clone https://github.com/hashiramaendure/shadow-clone-jutsu.git
@@ -56,8 +83,11 @@ scj create issue-123     # issue-123として作成
 # tmuxセッション付きで作成（Claude Code自動起動）
 scj create feature/new-feature --tmux --claude
 
+# Draft PRを自動作成
+scj create feature/new-feature --draft-pr
+
 # 設定可能なオプション
-scj create feature/new-feature --base main --open --setup --tmux --claude
+scj create feature/new-feature --base main --open --setup --tmux --claude --draft-pr
 
 # ベースブランチを指定して作成
 scj create feature/new-feature --base develop
@@ -267,6 +297,10 @@ scj suggest -b --issue 123
 scj suggest --commit
 scj suggest -c --diff
 
+# AI差分レビュー
+scj suggest --review
+scj suggest -r
+
 # 両方を提案
 scj suggest
 
@@ -405,9 +439,6 @@ scj watch --dry
 
 # 確認なしで自動同期
 scj watch --auto
-
-# エイリアス
-scj w
 ```
 
 #### 統合ダッシュボード（Web UI）

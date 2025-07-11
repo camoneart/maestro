@@ -14,7 +14,7 @@ describe('ConfigManager', () => {
 
   beforeEach(() => {
     mockStore = {}
-    
+
     // Confのモック実装
     vi.mocked(Conf).mockImplementation(
       () =>
@@ -42,7 +42,7 @@ describe('ConfigManager', () => {
     it('should set and get config values', () => {
       configManager.set('worktrees', { branchPrefix: 'feature/' })
       const value = configManager.get('worktrees')
-      
+
       expect(value?.branchPrefix).toBe('feature/')
     })
 
@@ -106,10 +106,7 @@ describe('ConfigManager', () => {
       await configManager.loadProjectConfig()
 
       // .scj.jsonを最初に試す
-      expect(fs.readFile).toHaveBeenCalledWith(
-        path.join(process.cwd(), '.scj.json'),
-        'utf-8'
-      )
+      expect(fs.readFile).toHaveBeenCalledWith(path.join(process.cwd(), '.scj.json'), 'utf-8')
       expect(configManager.get('worktrees')?.branchPrefix).toBe('feature/')
       expect(configManager.get('development')?.autoSetup).toBe(false)
       expect(configManager.get('development')?.defaultEditor).toBe('vscode')
@@ -132,7 +129,7 @@ describe('ConfigManager', () => {
 
       // バリデーションエラーはキャッチされるのでrejectしない
       await configManager.loadProjectConfig()
-      
+
       // プロジェクト設定は読み込まれない（null にセットされる）
       const projectConfig = (configManager as any).projectConfig
       expect(projectConfig).toBeNull()
@@ -163,7 +160,7 @@ describe('ConfigManager', () => {
       // Confインスタンスのpathプロパティにアクセス
       const conf = (configManager as any).conf
       conf.path = '/path/to/config'
-      
+
       const path = configManager.getConfigPath()
       expect(path).toBe('/path/to/config')
       expect(typeof path).toBe('string')

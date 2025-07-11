@@ -444,15 +444,15 @@ async function syncEnvironmentFiles(
       'package.json',
       'pnpm-lock.yaml',
       'yarn.lock',
-      'package-lock.json'
-    ]
+      'package-lock.json',
+    ],
   }
 
   // 同期するファイルを決定
   let filesToSync: string[] = config.development?.syncFiles || ['.env', '.env.local']
 
-  if (options.preset && presets[options.preset]) {
-    filesToSync = presets[options.preset]
+  if (options.preset && presets[options.preset as keyof typeof presets]) {
+    filesToSync = presets[options.preset as keyof typeof presets]
   }
 
   // メインワークツリーのパス
@@ -482,8 +482,8 @@ async function syncEnvironmentFiles(
         'jsconfig.json',
         '.prettierrc',
         '.eslintrc.json',
-        'CLAUDE.md'
-      ])
+        'CLAUDE.md',
+      ]),
     ]
 
     for (const file of potentialFiles) {
@@ -508,9 +508,9 @@ async function syncEnvironmentFiles(
         choices: availableFiles.map(file => ({
           name: file,
           value: file,
-          checked: filesToSync.includes(file)
-        }))
-      }
+          checked: filesToSync.includes(file),
+        })),
+      },
     ])
 
     filesToSync = selectedFiles
@@ -522,8 +522,6 @@ async function syncEnvironmentFiles(
   let failedCount = 0
 
   for (const worktree of targetWorktrees) {
-    const branchName = worktree.branch?.replace('refs/heads/', '') || worktree.branch
-
     for (const file of filesToSync) {
       try {
         const sourcePath = path.join(mainWorktree.path, file)
@@ -538,16 +536,14 @@ async function syncEnvironmentFiles(
         // ファイルをコピー
         await fs.copyFile(sourcePath, destPath)
         syncedCount++
-      } catch (error) {
+      } catch {
         failedCount++
         // エラーは無視して続行
       }
     }
   }
 
-  syncSpinner.succeed(
-    `ファイル同期完了: ${syncedCount}個成功, ${failedCount}個失敗`
-  )
+  syncSpinner.succeed(`ファイル同期完了: ${syncedCount}個成功, ${failedCount}個失敗`)
 
   // 同期したファイルの一覧を表示
   if (filesToSync.length > 0) {
