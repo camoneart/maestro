@@ -5,7 +5,6 @@ import inquirer from 'inquirer'
 import { GitWorktreeManager } from '../core/git.js'
 import { execa } from 'execa'
 import fs from 'fs/promises'
-import path from 'path'
 
 interface HealthOptions {
   fix?: boolean
@@ -155,7 +154,6 @@ async function checkWorktreeHealth(worktree: any, mainBranch: string, daysThresh
 
 // 問題を修正
 async function fixIssue(issue: HealthIssue, mainBranch: string): Promise<boolean> {
-  const branch = issue.worktree.branch?.replace('refs/heads/', '') || issue.worktree.branch
   
   try {
     switch (issue.type) {
@@ -211,12 +209,12 @@ function displayHealthReport(allIssues: HealthIssue[], verbose: boolean): void {
     if (!groupedIssues.has(branch)) {
       groupedIssues.set(branch, [])
     }
-    groupedIssues.get(branch)!.push(issue)
+    groupedIssues.get(branch)?.push(issue)
   })
   
   groupedIssues.forEach((issues, branch) => {
     console.log(chalk.cyan(`📁 ${branch}`))
-    console.log(chalk.gray(`   ${issues[0].worktree.path}`))
+    console.log(chalk.gray(`   ${issues[0]?.worktree.path || 'unknown'}`)) 
     
     issues.forEach(issue => {
       const icon = issue.severity === 'critical' ? '🚨' : 
@@ -281,7 +279,7 @@ export const healthCommand = new Command('health')
       
       // 各worktreeの健全性をチェック
       const allIssues: HealthIssue[] = []
-      const daysThreshold = parseInt(options.days || '30')
+      const daysThreshold = parseInt(options.days?.toString() || '30')
       
       for (const worktree of shadowClones) {
         const issues = await checkWorktreeHealth(worktree, mainBranch, daysThreshold)
