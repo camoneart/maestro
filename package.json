@@ -17,7 +17,8 @@
     "test": "vitest",
     "test:e2e": "npm run build && vitest run tests/e2e",
     "test:coverage": "vitest run --coverage",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "update-homebrew-formula": "node scripts/update-homebrew-formula.js"
   },
   "keywords": [
     "git",
