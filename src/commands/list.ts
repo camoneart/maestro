@@ -53,7 +53,7 @@ export const listCommand = new Command('list')
             try {
               const lastCommit = await gitManager.getLastCommit(worktree.path)
               ;(worktree as any).lastCommit = lastCommit
-            } catch (error) {
+            } catch {
               ;(worktree as any).lastCommit = null
             }
           }
@@ -74,7 +74,7 @@ export const listCommand = new Command('list')
 
         // ソート処理
         if (options.sort) {
-          await sortWorktrees(worktrees, options.sort, gitManager)
+          await sortWorktrees(worktrees, options.sort)
         }
 
         if (options?.json) {
@@ -162,7 +162,9 @@ export const listCommand = new Command('list')
           displayWorktree(mainWorktree, true, options.lastCommit, options.metadata)
         }
 
-        cloneWorktrees.forEach(wt => displayWorktree(wt, false, options.lastCommit, options.metadata))
+        cloneWorktrees.forEach(wt =>
+          displayWorktree(wt, false, options.lastCommit, options.metadata)
+        )
 
         console.log(chalk.gray(`\n合計: ${worktrees.length} 個の影分身`))
       } catch (error) {
@@ -172,11 +174,7 @@ export const listCommand = new Command('list')
     }
   )
 
-async function sortWorktrees(
-  worktrees: Worktree[],
-  sortBy: string,
-  gitManager: GitWorktreeManager
-): Promise<void> {
+async function sortWorktrees(worktrees: Worktree[], sortBy: string): Promise<void> {
   switch (sortBy) {
     case 'branch':
       worktrees.sort((a, b) => (a.branch || '').localeCompare(b.branch || ''))
@@ -198,7 +196,7 @@ async function sortWorktrees(
         try {
           const stats = fs.statSync(worktree.path)
           ;(worktree as any).size = stats.size
-        } catch (error) {
+        } catch {
           ;(worktree as any).size = 0
         }
       }
@@ -207,7 +205,12 @@ async function sortWorktrees(
   }
 }
 
-function displayWorktree(worktree: Worktree, isMain: boolean, showLastCommit?: boolean, showMetadata?: boolean) {
+function displayWorktree(
+  worktree: Worktree,
+  isMain: boolean,
+  showLastCommit?: boolean,
+  showMetadata?: boolean
+) {
   const prefix = isMain ? '📍' : '🥷'
   const branchName = worktree.branch || '(detached)'
   const status = []

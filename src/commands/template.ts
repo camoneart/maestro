@@ -53,11 +53,11 @@ function getTemplatePath(name: string, global = false): string {
 // 利用可能なテンプレートを取得
 async function getAvailableTemplates(global = false): Promise<WorktreeTemplate[]> {
   const templates: WorktreeTemplate[] = []
-  
+
   try {
     const templateDir = getTemplateDir(global)
     await fs.mkdir(templateDir, { recursive: true })
-    
+
     const files = await fs.readdir(templateDir)
     for (const file of files) {
       if (file.endsWith('.json')) {
@@ -73,7 +73,7 @@ async function getAvailableTemplates(global = false): Promise<WorktreeTemplate[]
   } catch {
     // エラーは無視
   }
-  
+
   return templates
 }
 
@@ -87,8 +87,8 @@ const defaultTemplates: WorktreeTemplate[] = [
       autoSetup: true,
       syncFiles: ['.env', '.env.local'],
       editor: 'cursor',
-      claude: true
-    }
+      claude: true,
+    },
   },
   {
     name: 'bugfix',
@@ -98,8 +98,8 @@ const defaultTemplates: WorktreeTemplate[] = [
       autoSetup: true,
       syncFiles: ['.env', '.env.local'],
       editor: 'cursor',
-      claude: false
-    }
+      claude: false,
+    },
   },
   {
     name: 'experiment',
@@ -111,9 +111,9 @@ const defaultTemplates: WorktreeTemplate[] = [
       editor: 'none',
       tmux: true,
       hooks: {
-        afterCreate: 'echo "実験開始！"'
-      }
-    }
+        afterCreate: 'echo "実験開始！"',
+      },
+    },
   },
   {
     name: 'docs',
@@ -126,40 +126,44 @@ const defaultTemplates: WorktreeTemplate[] = [
       customFiles: [
         {
           path: 'NOTES.md',
-          content: '# ドキュメント作成メモ\n\n## TODO\n- [ ] \n'
-        }
-      ]
-    }
-  }
+          content: '# ドキュメント作成メモ\n\n## TODO\n- [ ] \n',
+        },
+      ],
+    },
+  },
 ]
 
 // テンプレート一覧を表示
 async function listTemplates(global: boolean): Promise<void> {
   const localTemplates = await getAvailableTemplates(false)
   const globalTemplates = global ? await getAvailableTemplates(true) : []
-  
+
   console.log(chalk.bold('\n📋 利用可能なテンプレート:\n'))
-  
+
   // デフォルトテンプレート
   console.log(chalk.cyan('デフォルトテンプレート:'))
   defaultTemplates.forEach(template => {
     console.log(`  ${chalk.green(template.name)} - ${chalk.gray(template.description)}`)
     console.log(chalk.gray(`    ブランチ接頭辞: ${template.config.branchPrefix || 'なし'}`))
   })
-  
+
   // ローカルテンプレート
   if (localTemplates.length > 0) {
     console.log(chalk.cyan('\nローカルテンプレート:'))
     localTemplates.forEach(template => {
-      console.log(`  ${chalk.blue(template.name)} - ${chalk.gray(template.description || '説明なし')}`)
+      console.log(
+        `  ${chalk.blue(template.name)} - ${chalk.gray(template.description || '説明なし')}`
+      )
     })
   }
-  
+
   // グローバルテンプレート
   if (globalTemplates.length > 0) {
     console.log(chalk.cyan('\nグローバルテンプレート:'))
     globalTemplates.forEach(template => {
-      console.log(`  ${chalk.magenta(template.name)} - ${chalk.gray(template.description || '説明なし')}`)
+      console.log(
+        `  ${chalk.magenta(template.name)} - ${chalk.gray(template.description || '説明なし')}`
+      )
     })
   }
 }
@@ -167,30 +171,30 @@ async function listTemplates(global: boolean): Promise<void> {
 // テンプレートを保存
 async function saveTemplate(name: string, global: boolean): Promise<void> {
   const spinner = ora('現在の設定を読み込み中...').start()
-  
+
   try {
     const configManager = new ConfigManager()
     await configManager.loadProjectConfig()
     const currentConfig = configManager.getAll()
-    
+
     spinner.stop()
-    
+
     // テンプレート情報を入力
     const { description, includeFiles } = await inquirer.prompt([
       {
         type: 'input',
         name: 'description',
         message: 'テンプレートの説明:',
-        default: `${name}用のテンプレート`
+        default: `${name}用のテンプレート`,
       },
       {
         type: 'confirm',
         name: 'includeFiles',
         message: 'カスタムファイルを含めますか？',
-        default: false
-      }
+        default: false,
+      },
     ])
-    
+
     const template: WorktreeTemplate = {
       name,
       description,
@@ -199,48 +203,48 @@ async function saveTemplate(name: string, global: boolean): Promise<void> {
         autoSetup: currentConfig.development?.autoSetup,
         syncFiles: currentConfig.development?.syncFiles,
         editor: currentConfig.development?.defaultEditor,
-        hooks: currentConfig.hooks
-      }
+        hooks: currentConfig.hooks,
+      },
     }
-    
+
     // カスタムファイルの追加
     if (includeFiles) {
       const customFiles: Array<{ path: string; content: string }> = []
       let addMore = true
-      
+
       while (addMore) {
         const { filePath, fileContent, continueAdding } = await inquirer.prompt([
           {
             type: 'input',
             name: 'filePath',
             message: 'ファイルパス（worktree内の相対パス）:',
-            validate: input => input.trim().length > 0 || 'パスを入力してください'
+            validate: input => input.trim().length > 0 || 'パスを入力してください',
           },
           {
             type: 'editor',
             name: 'fileContent',
-            message: 'ファイル内容:'
+            message: 'ファイル内容:',
           },
           {
             type: 'confirm',
             name: 'continueAdding',
             message: 'さらにファイルを追加しますか？',
-            default: false
-          }
+            default: false,
+          },
         ])
-        
+
         customFiles.push({ path: filePath, content: fileContent })
         addMore = continueAdding
       }
-      
+
       template.config.customFiles = customFiles
     }
-    
+
     // テンプレートを保存
     const templatePath = getTemplatePath(name, global)
     await fs.mkdir(path.dirname(templatePath), { recursive: true })
     await fs.writeFile(templatePath, JSON.stringify(template, null, 2))
-    
+
     console.log(chalk.green(`✨ テンプレート '${name}' を保存しました`))
     console.log(chalk.gray(`パス: ${templatePath}`))
   } catch (error) {
@@ -253,26 +257,26 @@ async function saveTemplate(name: string, global: boolean): Promise<void> {
 async function applyTemplate(templateName: string): Promise<Record<string, any>> {
   // デフォルトテンプレートを確認
   let template = defaultTemplates.find(t => t.name === templateName)
-  
+
   // ローカルテンプレートを確認
   if (!template) {
     const localTemplates = await getAvailableTemplates(false)
     template = localTemplates.find(t => t.name === templateName)
   }
-  
+
   // グローバルテンプレートを確認
   if (!template) {
     const globalTemplates = await getAvailableTemplates(true)
     template = globalTemplates.find(t => t.name === templateName)
   }
-  
+
   if (!template) {
     throw new Error(`テンプレート '${templateName}' が見つかりません`)
   }
-  
+
   console.log(chalk.green(`✨ テンプレート '${templateName}' を適用します`))
   console.log(chalk.gray(template.description))
-  
+
   // 設定を返す（createコマンドで使用）
   return {
     branchPrefix: template.config.branchPrefix,
@@ -282,26 +286,26 @@ async function applyTemplate(templateName: string): Promise<Record<string, any>>
     tmux: template.config.tmux,
     claude: template.config.claude,
     hooks: template.config.hooks,
-    customFiles: template.config.customFiles
+    customFiles: template.config.customFiles,
   }
 }
 
 // テンプレートを削除
 async function deleteTemplate(name: string, global: boolean): Promise<void> {
   const templatePath = getTemplatePath(name, global)
-  
+
   try {
     await fs.access(templatePath)
-    
+
     const { confirmDelete } = await inquirer.prompt([
       {
         type: 'confirm',
         name: 'confirmDelete',
         message: `テンプレート '${name}' を削除しますか？`,
-        default: false
-      }
+        default: false,
+      },
     ])
-    
+
     if (confirmDelete) {
       await fs.unlink(templatePath)
       console.log(chalk.green(`✨ テンプレート '${name}' を削除しました`))
@@ -324,21 +328,20 @@ export const templateCommand = new Command('template')
       if (options.list || Object.keys(options).length === 0) {
         await listTemplates(options.global || false)
       }
-      
+
       if (options.save) {
         await saveTemplate(options.save, options.global || false)
       }
-      
+
       if (options.apply) {
         const config = await applyTemplate(options.apply)
         console.log(chalk.gray('\n適用される設定:'))
         console.log(JSON.stringify(config, null, 2))
       }
-      
+
       if (options.delete) {
         await deleteTemplate(options.delete, options.global || false)
       }
-      
     } catch (error) {
       console.error(chalk.red(error instanceof Error ? error.message : '不明なエラー'))
       process.exit(1)

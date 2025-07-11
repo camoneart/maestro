@@ -1,0 +1,49 @@
+{
+  "version": "0.1.0",
+  "description": "Git Worktree management tool with Claude Code integration",
+  "homepage": "https://github.com/hashiramaendure/shadow-clone-jutsu",
+  "license": "MIT",
+  "architecture": {
+    "64bit": {
+      "url": "https://registry.npmjs.org/shadow-clone-jutsu/-/shadow-clone-jutsu-0.1.0.tgz",
+      "hash": "PLACEHOLDER_SHA256"
+    }
+  },
+  "depends": "nodejs",
+  "pre_install": [
+    "if (!(Test-Path \"$dir\\node_modules\")) {",
+    "    Write-Host 'Installing shadow-clone-jutsu...' -ForegroundColor Yellow",
+    "    npm install --production --prefix \"$dir\"",
+    "}"
+  ],
+  "bin": [
+    [
+      "node_modules\\shadow-clone-jutsu\\dist\\cli.js",
+      "scj"
+    ],
+    [
+      "node_modules\\shadow-clone-jutsu\\dist\\cli.js",
+      "shadow-clone-jutsu"
+    ]
+  ],
+  "checkver": {
+    "url": "https://registry.npmjs.org/shadow-clone-jutsu/latest",
+    "regex": "\"version\":\\s*\"([\\d.]+)\""
+  },
+  "autoupdate": {
+    "architecture": {
+      "64bit": {
+        "url": "https://registry.npmjs.org/shadow-clone-jutsu/-/shadow-clone-jutsu-$version.tgz"
+      }
+    }
+  },
+  "notes": [
+    "shadow-clone-jutsu has been installed!",
+    "",
+    "To get started, run:",
+    "  scj --help",
+    "",
+    "For more information, visit:",
+    "  https://github.com/hashiramaendure/shadow-clone-jutsu"
+  ]
+}

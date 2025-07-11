@@ -1,5 +1,3 @@
-import { vi } from 'vitest'
-
 // gh repo viewのモックレスポンス
 export const mockGhRepoView = () => {
   return {
