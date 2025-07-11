@@ -4,7 +4,6 @@ import ora from 'ora'
 import inquirer from 'inquirer'
 import { GitWorktreeManager } from '../core/git.js'
 import { ConfigManager } from '../core/config.js'
-import { execa } from 'execa'
 import chokidar from 'chokidar'
 import path from 'path'
 import fs from 'fs/promises'
@@ -115,7 +114,6 @@ export const watchCommand = new Command('watch')
       const gitManager = new GitWorktreeManager()
       const configManager = new ConfigManager()
       await configManager.loadProjectConfig()
-      const config = configManager.getAll()
       
       // Gitリポジトリかチェック
       const isGitRepo = await gitManager.isGitRepository()
@@ -200,7 +198,7 @@ export const watchCommand = new Command('watch')
       
       // 変更バッファ（バッチ処理用）
       const changeBuffer: Map<string, FileChange> = new Map()
-      let syncTimeout: NodeJS.Timeout | null = null
+      let syncTimeout: ReturnType<typeof setTimeout> | null = null
       
       // バッチ同期処理
       const processBatchSync = async () => {

@@ -451,8 +451,8 @@ async function syncEnvironmentFiles(
   // 同期するファイルを決定
   let filesToSync: string[] = config.development?.syncFiles || ['.env', '.env.local']
 
-  if (options.preset && presets[options.preset]) {
-    filesToSync = presets[options.preset]
+  if (options.preset && presets[options.preset as keyof typeof presets]) {
+    filesToSync = presets[options.preset as keyof typeof presets]
   }
 
   // メインワークツリーのパス
@@ -522,8 +522,6 @@ async function syncEnvironmentFiles(
   let failedCount = 0
 
   for (const worktree of targetWorktrees) {
-    const branchName = worktree.branch?.replace('refs/heads/', '') || worktree.branch
-
     for (const file of filesToSync) {
       try {
         const sourcePath = path.join(mainWorktree.path, file)
@@ -538,7 +536,7 @@ async function syncEnvironmentFiles(
         // ファイルをコピー
         await fs.copyFile(sourcePath, destPath)
         syncedCount++
-      } catch (error) {
+      } catch {
         failedCount++
         // エラーは無視して続行
       }
