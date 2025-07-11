@@ -405,9 +405,6 @@ scj watch --dry
 
 # 確認なしで自動同期
 scj watch --auto
-
-# エイリアス
-scj w
 ```
 
 #### 統合ダッシュボード（Web UI）
