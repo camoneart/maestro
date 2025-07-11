@@ -13,6 +13,7 @@
     "start": "node dist/cli.js",
     "lint": "eslint src --ext .ts",
     "format": "prettier --write 'src/**/*.ts'",
+    "prettier:check": "prettier --check 'src/**/*.ts'",
     "test": "vitest",
     "test:e2e": "npm run build && vitest run tests/e2e",
     "test:coverage": "vitest run --coverage",
@@ -29,6 +30,9 @@
   "author": "",
   "license": "MIT",
   "packageManager": "pnpm@10.13.1",
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "dependencies": {
     "@modelcontextprotocol/sdk": "1.15.0",
     "@types/cli-progress": "3.11.6",
@@ -46,7 +50,7 @@
   },
   "devDependencies": {
     "@types/inquirer": "9.0.8",
-    "@types/node": "24.0.12",
+    "@types/node": "22",
     "@typescript-eslint/eslint-plugin": "8.36.0",
     "@typescript-eslint/parser": "8.36.0",
     "eslint": "9.30.1",
