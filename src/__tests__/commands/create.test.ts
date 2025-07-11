@@ -115,7 +115,7 @@ describe('create command', () => {
 
     it('should prompt for branch name if not provided', async () => {
       const suggestedBranch = 'new-feature'
-      
+
       vi.mocked(inquirer.prompt).mockResolvedValueOnce({
         branchName: suggestedBranch,
       })
@@ -137,7 +137,7 @@ describe('create command', () => {
   describe('environment setup', () => {
     it('should run npm install when autoSetup is true', async () => {
       const worktreePath = '/path/to/worktree'
-      
+
       vi.mocked(execa).mockResolvedValue({
         stdout: '',
         stderr: '',

@@ -22,7 +22,7 @@ vi.mock('../../core/git', () => {
   const mockGitManager = {
     isGitRepository: vi.fn().mockResolvedValue(true),
   }
-  
+
   return {
     GitWorktreeManager: vi.fn().mockImplementation(() => mockGitManager),
   }
@@ -36,7 +36,7 @@ describe.skip('issue command', () => {
   beforeEach(async () => {
     vi.resetModules()
     const { issueCommand } = await import('../../commands/issue')
-    
+
     program = new Command()
     program.exitOverride() // process.exitを防ぐ
     program.addCommand(issueCommand)
@@ -97,10 +97,14 @@ describe.skip('issue command', () => {
 
       await program.parseAsync(['node', 'test', 'issue', '--list'])
 
-      expect(mockExeca).toHaveBeenCalledWith(
-        'gh',
-        ['issue', 'list', '--json', 'number,title,author,state,labels,assignees', '--limit', '30']
-      )
+      expect(mockExeca).toHaveBeenCalledWith('gh', [
+        'issue',
+        'list',
+        '--json',
+        'number,title,author,state,labels,assignees',
+        '--limit',
+        '30',
+      ])
     })
   })
 
@@ -139,7 +143,14 @@ describe.skip('issue command', () => {
       expect(mockInquirer.prompt).toHaveBeenCalled()
       expect(mockExeca).toHaveBeenCalledWith(
         'gh',
-        expect.arrayContaining(['issue', 'create', '--title', 'New Issue', '--body', 'Issue description'])
+        expect.arrayContaining([
+          'issue',
+          'create',
+          '--title',
+          'New Issue',
+          '--body',
+          'Issue description',
+        ])
       )
     })
   })
@@ -174,10 +185,13 @@ describe.skip('issue command', () => {
 
       await program.parseAsync(['node', 'test', 'issue', '1'])
 
-      expect(mockExeca).toHaveBeenCalledWith(
-        'gh',
-        ['issue', 'view', '1', '--json', 'number,title,state,body,labels,author,assignees,createdAt,updatedAt']
-      )
+      expect(mockExeca).toHaveBeenCalledWith('gh', [
+        'issue',
+        'view',
+        '1',
+        '--json',
+        'number,title,state,body,labels,author,assignees,createdAt,updatedAt',
+      ])
     })
 
     it('should handle web view option', async () => {
@@ -200,9 +214,12 @@ describe.skip('issue command', () => {
   describe('error handling', () => {
     it('should handle non-git repository', async () => {
       const { GitWorktreeManager } = await import('../../core/git')
-      vi.mocked(GitWorktreeManager).mockImplementation(() => ({
-        isGitRepository: vi.fn().mockResolvedValue(false),
-      }) as any)
+      vi.mocked(GitWorktreeManager).mockImplementation(
+        () =>
+          ({
+            isGitRepository: vi.fn().mockResolvedValue(false),
+          }) as any
+      )
 
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
 

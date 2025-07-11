@@ -172,45 +172,45 @@ async function refreshStatus(prNumber: string): Promise<PullRequest> {
 // 自動レビュー&マージフロー
 async function autoReviewFlow(_branchName: string, baseBranch: string = 'main'): Promise<void> {
   const autoSpinner = ora('自動レビュー&マージフローを開始中...').start()
-  
+
   try {
     // 1. fetch origin main && rebase origin/main
     autoSpinner.text = 'ベースブランチをフェッチ中...'
     await execa('git', ['fetch', 'origin', baseBranch])
-    
+
     autoSpinner.text = 'リベース中...'
     try {
       await execa('git', ['rebase', `origin/${baseBranch}`])
       autoSpinner.succeed('リベースが完了しました')
     } catch {
       autoSpinner.warn('競合が発生しました')
-      
+
       // 2. 競合が出たらclaude /resolve-conflictを起動
       console.log(chalk.yellow('\n🔧 競合を解決するためにClaude Codeを起動します...'))
       console.log(chalk.gray('Claude Codeで以下のコマンドを実行してください:'))
       console.log(chalk.cyan('  /resolve-conflict'))
-      
+
       try {
         await execa('claude', [], { stdio: 'inherit' })
       } catch {
         console.log(chalk.red('Claude Codeの起動に失敗しました'))
         throw new ReviewCommandError('競合解決のためにClaude Codeを手動で起動してください')
       }
-      
+
       return
     }
-    
+
     // 3. claude /review --diff origin/main でコードレビュー
     console.log(chalk.blue('\n📝 Claude Codeでコードレビューを実行します...'))
     console.log(chalk.gray('Claude Codeで以下のコマンドを実行してください:'))
     console.log(chalk.cyan(`  /review --diff origin/${baseBranch}`))
-    
+
     try {
       await execa('claude', [], { stdio: 'inherit' })
     } catch {
       console.log(chalk.yellow('Claude Codeの起動に失敗しました'))
     }
-    
+
     // 4. claude "Generate Conventional Commit message" でコミット作成
     const { useConventionalCommit } = await inquirer.prompt([
       {
@@ -220,19 +220,19 @@ async function autoReviewFlow(_branchName: string, baseBranch: string = 'main'):
         default: true,
       },
     ])
-    
+
     if (useConventionalCommit) {
       console.log(chalk.blue('\n💬 Conventional Commitメッセージを生成中...'))
       console.log(chalk.gray('Claude Codeで以下のコマンドを実行してください:'))
       console.log(chalk.cyan('  "Generate Conventional Commit message for current changes"'))
-      
+
       try {
         await execa('claude', [], { stdio: 'inherit' })
       } catch {
         console.log(chalk.yellow('Claude Codeの起動に失敗しました'))
       }
     }
-    
+
     // 5. GitHub PR を API 経由で作成
     const { createPR } = await inquirer.prompt([
       {
@@ -242,7 +242,7 @@ async function autoReviewFlow(_branchName: string, baseBranch: string = 'main'):
         default: true,
       },
     ])
-    
+
     if (createPR) {
       const prSpinner = ora('GitHub PRを作成中...').start()
       try {
@@ -253,7 +253,6 @@ async function autoReviewFlow(_branchName: string, baseBranch: string = 'main'):
         console.error(chalk.red(error instanceof Error ? error.message : '不明なエラー'))
       }
     }
-    
   } catch (error) {
     autoSpinner.fail('自動レビューフローでエラーが発生しました')
     throw new ReviewCommandError(error instanceof Error ? error.message : '不明なエラー')

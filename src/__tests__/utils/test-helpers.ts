@@ -14,7 +14,7 @@ export const createMockWorktree = (overrides?: Partial<Worktree>): Worktree => (
 })
 
 export const createMockWorktrees = (count: number): Worktree[] => {
-  return Array.from({ length: count }, (_, i) => 
+  return Array.from({ length: count }, (_, i) =>
     createMockWorktree({
       path: `/path/to/worktree-${i}`,
       branch: `refs/heads/feature-${i}`,
@@ -92,18 +92,18 @@ export const createMockSpinner = () => {
     text: '',
     isSpinning: false,
   }
-  
-  spinner.start.mockImplementation(function(text?: string) {
+
+  spinner.start.mockImplementation(function (text?: string) {
     if (text) spinner.text = text
     spinner.isSpinning = true
     return spinner
   })
-  
-  spinner.stop.mockImplementation(function() {
+
+  spinner.stop.mockImplementation(function () {
     spinner.isSpinning = false
     return spinner
   })
-  
+
   return spinner
 }
 

@@ -44,7 +44,7 @@ describe('github command', () => {
   beforeEach(async () => {
     vi.resetModules()
     const { githubCommand } = await import('../../commands/github')
-    
+
     program = new Command()
     program.exitOverride()
     program.addCommand(githubCommand)
@@ -79,7 +79,6 @@ describe('github command', () => {
         },
       },
     })
-
   })
 
   afterEach(() => {
@@ -113,10 +112,13 @@ describe('github command', () => {
 
       await program.parseAsync(['node', 'test', 'github', 'checkout', '123'])
 
-      expect(mockExeca).toHaveBeenCalledWith(
-        'gh',
-        ['pr', 'view', '123', '--json', 'number,title,headRefName']
-      )
+      expect(mockExeca).toHaveBeenCalledWith('gh', [
+        'pr',
+        'view',
+        '123',
+        '--json',
+        'number,title,headRefName',
+      ])
       expect(mockGitWorktreeManagerInstance.attachWorktree).toHaveBeenCalledWith('feature-branch')
     })
 
@@ -165,7 +167,7 @@ describe('github command', () => {
         number: 456,
         title: 'Bug report',
       }
-      
+
       // inquirer.promptのモック設定
       mockInquirer.prompt.mockResolvedValueOnce({ confirmCreate: true })
 
@@ -188,10 +190,13 @@ describe('github command', () => {
 
       await program.parseAsync(['node', 'test', 'github', 'issue', '456'])
 
-      expect(mockExeca).toHaveBeenCalledWith(
-        'gh',
-        ['issue', 'view', '456', '--json', 'number,title']
-      )
+      expect(mockExeca).toHaveBeenCalledWith('gh', [
+        'issue',
+        'view',
+        '456',
+        '--json',
+        'number,title',
+      ])
       expect(mockGitWorktreeManagerInstance.createWorktree).toHaveBeenCalledWith('issue-456')
     })
 
@@ -208,7 +213,7 @@ describe('github command', () => {
         number: 789,
         title: 'Feature Request',
       }
-      
+
       // inquirer.promptのモック設定
       mockInquirer.prompt.mockResolvedValueOnce({ confirmCreate: true })
 
@@ -231,7 +236,9 @@ describe('github command', () => {
 
       await program.parseAsync(['node', 'test', 'github', 'issue', '789'])
 
-      expect(mockGitWorktreeManagerInstance.createWorktree).toHaveBeenCalledWith('issue-789-feature-request')
+      expect(mockGitWorktreeManagerInstance.createWorktree).toHaveBeenCalledWith(
+        'issue-789-feature-request'
+      )
     })
   })
 
@@ -253,15 +260,18 @@ describe('github command', () => {
 
       await program.parseAsync(['node', 'test', 'github', 'comment', '123', '-m', 'Great work!'])
 
-      expect(mockExeca).toHaveBeenCalledWith(
-        'gh',
-        ['pr', 'comment', '123', '--body', 'Great work!']
-      )
+      expect(mockExeca).toHaveBeenCalledWith('gh', [
+        'pr',
+        'comment',
+        '123',
+        '--body',
+        'Great work!',
+      ])
     })
 
     it('should prompt for comment body if not provided', async () => {
       mockInquirer.prompt.mockResolvedValueOnce({
-        comment: 'Interactive comment',  // 'message' ではなく 'comment'
+        comment: 'Interactive comment', // 'message' ではなく 'comment'
       })
 
       // detectTypeのためのモック
@@ -281,10 +291,13 @@ describe('github command', () => {
       await program.parseAsync(['node', 'test', 'github', 'comment', '123'])
 
       expect(mockInquirer.prompt).toHaveBeenCalled()
-      expect(mockExeca).toHaveBeenCalledWith(
-        'gh',
-        ['pr', 'comment', '123', '--body', 'Interactive comment']
-      )
+      expect(mockExeca).toHaveBeenCalledWith('gh', [
+        'pr',
+        'comment',
+        '123',
+        '--body',
+        'Interactive comment',
+      ])
     })
   })
 
