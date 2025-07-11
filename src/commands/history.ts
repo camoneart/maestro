@@ -4,7 +4,6 @@ import ora from 'ora'
 import inquirer from 'inquirer'
 import { GitWorktreeManager } from '../core/git.js'
 import { ConfigManager } from '../core/config.js'
-import { execa } from 'execa'
 import path from 'path'
 import fs from 'fs/promises'
 import { homedir } from 'os'
@@ -142,7 +141,7 @@ async function exportHistories(histories: ClaudeHistory[], outputPath: string): 
     const exportData = {
       exportedAt: new Date().toISOString(),
       totalHistories: histories.length,
-      histories: []
+      histories: [] as any[]
     }
     
     for (const history of histories) {
@@ -326,7 +325,7 @@ export const historyCommand = new Command('history')
       }
       
       if (options.merge) {
-        await mergeHistories(histories, options.merge)
+        await mergeHistories(histories, 'merged-history.md')
       }
       
       if (options.cleanup) {

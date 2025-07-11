@@ -44,10 +44,10 @@ async function getTmuxSessions(): Promise<TmuxSession[]> {
       .map(line => {
         const [name, attached, windows, created] = line.split(':')
         return {
-          name,
+          name: name || 'unknown',
           attached: attached === '1',
-          windows: parseInt(windows, 10),
-          created: new Date(parseInt(created, 10) * 1000).toLocaleString(),
+          windows: parseInt(windows || '0', 10),
+          created: new Date(parseInt(created || '0', 10) * 1000).toLocaleString(),
         }
       })
   } catch {
@@ -175,7 +175,40 @@ export const tmuxCommand = new Command('tmux')
           process.exit(1)
         }
         
-        await openInTmux(worktree.path, branchName, options)
+        // 直接tmuxセッションを作成
+        const sessionName = branchName.replace(/[^a-zA-Z0-9_-]/g, '-')
+        const editorCmd = options.editor ? getEditorCommand(options.editor) : ''
+        const tmuxArgs = ['new-session', '-s', sessionName, '-c', worktree.path]
+        
+        if (options.detach) {
+          tmuxArgs.push('-d')
+          if (editorCmd) {
+            tmuxArgs.push(editorCmd)
+          }
+          
+          try {
+            await execa('tmux', tmuxArgs)
+            console.log(chalk.cyan(`\n新しいtmuxセッション '${sessionName}' を作成しました`))
+            const sessions = await getTmuxSessions()
+            displaySessionsTable(sessions)
+          } catch (error) {
+            if (error instanceof Error && error.message.includes('duplicate session')) {
+              console.log(chalk.yellow(`\nセッション '${sessionName}' は既に存在します`))
+              const sessions = await getTmuxSessions()
+              displaySessionsTable(sessions)
+            } else {
+              throw error
+            }
+          }
+        } else {
+          console.log(chalk.cyan(`\n新しいtmuxセッション '${sessionName}' を作成します...`))
+          
+          if (editorCmd) {
+            spawn('tmux', [...tmuxArgs, editorCmd], { stdio: 'inherit' })
+          } else {
+            spawn('tmux', tmuxArgs, { stdio: 'inherit' })
+          }
+        }
         return
       }
 

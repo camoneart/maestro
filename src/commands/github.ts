@@ -223,6 +223,9 @@ export const githubCommand = new Command('github')
           number = inputNumber
 
           spinner.start('PR/Issueを確認中...')
+          if (!number) {
+            throw new GithubCommandError('PR/Issue番号が指定されていません')
+          }
           const targetType = await detectType(number)
           spinner.stop()
 
