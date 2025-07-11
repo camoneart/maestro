@@ -27,13 +27,22 @@ shadow-clone-jutsuは、Git Worktreeをより直感的に管理できるCLIツ�
 - Git >= 2.22.0
 - npm または yarn
 
-### グローバルインストール
+### インストール方法
+
+#### Homebrew (macOS)
+
+```bash
+brew tap hashiramaendure/tap
+brew install shadow-clone-jutsu
+```
+
+#### npm
 
 ```bash
 npm install -g shadow-clone-jutsu
 ```
 
-または
+#### ソースからインストール
 
 ```bash
 git clone https://github.com/hashiramaendure/shadow-clone-jutsu.git
