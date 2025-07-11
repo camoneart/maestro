@@ -83,8 +83,11 @@ scj create issue-123     # issue-123として作成
 # tmuxセッション付きで作成（Claude Code自動起動）
 scj create feature/new-feature --tmux --claude
 
+# Draft PRを自動作成
+scj create feature/new-feature --draft-pr
+
 # 設定可能なオプション
-scj create feature/new-feature --base main --open --setup --tmux --claude
+scj create feature/new-feature --base main --open --setup --tmux --claude --draft-pr
 
 # ベースブランチを指定して作成
 scj create feature/new-feature --base develop
