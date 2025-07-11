@@ -38,16 +38,19 @@ describe('review command', () => {
   beforeEach(async () => {
     vi.clearAllMocks()
     vi.resetModules()
-    
+
     // GitWorktreeManagerのモックをリセット
     const { GitWorktreeManager } = await import('../../core/git')
-    vi.mocked(GitWorktreeManager).mockImplementation(() => ({
-      isGitRepository: vi.fn().mockResolvedValue(true),
-      createWorktree: vi.fn().mockResolvedValue('/path/to/worktree'),
-      attachWorktree: vi.fn().mockResolvedValue('/path/to/worktree'),
-      listWorktrees: vi.fn().mockResolvedValue([]),
-    } as any))
-    
+    vi.mocked(GitWorktreeManager).mockImplementation(
+      () =>
+        ({
+          isGitRepository: vi.fn().mockResolvedValue(true),
+          createWorktree: vi.fn().mockResolvedValue('/path/to/worktree'),
+          attachWorktree: vi.fn().mockResolvedValue('/path/to/worktree'),
+          listWorktrees: vi.fn().mockResolvedValue([]),
+        }) as any
+    )
+
     const { reviewCommand } = await import('../../commands/review')
 
     program = new Command()
@@ -173,13 +176,7 @@ describe('review command', () => {
 
       await program.parseAsync(['node', 'test', 'review', '123', '--comment', 'LGTM'])
 
-      expect(mockExeca).toHaveBeenCalledWith('gh', [
-        'pr',
-        'comment',
-        '123',
-        '--body',
-        'LGTM',
-      ])
+      expect(mockExeca).toHaveBeenCalledWith('gh', ['pr', 'comment', '123', '--body', 'LGTM'])
     })
   })
 

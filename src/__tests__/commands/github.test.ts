@@ -44,7 +44,7 @@ describe('github command', () => {
   beforeEach(async () => {
     vi.clearAllMocks()
     vi.resetModules()
-    
+
     // GitWorktreeManagerのモックをリセット
     mockGitWorktreeManagerInstance = {
       isGitRepository: vi.fn().mockResolvedValue(true),
@@ -53,7 +53,7 @@ describe('github command', () => {
     }
     const { GitWorktreeManager } = await import('../../core/git')
     vi.mocked(GitWorktreeManager).mockImplementation(() => mockGitWorktreeManagerInstance)
-    
+
     const { githubCommand } = await import('../../commands/github')
 
     program = new Command()
@@ -195,8 +195,10 @@ describe('github command', () => {
         expect(error).toBeDefined()
       }
 
-      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('PR/Issue番号を指定してください'))
-      
+      expect(consoleSpy).toHaveBeenCalledWith(
+        expect.stringContaining('PR/Issue番号を指定してください')
+      )
+
       consoleSpy.mockRestore()
       consoleLogSpy.mockRestore()
     })
@@ -366,7 +368,7 @@ describe('github command', () => {
 
       // インタラクティブな入力をスキップするために、inquirer.promptをモック
       mockInquirer.prompt.mockResolvedValueOnce({ comment: 'Closing' })
-      
+
       await program.parseAsync(['node', 'test', 'github', 'comment', '123', '--close'])
 
       // detectTypeとcomment サブコマンドの処理により、実際の順序は変わる
@@ -390,7 +392,7 @@ describe('github command', () => {
 
       // インタラクティブな入力をスキップするために、inquirer.promptをモック
       mockInquirer.prompt.mockResolvedValueOnce({ comment: 'Reopening' })
-      
+
       await program.parseAsync(['node', 'test', 'github', 'comment', '123', '--reopen'])
 
       // detectTypeとcomment サブコマンドの処理により、実際の順序は変わる
