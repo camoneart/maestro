@@ -1,5 +1,10 @@
 # 🥷 shadow-clone-jutsu
 
+[![CI](https://github.com/hashiramaendure/shadow-clone-jutsu/actions/workflows/ci.yml/badge.svg)](https://github.com/hashiramaendure/shadow-clone-jutsu/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/hashiramaendure/shadow-clone-jutsu/branch/main/graph/badge.svg)](https://codecov.io/gh/hashiramaendure/shadow-clone-jutsu)
+[![npm version](https://badge.fury.io/js/shadow-clone-jutsu.svg)](https://badge.fury.io/js/shadow-clone-jutsu)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 影分身の術（Git Worktree）で、Claude Codeとパラレル開発を実現するCLIツール
 
 ## 概要
@@ -18,7 +23,7 @@ shadow-clone-jutsuは、Git Worktreeをより直感的に管理できるCLIツ�
 
 ### 前提条件
 
-- Node.js >= 18.0.0
+- Node.js >= 20.0.0
 - Git >= 2.22.0
 - npm または yarn
 
