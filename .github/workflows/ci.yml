@@ -34,6 +34,13 @@ jobs:
       - name: Run ESLint
         run: pnpm run lint
 
+      - name: Check no-explicit-any warnings count
+        run: |
+          # Count @typescript-eslint/no-explicit-any warnings
+          WARNING_COUNT=$(pnpm run lint 2>&1 | grep -c "@typescript-eslint/no-explicit-any" || true)
+          echo "Found $WARNING_COUNT @typescript-eslint/no-explicit-any warnings"
+          echo "Note: These warnings are allowed for now but should be reduced over time"
+
       - name: Run Prettier check
         run: pnpm run prettier:check
 
@@ -84,8 +91,23 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Check for skipped tests
+        run: |
+          if grep -r '\.skip(' src/__tests__ e2e --include='*.test.ts' --include='*.test.tsx' 2>/dev/null; then
+            echo "Error: Found .skip() in test files. All tests must be enabled."
+            exit 1
+          fi
+          echo "No skipped tests found ✓"
+
       - name: Run unit tests
         run: pnpm run test
+
+      - name: Generate coverage report (informational)
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '20'
+        run: |
+          # Run coverage but don't fail on thresholds
+          pnpm run test:coverage --coverage.thresholds.lines=0 --coverage.thresholds.functions=0 --coverage.thresholds.branches=0 --coverage.thresholds.statements=0 || true
+        continue-on-error: true
 
       - name: Build
         run: pnpm run build
