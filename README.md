@@ -297,6 +297,10 @@ scj suggest -b --issue 123
 scj suggest --commit
 scj suggest -c --diff
 
+# AI差分レビュー
+scj suggest --review
+scj suggest -r
+
 # 両方を提案
 scj suggest
 
