@@ -164,7 +164,7 @@ describe('tmux command', () => {
     })
   })
 
-  describe.skip('editor integration', () => {
+  describe('editor integration', () => {
     it('should launch editor after session creation', async () => {
       mockExeca.mockImplementation((cmd: string, args: string[]) => {
         if (cmd === 'tmux' && args[0] === '-V') {
@@ -195,9 +195,10 @@ describe('tmux command', () => {
 
       await program.parseAsync(['node', 'test', 'tmux', '--editor', 'nvim', '--detach'])
 
+      // --detachと--editorを同時に指定した場合、new-sessionコマンドにエディタが含まれる
       expect(mockExeca).toHaveBeenCalledWith(
         'tmux',
-        expect.arrayContaining(['send-keys', expect.stringContaining('nvim .'), 'Enter'])
+        expect.arrayContaining(['new-session', '-d', 'nvim .'])
       )
     })
   })

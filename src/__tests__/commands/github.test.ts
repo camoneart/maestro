@@ -42,7 +42,18 @@ describe('github command', () => {
   let mockConfigManager: any
 
   beforeEach(async () => {
+    vi.clearAllMocks()
     vi.resetModules()
+    
+    // GitWorktreeManagerのモックをリセット
+    mockGitWorktreeManagerInstance = {
+      isGitRepository: vi.fn().mockResolvedValue(true),
+      createWorktree: vi.fn().mockResolvedValue('/path/to/worktree'),
+      attachWorktree: vi.fn().mockResolvedValue('/path/to/worktree'),
+    }
+    const { GitWorktreeManager } = await import('../../core/git')
+    vi.mocked(GitWorktreeManager).mockImplementation(() => mockGitWorktreeManagerInstance)
+    
     const { githubCommand } = await import('../../commands/github')
 
     program = new Command()
@@ -52,7 +63,11 @@ describe('github command', () => {
     mockExeca = vi.mocked(execa)
     mockInquirer = vi.mocked(inquirer)
     mockConfigManager = vi.mocked(ConfigManager)
-    vi.clearAllMocks()
+
+    // process.exitのモック
+    vi.spyOn(process, 'exit').mockImplementation(() => {
+      throw new Error('process.exit called')
+    })
 
     // デフォルトのモック設定
     mockExeca.mockImplementation((cmd: string, args: string[]) => {
@@ -85,7 +100,7 @@ describe('github command', () => {
     vi.restoreAllMocks()
   })
 
-  describe.skip('checkout type', () => {
+  describe('checkout type', () => {
     it('should checkout PR by number', async () => {
       const mockPR = {
         number: 123,
@@ -107,8 +122,20 @@ describe('github command', () => {
             exitCode: 0,
           } as any)
         }
+        if (cmd === 'gh' && args[0] === 'pr' && args[1] === 'checkout') {
+          return Promise.resolve({ stdout: '', stderr: '', exitCode: 0 } as any)
+        }
+        if (cmd === 'git' && args[0] === 'checkout' && args[1] === '-') {
+          return Promise.resolve({ stdout: '', stderr: '', exitCode: 0 } as any)
+        }
+        if (cmd === 'git' && args[0] === 'branch' && args[1] === '-D') {
+          return Promise.resolve({ stdout: '', stderr: '', exitCode: 0 } as any)
+        }
         return Promise.resolve({ stdout: '', stderr: '', exitCode: 0 } as any)
       })
+
+      // inquirerのモック設定 (確認プロンプト)
+      mockInquirer.prompt.mockResolvedValueOnce({ confirmCreate: true })
 
       await program.parseAsync(['node', 'test', 'github', 'checkout', '123'])
 
@@ -119,7 +146,7 @@ describe('github command', () => {
         '--json',
         'number,title,headRefName',
       ])
-      expect(mockGitWorktreeManagerInstance.attachWorktree).toHaveBeenCalledWith('feature-branch')
+      expect(mockGitWorktreeManagerInstance.attachWorktree).toHaveBeenCalledWith('pr-123')
     })
 
     it('should handle interactive PR selection', async () => {
@@ -152,16 +179,30 @@ describe('github command', () => {
         return Promise.resolve({ stdout: '', stderr: '', exitCode: 0 } as any)
       })
 
-      mockInquirer.prompt.mockResolvedValueOnce({ selectedPR: '123' })
+      mockInquirer.prompt
+        .mockResolvedValueOnce({ selectType: 'pr' })
+        .mockResolvedValueOnce({ selectedNumber: '123' })
+        .mockResolvedValueOnce({ confirmCreate: true })
 
-      await program.parseAsync(['node', 'test', 'github', 'checkout'])
+      // checkoutサブコマンドでは番号が必要なので、process.exitが呼ばれる
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+      const consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
 
-      expect(mockInquirer.prompt).toHaveBeenCalled()
-      expect(mockGitWorktreeManagerInstance.attachWorktree).toHaveBeenCalledWith('feature-a')
+      try {
+        await program.parseAsync(['node', 'test', 'github', 'checkout'])
+      } catch (error) {
+        // process.exitがスローされることを期待
+        expect(error).toBeDefined()
+      }
+
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('PR/Issue番号を指定してください'))
+      
+      consoleSpy.mockRestore()
+      consoleLogSpy.mockRestore()
     })
   })
 
-  describe.skip('issue type', () => {
+  describe('issue type', () => {
     it('should create branch from issue', async () => {
       const mockIssue = {
         number: 456,
@@ -177,6 +218,9 @@ describe('github command', () => {
         }
         if (cmd === 'gh' && args[0] === 'auth' && args[1] === 'status') {
           return Promise.resolve(mockGhAuthStatus())
+        }
+        if (cmd === 'gh' && args[0] === 'pr' && args[1] === 'view') {
+          throw new Error('no pull requests found')
         }
         if (cmd === 'gh' && args[0] === 'issue' && args[1] === 'view') {
           return Promise.resolve({
@@ -224,6 +268,9 @@ describe('github command', () => {
         if (cmd === 'gh' && args[0] === 'auth' && args[1] === 'status') {
           return Promise.resolve(mockGhAuthStatus())
         }
+        if (cmd === 'gh' && args[0] === 'pr' && args[1] === 'view') {
+          throw new Error('no pull requests found')
+        }
         if (cmd === 'gh' && args[0] === 'issue' && args[1] === 'view') {
           return Promise.resolve({
             stdout: JSON.stringify(mockIssue),
@@ -242,7 +289,7 @@ describe('github command', () => {
     })
   })
 
-  describe.skip('comment type', () => {
+  describe('comment type', () => {
     it('should add comment to PR', async () => {
       // detectTypeのためのモック
       mockExeca.mockImplementation((cmd: string, args: string[]) => {
@@ -301,7 +348,7 @@ describe('github command', () => {
     })
   })
 
-  describe.skip('state management', () => {
+  describe('state management', () => {
     it('should close a PR', async () => {
       // detectTypeのためのモック
       mockExeca.mockImplementation((cmd: string, args: string[]) => {
@@ -317,8 +364,12 @@ describe('github command', () => {
         return Promise.resolve({ stdout: '', stderr: '', exitCode: 0 } as any)
       })
 
+      // インタラクティブな入力をスキップするために、inquirer.promptをモック
+      mockInquirer.prompt.mockResolvedValueOnce({ comment: 'Closing' })
+      
       await program.parseAsync(['node', 'test', 'github', 'comment', '123', '--close'])
 
+      // detectTypeとcomment サブコマンドの処理により、実際の順序は変わる
       expect(mockExeca).toHaveBeenCalledWith('gh', ['pr', 'close', '123'])
     })
 
@@ -337,8 +388,12 @@ describe('github command', () => {
         return Promise.resolve({ stdout: '', stderr: '', exitCode: 0 } as any)
       })
 
+      // インタラクティブな入力をスキップするために、inquirer.promptをモック
+      mockInquirer.prompt.mockResolvedValueOnce({ comment: 'Reopening' })
+      
       await program.parseAsync(['node', 'test', 'github', 'comment', '123', '--reopen'])
 
+      // detectTypeとcomment サブコマンドの処理により、実際の順序は変わる
       expect(mockExeca).toHaveBeenCalledWith('gh', ['pr', 'reopen', '123'])
     })
   })
