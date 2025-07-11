@@ -18,7 +18,6 @@
     "test:e2e": "npm run build && vitest run -c vitest.config.e2e.ts",
     "test:coverage": "vitest run --coverage",
     "typecheck": "tsc --noEmit",
-    "update-homebrew-formula": "node scripts/update-homebrew-formula.js",
     "update-scoop-manifest": "node scripts/update-scoop-manifest.js",
     "changeset": "changeset",
     "version": "changeset version",
