@@ -3,7 +3,6 @@ import chalk from 'chalk'
 import ora from 'ora'
 import inquirer from 'inquirer'
 import { GitWorktreeManager } from '../core/git.js'
-import { ConfigManager } from '../core/config.js'
 import { execa } from 'execa'
 import fs from 'fs/promises'
 import path from 'path'
@@ -243,7 +242,7 @@ export const suggestCommand = new Command('suggest')
         
         // ブランチ名を生成
         const branchSuggestions = await suggestBranchName(
-          description,
+          description || '',
           options.issue,
           options.pr
         )
