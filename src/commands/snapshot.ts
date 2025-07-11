@@ -6,7 +6,6 @@ import { GitWorktreeManager } from '../core/git.js'
 import { execa } from 'execa'
 import fs from 'fs/promises'
 import path from 'path'
-import { createHash } from 'crypto'
 
 interface SnapshotOptions {
   message?: string
@@ -68,11 +67,11 @@ async function getGitStatus(worktreePath: string): Promise<WorktreeSnapshot['git
     if (currentBranch) {
       const match = currentBranch.match(/\* (\S+)\s+\S+\s+(?:\[([^\]]+)\])?\s+(.+)/)
       if (match) {
-        status.branch = match[1]
+        status.branch = match[1] || 'unknown'
         if (match[2]) {
           const trackingMatch = match[2].match(/([^:]+)(?::\s*ahead\s+(\d+))?(?:,?\s*behind\s+(\d+))?/)
           if (trackingMatch) {
-            status.tracking = trackingMatch[1]
+            status.tracking = trackingMatch[1] || ''
             status.ahead = parseInt(trackingMatch[2] || '0')
             status.behind = parseInt(trackingMatch[3] || '0')
           }
@@ -92,7 +91,7 @@ async function getGitStatus(worktreePath: string): Promise<WorktreeSnapshot['git
     const { stdout: untracked } = await execa('git', ['ls-files', '--others', '--exclude-standard'], { cwd: worktreePath })
     if (untracked) status.untracked = untracked.split('\n').filter(Boolean)
     
-  } catch (error) {
+  } catch {
     console.error(chalk.yellow('Git状態の取得に失敗しました'))
   }
   
@@ -109,7 +108,7 @@ async function getLastCommitInfo(worktreePath: string): Promise<WorktreeSnapshot
     ], { cwd: worktreePath })
     
     const [hash, message, author, date] = stdout.split('|')
-    return { hash, message, author, date }
+    return { hash: hash || '', message: message || '', author: author || '', date: date || '' }
   } catch {
     return {
       hash: '',
@@ -151,11 +150,11 @@ async function createSnapshot(
       if (stashList) {
         const [hash, ...messageParts] = stashList.split(' ')
         snapshot.stash = {
-          hash,
+          hash: hash || '',
           message: messageParts.join(' ')
         }
       }
-    } catch (error) {
+    } catch {
       console.warn(chalk.yellow('スタッシュの作成に失敗しました'))
     }
   }
@@ -259,7 +258,7 @@ async function restoreSnapshot(snapshot: WorktreeSnapshot): Promise<void> {
         } else {
           spinner.warn('保存されたスタッシュが見つかりませんでした')
         }
-      } catch (error) {
+      } catch {
         spinner.warn('スタッシュの適用に失敗しました')
       }
     }
@@ -407,7 +406,7 @@ export const snapshotCommand = new Command('snapshot')
             const snapshot = await createSnapshot(worktree, message, options.stash || false)
             await saveSnapshot(snapshot)
             snapshots.push(snapshot)
-          } catch (error) {
+          } catch {
             console.warn(chalk.yellow(`${worktree.branch} のスナップショット作成に失敗しました`))
           }
         }
