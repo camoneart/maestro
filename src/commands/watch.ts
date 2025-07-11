@@ -102,7 +102,6 @@ async function syncFileChange(
 }
 
 export const watchCommand = new Command('watch')
-  .alias('w')
   .description('ファイル変更を監視して他のworktreeに自動同期')
   .option('-p, --patterns <patterns...>', '監視するファイルパターン', ['*.ts', '*.js', '*.json'])
   .option('-e, --exclude <patterns...>', '除外するパターン', ['node_modules/**', '.git/**', 'dist/**'])
