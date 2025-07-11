@@ -36,6 +36,13 @@ brew tap hashiramaendure/tap
 brew install shadow-clone-jutsu
 ```
 
+#### Scoop (Windows)
+
+```powershell
+scoop bucket add hashiramaendure https://github.com/hashiramaendure/scoop-bucket
+scoop install shadow-clone-jutsu
+```
+
 #### npm
 
 ```bash
