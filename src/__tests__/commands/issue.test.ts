@@ -35,14 +35,17 @@ describe('issue command', () => {
   beforeEach(async () => {
     vi.clearAllMocks()
     vi.resetModules()
-    
+
     // GitWorktreeManagerのモックをリセット
     const { GitWorktreeManager } = await import('../../core/git')
-    vi.mocked(GitWorktreeManager).mockImplementation(() => ({
-      isGitRepository: vi.fn().mockResolvedValue(true),
-      createWorktree: vi.fn().mockResolvedValue('/path/to/worktree'),
-    } as any))
-    
+    vi.mocked(GitWorktreeManager).mockImplementation(
+      () =>
+        ({
+          isGitRepository: vi.fn().mockResolvedValue(true),
+          createWorktree: vi.fn().mockResolvedValue('/path/to/worktree'),
+        }) as any
+    )
+
     const { issueCommand } = await import('../../commands/issue')
 
     program = new Command()
