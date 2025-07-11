@@ -20,7 +20,7 @@ async function getDirectorySize(dirPath: string): Promise<string> {
   try {
     const { stdout } = await execa('du', ['-sh', dirPath])
     const size = stdout.split('\t')[0]
-    return size
+    return size || 'unknown'
   } catch {
     return 'unknown'
   }
