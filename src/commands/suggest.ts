@@ -16,6 +16,7 @@ interface SuggestOptions {
   pr?: string
   description?: string
   diff?: boolean
+  review?: boolean
 }
 
 // Claude Codeを使ってブランチ名を提案
@@ -174,6 +175,7 @@ export const suggestCommand = new Command('suggest')
   .description('Claude Codeでブランチ名やコミットメッセージを提案')
   .option('-b, --branch', 'ブランチ名を提案')
   .option('-c, --commit', 'コミットメッセージを提案')
+  .option('-r, --review', 'git diffをレビューして要約')
   .option('-i, --issue <number>', 'Issue番号を指定')
   .option('-p, --pr <number>', 'PR番号を指定')
   .option('-d, --description <text>', '説明を指定')
@@ -193,7 +195,7 @@ export const suggestCommand = new Command('suggest')
       }
       
       // オプションが指定されていない場合はインタラクティブモード
-      if (!options.branch && !options.commit) {
+      if (!options.branch && !options.commit && !options.review) {
         const { action } = await inquirer.prompt([
           {
             type: 'list',
@@ -202,13 +204,15 @@ export const suggestCommand = new Command('suggest')
             choices: [
               { name: '🌿 ブランチ名', value: 'branch' },
               { name: '💬 コミットメッセージ', value: 'commit' },
-              { name: '🎯 両方', value: 'both' }
+              { name: '👀 差分レビュー', value: 'review' },
+              { name: '🎯 ブランチ名とコミットメッセージ', value: 'both' }
             ]
           }
         ])
         
         options.branch = action === 'branch' || action === 'both'
         options.commit = action === 'commit' || action === 'both'
+        options.review = action === 'review'
       }
       
       // ブランチ名の提案
@@ -338,6 +342,77 @@ export const suggestCommand = new Command('suggest')
             console.log(chalk.green(`\n✨ コミットメッセージ:`))
             console.log(chalk.cyan(finalCommit))
           }
+        }
+      }
+      
+      // 差分レビュー
+      if (options.review) {
+        const spinner = ora('差分を取得中...').start()
+        
+        try {
+          // git diffの結果を取得
+          const { stdout: stagedDiff } = await execa('git', ['diff', '--cached'])
+          const { stdout: unstagedDiff } = await execa('git', ['diff'])
+          const diffOutput = stagedDiff || unstagedDiff
+          
+          if (!diffOutput) {
+            spinner.fail('変更がありません')
+            return
+          }
+          
+          spinner.text = 'Claude Codeで差分をレビュー中...'
+          
+          // 一時ファイルにdiffとプロンプトを書き込む
+          const tempDir = await fs.mkdtemp(path.join(tmpdir(), 'scj-review-'))
+          const diffPath = path.join(tempDir, 'diff.patch')
+          const promptPath = path.join(tempDir, 'prompt.md')
+          
+          await fs.writeFile(diffPath, diffOutput)
+          
+          let prompt = `# コード差分レビュー\n\n`
+          prompt += `以下のgit diffをレビューして、変更内容を要約してください。\n\n`
+          prompt += `## 要求事項:\n`
+          prompt += `1. 変更の概要（1-2文）\n`
+          prompt += `2. 主な変更点（箇条書き）\n`
+          prompt += `3. 潜在的な問題や改善点\n`
+          prompt += `4. セキュリティや性能への影響\n\n`
+          prompt += `## 差分:\n`
+          prompt += `\`\`\`diff\n${diffOutput}\n\`\`\`\n`
+          
+          await fs.writeFile(promptPath, prompt)
+          
+          // Claudeコマンドを実行してレビューを取得
+          const { stdout } = await execa('claude', [promptPath], {
+            env: { ...process.env }
+          })
+          
+          spinner.succeed('レビュー完了')
+          
+          console.log(chalk.bold('\n👀 差分レビュー結果:\n'))
+          console.log(stdout)
+          
+          // レビュー結果を保存するか確認
+          const { saveReview } = await inquirer.prompt([
+            {
+              type: 'confirm',
+              name: 'saveReview',
+              message: 'レビュー結果をファイルに保存しますか？',
+              default: false
+            }
+          ])
+          
+          if (saveReview) {
+            const reviewPath = path.join(process.cwd(), `review-${new Date().toISOString().split('T')[0]}.md`)
+            await fs.writeFile(reviewPath, `# コードレビュー ${new Date().toISOString()}\n\n${stdout}\n\n## 差分\n\`\`\`diff\n${diffOutput}\n\`\`\``)
+            console.log(chalk.green(`\n✅ レビュー結果を保存しました: ${reviewPath}`))
+          }
+          
+          // 一時ファイルをクリーンアップ
+          await fs.rm(tempDir, { recursive: true })
+          
+        } catch (error) {
+          spinner.fail('レビューに失敗しました')
+          throw error
         }
       }
       
