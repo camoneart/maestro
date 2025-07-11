@@ -4,13 +4,10 @@ import ora from 'ora'
 import { GitWorktreeManager } from '../core/git.js'
 import { createServer } from 'http'
 import { readFile } from 'fs/promises'
-import path from 'path'
-import { fileURLToPath } from 'url'
 import { execa } from 'execa'
 import open from 'open'
+import path from 'path'
 
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
 
 interface DashboardOptions {
   port?: number
