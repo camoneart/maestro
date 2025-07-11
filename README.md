@@ -42,6 +42,8 @@ brew tap hashiramaendure/tap
 brew install shadow-clone-jutsu
 ```
 
+※ 注意: npmパッケージ公開後に利用可能になります
+
 #### Scoop (Windows)
 
 ```powershell
