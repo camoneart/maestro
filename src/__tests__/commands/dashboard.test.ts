@@ -51,10 +51,17 @@ describe('dashboard command', () => {
       close: vi.fn(callback => {
         if (callback) process.nextTick(callback)
       }),
+      _requestHandler: null,
     }
 
     // createServerのモック
-    serverListenSpy = vi.spyOn(http, 'createServer').mockReturnValue(mockServer as any)
+    serverListenSpy = vi.spyOn(http, 'createServer').mockImplementation((handler) => {
+      // リクエストハンドラーを保存
+      if (handler) {
+        mockServer._requestHandler = handler
+      }
+      return mockServer as any
+    })
 
     // openのモック
     vi.mocked(open).mockResolvedValue()
@@ -127,17 +134,14 @@ describe('dashboard command', () => {
   describe('APIエンドポイント', () => {
     let requestHandler: Function
 
-    beforeEach(() => {
-      // createServerに渡されるリクエストハンドラーをキャプチャ
-      serverListenSpy.mockImplementation(handler => {
-        requestHandler = handler
-        return mockServer
-      })
+    beforeEach(async () => {
+      // コマンドを一度実行してサーバーを起動
+      await dashboardCommand.parseAsync(['node', 'test'])
+      // createServerに渡されたリクエストハンドラーを取得
+      requestHandler = mockServer._requestHandler
     })
 
     it('/api/worktreesでworktreeデータを返す', async () => {
-      await dashboardCommand.parseAsync(['node', 'test'])
-
       const mockReq = { url: '/api/worktrees', method: 'GET' }
       const mockRes = {
         setHeader: vi.fn(),
@@ -156,6 +160,9 @@ describe('dashboard command', () => {
     })
 
     it('メタデータとヘルスチェックを含む', async () => {
+      // beforeEachでサーバーが起動されるので、再起動の前に停止
+      mockServer.close()
+      
       // 古いコミット（31日前）を返す
       mockGitManager.getLastCommit.mockResolvedValue({
         date: new Date(Date.now() - 31 * 24 * 60 * 60 * 1000).toISOString(),
@@ -170,8 +177,6 @@ describe('dashboard command', () => {
         }
         return Promise.resolve(createMockExecaResponse())
       })
-
-      await dashboardCommand.parseAsync(['node', 'test'])
 
       const mockReq = { url: '/api/worktrees', method: 'GET' }
       const mockRes = {
@@ -192,8 +197,6 @@ describe('dashboard command', () => {
     })
 
     it('/でHTMLを返す', async () => {
-      await dashboardCommand.parseAsync(['node', 'test'])
-
       const mockReq = { url: '/', method: 'GET' }
       const mockRes = {
         setHeader: vi.fn(),
@@ -213,8 +216,6 @@ describe('dashboard command', () => {
     })
 
     it('/api/open-editorでエディタを開く', async () => {
-      await dashboardCommand.parseAsync(['node', 'test'])
-
       const mockReq = {
         url: '/api/open-editor',
         method: 'POST',
@@ -239,8 +240,6 @@ describe('dashboard command', () => {
     })
 
     it('/api/open-terminalでターミナルを開く', async () => {
-      await dashboardCommand.parseAsync(['node', 'test'])
-
       const mockReq = {
         url: '/api/open-terminal',
         method: 'POST',
@@ -265,8 +264,6 @@ describe('dashboard command', () => {
     })
 
     it('存在しないエンドポイントで404を返す', async () => {
-      await dashboardCommand.parseAsync(['node', 'test'])
-
       const mockReq = { url: '/api/unknown', method: 'GET' }
       const mockRes = {
         setHeader: vi.fn(),
@@ -281,8 +278,6 @@ describe('dashboard command', () => {
     })
 
     it('CORSヘッダーを設定する', async () => {
-      await dashboardCommand.parseAsync(['node', 'test'])
-
       const mockReq = { url: '/api/worktrees', method: 'GET' }
       const mockRes = {
         setHeader: vi.fn(),
@@ -301,8 +296,6 @@ describe('dashboard command', () => {
     })
 
     it('OPTIONSリクエストに対応する', async () => {
-      await dashboardCommand.parseAsync(['node', 'test'])
-
       const mockReq = { method: 'OPTIONS' }
       const mockRes = {
         setHeader: vi.fn(),
@@ -351,16 +344,8 @@ describe('dashboard command', () => {
     })
 
     it('APIエラーを500エラーとして返す', async () => {
-      let requestHandler: Function
-      serverListenSpy.mockImplementation(handler => {
-        requestHandler = handler
-        return mockServer
-      })
-
       // worktree取得をエラーにする
       mockGitManager.listWorktrees.mockRejectedValue(new Error('Git error'))
-
-      await dashboardCommand.parseAsync(['node', 'test'])
 
       const mockReq = { url: '/api/worktrees', method: 'GET' }
       const mockRes = {
@@ -369,6 +354,7 @@ describe('dashboard command', () => {
         end: vi.fn(),
       }
 
+      const requestHandler = mockServer._requestHandler
       await requestHandler(mockReq, mockRes)
 
       expect(mockRes.writeHead).toHaveBeenCalledWith(500)
@@ -376,16 +362,8 @@ describe('dashboard command', () => {
     })
 
     it('メタデータ読み込みエラーを無視する', async () => {
-      let requestHandler: Function
-      serverListenSpy.mockImplementation(handler => {
-        requestHandler = handler
-        return mockServer
-      })
-
       // メタデータ読み込みを失敗させる
       vi.mocked(fs.readFile).mockRejectedValue(new Error('File not found'))
-
-      await dashboardCommand.parseAsync(['node', 'test'])
 
       const mockReq = { url: '/api/worktrees', method: 'GET' }
       const mockRes = {
@@ -394,6 +372,7 @@ describe('dashboard command', () => {
         end: vi.fn(),
       }
 
+      const requestHandler = mockServer._requestHandler
       await requestHandler(mockReq, mockRes)
 
       // エラーが発生してもレスポンスが返ることを確認

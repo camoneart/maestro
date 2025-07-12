@@ -127,7 +127,8 @@ describe('watch command', () => {
 
   describe('基本的な動作', () => {
     it('現在のworktreeの変更を監視する', async () => {
-      const watchPromise = watchCommand.parseAsync(['node', 'test'])
+      // --autoオプションを追加して確認プロンプトをスキップ
+      const watchPromise = watchCommand.parseAsync(['node', 'test', '--auto'])
 
       // 少し待つ
       await new Promise(resolve => setTimeout(resolve, 50))
@@ -152,7 +153,8 @@ describe('watch command', () => {
     })
 
     it('ファイル追加を検出して同期する', async () => {
-      const watchPromise = watchCommand.parseAsync(['node', 'test'])
+      // --autoオプションを追加
+      const watchPromise = watchCommand.parseAsync(['node', 'test', '--auto'])
 
       // 少し待つ
       await new Promise(resolve => setTimeout(resolve, 50))
@@ -179,7 +181,8 @@ describe('watch command', () => {
     })
 
     it('ファイル変更を検出して同期する', async () => {
-      const watchPromise = watchCommand.parseAsync(['node', 'test'])
+      // --autoオプションを追加
+      const watchPromise = watchCommand.parseAsync(['node', 'test', '--auto'])
 
       await new Promise(resolve => setTimeout(resolve, 50))
 
@@ -200,7 +203,8 @@ describe('watch command', () => {
     })
 
     it('ファイル削除を検出して同期する', async () => {
-      const watchPromise = watchCommand.parseAsync(['node', 'test'])
+      // --autoオプションを追加
+      const watchPromise = watchCommand.parseAsync(['node', 'test', '--auto'])
 
       await new Promise(resolve => setTimeout(resolve, 50))
 
@@ -302,7 +306,15 @@ describe('watch command', () => {
 
   describe('インタラクティブモード', () => {
     it('--autoなしの場合は同期確認を行う', async () => {
-      vi.mocked(inquirer.prompt).mockResolvedValue({ confirmSync: true })
+      // inquirer.promptのモックを設定
+      vi.mocked(inquirer.prompt).mockImplementation(async (questions: any) => {
+        // questionsが配列の場合、最初の質問のnameをチェック
+        const question = Array.isArray(questions) ? questions[0] : questions
+        if (question.name === 'confirmSync') {
+          return { confirmSync: true }
+        }
+        return {}
+      })
 
       const watchPromise = watchCommand.parseAsync(['node', 'test'])
 
@@ -327,7 +339,14 @@ describe('watch command', () => {
     })
 
     it('同期をキャンセルできる', async () => {
-      vi.mocked(inquirer.prompt).mockResolvedValue({ confirmSync: false })
+      // inquirer.promptのモックを設定
+      vi.mocked(inquirer.prompt).mockImplementation(async (questions: any) => {
+        const question = Array.isArray(questions) ? questions[0] : questions
+        if (question.name === 'confirmSync') {
+          return { confirmSync: false }
+        }
+        return {}
+      })
 
       const watchPromise = watchCommand.parseAsync(['node', 'test'])
 
@@ -381,7 +400,8 @@ describe('watch command', () => {
     it('ファイル同期エラーを処理する', async () => {
       vi.mocked(fs.copyFile).mockRejectedValue(new Error('Permission denied'))
 
-      const watchPromise = watchCommand.parseAsync(['node', 'test'])
+      // --autoオプションを追加
+      const watchPromise = watchCommand.parseAsync(['node', 'test', '--auto'])
 
       await new Promise(resolve => setTimeout(resolve, 50))
 
@@ -405,7 +425,8 @@ describe('watch command', () => {
         return process
       })
 
-      const watchPromise = watchCommand.parseAsync(['node', 'test'])
+      // --autoオプションを追加
+      const watchPromise = watchCommand.parseAsync(['node', 'test', '--auto'])
 
       await new Promise(resolve => setTimeout(resolve, 50))
 

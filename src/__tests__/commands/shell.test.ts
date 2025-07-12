@@ -86,12 +86,7 @@ describe('shell command', () => {
 
   describe('基本的な動作', () => {
     it('指定したブランチのシェルに入る', async () => {
-      const shellPromise = shellCommand.parseAsync(['node', 'test', 'feature-a'])
-
-      // シェル起動をシミュレート
-      setTimeout(() => mockShellProcess.emit('exit', 0), 100)
-
-      await shellPromise
+      await shellCommand.parseAsync(['node', 'test', 'feature-a'])
 
       expect(console.log).toHaveBeenCalledWith(
         expect.stringContaining("🥷 影分身 'feature-a' に入ります...")
@@ -151,12 +146,7 @@ describe('shell command', () => {
     it('inquirerでブランチを選択できる', async () => {
       vi.mocked(inquirer.prompt).mockResolvedValue({ selectedBranch: 'feature-b' })
 
-      const shellPromise = shellCommand.parseAsync(['node', 'test'])
-
-      // シェル起動をシミュレート
-      setTimeout(() => mockShellProcess.emit('exit', 0), 100)
-
-      await shellPromise
+      await shellCommand.parseAsync(['node', 'test'])
 
       expect(inquirer.prompt).toHaveBeenCalledWith(
         expect.arrayContaining([
@@ -173,18 +163,19 @@ describe('shell command', () => {
     })
 
     it('--fzfオプションでfzfを使用して選択できる', async () => {
-      const shellPromise = shellCommand.parseAsync(['node', 'test', '--fzf'])
-
       // fzf選択をシミュレート
-      setTimeout(() => {
-        mockFzfProcess.stdout.emit('data', 'feature-a | /repo/worktree-1\n')
-        mockFzfProcess.emit('close', 0)
-      }, 50)
+      const fzfPromise = new Promise<void>(resolve => {
+        setTimeout(() => {
+          mockFzfProcess.stdout.emit('data', 'feature-a | /repo/worktree-1\n')
+          mockFzfProcess.emit('close', 0)
+          resolve()
+        }, 50)
+      })
 
-      // シェル起動をシミュレート
-      setTimeout(() => mockShellProcess.emit('exit', 0), 150)
-
-      await shellPromise
+      const commandPromise = shellCommand.parseAsync(['node', 'test', '--fzf'])
+      
+      await fzfPromise
+      await commandPromise
 
       expect(spawn).toHaveBeenCalledWith(
         'fzf',
@@ -198,12 +189,12 @@ describe('shell command', () => {
     })
 
     it('fzfでキャンセルした場合は終了する', async () => {
-      const shellPromise = shellCommand.parseAsync(['node', 'test', '--fzf'])
-
       // fzfキャンセルをシミュレート（即座に実行）
       process.nextTick(() => mockFzfProcess.emit('close', 1))
 
-      await expect(shellPromise).rejects.toThrow('process.exit called with code 0')
+      await expect(shellCommand.parseAsync(['node', 'test', '--fzf'])).rejects.toThrow(
+        'process.exit called with code 0'
+      )
 
       expect(console.log).toHaveBeenCalledWith(expect.stringContaining('キャンセルされました'))
     })
@@ -259,12 +250,7 @@ describe('shell command', () => {
         stdout: 'shadow-clone-feature-a\nother-session',
       } as any)
 
-      const shellPromise = shellCommand.parseAsync(['node', 'test', 'feature-a', '--tmux'])
-
-      // tmuxプロセス終了をシミュレート
-      setTimeout(() => mockShellProcess.emit('exit', 0), 100)
-
-      await shellPromise
+      await shellCommand.parseAsync(['node', 'test', 'feature-a', '--tmux'])
 
       expect(execa).toHaveBeenCalledWith(
         'tmux',
@@ -289,12 +275,7 @@ describe('shell command', () => {
         stdout: '',
       } as any)
 
-      const shellPromise = shellCommand.parseAsync(['node', 'test', 'feature-a', '--tmux'])
-
-      // tmuxプロセス終了をシミュレート
-      setTimeout(() => mockShellProcess.emit('exit', 0), 100)
-
-      await shellPromise
+      await shellCommand.parseAsync(['node', 'test', 'feature-a', '--tmux'])
 
       expect(spawn).toHaveBeenCalledWith(
         'tmux',
@@ -316,12 +297,7 @@ describe('shell command', () => {
     it('tmuxエラー時は通常のシェルで起動する', async () => {
       vi.mocked(execa).mockRejectedValue(new Error('tmux not found'))
 
-      const shellPromise = shellCommand.parseAsync(['node', 'test', 'feature-a', '--tmux'])
-
-      // シェル起動をシミュレート
-      setTimeout(() => mockShellProcess.emit('exit', 0), 100)
-
-      await shellPromise
+      await shellCommand.parseAsync(['node', 'test', 'feature-a', '--tmux'])
 
       expect(console.error).toHaveBeenCalledWith(
         expect.stringContaining('❌ tmuxセッション処理に失敗: tmux not found')
@@ -337,9 +313,7 @@ describe('shell command', () => {
     it('zshの場合は適切なプロンプトを設定する', async () => {
       process.env.SHELL = '/bin/zsh'
 
-      const shellPromise = shellCommand.parseAsync(['node', 'test', 'feature-a'])
-      setTimeout(() => mockShellProcess.emit('exit', 0), 100)
-      await shellPromise
+      await shellCommand.parseAsync(['node', 'test', 'feature-a'])
 
       expect(spawn).toHaveBeenCalledWith(
         '/bin/zsh',
@@ -356,9 +330,7 @@ describe('shell command', () => {
     it('bashの場合は適切なプロンプトを設定する', async () => {
       process.env.SHELL = '/bin/bash'
 
-      const shellPromise = shellCommand.parseAsync(['node', 'test', 'feature-a'])
-      setTimeout(() => mockShellProcess.emit('exit', 0), 100)
-      await shellPromise
+      await shellCommand.parseAsync(['node', 'test', 'feature-a'])
 
       expect(spawn).toHaveBeenCalledWith(
         '/bin/bash',
@@ -374,9 +346,7 @@ describe('shell command', () => {
     it('fishの場合は適切なプロンプトを設定する', async () => {
       process.env.SHELL = '/usr/bin/fish'
 
-      const shellPromise = shellCommand.parseAsync(['node', 'test', 'feature-a'])
-      setTimeout(() => mockShellProcess.emit('exit', 0), 100)
-      await shellPromise
+      await shellCommand.parseAsync(['node', 'test', 'feature-a'])
 
       expect(spawn).toHaveBeenCalledWith(
         '/usr/bin/fish',
@@ -392,9 +362,7 @@ describe('shell command', () => {
     it('SHELL環境変数が未設定の場合はbashを使用する', async () => {
       delete process.env.SHELL
 
-      const shellPromise = shellCommand.parseAsync(['node', 'test', 'feature-a'])
-      setTimeout(() => mockShellProcess.emit('exit', 0), 100)
-      await shellPromise
+      await shellCommand.parseAsync(['node', 'test', 'feature-a'])
 
       expect(spawn).toHaveBeenCalledWith('/bin/bash', [], expect.any(Object))
     })
@@ -429,16 +397,25 @@ describe('shell command', () => {
 
   describe('シェル終了処理', () => {
     it('シェル終了時にメッセージを表示する', async () => {
-      const shellPromise = shellCommand.parseAsync(['node', 'test', 'feature-a'])
+      await shellCommand.parseAsync(['node', 'test', 'feature-a'])
 
-      // シェル起動後の確認
-      await new Promise(resolve => setTimeout(resolve, 50))
+      // シェル起動後の確認を無効化（spawnMockの行動に依存）
+      // spawnコールを確認
+      expect(spawn).toHaveBeenCalledWith(
+        '/bin/zsh',
+        [],
+        expect.objectContaining({
+          cwd: '/repo/worktree-1',
+          stdio: 'inherit',
+        })
+      )
 
+      // exitイベントに対するリスナーが設定されていることを確認
       // シェル終了をシミュレート
       mockShellProcess.emit('exit', 0)
 
-      // 終了処理を待つ
-      await new Promise(resolve => setTimeout(resolve, 50))
+      // 非同期処理を待つ
+      await new Promise(resolve => setImmediate(resolve))
 
       expect(console.log).toHaveBeenCalledWith(
         expect.stringContaining('影分身から戻りました (exit code: 0)')

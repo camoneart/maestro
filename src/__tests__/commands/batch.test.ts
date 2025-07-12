@@ -182,16 +182,19 @@ feature-b | Feature B
 
   describe('インタラクティブモード', () => {
     it('インタラクティブに複数のworktreeを入力できる', async () => {
-      // inquirerのモック - 2回の入力をシミュレート
+      // inquirerのモック - 順番に返すresponses
       let callIndex = 0
       const mockResponses = [
+        // 1つ目のworktree入力
         { branchName: 'feature-x', description: 'Feature X', continueAdding: true },
+        // 2つ目のworktree入力
         { branchName: 'feature-y', description: 'Feature Y', continueAdding: false },
+        // 作成確認
         { confirmCreate: true },
       ]
 
       vi.mocked(inquirer.prompt).mockImplementation(async () => {
-        const response = mockResponses[Math.floor(callIndex / 3)]
+        const response = mockResponses[callIndex]
         callIndex++
         return response
       })
@@ -217,10 +220,6 @@ feature-b | Feature B
       })
 
       vi.mocked(inquirer.prompt).mockResolvedValue({
-        inputMethod: 'manual',
-        branchName: 'feature-1',
-        description: '',
-        continueAdding: false,
         confirmCreate: true,
       })
 
@@ -292,7 +291,12 @@ feature-b | Feature B
       })
 
       // エディタのモック
-      vi.mocked(execa).mockResolvedValue(createMockExecaResponse())
+      vi.mocked(execa).mockImplementation((cmd: string, args: string[]) => {
+        if (cmd === 'cursor') {
+          return Promise.resolve(createMockExecaResponse())
+        }
+        return Promise.resolve(createMockExecaResponse())
+      })
 
       await batchCommand.parseAsync(['node', 'test', '--from-file', 'batch.txt', '--open'])
 
@@ -313,7 +317,12 @@ feature-b | Feature B
     })
 
     it('worktreeが0個の場合は作成をスキップする', async () => {
-      vi.mocked(execa).mockResolvedValue(createMockExecaResponse('[]')) // 空のIssueリスト
+      vi.mocked(execa).mockImplementation((cmd: string, args: string[]) => {
+        if (cmd === 'gh' && args[0] === 'issue' && args[1] === 'list') {
+          return Promise.resolve(createMockExecaResponse('[]')) // 空のIssueリスト
+        }
+        return Promise.resolve(createMockExecaResponse())
+      })
       vi.mocked(inquirer.prompt).mockResolvedValue({ inputMethod: 'issues', selectedIssues: [] })
 
       await batchCommand.parseAsync(['node', 'test'])
