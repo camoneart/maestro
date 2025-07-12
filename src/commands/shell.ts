@@ -1,6 +1,7 @@
 import { Command } from 'commander'
 import chalk from 'chalk'
 import { GitWorktreeManager } from '../core/git.js'
+import { Worktree } from '../types/index.js'
 import { spawn } from 'child_process'
 import inquirer from 'inquirer'
 import { execa } from 'execa'
@@ -35,7 +36,7 @@ export const shellCommand = new Command('shell')
           process.exit(0)
         }
 
-        let targetWorktree: any
+        let targetWorktree: Worktree | undefined
 
         // ブランチ名が指定されていない場合は選択
         if (!branchName) {

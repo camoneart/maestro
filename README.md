@@ -25,6 +25,113 @@ shadow-clone-jutsuは、Git Worktreeをより直感的に管理できるCLIツ�
 <!-- ![Demo](./docs/demo.gif) -->
 <!-- [![asciicast](https://asciinema.org/a/DEMO_ID.svg)](https://asciinema.org/a/DEMO_ID) -->
 
+## Getting Started
+
+### クイックスタート
+
+```bash
+# 1. インストール（お好みの方法で）
+npm install -g shadow-clone-jutsu
+
+# 2. プロジェクトディレクトリに移動
+cd your-git-project
+
+# 3. 新しい影分身（worktree）を作成
+scj create feature/awesome-feature
+
+# 4. 作成した影分身で作業を開始
+scj shell feature/awesome-feature
+```
+
+### 基本的な使い方
+
+#### 📦 複数の機能を並行開発
+
+```bash
+# 認証機能の開発
+scj create feature/auth --tmux --claude
+
+# バグ修正を並行で実施
+scj create bugfix/login-issue
+
+# 影分身の一覧を確認
+scj list
+
+# 影分身間を素早く切り替え
+scj tmux --fzf
+```
+
+#### 🔄 GitHub連携
+
+```bash
+# IssueからWorktreeを作成
+scj create 123  # issue-123として作成される
+
+# PRから影分身を作成
+scj github pr 456
+
+# Draft PRを自動作成
+scj create feature/new-ui --draft-pr
+```
+
+#### 🤖 Claude Code統合
+
+```bash
+# Claude Codeと一緒に開発を開始
+scj create feature/ai-integration --tmux --claude
+
+# AI差分レビューを実行
+scj suggest --review
+
+# 自動レビュー&マージフロー
+scj review --auto-flow
+```
+
+### よくある使用例
+
+#### 1. 複数のIssueを並行で処理
+
+```bash
+# GitHub Issuesから複数選択して一括作成
+scj batch
+
+# 各影分身でそれぞれ作業
+scj shell issue-123  # Issue #123の修正
+scj shell issue-456  # Issue #456の機能実装
+```
+
+#### 2. 実験的な開発
+
+```bash
+# 実験用の影分身を作成
+scj create experiment/new-architecture --template experiment
+
+# メインの開発に影響なく実験
+# 実験が成功したらマージ、失敗したら削除
+scj delete experiment/new-architecture
+```
+
+#### 3. コードレビューフロー
+
+```bash
+# PRをローカルでチェックアウト
+scj github pr 789
+
+# AI差分レビューを実行
+scj suggest --review
+
+# レビューコメントを反映して更新
+git add -A && git commit -m "fix: review comments"
+git push
+```
+
+### Tips & Tricks
+
+- **tmux統合**: `--tmux` フラグを使うと自動的にtmuxセッション/ウィンドウが作成されます
+- **JSON出力**: `--json` フラグで多くのコマンドがJSON形式で出力できます（CI/CD連携に便利）
+- **fzf選択**: `--fzf` フラグでインタラクティブな選択が可能です
+- **一括操作**: `batch` コマンドで複数の影分身を効率的に管理できます
+
 ## インストール
 
 ### 前提条件

@@ -6,6 +6,32 @@ import { spawn } from 'child_process'
 import fs from 'fs'
 import path from 'path'
 
+// 拡張Worktree型定義
+interface EnhancedWorktree extends Worktree {
+  lastCommit?: { date: string; message: string; hash: string } | null
+  metadata?: WorktreeMetadata | null
+  size?: number
+}
+
+// worktreeメタデータ型定義
+interface WorktreeMetadata {
+  createdAt: string
+  branch: string
+  worktreePath: string
+  github?: {
+    type: 'issue' | 'pr'
+    title: string
+    body: string
+    author: string
+    labels: string[]
+    assignees: string[]
+    milestone?: string
+    url: string
+    issueNumber?: string
+  }
+  template?: string
+}
+
 export const listCommand = new Command('list')
   .alias('ls')
   .description('影分身（worktree）の一覧を表示')
@@ -52,9 +78,9 @@ export const listCommand = new Command('list')
           for (const worktree of worktrees) {
             try {
               const lastCommit = await gitManager.getLastCommit(worktree.path)
-              ;(worktree as any).lastCommit = lastCommit
+              ;(worktree as EnhancedWorktree).lastCommit = lastCommit
             } catch {
-              ;(worktree as any).lastCommit = null
+              ;(worktree as EnhancedWorktree).lastCommit = null
             }
           }
         }
@@ -65,9 +91,9 @@ export const listCommand = new Command('list')
             try {
               const metadataPath = path.join(worktree.path, '.scj-metadata.json')
               const metadataContent = await fs.promises.readFile(metadataPath, 'utf-8')
-              ;(worktree as any).metadata = JSON.parse(metadataContent)
+              ;(worktree as EnhancedWorktree).metadata = JSON.parse(metadataContent)
             } catch {
-              ;(worktree as any).metadata = null
+              ;(worktree as EnhancedWorktree).metadata = null
             }
           }
         }
@@ -83,8 +109,8 @@ export const listCommand = new Command('list')
             ...wt,
             isCurrent: wt.path === process.cwd() || wt.path.endsWith('.'),
             locked: wt.locked || false,
-            lastCommit: (wt as any).lastCommit || null,
-            metadata: (wt as any).metadata || null,
+            lastCommit: (wt as EnhancedWorktree).lastCommit || null,
+            metadata: (wt as EnhancedWorktree).metadata || null,
           }))
           console.log(JSON.stringify(jsonWorktrees, null, 2))
           return
@@ -182,8 +208,8 @@ async function sortWorktrees(worktrees: Worktree[], sortBy: string): Promise<voi
     case 'age':
       // lastCommit が設定されている場合は日付でソート
       worktrees.sort((a, b) => {
-        const aCommit = (a as any).lastCommit
-        const bCommit = (b as any).lastCommit
+        const aCommit = (a as EnhancedWorktree).lastCommit
+        const bCommit = (b as EnhancedWorktree).lastCommit
         if (!aCommit && !bCommit) return 0
         if (!aCommit) return 1
         if (!bCommit) return -1
@@ -195,12 +221,12 @@ async function sortWorktrees(worktrees: Worktree[], sortBy: string): Promise<voi
       for (const worktree of worktrees) {
         try {
           const stats = fs.statSync(worktree.path)
-          ;(worktree as any).size = stats.size
+          ;(worktree as EnhancedWorktree).size = stats.size
         } catch {
-          ;(worktree as any).size = 0
+          ;(worktree as EnhancedWorktree).size = 0
         }
       }
-      worktrees.sort((a, b) => ((b as any).size || 0) - ((a as any).size || 0))
+      worktrees.sort((a, b) => ((b as EnhancedWorktree).size || 0) - ((a as EnhancedWorktree).size || 0))
       break
   }
 }
@@ -227,7 +253,7 @@ function displayWorktree(
   }
 
   // メタデータからGitHubバッジを追加
-  const metadata = (worktree as any).metadata
+  const metadata = (worktree as EnhancedWorktree).metadata
   if (metadata?.github) {
     if (metadata.github.type === 'pr') {
       status.push(chalk.blue(`PR #${metadata.github.issueNumber}`))
@@ -244,8 +270,8 @@ function displayWorktree(
     `${chalk.gray(worktree.path)} ` +
     `${status.join(' ')}`
 
-  if (showLastCommit && (worktree as any).lastCommit) {
-    const lastCommit = (worktree as any).lastCommit
+  if (showLastCommit && (worktree as EnhancedWorktree).lastCommit) {
+    const lastCommit = (worktree as EnhancedWorktree).lastCommit
     output += `\n    ${chalk.gray('最終コミット:')} ${chalk.yellow(lastCommit.date)} ${chalk.gray(lastCommit.message)}`
   }
 

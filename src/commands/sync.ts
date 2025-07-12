@@ -9,6 +9,7 @@ import { spawn } from 'child_process'
 import cliProgress from 'cli-progress'
 import fs from 'fs/promises'
 import path from 'path'
+import pLimit from 'p-limit'
 
 interface SyncOptions {
   all?: boolean
@@ -20,6 +21,7 @@ interface SyncOptions {
   files?: boolean
   interactive?: boolean
   preset?: string
+  concurrency?: number
 }
 
 interface SyncResult {
@@ -44,6 +46,7 @@ export const syncCommand = new Command('sync')
   .option('-f, --files', '環境変数・設定ファイルを同期')
   .option('-i, --interactive', 'インタラクティブモードで同期するファイルを選択')
   .option('-p, --preset <name>', '同期プリセットを使用（env, config, all）')
+  .option('-c, --concurrency <number>', '並列実行数 (デフォルト: 5)', parseInt)
   .action(async (branchName?: string, options: SyncOptions = {}) => {
     const spinner = ora('影分身を確認中...').start()
 
@@ -265,7 +268,11 @@ export const syncCommand = new Command('sync')
       const results: SyncResult[] = []
       progressBar.start(targetWorktrees.length, 0)
 
-      const syncPromises = targetWorktrees.map(async (worktree, index) => {
+      // 並列実行制限を設定
+      const concurrency = options.concurrency || 5
+      const limit = pLimit(concurrency)
+
+      const syncPromises = targetWorktrees.map((worktree, index) => limit(async () => {
         const branchName = worktree.branch?.replace('refs/heads/', '') || worktree.branch
 
         try {
@@ -332,7 +339,7 @@ export const syncCommand = new Command('sync')
         } finally {
           progressBar.update(index + 1, { branch: branchName })
         }
-      })
+      }))
 
       const syncResults = await Promise.allSettled(syncPromises)
 
@@ -417,9 +424,11 @@ export const syncCommand = new Command('sync')
   })
 
 // 環境変数・設定ファイルの同期
+import { Worktree } from '../types/index.js'
+
 async function syncEnvironmentFiles(
-  allWorktrees: any[],
-  targetWorktrees: any[],
+  allWorktrees: Worktree[],
+  targetWorktrees: Worktree[],
   options: SyncOptions
 ): Promise<void> {
   console.log(chalk.bold('\n🔧 環境変数・設定ファイルの同期\n'))

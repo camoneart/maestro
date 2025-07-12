@@ -102,12 +102,9 @@ jobs:
       - name: Run unit tests
         run: pnpm run test
 
-      - name: Generate coverage report (informational)
+      - name: Run tests with coverage
         if: matrix.os == 'ubuntu-latest' && matrix.node-version == '20'
-        run: |
-          # Run coverage but don't fail on thresholds
-          pnpm run test:coverage --coverage.thresholds.lines=0 --coverage.thresholds.functions=0 --coverage.thresholds.branches=0 --coverage.thresholds.statements=0 || true
-        continue-on-error: true
+        run: pnpm run test:coverage
 
       - name: Build
         run: pnpm run build
@@ -123,7 +120,18 @@ jobs:
           file: ./coverage/lcov.info
           flags: unittests
           name: shadow-clone-jutsu
-          fail_ci_if_error: false
+          fail_ci_if_error: true
+
+      - name: Check coverage thresholds
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '20'
+        run: |
+          # Check if coverage meets minimum threshold (40%)
+          COVERAGE=$(cat coverage/coverage-summary.json | jq '.total.lines.pct')
+          echo "Current coverage: ${COVERAGE}%"
+          if (( $(echo "$COVERAGE < 40" | bc -l) )); then
+            echo "Coverage ${COVERAGE}% is below minimum threshold of 40%"
+            exit 1
+          fi
 
   build:
     name: Build

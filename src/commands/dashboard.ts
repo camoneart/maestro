@@ -2,6 +2,7 @@ import { Command } from 'commander'
 import chalk from 'chalk'
 import ora from 'ora'
 import { GitWorktreeManager } from '../core/git.js'
+import { Worktree } from '../types/index.js'
 import { createServer } from 'http'
 import { readFile } from 'fs/promises'
 import { execa } from 'execa'
@@ -395,17 +396,49 @@ const htmlTemplate = `
 </html>
 `
 
+// 拡張Worktree型定義
+interface EnhancedWorktree extends Worktree {
+  isMain: boolean
+  metadata: WorktreeMetadata | null
+  lastCommit: { date: string; message: string; hash: string } | null
+  health: string[]
+  uncommittedChanges: boolean
+}
+
+// worktreeメタデータ型定義
+interface WorktreeMetadata {
+  createdAt: string
+  branch: string
+  worktreePath: string
+  github?: {
+    type: 'issue' | 'pr'
+    title: string
+    body: string
+    author: string
+    labels: string[]
+    assignees: string[]
+    milestone?: string
+    url: string
+    issueNumber?: string
+  }
+  template?: string
+}
+
 // APIデータを取得
-async function getWorktreeData(): Promise<any> {
+async function getWorktreeData(): Promise<{ worktrees: EnhancedWorktree[] }> {
   const gitManager = new GitWorktreeManager()
   const worktrees = await gitManager.listWorktrees()
 
   const enhancedWorktrees = await Promise.all(
     worktrees.map(async wt => {
-      const result: any = {
+      const result: EnhancedWorktree = {
         ...wt,
         isMain: wt.path.endsWith('.'),
         branch: wt.branch?.replace('refs/heads/', '') || wt.branch,
+        metadata: null,
+        lastCommit: null,
+        health: [],
+        uncommittedChanges: false,
       }
 
       // メタデータを取得

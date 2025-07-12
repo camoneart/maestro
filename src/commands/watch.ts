@@ -47,10 +47,12 @@ function isExcluded(filePath: string, excludePatterns: string[]): boolean {
 }
 
 // ファイル変更を他のworktreeに同期
+import { Worktree } from '../types/index.js'
+
 async function syncFileChange(
   change: FileChange,
   sourceWorktree: string,
-  targetWorktrees: any[],
+  targetWorktrees: Worktree[],
   dryRun: boolean
 ): Promise<void> {
   const relativePath = path.relative(sourceWorktree, change.path)
@@ -142,7 +144,7 @@ export const watchCommand = new Command('watch')
       spinner.stop()
 
       // 同期先を選択
-      let targetWorktrees: any[] = []
+      let targetWorktrees: Worktree[] = []
 
       if (options.all) {
         targetWorktrees = worktrees.filter(wt => wt.path !== currentPath)
