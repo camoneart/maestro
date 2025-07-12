@@ -24,11 +24,13 @@ describe('dashboard command', () => {
   let mockGitManager: any
   let mockSpinner: any
   let mockServer: any
-  let serverListenSpy: SpyInstance
+  let httpCreateServerSpy: SpyInstance
+  let processOnSpy: SpyInstance
 
-  beforeEach(() => {
+  beforeEach(async () => {
     // GitWorktreeManagerのモック
     mockGitManager = {
+      isGitRepository: vi.fn().mockResolvedValue(true),
       listWorktrees: vi.fn().mockResolvedValue(createMockWorktrees(3)),
       getLastCommit: vi.fn().mockResolvedValue({
         date: new Date().toISOString(),
@@ -51,16 +53,29 @@ describe('dashboard command', () => {
       close: vi.fn(callback => {
         if (callback) process.nextTick(callback)
       }),
-      _requestHandler: null,
     }
 
+    // リクエストハンドラーを保存する変数
+    let capturedRequestHandler: Function | null = null
+
     // createServerのモック
-    serverListenSpy = vi.spyOn(http, 'createServer').mockImplementation((handler) => {
+    httpCreateServerSpy = vi.spyOn(http, 'createServer').mockImplementation((handler) => {
       // リクエストハンドラーを保存
-      if (handler) {
-        mockServer._requestHandler = handler
+      if (typeof handler === 'function') {
+        capturedRequestHandler = handler
       }
+      // リクエストハンドラーにアクセスできるようにする
+      ;(mockServer as any)._requestHandler = handler
       return mockServer as any
+    })
+
+    // process.onのモック（SIGINTハンドラーを登録しないように）
+    processOnSpy = vi.spyOn(process, 'on').mockImplementation((event, handler) => {
+      // SIGINT以外のイベントは通常通り処理
+      if (event !== 'SIGINT') {
+        return process
+      }
+      return process
     })
 
     // openのモック
@@ -137,11 +152,20 @@ describe('dashboard command', () => {
     beforeEach(async () => {
       // コマンドを一度実行してサーバーを起動
       await dashboardCommand.parseAsync(['node', 'test'])
+      
+      // createServerが呼ばれたことを確認
+      expect(http.createServer).toHaveBeenCalled()
+      
       // createServerに渡されたリクエストハンドラーを取得
-      requestHandler = mockServer._requestHandler
+      const createServerCalls = vi.mocked(http.createServer).mock.calls
+      expect(createServerCalls.length).toBeGreaterThan(0)
+      requestHandler = createServerCalls[0][0] as Function
     })
 
     it('/api/worktreesでworktreeデータを返す', async () => {
+      expect(requestHandler).toBeDefined()
+      expect(typeof requestHandler).toBe('function')
+
       const mockReq = { url: '/api/worktrees', method: 'GET' }
       const mockRes = {
         setHeader: vi.fn(),

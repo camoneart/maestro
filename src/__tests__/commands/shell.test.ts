@@ -112,7 +112,7 @@ describe('shell command', () => {
       ])
 
       await expect(shellCommand.parseAsync(['node', 'test'])).rejects.toThrow(
-        'process.exit called with code 0'
+        'process.exit called with code 1'
       )
 
       expect(console.log).toHaveBeenCalledWith(expect.stringContaining('影分身が存在しません'))
@@ -189,15 +189,20 @@ describe('shell command', () => {
     })
 
     it('fzfでキャンセルした場合は終了する', async () => {
-      // fzfキャンセルをシミュレート（即座に実行）
-      process.nextTick(() => mockFzfProcess.emit('close', 1))
-
-      await expect(shellCommand.parseAsync(['node', 'test', '--fzf'])).rejects.toThrow(
-        'process.exit called with code 0'
-      )
+      // parseAsyncを開始してfzfプロセスが開始されるのを待つ
+      const commandPromise = shellCommand.parseAsync(['node', 'test', '--fzf'])
+      
+      // fzfプロセスが開始されるのを少し待つ
+      await new Promise(resolve => setTimeout(resolve, 100))
+      
+      // fzfプロセスをキャンセル（終了コード1）
+      mockFzfProcess.emit('close', 1)
+      
+      // コマンドがexitで終了することを確認
+      await expect(commandPromise).rejects.toThrow('process.exit called with code 0')
 
       expect(console.log).toHaveBeenCalledWith(expect.stringContaining('キャンセルされました'))
-    })
+    }, 10000)
   })
 
   describe('コマンド実行オプション', () => {

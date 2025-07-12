@@ -107,7 +107,7 @@ export const listCommand = new Command('list')
           // JSON出力時に追加フィールドを含める
           const jsonWorktrees = worktrees.map(wt => ({
             ...wt,
-            isCurrent: wt.path === process.cwd() || wt.path.endsWith('.'),
+            isCurrent: wt.isCurrentDirectory || wt.path === process.cwd(),
             locked: wt.locked || false,
             lastCommit: (wt as EnhancedWorktree).lastCommit || null,
             metadata: (wt as EnhancedWorktree).metadata || null,
@@ -181,8 +181,8 @@ export const listCommand = new Command('list')
         console.log(chalk.bold('\n🥷 影分身一覧:\n'))
 
         // メインワークツリーを先頭に表示
-        const mainWorktree = worktrees.find(wt => wt.path.endsWith('.'))
-        const cloneWorktrees = worktrees.filter(wt => !wt.path.endsWith('.'))
+        const mainWorktree = worktrees.find(wt => wt.branch === 'refs/heads/main' || wt.isCurrentDirectory)
+        const cloneWorktrees = worktrees.filter(wt => wt !== mainWorktree)
 
         if (mainWorktree) {
           displayWorktree(mainWorktree, true, options.lastCommit, options.metadata)

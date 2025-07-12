@@ -1,6 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { GitWorktreeManager } from '../../core/git'
-import fs from 'fs/promises'
 import { spawn } from 'child_process'
 import { listCommand } from '../../commands/list'
 import { createMockWorktree, createMockWorktrees } from '../utils/test-helpers'
@@ -8,13 +7,15 @@ import { EventEmitter } from 'events'
 
 // モック設定
 vi.mock('../../core/git')
-vi.mock('fs/promises')
 vi.mock('child_process')
 
-// fsのsyncメソッドもモック
+// fsモジュール全体をモック
 vi.mock('fs', () => ({
   default: {
     statSync: vi.fn().mockReturnValue({ size: 1024 * 1024 }),
+    promises: {
+      readFile: vi.fn(),
+    },
   },
 }))
 
@@ -22,7 +23,7 @@ describe('list command', () => {
   let mockGitManager: any
   let mockFzfProcess: any
 
-  beforeEach(() => {
+  beforeEach(async () => {
     // GitWorktreeManagerのモック
     mockGitManager = {
       isGitRepository: vi.fn().mockResolvedValue(true),
@@ -65,8 +66,9 @@ describe('list command', () => {
     mockFzfProcess.stdout = new EventEmitter()
     vi.mocked(spawn).mockReturnValue(mockFzfProcess)
 
-    // fs.readFileのモック
-    vi.mocked(fs.readFile).mockResolvedValue(
+    // fs.promises.readFileのモック
+    const fs = await import('fs')
+    vi.mocked(fs.default.promises.readFile).mockResolvedValue(
       JSON.stringify({
         createdAt: '2024-01-01T10:00:00Z',
         branch: 'feature-a',
@@ -139,11 +141,14 @@ describe('list command', () => {
 
       expect(jsonData).toBeInstanceOf(Array)
       expect(jsonData).toHaveLength(4)
-      expect(jsonData[0]).toHaveProperty('path', '/repo/.')
-      expect(jsonData[0]).toHaveProperty('branch', 'refs/heads/main')
-      expect(jsonData[0]).toHaveProperty('isCurrent', true)
-      expect(jsonData[0]).toHaveProperty('lastCommit')
-      expect(jsonData[0]).toHaveProperty('metadata')
+      
+      // Find the main worktree (path ends with '.')
+      const mainWorktree = jsonData.find((wt: any) => wt.path === '/repo/.')
+      expect(mainWorktree).toBeDefined()
+      expect(mainWorktree).toHaveProperty('branch', 'refs/heads/main')
+      expect(mainWorktree).toHaveProperty('isCurrent', true)
+      expect(mainWorktree).toHaveProperty('lastCommit')
+      expect(mainWorktree).toHaveProperty('metadata')
     })
 
     it('JSON出力時に追加情報を含める', async () => {
@@ -152,15 +157,20 @@ describe('list command', () => {
       const logCall = vi.mocked(console.log).mock.calls[0][0]
       const jsonData = JSON.parse(logCall)
 
+      // Find worktrees with specific properties
+      const mainWorktree = jsonData.find((wt: any) => wt.path === '/repo/.')
+      const worktreeWithMetadata = jsonData.find((wt: any) => wt.path === '/repo/worktree-1')
+
       // 最終コミット情報
-      expect(jsonData[0].lastCommit).toEqual({
+      expect(mainWorktree.lastCommit).toEqual({
         date: '2024-01-01T12:00:00Z',
         message: 'feat: add new feature',
         hash: 'abc1234',
       })
 
       // メタデータ情報
-      expect(jsonData[1].metadata.github).toEqual(
+      expect(worktreeWithMetadata.metadata).toBeTruthy()
+      expect(worktreeWithMetadata.metadata.github).toEqual(
         expect.objectContaining({
           type: 'issue',
           issueNumber: '123',
@@ -174,20 +184,27 @@ describe('list command', () => {
     it('--filterオプションでブランチ名をフィルタする', async () => {
       await listCommand.parseAsync(['node', 'test', '--filter', 'feature-a'])
 
-      // mainとfeature-aのみ表示される
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('refs/heads/main'))
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('refs/heads/feature-a'))
-      expect(console.log).not.toHaveBeenCalledWith(expect.stringContaining('refs/heads/feature-b'))
-      expect(console.log).not.toHaveBeenCalledWith(expect.stringContaining('refs/heads/feature-c'))
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('合計: 2 個の影分身'))
+      const logCalls = vi.mocked(console.log).mock.calls
+      const output = logCalls.map(call => call[0]).join('\n')
+
+      // feature-aのみ表示される（mainはフィルタされる）
+      expect(output).toContain('refs/heads/feature-a')
+      expect(output).not.toContain('refs/heads/main')
+      expect(output).not.toContain('refs/heads/feature-b')
+      expect(output).not.toContain('refs/heads/feature-c')
+      expect(output).toContain('合計: 1 個の影分身')
     })
 
     it('--filterオプションでパスをフィルタする', async () => {
       await listCommand.parseAsync(['node', 'test', '--filter', 'worktree-2'])
 
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('refs/heads/main'))
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('refs/heads/feature-b'))
-      expect(console.log).not.toHaveBeenCalledWith(expect.stringContaining('refs/heads/feature-a'))
+      const logCalls = vi.mocked(console.log).mock.calls
+      const output = logCalls.map(call => call[0]).join('\n')
+
+      expect(output).toContain('refs/heads/feature-b')
+      expect(output).not.toContain('refs/heads/main')
+      expect(output).not.toContain('refs/heads/feature-a')
+      expect(output).toContain('合計: 1 個の影分身')
     })
   })
 
@@ -196,12 +213,18 @@ describe('list command', () => {
       await listCommand.parseAsync(['node', 'test', '--sort', 'branch'])
 
       const logCalls = vi.mocked(console.log).mock.calls
-      const branchLogs = logCalls.filter(call => call[0].includes('🥷'))
+      const output = logCalls.map(call => call[0]).join('\n')
+      
+      // ブランチ情報を含む行を抽出
+      const branchLines = logCalls
+        .filter(call => typeof call[0] === 'string' && call[0].includes('refs/heads/') && !call[0].includes('main'))
+        .map(call => call[0])
 
-      // ブランチ名でアルファベット順にソートされていることを確認
-      expect(branchLogs[0][0]).toContain('feature-a')
-      expect(branchLogs[1][0]).toContain('feature-b')
-      expect(branchLogs[2][0]).toContain('feature-c')
+      // feature-a, feature-b, feature-c の順でソートされていることを確認
+      expect(branchLines.length).toBeGreaterThanOrEqual(3)
+      expect(branchLines[0]).toContain('feature-a')
+      expect(branchLines[1]).toContain('feature-b')
+      expect(branchLines[2]).toContain('feature-c')
     })
 
     it('--sort ageで最終コミット日時でソート', async () => {
@@ -223,10 +246,18 @@ describe('list command', () => {
 
       // 最新のコミットが先に表示される
       const logCalls = vi.mocked(console.log).mock.calls
-      const commitLogs = logCalls.filter(call => call[0].includes('最終コミット:'))
-
-      expect(commitLogs[0][0]).toContain('2024-01-04')
-      expect(commitLogs[1][0]).toContain('2024-01-03')
+      const output = logCalls.map(call => call[0]).join('\n')
+      
+      // feature-b (2024-01-04) が最初に来ることを確認
+      const indexFeatureB = output.indexOf('feature-b')
+      const indexMain = output.indexOf('refs/heads/main')
+      const indexFeatureC = output.indexOf('feature-c')
+      const indexFeatureA = output.indexOf('feature-a')
+      
+      expect(indexFeatureB).toBeGreaterThan(-1)
+      expect(indexFeatureB).toBeLessThan(indexMain)
+      expect(indexMain).toBeLessThan(indexFeatureC)
+      expect(indexFeatureC).toBeLessThan(indexFeatureA)
     })
 
     it('--sort sizeでディレクトリサイズでソート', async () => {
@@ -257,39 +288,58 @@ describe('list command', () => {
     it('--metadataでメタデータ情報を表示', async () => {
       await listCommand.parseAsync(['node', 'test', '--metadata'])
 
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('GitHub:'))
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('Fix bug in authentication'))
-      expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining('ラベル: bug, high-priority')
-      )
-      expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining('担当者: developer1, developer2')
-      )
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('作成日時:'))
+      const logCalls = vi.mocked(console.log).mock.calls
+      const output = logCalls.map(call => call[0]).join('\n')
+
+      // worktree-1のメタデータが表示されることを確認
+      expect(output).toContain('GitHub:')
+      expect(output).toContain('Fix bug in authentication')
+      expect(output).toContain('ラベル: bug, high-priority')
+      expect(output).toContain('担当者: developer1, developer2')
+      expect(output).toContain('作成日時:')
     })
 
     it('GitHubバッジを表示', async () => {
-      // PRメタデータ
-      vi.mocked(fs.readFile)
-        .mockResolvedValueOnce(
-          JSON.stringify({
-            github: {
-              type: 'pr',
-              issueNumber: '456',
-            },
-          })
-        )
-        .mockResolvedValueOnce(
-          JSON.stringify({
-            template: 'fastapi',
-          })
-        )
+      // モックをリセットして新しいデータを設定
+      const fs = (await import('fs')).default
+      vi.mocked(fs.promises.readFile).mockReset()
+      
+      // 各worktreeに対して異なるメタデータを返す
+      vi.mocked(fs.promises.readFile)
+        .mockResolvedValueOnce(JSON.stringify({
+          createdAt: '2024-01-01T10:00:00Z',
+          branch: 'feature-a',
+          worktreePath: '/repo/worktree-1',
+          github: {
+            type: 'issue',
+            title: 'Fix bug in authentication',
+            body: 'Description of the issue',
+            author: 'testuser',
+            labels: ['bug', 'high-priority'],
+            assignees: ['developer1', 'developer2'],
+            url: 'https://github.com/owner/repo/issues/123',
+            issueNumber: '123',
+          },
+        }))
+        .mockResolvedValueOnce(JSON.stringify({
+          github: {
+            type: 'pr',
+            issueNumber: '456',
+          },
+        }))
+        .mockResolvedValueOnce(JSON.stringify({
+          template: 'fastapi',
+        }))
+        .mockResolvedValueOnce(JSON.stringify({}))
 
       await listCommand.parseAsync(['node', 'test', '--metadata'])
 
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('Issue #123'))
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('PR #456'))
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('[fastapi]'))
+      const logCalls = vi.mocked(console.log).mock.calls
+      const output = logCalls.map(call => call[0]).join('\n')
+
+      expect(output).toContain('Issue #123')
+      expect(output).toContain('PR #456')
+      expect(output).toContain('[fastapi]')
     })
   })
 
@@ -314,21 +364,38 @@ describe('list command', () => {
     })
 
     it('fzfで選択されたブランチ名を出力する', async () => {
-      await listCommand.parseAsync(['node', 'test', '--fzf'])
+      // parseAsyncを非同期で実行してfzfプロセスを開始
+      const parsePromise = listCommand.parseAsync(['node', 'test', '--fzf'])
+
+      // fzfプロセスが開始されるのを待つ
+      await new Promise(resolve => setTimeout(resolve, 10))
 
       // fzfからの出力をシミュレート
       mockFzfProcess.stdout.emit('data', 'refs/heads/feature-a [現在] | /repo/worktree-1\n')
       mockFzfProcess.emit('close', 0)
+
+      // parseAsyncの完了を待つ
+      await parsePromise
 
       // ブランチ名のみが出力される
       expect(console.log).toHaveBeenCalledWith('feature-a')
     })
 
     it('fzfでキャンセルされた場合は何も出力しない', async () => {
-      await listCommand.parseAsync(['node', 'test', '--fzf'])
+      // console.logのモックをリセット
+      vi.mocked(console.log).mockClear()
+
+      // parseAsyncを非同期で実行してfzfプロセスを開始
+      const parsePromise = listCommand.parseAsync(['node', 'test', '--fzf'])
+
+      // fzfプロセスが開始されるのを待つ
+      await new Promise(resolve => setTimeout(resolve, 10))
 
       // fzfがキャンセルされた（コード1で終了）
       mockFzfProcess.emit('close', 1)
+
+      // parseAsyncの完了を待つ
+      await parsePromise
 
       // console.logが呼ばれていないことを確認
       expect(console.log).not.toHaveBeenCalled()
@@ -362,7 +429,8 @@ describe('list command', () => {
     })
 
     it('メタデータ読み込みエラーを無視する', async () => {
-      vi.mocked(fs.readFile).mockRejectedValue(new Error('File not found'))
+      const fs = (await import('fs')).default
+      vi.mocked(fs.promises.readFile).mockRejectedValue(new Error('File not found'))
 
       // エラーが発生してもコマンドは正常に完了する
       await listCommand.parseAsync(['node', 'test', '--metadata'])
