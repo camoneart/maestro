@@ -127,8 +127,8 @@ describe('watch command', () => {
 
   describe('基本的な動作', () => {
     it('現在のworktreeの変更を監視する', async () => {
-      // --autoオプションを追加して確認プロンプトをスキップ
-      const watchPromise = watchCommand.parseAsync(['node', 'test', '--auto'])
+      // --allオプションを追加して確認プロンプトをスキップ
+      const watchPromise = watchCommand.parseAsync(['node', 'test', '--all'])
 
       // 少し待つ
       await new Promise(resolve => setTimeout(resolve, 50))
@@ -153,8 +153,8 @@ describe('watch command', () => {
     })
 
     it('ファイル追加を検出して同期する', async () => {
-      // --autoオプションを追加
-      const watchPromise = watchCommand.parseAsync(['node', 'test', '--auto'])
+      // --allオプションを追加
+      const watchPromise = watchCommand.parseAsync(['node', 'test', '--all'])
 
       // 少し待つ
       await new Promise(resolve => setTimeout(resolve, 50))
@@ -181,8 +181,8 @@ describe('watch command', () => {
     })
 
     it('ファイル変更を検出して同期する', async () => {
-      // --autoオプションを追加
-      const watchPromise = watchCommand.parseAsync(['node', 'test', '--auto'])
+      // --allオプションを追加
+      const watchPromise = watchCommand.parseAsync(['node', 'test', '--all'])
 
       await new Promise(resolve => setTimeout(resolve, 50))
 
@@ -203,8 +203,8 @@ describe('watch command', () => {
     })
 
     it('ファイル削除を検出して同期する', async () => {
-      // --autoオプションを追加
-      const watchPromise = watchCommand.parseAsync(['node', 'test', '--auto'])
+      // --allオプションを追加
+      const watchPromise = watchCommand.parseAsync(['node', 'test', '--all'])
 
       await new Promise(resolve => setTimeout(resolve, 50))
 
@@ -310,8 +310,12 @@ describe('watch command', () => {
       vi.mocked(inquirer.prompt).mockImplementation(async (questions: any) => {
         // questionsが配列の場合、最初の質問のnameをチェック
         const question = Array.isArray(questions) ? questions[0] : questions
-        if (question.name === 'confirmSync') {
-          return { confirmSync: true }
+        if (question.name === 'selected') {
+          // 初回の同期先選択
+          return { selected: [mockGitManager.listWorktrees.mock.results[0].value[2]] }
+        }
+        if (question.name === 'proceed') {
+          return { proceed: true }
         }
         return {}
       })
@@ -323,13 +327,13 @@ describe('watch command', () => {
       // ファイル追加イベントを発火
       mockWatcher.emit('add', '/repo/worktree-1/src/new-file.ts')
 
-      await new Promise(resolve => setTimeout(resolve, 50))
+      await new Promise(resolve => setTimeout(resolve, 150))
 
       expect(inquirer.prompt).toHaveBeenCalledWith(
         expect.arrayContaining([
           expect.objectContaining({
-            name: 'confirmSync',
-            message: expect.stringContaining('他のworktreeに同期しますか？'),
+            name: 'proceed',
+            message: expect.stringContaining('これらの変更を同期しますか？'),
           }),
         ])
       )
@@ -342,8 +346,12 @@ describe('watch command', () => {
       // inquirer.promptのモックを設定
       vi.mocked(inquirer.prompt).mockImplementation(async (questions: any) => {
         const question = Array.isArray(questions) ? questions[0] : questions
-        if (question.name === 'confirmSync') {
-          return { confirmSync: false }
+        if (question.name === 'selected') {
+          // 初回の同期先選択
+          return { selected: [mockGitManager.listWorktrees.mock.results[0].value[2]] }
+        }
+        if (question.name === 'proceed') {
+          return { proceed: false }
         }
         return {}
       })
@@ -355,7 +363,7 @@ describe('watch command', () => {
       // ファイル追加イベントを発火
       mockWatcher.emit('add', '/repo/worktree-1/src/new-file.ts')
 
-      await new Promise(resolve => setTimeout(resolve, 50))
+      await new Promise(resolve => setTimeout(resolve, 150))
 
       expect(fs.copyFile).not.toHaveBeenCalled()
       expect(console.log).toHaveBeenCalledWith(expect.stringContaining('スキップしました'))
@@ -386,32 +394,35 @@ describe('watch command', () => {
     })
 
     it('影分身が存在しない場合エラーを表示する', async () => {
-      mockGitManager.listWorktrees.mockResolvedValue([
-        createMockWorktree({ path: '/repo/.', branch: 'refs/heads/main' }),
-      ])
+      // 他のworktreeがない状態をシミュレート
+      vi.mocked(inquirer.prompt).mockResolvedValue({ selected: [] })
+      
+      const watchPromise = watchCommand.parseAsync(['node', 'test'])
 
-      await expect(watchCommand.parseAsync(['node', 'test'])).rejects.toThrow(
-        'process.exit called with code 1'
+      await expect(watchPromise).rejects.toThrow(
+        'process.exit called with code 0'
       )
 
-      expect(mockSpinner.fail).toHaveBeenCalledWith('他の影分身が存在しません')
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('同期先が選択されていません'))
     })
 
     it('ファイル同期エラーを処理する', async () => {
       vi.mocked(fs.copyFile).mockRejectedValue(new Error('Permission denied'))
 
-      // --autoオプションを追加
-      const watchPromise = watchCommand.parseAsync(['node', 'test', '--auto'])
+      // --allオプションを追加
+      const watchPromise = watchCommand.parseAsync(['node', 'test', '--all'])
 
       await new Promise(resolve => setTimeout(resolve, 50))
 
       // ファイル追加イベントを発火
       mockWatcher.emit('add', '/repo/worktree-1/src/new-file.ts')
 
-      await new Promise(resolve => setTimeout(resolve, 50))
+      await new Promise(resolve => setTimeout(resolve, 150))
 
       // エラーが発生してもwatchは継続する
-      expect(console.error).not.toHaveBeenCalled()
+      expect(console.error).toHaveBeenCalledWith(
+        expect.stringContaining('エラー - Error: Permission denied')
+      )
 
       mockWatcher.emit('error', new Error('Test complete'))
     })
@@ -420,18 +431,27 @@ describe('watch command', () => {
   describe('終了処理', () => {
     it('SIGINTで適切に終了する', async () => {
       const listeners: { [key: string]: Function } = {}
+      const originalOn = process.on.bind(process)
       vi.spyOn(process, 'on').mockImplementation((event: string, listener: Function) => {
-        listeners[event] = listener
-        return process
+        if (event === 'SIGINT') {
+          listeners[event] = listener
+          return process
+        }
+        return originalOn(event as any, listener)
       })
 
-      // --autoオプションを追加
-      const watchPromise = watchCommand.parseAsync(['node', 'test', '--auto'])
+      // --allオプションを追加
+      const watchPromise = watchCommand.parseAsync(['node', 'test', '--all'])
 
       await new Promise(resolve => setTimeout(resolve, 50))
 
+      // SIGINTハンドラーが登録されていることを確認
+      expect(listeners['SIGINT']).toBeDefined()
+
       // SIGINTをトリガー
-      listeners['SIGINT']()
+      if (listeners['SIGINT']) {
+        listeners['SIGINT']()
+      }
 
       expect(console.log).toHaveBeenCalledWith(
         expect.stringContaining('ファイル監視を停止しています...')

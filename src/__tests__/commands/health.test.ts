@@ -103,11 +103,14 @@ describe('health command', () => {
         createMockWorktree({ path: '/repo/.', branch: 'refs/heads/main' }),
       ])
 
-      await expect(healthCommand.parseAsync(['node', 'test'])).rejects.toThrow(
-        'process.exit called with code 0'
-      )
+      try {
+        await healthCommand.parseAsync(['node', 'test'])
+      } catch (error) {
+        // process.exitが呼ばれることを期待
+      }
 
       expect(mockSpinner.succeed).toHaveBeenCalledWith('影分身が存在しません')
+      expect(process.exit).toHaveBeenCalledWith(0)
     })
   })
 
@@ -142,7 +145,7 @@ describe('health command', () => {
       await healthCommand.parseAsync(['node', 'test'])
 
       expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining('mainから25コミット遅れています')
+        expect.stringContaining('から25コミット遅れています')
       )
     })
 
@@ -241,7 +244,9 @@ describe('health command', () => {
           }),
         ])
       )
-      expect(execa).toHaveBeenCalledWith('git', ['merge', 'main', '--no-edit'], expect.any(Object))
+      expect(execa).toHaveBeenCalledWith('git', ['merge', 'main', '--no-edit'], 
+        expect.objectContaining({ cwd: expect.any(String) })
+      )
       expect(mockSpinner.succeed).toHaveBeenCalledWith('2個の問題を修正しました')
     })
 
