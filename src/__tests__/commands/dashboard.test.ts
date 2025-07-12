@@ -5,11 +5,11 @@ import fs from 'fs/promises'
 import open from 'open'
 import http from 'http'
 import { dashboardCommand } from '../../commands/dashboard'
-import { 
-  createMockWorktree, 
+import {
+  createMockWorktree,
   createMockWorktrees,
   createMockExecaResponse,
-  createMockSpinner
+  createMockSpinner,
 } from '../utils/test-helpers'
 import ora from 'ora'
 
@@ -33,7 +33,7 @@ describe('dashboard command', () => {
       getLastCommit: vi.fn().mockResolvedValue({
         date: new Date().toISOString(),
         message: 'Initial commit',
-        hash: 'abc123'
+        hash: 'abc123',
       }),
     }
     vi.mocked(GitWorktreeManager).mockImplementation(() => mockGitManager)
@@ -48,7 +48,7 @@ describe('dashboard command', () => {
         // コールバックを非同期で実行
         if (callback) process.nextTick(callback)
       }),
-      close: vi.fn((callback) => {
+      close: vi.fn(callback => {
         if (callback) process.nextTick(callback)
       }),
     }
@@ -63,28 +63,30 @@ describe('dashboard command', () => {
     vi.mocked(execa).mockResolvedValue(createMockExecaResponse())
 
     // fs.readFileのモック
-    vi.mocked(fs.readFile).mockResolvedValue(JSON.stringify({
-      createdAt: new Date().toISOString(),
-      branch: 'feature-test',
-      worktreePath: '/path/to/worktree',
-      github: {
-        type: 'issue',
-        title: 'Test Issue',
-        body: 'Test body',
-        author: 'testuser',
-        labels: ['bug'],
-        assignees: ['testuser'],
-        url: 'https://github.com/owner/repo/issues/123',
-        issueNumber: '123'
-      }
-    }))
+    vi.mocked(fs.readFile).mockResolvedValue(
+      JSON.stringify({
+        createdAt: new Date().toISOString(),
+        branch: 'feature-test',
+        worktreePath: '/path/to/worktree',
+        github: {
+          type: 'issue',
+          title: 'Test Issue',
+          body: 'Test body',
+          author: 'testuser',
+          labels: ['bug'],
+          assignees: ['testuser'],
+          url: 'https://github.com/owner/repo/issues/123',
+          issueNumber: '123',
+        },
+      })
+    )
 
     // consoleのモック
     vi.spyOn(console, 'log').mockImplementation(() => {})
     vi.spyOn(console, 'error').mockImplementation(() => {})
 
     // process.exitのモック
-    vi.spyOn(process, 'exit').mockImplementation((code) => {
+    vi.spyOn(process, 'exit').mockImplementation(code => {
       throw new Error(`process.exit called with code ${code}`)
     })
   })
@@ -127,7 +129,7 @@ describe('dashboard command', () => {
 
     beforeEach(() => {
       // createServerに渡されるリクエストハンドラーをキャプチャ
-      serverListenSpy.mockImplementation((handler) => {
+      serverListenSpy.mockImplementation(handler => {
         requestHandler = handler
         return mockServer
       })
@@ -147,7 +149,7 @@ describe('dashboard command', () => {
 
       expect(mockRes.writeHead).toHaveBeenCalledWith(200, { 'Content-Type': 'application/json' })
       expect(mockRes.end).toHaveBeenCalledWith(expect.stringContaining('"worktrees"'))
-      
+
       const responseData = JSON.parse(mockRes.end.mock.calls[0][0])
       expect(responseData.worktrees).toHaveLength(3)
       expect(responseData.stats).toBeDefined()
@@ -158,7 +160,7 @@ describe('dashboard command', () => {
       mockGitManager.getLastCommit.mockResolvedValue({
         date: new Date(Date.now() - 31 * 24 * 60 * 60 * 1000).toISOString(),
         message: 'Old commit',
-        hash: 'old123'
+        hash: 'old123',
       })
 
       // 未コミットの変更を返す
@@ -182,7 +184,7 @@ describe('dashboard command', () => {
 
       const responseData = JSON.parse(mockRes.end.mock.calls[0][0])
       const worktree = responseData.worktrees[0]
-      
+
       expect(worktree.metadata).toBeDefined()
       expect(worktree.metadata.github).toBeDefined()
       expect(worktree.health).toContain('stale')
@@ -201,9 +203,13 @@ describe('dashboard command', () => {
 
       await requestHandler(mockReq, mockRes)
 
-      expect(mockRes.writeHead).toHaveBeenCalledWith(200, { 'Content-Type': 'text/html; charset=utf-8' })
+      expect(mockRes.writeHead).toHaveBeenCalledWith(200, {
+        'Content-Type': 'text/html; charset=utf-8',
+      })
       expect(mockRes.end).toHaveBeenCalledWith(expect.stringContaining('<!DOCTYPE html>'))
-      expect(mockRes.end).toHaveBeenCalledWith(expect.stringContaining('Shadow Clone Jutsu Dashboard'))
+      expect(mockRes.end).toHaveBeenCalledWith(
+        expect.stringContaining('Shadow Clone Jutsu Dashboard')
+      )
     })
 
     it('/api/open-editorでエディタを開く', async () => {
@@ -287,7 +293,10 @@ describe('dashboard command', () => {
       await requestHandler(mockReq, mockRes)
 
       expect(mockRes.setHeader).toHaveBeenCalledWith('Access-Control-Allow-Origin', '*')
-      expect(mockRes.setHeader).toHaveBeenCalledWith('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+      expect(mockRes.setHeader).toHaveBeenCalledWith(
+        'Access-Control-Allow-Methods',
+        'GET, POST, OPTIONS'
+      )
       expect(mockRes.setHeader).toHaveBeenCalledWith('Access-Control-Allow-Headers', 'Content-Type')
     })
 
@@ -333,15 +342,17 @@ describe('dashboard command', () => {
         throw new Error('Port already in use')
       })
 
-      await expect(dashboardCommand.parseAsync(['node', 'test'])).rejects.toThrow('process.exit called with code 1')
-      
+      await expect(dashboardCommand.parseAsync(['node', 'test'])).rejects.toThrow(
+        'process.exit called with code 1'
+      )
+
       expect(mockSpinner.fail).toHaveBeenCalledWith('ダッシュボードサーバーの起動に失敗しました')
       expect(console.error).toHaveBeenCalledWith(expect.stringContaining('Port already in use'))
     })
 
     it('APIエラーを500エラーとして返す', async () => {
       let requestHandler: Function
-      serverListenSpy.mockImplementation((handler) => {
+      serverListenSpy.mockImplementation(handler => {
         requestHandler = handler
         return mockServer
       })
@@ -366,7 +377,7 @@ describe('dashboard command', () => {
 
     it('メタデータ読み込みエラーを無視する', async () => {
       let requestHandler: Function
-      serverListenSpy.mockImplementation((handler) => {
+      serverListenSpy.mockImplementation(handler => {
         requestHandler = handler
         return mockServer
       })
@@ -387,7 +398,7 @@ describe('dashboard command', () => {
 
       // エラーが発生してもレスポンスが返ることを確認
       expect(mockRes.writeHead).toHaveBeenCalledWith(200, { 'Content-Type': 'application/json' })
-      
+
       const responseData = JSON.parse(mockRes.end.mock.calls[0][0])
       expect(responseData.worktrees[0].metadata).toBeNull()
     })

@@ -8,12 +8,12 @@ import inquirer from 'inquirer'
 import ora from 'ora'
 import cliProgress from 'cli-progress'
 import { syncCommand } from '../../commands/sync'
-import { 
-  createMockWorktree, 
+import {
+  createMockWorktree,
   createMockWorktrees,
   createMockExecaResponse,
   createMockSpinner,
-  createMockConfig
+  createMockConfig,
 } from '../utils/test-helpers'
 import { EventEmitter } from 'events'
 import path from 'path'
@@ -40,17 +40,17 @@ describe('sync command', () => {
     mockGitManager = {
       isGitRepository: vi.fn().mockResolvedValue(true),
       listWorktrees: vi.fn().mockResolvedValue([
-        createMockWorktree({ 
-          path: '/repo/.', 
-          branch: 'refs/heads/main' 
+        createMockWorktree({
+          path: '/repo/.',
+          branch: 'refs/heads/main',
         }),
-        createMockWorktree({ 
-          path: '/repo/worktree-1', 
-          branch: 'refs/heads/feature-a' 
+        createMockWorktree({
+          path: '/repo/worktree-1',
+          branch: 'refs/heads/feature-a',
         }),
-        createMockWorktree({ 
-          path: '/repo/worktree-2', 
-          branch: 'refs/heads/feature-b' 
+        createMockWorktree({
+          path: '/repo/worktree-2',
+          branch: 'refs/heads/feature-b',
         }),
       ]),
     }
@@ -79,7 +79,7 @@ describe('sync command', () => {
     mockFzfProcess = new EventEmitter() as any
     mockFzfProcess.stdin = {
       write: vi.fn(),
-      end: vi.fn()
+      end: vi.fn(),
     }
     mockFzfProcess.stdout = new EventEmitter()
     vi.mocked(spawn).mockReturnValue(mockFzfProcess)
@@ -117,14 +117,14 @@ describe('sync command', () => {
 
     // pathのモック
     vi.spyOn(path, 'join').mockImplementation((...args) => args.join('/'))
-    vi.spyOn(path, 'dirname').mockImplementation((p) => p.split('/').slice(0, -1).join('/'))
+    vi.spyOn(path, 'dirname').mockImplementation(p => p.split('/').slice(0, -1).join('/'))
 
     // consoleのモック
     vi.spyOn(console, 'log').mockImplementation(() => {})
     vi.spyOn(console, 'error').mockImplementation(() => {})
 
     // process.exitのモック
-    vi.spyOn(process, 'exit').mockImplementation((code) => {
+    vi.spyOn(process, 'exit').mockImplementation(code => {
       throw new Error(`process.exit called with code ${code}`)
     })
   })
@@ -138,9 +138,13 @@ describe('sync command', () => {
       await syncCommand.parseAsync(['node', 'test', 'feature-a'])
 
       expect(mockProgressBar.start).toHaveBeenCalledWith(1, 0)
-      expect(execa).toHaveBeenCalledWith('git', ['merge', 'main', '--no-edit'], expect.objectContaining({
-        cwd: '/repo/worktree-1'
-      }))
+      expect(execa).toHaveBeenCalledWith(
+        'git',
+        ['merge', 'main', '--no-edit'],
+        expect.objectContaining({
+          cwd: '/repo/worktree-1',
+        })
+      )
       expect(console.log).toHaveBeenCalledWith(expect.stringContaining('同期結果:'))
       expect(console.log).toHaveBeenCalledWith(expect.stringContaining('✅ feature-a - 成功'))
     })
@@ -158,21 +162,29 @@ describe('sync command', () => {
 
       expect(execa).toHaveBeenCalledWith('git', ['fetch', 'origin', 'develop'], expect.any(Object))
       expect(execa).toHaveBeenCalledWith('git', ['pull', 'origin', 'develop'], expect.any(Object))
-      expect(execa).toHaveBeenCalledWith('git', ['merge', 'develop', '--no-edit'], expect.any(Object))
+      expect(execa).toHaveBeenCalledWith(
+        'git',
+        ['merge', 'develop', '--no-edit'],
+        expect.any(Object)
+      )
     })
 
     it('影分身が存在しない場合はエラーを表示', async () => {
       mockGitManager.listWorktrees.mockResolvedValue([
-        createMockWorktree({ path: '/repo/.', branch: 'refs/heads/main' })
+        createMockWorktree({ path: '/repo/.', branch: 'refs/heads/main' }),
       ])
 
-      await expect(syncCommand.parseAsync(['node', 'test'])).rejects.toThrow('process.exit called with code 0')
+      await expect(syncCommand.parseAsync(['node', 'test'])).rejects.toThrow(
+        'process.exit called with code 0'
+      )
 
       expect(mockSpinner.fail).toHaveBeenCalledWith('影分身が存在しません')
     })
 
     it('存在しないブランチを指定した場合エラーを表示', async () => {
-      await expect(syncCommand.parseAsync(['node', 'test', 'non-existent'])).rejects.toThrow('process.exit called with code 1')
+      await expect(syncCommand.parseAsync(['node', 'test', 'non-existent'])).rejects.toThrow(
+        'process.exit called with code 1'
+      )
 
       expect(mockSpinner.fail).toHaveBeenCalledWith("影分身 'non-existent' が見つかりません")
     })
@@ -183,40 +195,66 @@ describe('sync command', () => {
       await syncCommand.parseAsync(['node', 'test', '--all'])
 
       expect(mockProgressBar.start).toHaveBeenCalledWith(2, 0)
-      expect(execa).toHaveBeenCalledWith('git', ['merge', 'main', '--no-edit'], expect.objectContaining({
-        cwd: '/repo/worktree-1'
-      }))
-      expect(execa).toHaveBeenCalledWith('git', ['merge', 'main', '--no-edit'], expect.objectContaining({
-        cwd: '/repo/worktree-2'
-      }))
+      expect(execa).toHaveBeenCalledWith(
+        'git',
+        ['merge', 'main', '--no-edit'],
+        expect.objectContaining({
+          cwd: '/repo/worktree-1',
+        })
+      )
+      expect(execa).toHaveBeenCalledWith(
+        'git',
+        ['merge', 'main', '--no-edit'],
+        expect.objectContaining({
+          cwd: '/repo/worktree-2',
+        })
+      )
       expect(console.log).toHaveBeenCalledWith(expect.stringContaining('合計: 2 成功'))
     })
 
     it('--rebaseオプションでrebaseを使用する', async () => {
       await syncCommand.parseAsync(['node', 'test', 'feature-a', '--rebase'])
 
-      expect(execa).toHaveBeenCalledWith('git', ['rebase', 'main'], expect.objectContaining({
-        cwd: '/repo/worktree-1'
-      }))
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('✅ feature-a - 成功 (rebase)'))
+      expect(execa).toHaveBeenCalledWith(
+        'git',
+        ['rebase', 'main'],
+        expect.objectContaining({
+          cwd: '/repo/worktree-1',
+        })
+      )
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringContaining('✅ feature-a - 成功 (rebase)')
+      )
     })
 
     it('--pushオプションで同期後にpushする', async () => {
       await syncCommand.parseAsync(['node', 'test', 'feature-a', '--push'])
 
-      expect(execa).toHaveBeenCalledWith('git', ['push'], expect.objectContaining({
-        cwd: '/repo/worktree-1'
-      }))
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('✅ feature-a - 成功 (merge + push)'))
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('🚀 リモートリポジトリにプッシュしました'))
+      expect(execa).toHaveBeenCalledWith(
+        'git',
+        ['push'],
+        expect.objectContaining({
+          cwd: '/repo/worktree-1',
+        })
+      )
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringContaining('✅ feature-a - 成功 (merge + push)')
+      )
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringContaining('🚀 リモートリポジトリにプッシュしました')
+      )
     })
 
     it('--rebase --pushでforce-pushする', async () => {
       await syncCommand.parseAsync(['node', 'test', 'feature-a', '--rebase', '--push'])
 
-      expect(execa).toHaveBeenCalledWith('git', ['push', '--force-with-lease'], expect.objectContaining({
-        cwd: '/repo/worktree-1'
-      }))
+      expect(execa).toHaveBeenCalledWith(
+        'git',
+        ['push', '--force-with-lease'],
+        expect.objectContaining({
+          cwd: '/repo/worktree-1',
+        })
+      )
     })
 
     it('--dry-runで実行内容のみ表示する', async () => {
@@ -225,31 +263,39 @@ describe('sync command', () => {
       expect(console.log).toHaveBeenCalledWith(expect.stringContaining('🔍 実行内容プレビュー:'))
       expect(console.log).toHaveBeenCalledWith(expect.stringContaining('メインブランチ: main'))
       expect(console.log).toHaveBeenCalledWith(expect.stringContaining('同期方法: merge'))
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('🔄 feature-a - 5コミット遅れ (merge)'))
-      
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringContaining('🔄 feature-a - 5コミット遅れ (merge)')
+      )
+
       // 実際の同期は実行されない
-      expect(execa).not.toHaveBeenCalledWith('git', ['merge', 'main', '--no-edit'], expect.any(Object))
+      expect(execa).not.toHaveBeenCalledWith(
+        'git',
+        ['merge', 'main', '--no-edit'],
+        expect.any(Object)
+      )
     })
   })
 
   describe('選択インターフェース', () => {
     it('インタラクティブモードで複数選択できる', async () => {
-      vi.mocked(inquirer.prompt).mockResolvedValue({ 
+      vi.mocked(inquirer.prompt).mockResolvedValue({
         selectedBranches: [
           createMockWorktree({ path: '/repo/worktree-1', branch: 'refs/heads/feature-a' }),
-          createMockWorktree({ path: '/repo/worktree-2', branch: 'refs/heads/feature-b' })
-        ]
+          createMockWorktree({ path: '/repo/worktree-2', branch: 'refs/heads/feature-b' }),
+        ],
       })
 
       await syncCommand.parseAsync(['node', 'test'])
 
-      expect(inquirer.prompt).toHaveBeenCalledWith(expect.arrayContaining([
-        expect.objectContaining({
-          type: 'checkbox',
-          name: 'selectedBranches',
-          message: '同期する影分身を選択してください:'
-        })
-      ]))
+      expect(inquirer.prompt).toHaveBeenCalledWith(
+        expect.arrayContaining([
+          expect.objectContaining({
+            type: 'checkbox',
+            name: 'selectedBranches',
+            message: '同期する影分身を選択してください:',
+          }),
+        ])
+      )
       expect(mockProgressBar.start).toHaveBeenCalledWith(2, 0)
     })
 
@@ -258,16 +304,23 @@ describe('sync command', () => {
 
       // fzf選択をシミュレート
       setTimeout(() => {
-        mockFzfProcess.stdout.emit('data', 'feature-a | /repo/worktree-1\nfeature-b | /repo/worktree-2\n')
+        mockFzfProcess.stdout.emit(
+          'data',
+          'feature-a | /repo/worktree-1\nfeature-b | /repo/worktree-2\n'
+        )
         mockFzfProcess.emit('close', 0)
       }, 50)
 
       await syncPromise
 
-      expect(spawn).toHaveBeenCalledWith('fzf', expect.arrayContaining([
-        '--multi',
-        '--header=同期する影分身を選択 (Tab で複数選択, Ctrl-C でキャンセル)'
-      ]), expect.any(Object))
+      expect(spawn).toHaveBeenCalledWith(
+        'fzf',
+        expect.arrayContaining([
+          '--multi',
+          '--header=同期する影分身を選択 (Tab で複数選択, Ctrl-C でキャンセル)',
+        ]),
+        expect.any(Object)
+      )
       expect(mockProgressBar.start).toHaveBeenCalledWith(2, 0)
     })
   })
@@ -283,7 +336,11 @@ describe('sync command', () => {
 
       await syncCommand.parseAsync(['node', 'test', 'feature-a'])
 
-      expect(execa).not.toHaveBeenCalledWith('git', ['merge', expect.any(String), expect.any(String)], expect.any(Object))
+      expect(execa).not.toHaveBeenCalledWith(
+        'git',
+        ['merge', expect.any(String), expect.any(String)],
+        expect.any(Object)
+      )
       expect(console.log).toHaveBeenCalledWith(expect.stringContaining('⏭️ feature-a - スキップ'))
       expect(console.log).toHaveBeenCalledWith(expect.stringContaining('未コミットの変更'))
     })
@@ -298,7 +355,11 @@ describe('sync command', () => {
 
       await syncCommand.parseAsync(['node', 'test', 'feature-a'])
 
-      expect(execa).not.toHaveBeenCalledWith('git', ['merge', expect.any(String), expect.any(String)], expect.any(Object))
+      expect(execa).not.toHaveBeenCalledWith(
+        'git',
+        ['merge', expect.any(String), expect.any(String)],
+        expect.any(Object)
+      )
       expect(console.log).toHaveBeenCalledWith(expect.stringContaining('🔄 feature-a - up-to-date'))
     })
 
@@ -314,7 +375,9 @@ describe('sync command', () => {
 
       expect(console.log).toHaveBeenCalledWith(expect.stringContaining('❌ feature-a - 失敗'))
       expect(console.log).toHaveBeenCalledWith(expect.stringContaining('Merge conflict'))
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('💡 ヒント: 競合が発生した場合は'))
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringContaining('💡 ヒント: 競合が発生した場合は')
+      )
     })
   })
 
@@ -324,7 +387,9 @@ describe('sync command', () => {
 
       expect(fs.copyFile).toHaveBeenCalledWith('/repo/./.env', '/repo/worktree-1/.env')
       expect(fs.copyFile).toHaveBeenCalledWith('/repo/./.env.local', '/repo/worktree-1/.env.local')
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('🔧 環境変数・設定ファイルの同期'))
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringContaining('🔧 環境変数・設定ファイルの同期')
+      )
       expect(mockSpinner.succeed).toHaveBeenCalledWith(expect.stringContaining('ファイル同期完了'))
     })
 
@@ -333,28 +398,43 @@ describe('sync command', () => {
 
       expect(fs.copyFile).toHaveBeenCalledWith('/repo/./.env', '/repo/worktree-1/.env')
       expect(fs.copyFile).toHaveBeenCalledWith('/repo/./.env.local', '/repo/worktree-1/.env.local')
-      expect(fs.copyFile).toHaveBeenCalledWith('/repo/./.env.development', '/repo/worktree-1/.env.development')
-      expect(fs.copyFile).toHaveBeenCalledWith('/repo/./.env.production', '/repo/worktree-1/.env.production')
+      expect(fs.copyFile).toHaveBeenCalledWith(
+        '/repo/./.env.development',
+        '/repo/worktree-1/.env.development'
+      )
+      expect(fs.copyFile).toHaveBeenCalledWith(
+        '/repo/./.env.production',
+        '/repo/worktree-1/.env.production'
+      )
     })
 
     it('--interactiveオプションでファイルを選択する', async () => {
-      vi.mocked(inquirer.prompt).mockResolvedValueOnce({ 
-        selectedBranches: [createMockWorktree({ path: '/repo/worktree-1', branch: 'refs/heads/feature-a' })]
-      }).mockResolvedValueOnce({
-        selectedFiles: ['.env', 'config.json']
-      })
+      vi.mocked(inquirer.prompt)
+        .mockResolvedValueOnce({
+          selectedBranches: [
+            createMockWorktree({ path: '/repo/worktree-1', branch: 'refs/heads/feature-a' }),
+          ],
+        })
+        .mockResolvedValueOnce({
+          selectedFiles: ['.env', 'config.json'],
+        })
 
       await syncCommand.parseAsync(['node', 'test', '--interactive'])
 
-      expect(inquirer.prompt).toHaveBeenCalledWith(expect.arrayContaining([
-        expect.objectContaining({
-          type: 'checkbox',
-          name: 'selectedFiles',
-          message: '同期するファイルを選択:'
-        })
-      ]))
+      expect(inquirer.prompt).toHaveBeenCalledWith(
+        expect.arrayContaining([
+          expect.objectContaining({
+            type: 'checkbox',
+            name: 'selectedFiles',
+            message: '同期するファイルを選択:',
+          }),
+        ])
+      )
       expect(fs.copyFile).toHaveBeenCalledWith('/repo/./.env', '/repo/worktree-1/.env')
-      expect(fs.copyFile).toHaveBeenCalledWith('/repo/./config.json', '/repo/worktree-1/config.json')
+      expect(fs.copyFile).toHaveBeenCalledWith(
+        '/repo/./config.json',
+        '/repo/worktree-1/config.json'
+      )
     })
 
     it('ファイルが存在しない場合はスキップする', async () => {
@@ -363,7 +443,9 @@ describe('sync command', () => {
       await syncCommand.parseAsync(['node', 'test', 'feature-a', '--files'])
 
       // エラーが発生してもコマンドは正常に完了する
-      expect(mockSpinner.succeed).toHaveBeenCalledWith(expect.stringContaining('ファイル同期完了: 0個成功'))
+      expect(mockSpinner.succeed).toHaveBeenCalledWith(
+        expect.stringContaining('ファイル同期完了: 0個成功')
+      )
     })
   })
 
@@ -371,7 +453,9 @@ describe('sync command', () => {
     it('Gitリポジトリでない場合エラーを表示する', async () => {
       mockGitManager.isGitRepository.mockResolvedValue(false)
 
-      await expect(syncCommand.parseAsync(['node', 'test'])).rejects.toThrow('process.exit called with code 1')
+      await expect(syncCommand.parseAsync(['node', 'test'])).rejects.toThrow(
+        'process.exit called with code 1'
+      )
 
       expect(mockSpinner.fail).toHaveBeenCalledWith('このディレクトリはGitリポジトリではありません')
     })
@@ -406,7 +490,11 @@ describe('sync command', () => {
 
       await syncCommand.parseAsync(['node', 'test', 'feature-a'])
 
-      expect(execa).toHaveBeenCalledWith('git', ['merge', 'master', '--no-edit'], expect.any(Object))
+      expect(execa).toHaveBeenCalledWith(
+        'git',
+        ['merge', 'master', '--no-edit'],
+        expect.any(Object)
+      )
     })
   })
 })

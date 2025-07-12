@@ -3,10 +3,7 @@ import { GitWorktreeManager } from '../../core/git'
 import fs from 'fs/promises'
 import { spawn } from 'child_process'
 import { listCommand } from '../../commands/list'
-import { 
-  createMockWorktree, 
-  createMockWorktrees
-} from '../utils/test-helpers'
+import { createMockWorktree, createMockWorktrees } from '../utils/test-helpers'
 import { EventEmitter } from 'events'
 
 // モック設定
@@ -17,8 +14,8 @@ vi.mock('child_process')
 // fsのsyncメソッドもモック
 vi.mock('fs', () => ({
   default: {
-    statSync: vi.fn().mockReturnValue({ size: 1024 * 1024 })
-  }
+    statSync: vi.fn().mockReturnValue({ size: 1024 * 1024 }),
+  },
 }))
 
 describe('list command', () => {
@@ -30,32 +27,32 @@ describe('list command', () => {
     mockGitManager = {
       isGitRepository: vi.fn().mockResolvedValue(true),
       listWorktrees: vi.fn().mockResolvedValue([
-        createMockWorktree({ 
-          path: '/repo/.', 
+        createMockWorktree({
+          path: '/repo/.',
           branch: 'refs/heads/main',
-          isCurrentDirectory: true
+          isCurrentDirectory: true,
         }),
-        createMockWorktree({ 
-          path: '/repo/worktree-1', 
-          branch: 'refs/heads/feature-a' 
+        createMockWorktree({
+          path: '/repo/worktree-1',
+          branch: 'refs/heads/feature-a',
         }),
-        createMockWorktree({ 
-          path: '/repo/worktree-2', 
+        createMockWorktree({
+          path: '/repo/worktree-2',
           branch: 'refs/heads/feature-b',
           locked: true,
-          reason: 'Manual lock'
+          reason: 'Manual lock',
         }),
-        createMockWorktree({ 
-          path: '/repo/worktree-3', 
+        createMockWorktree({
+          path: '/repo/worktree-3',
           branch: 'refs/heads/feature-c',
-          prunable: true
+          prunable: true,
         }),
       ]),
       getLastCommit: vi.fn().mockResolvedValue({
         date: '2024-01-01T12:00:00Z',
         message: 'feat: add new feature',
-        hash: 'abc1234'
-      })
+        hash: 'abc1234',
+      }),
     }
     vi.mocked(GitWorktreeManager).mockImplementation(() => mockGitManager)
 
@@ -63,34 +60,36 @@ describe('list command', () => {
     mockFzfProcess = new EventEmitter() as any
     mockFzfProcess.stdin = {
       write: vi.fn(),
-      end: vi.fn()
+      end: vi.fn(),
     }
     mockFzfProcess.stdout = new EventEmitter()
     vi.mocked(spawn).mockReturnValue(mockFzfProcess)
 
     // fs.readFileのモック
-    vi.mocked(fs.readFile).mockResolvedValue(JSON.stringify({
-      createdAt: '2024-01-01T10:00:00Z',
-      branch: 'feature-a',
-      worktreePath: '/repo/worktree-1',
-      github: {
-        type: 'issue',
-        title: 'Fix bug in authentication',
-        body: 'Description of the issue',
-        author: 'testuser',
-        labels: ['bug', 'high-priority'],
-        assignees: ['developer1', 'developer2'],
-        url: 'https://github.com/owner/repo/issues/123',
-        issueNumber: '123'
-      }
-    }))
+    vi.mocked(fs.readFile).mockResolvedValue(
+      JSON.stringify({
+        createdAt: '2024-01-01T10:00:00Z',
+        branch: 'feature-a',
+        worktreePath: '/repo/worktree-1',
+        github: {
+          type: 'issue',
+          title: 'Fix bug in authentication',
+          body: 'Description of the issue',
+          author: 'testuser',
+          labels: ['bug', 'high-priority'],
+          assignees: ['developer1', 'developer2'],
+          url: 'https://github.com/owner/repo/issues/123',
+          issueNumber: '123',
+        },
+      })
+    )
 
     // consoleのモック
     vi.spyOn(console, 'log').mockImplementation(() => {})
     vi.spyOn(console, 'error').mockImplementation(() => {})
 
     // process.exitのモック
-    vi.spyOn(process, 'exit').mockImplementation((code) => {
+    vi.spyOn(process, 'exit').mockImplementation(code => {
       throw new Error(`process.exit called with code ${code}`)
     })
 
@@ -157,15 +156,17 @@ describe('list command', () => {
       expect(jsonData[0].lastCommit).toEqual({
         date: '2024-01-01T12:00:00Z',
         message: 'feat: add new feature',
-        hash: 'abc1234'
+        hash: 'abc1234',
       })
 
       // メタデータ情報
-      expect(jsonData[1].metadata.github).toEqual(expect.objectContaining({
-        type: 'issue',
-        issueNumber: '123',
-        title: 'Fix bug in authentication'
-      }))
+      expect(jsonData[1].metadata.github).toEqual(
+        expect.objectContaining({
+          type: 'issue',
+          issueNumber: '123',
+          title: 'Fix bug in authentication',
+        })
+      )
     })
   })
 
@@ -196,7 +197,7 @@ describe('list command', () => {
 
       const logCalls = vi.mocked(console.log).mock.calls
       const branchLogs = logCalls.filter(call => call[0].includes('🥷'))
-      
+
       // ブランチ名でアルファベット順にソートされていることを確認
       expect(branchLogs[0][0]).toContain('feature-a')
       expect(branchLogs[1][0]).toContain('feature-b')
@@ -209,12 +210,12 @@ describe('list command', () => {
           '/repo/.': '2024-01-03T12:00:00Z',
           '/repo/worktree-1': '2024-01-01T12:00:00Z',
           '/repo/worktree-2': '2024-01-04T12:00:00Z',
-          '/repo/worktree-3': '2024-01-02T12:00:00Z'
+          '/repo/worktree-3': '2024-01-02T12:00:00Z',
         }
         return Promise.resolve({
           date: dates[path] || '2024-01-01T12:00:00Z',
           message: 'commit message',
-          hash: 'abc123'
+          hash: 'abc123',
         })
       })
 
@@ -223,7 +224,7 @@ describe('list command', () => {
       // 最新のコミットが先に表示される
       const logCalls = vi.mocked(console.log).mock.calls
       const commitLogs = logCalls.filter(call => call[0].includes('最終コミット:'))
-      
+
       expect(commitLogs[0][0]).toContain('2024-01-04')
       expect(commitLogs[1][0]).toContain('2024-01-03')
     })
@@ -258,21 +259,31 @@ describe('list command', () => {
 
       expect(console.log).toHaveBeenCalledWith(expect.stringContaining('GitHub:'))
       expect(console.log).toHaveBeenCalledWith(expect.stringContaining('Fix bug in authentication'))
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('ラベル: bug, high-priority'))
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('担当者: developer1, developer2'))
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringContaining('ラベル: bug, high-priority')
+      )
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringContaining('担当者: developer1, developer2')
+      )
       expect(console.log).toHaveBeenCalledWith(expect.stringContaining('作成日時:'))
     })
 
     it('GitHubバッジを表示', async () => {
       // PRメタデータ
-      vi.mocked(fs.readFile).mockResolvedValueOnce(JSON.stringify({
-        github: {
-          type: 'pr',
-          issueNumber: '456'
-        }
-      })).mockResolvedValueOnce(JSON.stringify({
-        template: 'fastapi'
-      }))
+      vi.mocked(fs.readFile)
+        .mockResolvedValueOnce(
+          JSON.stringify({
+            github: {
+              type: 'pr',
+              issueNumber: '456',
+            },
+          })
+        )
+        .mockResolvedValueOnce(
+          JSON.stringify({
+            template: 'fastapi',
+          })
+        )
 
       await listCommand.parseAsync(['node', 'test', '--metadata'])
 
@@ -286,13 +297,17 @@ describe('list command', () => {
     it('--fzfオプションでfzfを起動する', async () => {
       await listCommand.parseAsync(['node', 'test', '--fzf'])
 
-      expect(spawn).toHaveBeenCalledWith('fzf', expect.arrayContaining([
-        '--ansi',
-        '--header=影分身を選択 (Ctrl-C でキャンセル)',
-        '--preview',
-        expect.any(String),
-        '--preview-window=right:50%:wrap'
-      ]), expect.any(Object))
+      expect(spawn).toHaveBeenCalledWith(
+        'fzf',
+        expect.arrayContaining([
+          '--ansi',
+          '--header=影分身を選択 (Ctrl-C でキャンセル)',
+          '--preview',
+          expect.any(String),
+          '--preview-window=right:50%:wrap',
+        ]),
+        expect.any(Object)
+      )
 
       expect(mockFzfProcess.stdin.write).toHaveBeenCalled()
       expect(mockFzfProcess.stdin.end).toHaveBeenCalled()
@@ -324,7 +339,9 @@ describe('list command', () => {
     it('Gitリポジトリでない場合エラーを表示する', async () => {
       mockGitManager.isGitRepository.mockResolvedValue(false)
 
-      await expect(listCommand.parseAsync(['node', 'test'])).rejects.toThrow('process.exit called with code 1')
+      await expect(listCommand.parseAsync(['node', 'test'])).rejects.toThrow(
+        'process.exit called with code 1'
+      )
 
       expect(console.error).toHaveBeenCalledWith(
         expect.stringContaining('エラー: このディレクトリはGitリポジトリではありません')
@@ -334,7 +351,9 @@ describe('list command', () => {
     it('一般的なエラーを処理する', async () => {
       mockGitManager.listWorktrees.mockRejectedValue(new Error('Git command failed'))
 
-      await expect(listCommand.parseAsync(['node', 'test'])).rejects.toThrow('process.exit called with code 1')
+      await expect(listCommand.parseAsync(['node', 'test'])).rejects.toThrow(
+        'process.exit called with code 1'
+      )
 
       expect(console.error).toHaveBeenCalledWith(
         expect.stringContaining('エラー:'),

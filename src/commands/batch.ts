@@ -178,57 +178,62 @@ async function createWorktreesInParallel(
   const limit = pLimit(concurrency)
 
   // 並列実行
-  const promises = worktrees.map(worktree => limit(async () => {
-    const spinner = ora(`${worktree.name} を作成中...`).start()
+  const promises = worktrees.map(worktree =>
+    limit(async () => {
+      const spinner = ora(`${worktree.name} を作成中...`).start()
 
-    try {
-      // ブランチ名にプレフィックスを追加
-      let branchName = worktree.name
-      if (config.worktrees?.branchPrefix && !branchName.startsWith(config.worktrees.branchPrefix)) {
-        branchName = config.worktrees.branchPrefix + branchName
-      }
-
-      // ワークツリーを作成
-      const worktreePath = await gitManager.createWorktree(branchName, options.base)
-
-      // 環境セットアップ（必要な場合）
-      if (options.setup || (options.setup === undefined && config.development?.autoSetup)) {
-        try {
-          await execa('npm', ['install'], { cwd: worktreePath })
-        } catch {
-          // npm installが失敗してもworktree作成は成功とする
+      try {
+        // ブランチ名にプレフィックスを追加
+        let branchName = worktree.name
+        if (
+          config.worktrees?.branchPrefix &&
+          !branchName.startsWith(config.worktrees.branchPrefix)
+        ) {
+          branchName = config.worktrees.branchPrefix + branchName
         }
 
-        // 同期ファイルのコピー
-        if (config.development?.syncFiles) {
-          for (const file of config.development.syncFiles) {
-            try {
-              const sourcePath = path.join(process.cwd(), file)
-              const destPath = path.join(worktreePath, file)
-              await fs.copyFile(sourcePath, destPath)
-            } catch {
-              // ファイルコピーエラーは無視
+        // ワークツリーを作成
+        const worktreePath = await gitManager.createWorktree(branchName, options.base)
+
+        // 環境セットアップ（必要な場合）
+        if (options.setup || (options.setup === undefined && config.development?.autoSetup)) {
+          try {
+            await execa('npm', ['install'], { cwd: worktreePath })
+          } catch {
+            // npm installが失敗してもworktree作成は成功とする
+          }
+
+          // 同期ファイルのコピー
+          if (config.development?.syncFiles) {
+            for (const file of config.development.syncFiles) {
+              try {
+                const sourcePath = path.join(process.cwd(), file)
+                const destPath = path.join(worktreePath, file)
+                await fs.copyFile(sourcePath, destPath)
+              } catch {
+                // ファイルコピーエラーは無視
+              }
             }
           }
         }
+
+        spinner.succeed(`${worktree.name} を作成しました`)
+
+        results.push({
+          worktree,
+          status: 'success',
+          path: worktreePath,
+        })
+      } catch (error) {
+        spinner.fail(`${worktree.name} の作成に失敗しました`)
+        results.push({
+          worktree,
+          status: 'failed',
+          error: error instanceof Error ? error.message : '不明なエラー',
+        })
       }
-
-      spinner.succeed(`${worktree.name} を作成しました`)
-
-      results.push({
-        worktree,
-        status: 'success',
-        path: worktreePath,
-      })
-    } catch (error) {
-      spinner.fail(`${worktree.name} の作成に失敗しました`)
-      results.push({
-        worktree,
-        status: 'failed',
-        error: error instanceof Error ? error.message : '不明なエラー',
-      })
-    }
-  }))
+    })
+  )
 
   await Promise.all(promises)
 

@@ -272,74 +272,76 @@ export const syncCommand = new Command('sync')
       const concurrency = options.concurrency || 5
       const limit = pLimit(concurrency)
 
-      const syncPromises = targetWorktrees.map((worktree, index) => limit(async () => {
-        const branchName = worktree.branch?.replace('refs/heads/', '') || worktree.branch
+      const syncPromises = targetWorktrees.map((worktree, index) =>
+        limit(async () => {
+          const branchName = worktree.branch?.replace('refs/heads/', '') || worktree.branch
 
-        try {
-          // 現在のブランチの状態を保存
-          const { stdout: status } = await execa('git', ['status', '--porcelain'], {
-            cwd: worktree.path,
-          })
-
-          if (status.trim()) {
-            return { branch: branchName, status: 'skipped' as const, reason: '未コミットの変更' }
-          }
-
-          // up-to-dateチェック
-          const { stdout: behind } = await execa(
-            'git',
-            ['rev-list', '--count', `${branchName}..${mainBranch}`],
-            {
+          try {
+            // 現在のブランチの状態を保存
+            const { stdout: status } = await execa('git', ['status', '--porcelain'], {
               cwd: worktree.path,
-            }
-          )
+            })
 
-          const behindCount = parseInt(behind.trim())
-
-          if (behindCount === 0) {
-            return { branch: branchName, status: 'up-to-date' as const, reason: '既に最新' }
-          }
-
-          // 同期実行
-          if (options.rebase) {
-            await execa('git', ['rebase', mainBranch], { cwd: worktree.path })
-
-            // pushオプション
-            if (options.push) {
-              await execa('git', ['push', '--force-with-lease'], { cwd: worktree.path })
+            if (status.trim()) {
+              return { branch: branchName, status: 'skipped' as const, reason: '未コミットの変更' }
             }
 
+            // up-to-dateチェック
+            const { stdout: behind } = await execa(
+              'git',
+              ['rev-list', '--count', `${branchName}..${mainBranch}`],
+              {
+                cwd: worktree.path,
+              }
+            )
+
+            const behindCount = parseInt(behind.trim())
+
+            if (behindCount === 0) {
+              return { branch: branchName, status: 'up-to-date' as const, reason: '既に最新' }
+            }
+
+            // 同期実行
+            if (options.rebase) {
+              await execa('git', ['rebase', mainBranch], { cwd: worktree.path })
+
+              // pushオプション
+              if (options.push) {
+                await execa('git', ['push', '--force-with-lease'], { cwd: worktree.path })
+              }
+
+              return {
+                branch: branchName,
+                status: 'success' as const,
+                method: 'rebase' as const,
+                pushed: options.push,
+              }
+            } else {
+              await execa('git', ['merge', mainBranch, '--no-edit'], { cwd: worktree.path })
+
+              // pushオプション
+              if (options.push) {
+                await execa('git', ['push'], { cwd: worktree.path })
+              }
+
+              return {
+                branch: branchName,
+                status: 'success' as const,
+                method: 'merge' as const,
+                pushed: options.push,
+              }
+            }
+          } catch (error) {
             return {
               branch: branchName,
-              status: 'success' as const,
-              method: 'rebase' as const,
-              pushed: options.push,
+              status: 'failed' as const,
+              error: error instanceof Error ? error.message : '不明なエラー',
             }
-          } else {
-            await execa('git', ['merge', mainBranch, '--no-edit'], { cwd: worktree.path })
-
-            // pushオプション
-            if (options.push) {
-              await execa('git', ['push'], { cwd: worktree.path })
-            }
-
-            return {
-              branch: branchName,
-              status: 'success' as const,
-              method: 'merge' as const,
-              pushed: options.push,
-            }
+          } finally {
+            progressBar.update(index + 1, { branch: branchName })
           }
-        } catch (error) {
-          return {
-            branch: branchName,
-            status: 'failed' as const,
-            error: error instanceof Error ? error.message : '不明なエラー',
-          }
-        } finally {
-          progressBar.update(index + 1, { branch: branchName })
-        }
-      }))
+        })
+      )
 
       const syncResults = await Promise.allSettled(syncPromises)
 

@@ -6,11 +6,11 @@ import inquirer from 'inquirer'
 import ora from 'ora'
 import path from 'path'
 import { snapshotCommand } from '../../commands/snapshot'
-import { 
-  createMockWorktree, 
+import {
+  createMockWorktree,
   createMockWorktrees,
   createMockExecaResponse,
-  createMockSpinner
+  createMockSpinner,
 } from '../utils/test-helpers'
 
 // モック設定
@@ -30,17 +30,17 @@ describe('snapshot command', () => {
     mockGitManager = {
       isGitRepository: vi.fn().mockResolvedValue(true),
       listWorktrees: vi.fn().mockResolvedValue([
-        createMockWorktree({ 
-          path: '/repo/.', 
-          branch: 'refs/heads/main' 
+        createMockWorktree({
+          path: '/repo/.',
+          branch: 'refs/heads/main',
         }),
-        createMockWorktree({ 
-          path: '/repo/worktree-1', 
-          branch: 'refs/heads/feature-a' 
+        createMockWorktree({
+          path: '/repo/worktree-1',
+          branch: 'refs/heads/feature-a',
         }),
-        createMockWorktree({ 
-          path: '/repo/worktree-2', 
-          branch: 'refs/heads/feature-b' 
+        createMockWorktree({
+          path: '/repo/worktree-2',
+          branch: 'refs/heads/feature-b',
         }),
       ]),
     }
@@ -54,7 +54,9 @@ describe('snapshot command', () => {
     vi.mocked(execa).mockImplementation(async (cmd: string, args: string[]) => {
       if (cmd === 'git') {
         if (args[0] === 'branch' && args[1] === '-vv') {
-          return createMockExecaResponse('* feature-a abc123 [origin/feature-a: ahead 2, behind 1] Initial commit')
+          return createMockExecaResponse(
+            '* feature-a abc123 [origin/feature-a: ahead 2, behind 1] Initial commit'
+          )
         }
         if (args[0] === 'diff' && args[1] === '--cached' && args[2] === '--name-only') {
           return createMockExecaResponse('src/staged.ts')
@@ -66,7 +68,9 @@ describe('snapshot command', () => {
           return createMockExecaResponse('src/untracked.ts')
         }
         if (args[0] === 'log' && args[1] === '-1') {
-          return createMockExecaResponse('abc123|feat: add feature|John Doe|2024-01-01 12:00:00 +0900')
+          return createMockExecaResponse(
+            'abc123|feat: add feature|John Doe|2024-01-01 12:00:00 +0900'
+          )
         }
         if (args[0] === 'stash' && args[1] === 'push') {
           return createMockExecaResponse('Saved working directory and index state')
@@ -85,11 +89,13 @@ describe('snapshot command', () => {
     vi.mocked(fs.writeFile).mockResolvedValue(undefined)
 
     // fs.readFileのモック
-    vi.mocked(fs.readFile).mockResolvedValue(JSON.stringify({
-      createdAt: '2024-01-01T10:00:00Z',
-      branch: 'feature-a',
-      worktreePath: '/repo/worktree-1'
-    }))
+    vi.mocked(fs.readFile).mockResolvedValue(
+      JSON.stringify({
+        createdAt: '2024-01-01T10:00:00Z',
+        branch: 'feature-a',
+        worktreePath: '/repo/worktree-1',
+      })
+    )
 
     // fs.readdirのモック
     vi.mocked(fs.readdir).mockResolvedValue([])
@@ -112,7 +118,7 @@ describe('snapshot command', () => {
     vi.spyOn(console, 'warn').mockImplementation(() => {})
 
     // process.exitのモック
-    vi.spyOn(process, 'exit').mockImplementation((code) => {
+    vi.spyOn(process, 'exit').mockImplementation(code => {
       throw new Error(`process.exit called with code ${code}`)
     })
   })
@@ -130,7 +136,9 @@ describe('snapshot command', () => {
         expect.stringContaining('.json'),
         expect.stringContaining('"branch":"refs/heads/feature-a"')
       )
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('📸 作成されたスナップショット:'))
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringContaining('📸 作成されたスナップショット:')
+      )
     })
 
     it('カスタムメッセージでスナップショットを作成する', async () => {
@@ -138,7 +146,7 @@ describe('snapshot command', () => {
 
       const writeCall = vi.mocked(fs.writeFile).mock.calls[0]
       const snapshotData = JSON.parse(writeCall[1] as string)
-      
+
       expect(snapshotData.message).toBe('Important checkpoint')
     })
 
@@ -147,10 +155,18 @@ describe('snapshot command', () => {
 
       expect(execa).toHaveBeenCalledWith(
         'git',
-        ['stash', 'push', '-m', expect.stringContaining('Shadow Clone Snapshot'), '--include-untracked'],
+        [
+          'stash',
+          'push',
+          '-m',
+          expect.stringContaining('Shadow Clone Snapshot'),
+          '--include-untracked',
+        ],
         expect.any(Object)
       )
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('✅ 変更をスタッシュに保存しました'))
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringContaining('✅ 変更をスタッシュに保存しました')
+      )
     })
 
     it('--allオプションで全worktreeのスナップショットを作成する', async () => {
@@ -167,7 +183,7 @@ describe('snapshot command', () => {
 
       const writeCall = vi.mocked(fs.writeFile).mock.calls[0]
       const snapshotData = JSON.parse(writeCall[1] as string)
-      
+
       expect(snapshotData.gitStatus).toEqual({
         branch: 'feature-a',
         tracking: 'origin/feature-a',
@@ -175,7 +191,7 @@ describe('snapshot command', () => {
         behind: 1,
         staged: ['src/staged.ts'],
         modified: ['src/modified.ts'],
-        untracked: ['src/untracked.ts']
+        untracked: ['src/untracked.ts'],
       })
     })
 
@@ -184,29 +200,31 @@ describe('snapshot command', () => {
 
       const writeCall = vi.mocked(fs.writeFile).mock.calls[0]
       const snapshotData = JSON.parse(writeCall[1] as string)
-      
+
       expect(snapshotData.lastCommit).toEqual({
         hash: 'abc123',
         message: 'feat: add feature',
         author: 'John Doe',
-        date: '2024-01-01 12:00:00 +0900'
+        date: '2024-01-01 12:00:00 +0900',
       })
     })
 
     it('メタデータが存在する場合は含める', async () => {
-      vi.mocked(fs.readFile).mockResolvedValueOnce(JSON.stringify({
-        github: {
-          type: 'issue',
-          issueNumber: '123',
-          title: 'Test issue'
-        }
-      }))
+      vi.mocked(fs.readFile).mockResolvedValueOnce(
+        JSON.stringify({
+          github: {
+            type: 'issue',
+            issueNumber: '123',
+            title: 'Test issue',
+          },
+        })
+      )
 
       await snapshotCommand.parseAsync(['node', 'test'])
 
       const writeCall = vi.mocked(fs.writeFile).mock.calls[0]
       const snapshotData = JSON.parse(writeCall[1] as string)
-      
+
       expect(snapshotData.metadata).toBeDefined()
       expect(snapshotData.metadata.github.issueNumber).toBe('123')
     })
@@ -224,10 +242,10 @@ describe('snapshot command', () => {
           gitStatus: {
             staged: ['file1.ts'],
             modified: ['file2.ts'],
-            untracked: []
+            untracked: [],
           },
-          stash: { hash: 'abc123', message: 'stash message' }
-        }
+          stash: { hash: 'abc123', message: 'stash message' },
+        },
       ]
 
       vi.mocked(fs.readdir).mockResolvedValue(['snapshot-123.json'])
@@ -247,7 +265,9 @@ describe('snapshot command', () => {
 
       await snapshotCommand.parseAsync(['node', 'test', '--list'])
 
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('スナップショットが存在しません'))
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringContaining('スナップショットが存在しません')
+      )
     })
   })
 
@@ -265,15 +285,15 @@ describe('snapshot command', () => {
         behind: 1,
         staged: ['file1.ts'],
         modified: ['file2.ts'],
-        untracked: []
+        untracked: [],
       },
       stash: { hash: 'abc123', message: 'Shadow Clone Snapshot: snapshot-123' },
       lastCommit: {
         hash: 'abc123',
         message: 'feat: add feature',
         author: 'John Doe',
-        date: '2024-01-01 12:00:00 +0900'
-      }
+        date: '2024-01-01 12:00:00 +0900',
+      },
     }
 
     it('--restoreオプションでスナップショットを復元する', async () => {
@@ -281,28 +301,38 @@ describe('snapshot command', () => {
       vi.mocked(fs.readFile).mockResolvedValue(JSON.stringify(mockSnapshot))
       vi.mocked(execa).mockImplementation(async (cmd: string, args: string[]) => {
         if (cmd === 'git' && args[0] === 'stash' && args[1] === 'list') {
-          return createMockExecaResponse('stash@{0}: Shadow Clone Snapshot: snapshot-123\nstash@{1}: Other stash')
+          return createMockExecaResponse(
+            'stash@{0}: Shadow Clone Snapshot: snapshot-123\nstash@{1}: Other stash'
+          )
         }
         return createMockExecaResponse()
       })
 
       await snapshotCommand.parseAsync(['node', 'test', '--restore', 'snapshot-123'])
 
-      expect(mockSpinner.succeed).toHaveBeenCalledWith("スナップショット 'snapshot-123' を復元しました")
+      expect(mockSpinner.succeed).toHaveBeenCalledWith(
+        "スナップショット 'snapshot-123' を復元しました"
+      )
       expect(execa).toHaveBeenCalledWith('git', ['stash', 'apply', 'stash@{0}'], expect.any(Object))
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('📸 復元されたスナップショット:'))
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringContaining('📸 復元されたスナップショット:')
+      )
     })
 
     it('短縮IDでも復元できる', async () => {
       vi.mocked(fs.readdir).mockResolvedValue(['snapshot-123456789.json'])
-      vi.mocked(fs.readFile).mockResolvedValue(JSON.stringify({
-        ...mockSnapshot,
-        id: 'snapshot-123456789'
-      }))
+      vi.mocked(fs.readFile).mockResolvedValue(
+        JSON.stringify({
+          ...mockSnapshot,
+          id: 'snapshot-123456789',
+        })
+      )
 
       await snapshotCommand.parseAsync(['node', 'test', '--restore', 'snapshot-123'])
 
-      expect(mockSpinner.succeed).toHaveBeenCalledWith(expect.stringContaining('snapshot-123456789'))
+      expect(mockSpinner.succeed).toHaveBeenCalledWith(
+        expect.stringContaining('snapshot-123456789')
+      )
     })
 
     it('worktreeが存在しない場合はエラーを表示', async () => {
@@ -322,12 +352,14 @@ describe('snapshot command', () => {
 
       await snapshotCommand.parseAsync(['node', 'test', '--restore', 'snapshot-123'])
 
-      expect(inquirer.prompt).toHaveBeenCalledWith(expect.arrayContaining([
-        expect.objectContaining({
-          name: 'confirmRestore',
-          message: '現在の変更が失われる可能性があります。続行しますか？'
-        })
-      ]))
+      expect(inquirer.prompt).toHaveBeenCalledWith(
+        expect.arrayContaining([
+          expect.objectContaining({
+            name: 'confirmRestore',
+            message: '現在の変更が失われる可能性があります。続行しますか？',
+          }),
+        ])
+      )
     })
 
     it('復元をキャンセルできる', async () => {
@@ -338,7 +370,11 @@ describe('snapshot command', () => {
       await snapshotCommand.parseAsync(['node', 'test', '--restore', 'snapshot-123'])
 
       expect(console.log).toHaveBeenCalledWith(expect.stringContaining('復元をキャンセルしました'))
-      expect(execa).not.toHaveBeenCalledWith('git', ['stash', 'apply', expect.any(String)], expect.any(Object))
+      expect(execa).not.toHaveBeenCalledWith(
+        'git',
+        ['stash', 'apply', expect.any(String)],
+        expect.any(Object)
+      )
     })
   })
 
@@ -347,21 +383,27 @@ describe('snapshot command', () => {
       await snapshotCommand.parseAsync(['node', 'test', '--delete', 'snapshot-123'])
 
       expect(fs.unlink).toHaveBeenCalledWith('/repo/.scj/snapshots/snapshot-123.json')
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining("✨ スナップショット 'snapshot-123' を削除しました"))
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringContaining("✨ スナップショット 'snapshot-123' を削除しました")
+      )
     })
 
     it('短縮IDでも削除できる', async () => {
       vi.mocked(fs.unlink).mockRejectedValueOnce(new Error('ENOENT'))
       vi.mocked(fs.readdir).mockResolvedValue(['snapshot-123456789.json'])
-      vi.mocked(fs.readFile).mockResolvedValue(JSON.stringify({
-        id: 'snapshot-123456789',
-        branch: 'feature-a'
-      }))
+      vi.mocked(fs.readFile).mockResolvedValue(
+        JSON.stringify({
+          id: 'snapshot-123456789',
+          branch: 'feature-a',
+        })
+      )
 
       await snapshotCommand.parseAsync(['node', 'test', '--delete', 'snapshot-123'])
 
       expect(fs.unlink).toHaveBeenCalledWith('/repo/.scj/snapshots/snapshot-123456789.json')
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining("✨ スナップショット 'snapshot-123456789' を削除しました"))
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringContaining("✨ スナップショット 'snapshot-123456789' を削除しました")
+      )
     })
 
     it('存在しないスナップショットの削除はエラー', async () => {
@@ -372,7 +414,9 @@ describe('snapshot command', () => {
         snapshotCommand.parseAsync(['node', 'test', '--delete', 'non-existent'])
       ).rejects.toThrow('process.exit called with code 1')
 
-      expect(console.error).toHaveBeenCalledWith(expect.stringContaining("スナップショット 'non-existent' が見つかりません"))
+      expect(console.error).toHaveBeenCalledWith(
+        expect.stringContaining("スナップショット 'non-existent' が見つかりません")
+      )
     })
   })
 
@@ -380,22 +424,30 @@ describe('snapshot command', () => {
     it('Gitリポジトリでない場合エラーを表示する', async () => {
       mockGitManager.isGitRepository.mockResolvedValue(false)
 
-      await expect(snapshotCommand.parseAsync(['node', 'test'])).rejects.toThrow('process.exit called with code 1')
+      await expect(snapshotCommand.parseAsync(['node', 'test'])).rejects.toThrow(
+        'process.exit called with code 1'
+      )
 
-      expect(console.error).toHaveBeenCalledWith(expect.stringContaining('このディレクトリはGitリポジトリではありません'))
+      expect(console.error).toHaveBeenCalledWith(
+        expect.stringContaining('このディレクトリはGitリポジトリではありません')
+      )
     })
 
     it('現在のディレクトリがworktreeでない場合エラーを表示', async () => {
       vi.spyOn(process, 'cwd').mockReturnValue('/other/path')
 
-      await expect(snapshotCommand.parseAsync(['node', 'test'])).rejects.toThrow('process.exit called with code 1')
+      await expect(snapshotCommand.parseAsync(['node', 'test'])).rejects.toThrow(
+        'process.exit called with code 1'
+      )
 
-      expect(console.error).toHaveBeenCalledWith(expect.stringContaining('現在のディレクトリはworktreeではありません'))
+      expect(console.error).toHaveBeenCalledWith(
+        expect.stringContaining('現在のディレクトリはworktreeではありません')
+      )
     })
 
     it('影分身が存在しない場合（--allオプション）', async () => {
       mockGitManager.listWorktrees.mockResolvedValue([
-        createMockWorktree({ path: '/repo/.', branch: 'refs/heads/main' })
+        createMockWorktree({ path: '/repo/.', branch: 'refs/heads/main' }),
       ])
 
       await snapshotCommand.parseAsync(['node', 'test', '--all'])
@@ -406,9 +458,14 @@ describe('snapshot command', () => {
     it('スナップショット作成エラーを処理する', async () => {
       vi.mocked(fs.writeFile).mockRejectedValue(new Error('Write error'))
 
-      await expect(snapshotCommand.parseAsync(['node', 'test'])).rejects.toThrow('process.exit called with code 1')
+      await expect(snapshotCommand.parseAsync(['node', 'test'])).rejects.toThrow(
+        'process.exit called with code 1'
+      )
 
-      expect(console.error).toHaveBeenCalledWith(expect.stringContaining('エラー:'), expect.stringContaining('Write error'))
+      expect(console.error).toHaveBeenCalledWith(
+        expect.stringContaining('エラー:'),
+        expect.stringContaining('Write error')
+      )
     })
   })
 })

@@ -226,7 +226,9 @@ async function sortWorktrees(worktrees: Worktree[], sortBy: string): Promise<voi
           ;(worktree as EnhancedWorktree).size = 0
         }
       }
-      worktrees.sort((a, b) => ((b as EnhancedWorktree).size || 0) - ((a as EnhancedWorktree).size || 0))
+      worktrees.sort(
+        (a, b) => ((b as EnhancedWorktree).size || 0) - ((a as EnhancedWorktree).size || 0)
+      )
       break
   }
 }
@@ -271,7 +273,7 @@ function displayWorktree(
     `${status.join(' ')}`
 
   if (showLastCommit && (worktree as EnhancedWorktree).lastCommit) {
-    const lastCommit = (worktree as EnhancedWorktree).lastCommit
+    const lastCommit = (worktree as EnhancedWorktree).lastCommit!
     output += `\n    ${chalk.gray('最終コミット:')} ${chalk.yellow(lastCommit.date)} ${chalk.gray(lastCommit.message)}`
   }
 

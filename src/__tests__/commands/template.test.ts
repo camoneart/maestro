@@ -5,10 +5,7 @@ import inquirer from 'inquirer'
 import ora from 'ora'
 import path from 'path'
 import { templateCommand } from '../../commands/template'
-import { 
-  createMockConfig,
-  createMockSpinner
-} from '../utils/test-helpers'
+import { createMockConfig, createMockSpinner } from '../utils/test-helpers'
 import { homedir } from 'os'
 
 // モック設定
@@ -30,8 +27,8 @@ describe('template command', () => {
       autoSetup: true,
       syncFiles: ['.env', '.env.local'],
       editor: 'cursor' as const,
-      claude: true
-    }
+      claude: true,
+    },
   }
 
   beforeEach(() => {
@@ -39,7 +36,7 @@ describe('template command', () => {
     mockConfigManager = {
       loadProjectConfig: vi.fn().mockResolvedValue(undefined),
       getAll: vi.fn().mockReturnValue(createMockConfig()),
-      saveProjectConfig: vi.fn().mockResolvedValue(undefined)
+      saveProjectConfig: vi.fn().mockResolvedValue(undefined),
     }
     vi.mocked(ConfigManager).mockImplementation(() => mockConfigManager)
 
@@ -76,7 +73,7 @@ describe('template command', () => {
     vi.spyOn(console, 'error').mockImplementation(() => {})
 
     // process.exitのモック
-    vi.spyOn(process, 'exit').mockImplementation((code) => {
+    vi.spyOn(process, 'exit').mockImplementation(code => {
       throw new Error(`process.exit called with code ${code}`)
     })
   })
@@ -89,7 +86,9 @@ describe('template command', () => {
     it('--listオプションでテンプレート一覧を表示する', async () => {
       await templateCommand.parseAsync(['node', 'test', '--list'])
 
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('📚 利用可能なテンプレート:'))
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringContaining('📚 利用可能なテンプレート:')
+      )
       expect(console.log).toHaveBeenCalledWith(expect.stringContaining('feature'))
       expect(console.log).toHaveBeenCalledWith(expect.stringContaining('新機能開発用テンプレート'))
     })
@@ -98,7 +97,9 @@ describe('template command', () => {
       await templateCommand.parseAsync(['node', 'test', '--list', '--global'])
 
       expect(fs.readdir).toHaveBeenCalledWith(`${mockHomeDir}/.scj/templates`)
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('📚 利用可能なテンプレート (グローバル):'))
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringContaining('📚 利用可能なテンプレート (グローバル):')
+      )
     })
 
     it('テンプレートが存在しない場合はデフォルトテンプレートを表示', async () => {
@@ -114,9 +115,9 @@ describe('template command', () => {
 
   describe('テンプレート保存', () => {
     it('--saveオプションで現在の設定をテンプレートとして保存する', async () => {
-      vi.mocked(inquirer.prompt).mockResolvedValue({ 
+      vi.mocked(inquirer.prompt).mockResolvedValue({
         description: 'カスタムテンプレート',
-        saveGlobal: false
+        saveGlobal: false,
       })
 
       await templateCommand.parseAsync(['node', 'test', '--save', 'custom'])
@@ -129,8 +130,8 @@ describe('template command', () => {
     })
 
     it('--save --globalでグローバルに保存する', async () => {
-      vi.mocked(inquirer.prompt).mockResolvedValue({ 
-        description: 'グローバルテンプレート'
+      vi.mocked(inquirer.prompt).mockResolvedValue({
+        description: 'グローバルテンプレート',
       })
 
       await templateCommand.parseAsync(['node', 'test', '--save', 'global-template', '--global'])
@@ -142,26 +143,27 @@ describe('template command', () => {
     })
 
     it('インタラクティブモードで詳細設定を行う', async () => {
-      vi.mocked(inquirer.prompt).mockResolvedValueOnce({
-        name: 'interactive',
-        description: 'インタラクティブテンプレート',
-        branchPrefix: 'custom/',
-        autoSetup: true,
-        editor: 'vscode',
-        claude: false,
-        tmux: true,
-        syncFiles: ['.env', 'config.json'],
-        hasCustomFiles: true
-      }).mockResolvedValueOnce({
-        customFiles: [
-          { path: '.github/CODEOWNERS', content: '* @team' }
-        ],
-        hasHooks: true
-      }).mockResolvedValueOnce({
-        afterCreate: 'npm run setup',
-        beforeDelete: 'npm run cleanup',
-        saveGlobal: false
-      })
+      vi.mocked(inquirer.prompt)
+        .mockResolvedValueOnce({
+          name: 'interactive',
+          description: 'インタラクティブテンプレート',
+          branchPrefix: 'custom/',
+          autoSetup: true,
+          editor: 'vscode',
+          claude: false,
+          tmux: true,
+          syncFiles: ['.env', 'config.json'],
+          hasCustomFiles: true,
+        })
+        .mockResolvedValueOnce({
+          customFiles: [{ path: '.github/CODEOWNERS', content: '* @team' }],
+          hasHooks: true,
+        })
+        .mockResolvedValueOnce({
+          afterCreate: 'npm run setup',
+          beforeDelete: 'npm run cleanup',
+          saveGlobal: false,
+        })
 
       await templateCommand.parseAsync(['node', 'test', '--save'])
 
@@ -179,16 +181,18 @@ describe('template command', () => {
     it('--applyオプションでテンプレートを適用する', async () => {
       await templateCommand.parseAsync(['node', 'test', '--apply', 'feature'])
 
-      expect(mockConfigManager.saveProjectConfig).toHaveBeenCalledWith(expect.objectContaining({
-        worktrees: expect.objectContaining({
-          branchPrefix: 'feature/'
-        }),
-        development: expect.objectContaining({
-          autoSetup: true,
-          syncFiles: ['.env', '.env.local'],
-          defaultEditor: 'cursor'
+      expect(mockConfigManager.saveProjectConfig).toHaveBeenCalledWith(
+        expect.objectContaining({
+          worktrees: expect.objectContaining({
+            branchPrefix: 'feature/',
+          }),
+          development: expect.objectContaining({
+            autoSetup: true,
+            syncFiles: ['.env', '.env.local'],
+            defaultEditor: 'cursor',
+          }),
         })
-      }))
+      )
       expect(mockSpinner.succeed).toHaveBeenCalledWith('テンプレート "feature" を適用しました')
     })
 
@@ -199,9 +203,9 @@ describe('template command', () => {
           ...mockTemplate.config,
           customFiles: [
             { path: '.github/CODEOWNERS', content: '* @team' },
-            { path: 'docs/README.md', content: '# Documentation' }
-          ]
-        }
+            { path: 'docs/README.md', content: '# Documentation' },
+          ],
+        },
       }
       vi.mocked(fs.readFile).mockResolvedValue(JSON.stringify(templateWithFiles))
 
@@ -230,14 +234,18 @@ describe('template command', () => {
 
       await templateCommand.parseAsync(['node', 'test', '--delete', 'custom'])
 
-      expect(inquirer.prompt).toHaveBeenCalledWith(expect.arrayContaining([
-        expect.objectContaining({
-          name: 'confirmDelete',
-          message: 'テンプレート "custom" を削除しますか？'
-        })
-      ]))
+      expect(inquirer.prompt).toHaveBeenCalledWith(
+        expect.arrayContaining([
+          expect.objectContaining({
+            name: 'confirmDelete',
+            message: 'テンプレート "custom" を削除しますか？',
+          }),
+        ])
+      )
       expect(fs.unlink).toHaveBeenCalledWith('/repo/.scj/templates/custom.json')
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('✨ テンプレート "custom" を削除しました'))
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringContaining('✨ テンプレート "custom" を削除しました')
+      )
     })
 
     it('削除をキャンセルできる', async () => {
@@ -254,7 +262,7 @@ describe('template command', () => {
     it('--editオプションでテンプレートを編集する', async () => {
       const updatedConfig = {
         branchPrefix: 'updated/',
-        autoSetup: false
+        autoSetup: false,
       }
       vi.mocked(inquirer.prompt).mockResolvedValue(updatedConfig)
 
@@ -271,27 +279,31 @@ describe('template command', () => {
 
   describe('デフォルト動作', () => {
     it('オプションなしでインタラクティブメニューを表示', async () => {
-      vi.mocked(inquirer.prompt).mockResolvedValueOnce({ 
-        action: 'list' 
+      vi.mocked(inquirer.prompt).mockResolvedValueOnce({
+        action: 'list',
       })
 
       await templateCommand.parseAsync(['node', 'test'])
 
-      expect(inquirer.prompt).toHaveBeenCalledWith(expect.arrayContaining([
-        expect.objectContaining({
-          type: 'list',
-          name: 'action',
-          message: 'テンプレート管理'
-        })
-      ]))
+      expect(inquirer.prompt).toHaveBeenCalledWith(
+        expect.arrayContaining([
+          expect.objectContaining({
+            type: 'list',
+            name: 'action',
+            message: 'テンプレート管理',
+          }),
+        ])
+      )
     })
 
     it('メニューから適用を選択', async () => {
-      vi.mocked(inquirer.prompt).mockResolvedValueOnce({ 
-        action: 'apply' 
-      }).mockResolvedValueOnce({
-        templateToApply: mockTemplate
-      })
+      vi.mocked(inquirer.prompt)
+        .mockResolvedValueOnce({
+          action: 'apply',
+        })
+        .mockResolvedValueOnce({
+          templateToApply: mockTemplate,
+        })
 
       await templateCommand.parseAsync(['node', 'test'])
 
@@ -303,9 +315,9 @@ describe('template command', () => {
     it('ファイル操作エラーを処理する', async () => {
       vi.mocked(fs.writeFile).mockRejectedValue(new Error('Permission denied'))
 
-      await expect(
-        templateCommand.parseAsync(['node', 'test', '--save', 'test'])
-      ).rejects.toThrow('process.exit called with code 1')
+      await expect(templateCommand.parseAsync(['node', 'test', '--save', 'test'])).rejects.toThrow(
+        'process.exit called with code 1'
+      )
 
       expect(mockSpinner.fail).toHaveBeenCalledWith('テンプレートの保存に失敗しました')
     })

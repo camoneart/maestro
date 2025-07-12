@@ -5,11 +5,11 @@ import fs from 'fs/promises'
 import inquirer from 'inquirer'
 import ora from 'ora'
 import { historyCommand } from '../../commands/history'
-import { 
-  createMockWorktree, 
+import {
+  createMockWorktree,
   createMockWorktrees,
   createMockConfig,
-  createMockSpinner
+  createMockSpinner,
 } from '../utils/test-helpers'
 import path from 'path'
 import { homedir } from 'os'
@@ -37,13 +37,13 @@ describe('history command', () => {
     // GitWorktreeManagerのモック
     mockGitManager = {
       listWorktrees: vi.fn().mockResolvedValue([
-        createMockWorktree({ 
-          path: '/repo/worktree-1', 
-          branch: 'refs/heads/feature-a' 
+        createMockWorktree({
+          path: '/repo/worktree-1',
+          branch: 'refs/heads/feature-a',
         }),
-        createMockWorktree({ 
-          path: '/repo/worktree-2', 
-          branch: 'refs/heads/feature-b' 
+        createMockWorktree({
+          path: '/repo/worktree-2',
+          branch: 'refs/heads/feature-b',
         }),
       ]),
     }
@@ -56,9 +56,9 @@ describe('history command', () => {
         ...createMockConfig(),
         claude: {
           costOptimization: {
-            historyPath: '~/.claude/history/{branch}.md'
-          }
-        }
+            historyPath: '~/.claude/history/{branch}.md',
+          },
+        },
       }),
     }
     vi.mocked(ConfigManager).mockImplementation(() => mockConfigManager)
@@ -86,7 +86,7 @@ describe('history command', () => {
     vi.spyOn(console, 'error').mockImplementation(() => {})
 
     // process.exitのモック
-    vi.spyOn(process, 'exit').mockImplementation((code) => {
+    vi.spyOn(process, 'exit').mockImplementation(code => {
       throw new Error(`process.exit called with code ${code}`)
     })
   })
@@ -112,7 +112,9 @@ describe('history command', () => {
 
       await historyCommand.parseAsync(['node', 'test'])
 
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('Claude Code履歴が見つかりません'))
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringContaining('Claude Code履歴が見つかりません')
+      )
     })
 
     it('削除されたworktreeの履歴も表示する', async () => {
@@ -130,11 +132,7 @@ describe('history command', () => {
       vi.mocked(fs.stat).mockImplementation(async () => {
         statCallCount++
         // 異なる日付を返す
-        const dates = [
-          new Date('2024-01-03'),
-          new Date('2024-01-01'),
-          new Date('2024-01-02'),
-        ]
+        const dates = [new Date('2024-01-03'), new Date('2024-01-01'), new Date('2024-01-02')]
         return {
           mtime: dates[statCallCount - 1] || new Date(),
           size: 1024,
@@ -147,10 +145,10 @@ describe('history command', () => {
 
       // ログ出力を確認して順序を検証
       const logCalls = vi.mocked(console.log).mock.calls
-      const branchLogs = logCalls.filter(call => 
-        call[0].includes('feature-') || call[0].includes('old-branch')
+      const branchLogs = logCalls.filter(
+        call => call[0].includes('feature-') || call[0].includes('old-branch')
       )
-      
+
       // 最新の日付が最初に表示されることを確認
       expect(branchLogs.length).toBeGreaterThan(0)
     })
@@ -188,10 +186,10 @@ describe('history command', () => {
         'export.json',
         expect.stringContaining('"exportedAt"')
       )
-      
+
       const writeCall = vi.mocked(fs.writeFile).mock.calls[0]
       const exportData = JSON.parse(writeCall[1] as string)
-      
+
       expect(exportData).toHaveProperty('totalHistories')
       expect(exportData).toHaveProperty('histories')
       expect(exportData.histories).toBeInstanceOf(Array)
@@ -215,7 +213,8 @@ describe('history command', () => {
     })
 
     it('読み込みエラーがあってもスキップして続行する', async () => {
-      vi.mocked(fs.readFile).mockRejectedValueOnce(new Error('Read error'))
+      vi.mocked(fs.readFile)
+        .mockRejectedValueOnce(new Error('Read error'))
         .mockResolvedValueOnce('成功した履歴')
       vi.mocked(fs.writeFile).mockResolvedValue(undefined)
 
@@ -251,10 +250,7 @@ describe('history command', () => {
       let statCallCount = 0
       vi.mocked(fs.stat).mockImplementation(async () => {
         statCallCount++
-        const dates = [
-          new Date('2024-01-02'),
-          new Date('2024-01-01'),
-        ]
+        const dates = [new Date('2024-01-02'), new Date('2024-01-01')]
         return {
           mtime: dates[statCallCount - 1] || new Date(),
           size: 1024,
@@ -262,14 +258,14 @@ describe('history command', () => {
           isDirectory: () => false,
         } as any
       })
-      
+
       vi.mocked(fs.writeFile).mockResolvedValue(undefined)
 
       await historyCommand.parseAsync(['node', 'test', '--merge', 'merged.md'])
 
       const writeCall = vi.mocked(fs.writeFile).mock.calls[0]
       const content = writeCall[1] as string
-      
+
       // feature-bが先に来ることを確認（日付が古いため）
       const featureAIndex = content.indexOf('feature-a')
       const featureBIndex = content.indexOf('feature-b')
@@ -298,12 +294,14 @@ describe('history command', () => {
 
       await historyCommand.parseAsync(['node', 'test', '--cleanup'])
 
-      expect(inquirer.prompt).toHaveBeenCalledWith(expect.arrayContaining([
-        expect.objectContaining({
-          name: 'confirmDelete',
-          message: '1個の履歴を削除しますか？'
-        })
-      ]))
+      expect(inquirer.prompt).toHaveBeenCalledWith(
+        expect.arrayContaining([
+          expect.objectContaining({
+            name: 'confirmDelete',
+            message: '1個の履歴を削除しますか？',
+          }),
+        ])
+      )
       expect(fs.unlink).toHaveBeenCalledWith(expect.stringContaining('deleted-branch.md'))
       expect(mockSpinner.succeed).toHaveBeenCalledWith('1個の履歴を削除しました')
     })
@@ -314,14 +312,16 @@ describe('history command', () => {
 
       await historyCommand.parseAsync(['node', 'test', '--cleanup'])
 
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('✨ クリーンアップする履歴はありません'))
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringContaining('✨ クリーンアップする履歴はありません')
+      )
     })
   })
 
   describe('履歴の同期', () => {
     it('履歴を正しいパスに移動する', async () => {
       // 履歴が異なるパスにある設定
-      vi.mocked(fs.stat).mockImplementation(async (filePath) => {
+      vi.mocked(fs.stat).mockImplementation(async filePath => {
         const pathStr = filePath.toString()
         if (pathStr.includes('old-location')) {
           return {
@@ -341,7 +341,9 @@ describe('history command', () => {
       await historyCommand.parseAsync(['node', 'test', '--sync'])
 
       expect(fs.mkdir).toHaveBeenCalledWith(expect.any(String), { recursive: true })
-      expect(mockSpinner.succeed).toHaveBeenCalledWith(expect.stringContaining('個の履歴を同期しました'))
+      expect(mockSpinner.succeed).toHaveBeenCalledWith(
+        expect.stringContaining('個の履歴を同期しました')
+      )
     })
 
     it('同期エラーをスキップする', async () => {
@@ -366,7 +368,9 @@ describe('history command', () => {
     it('一般的なエラーを処理する', async () => {
       mockGitManager.listWorktrees.mockRejectedValue(new Error('Git error'))
 
-      await expect(historyCommand.parseAsync(['node', 'test'])).rejects.toThrow('process.exit called with code 1')
+      await expect(historyCommand.parseAsync(['node', 'test'])).rejects.toThrow(
+        'process.exit called with code 1'
+      )
 
       expect(console.error).toHaveBeenCalledWith(expect.stringContaining('Git error'))
     })
@@ -378,7 +382,9 @@ describe('history command', () => {
         historyCommand.parseAsync(['node', 'test', '--show', 'refs/heads/feature-a'])
       ).rejects.toThrow('process.exit called with code 1')
 
-      expect(console.error).toHaveBeenCalledWith(expect.stringContaining('履歴の読み込みに失敗しました'))
+      expect(console.error).toHaveBeenCalledWith(
+        expect.stringContaining('履歴の読み込みに失敗しました')
+      )
     })
   })
 })

@@ -5,11 +5,11 @@ import fs from 'fs/promises'
 import inquirer from 'inquirer'
 import ora from 'ora'
 import { healthCommand } from '../../commands/health'
-import { 
-  createMockWorktree, 
+import {
+  createMockWorktree,
   createMockWorktrees,
   createMockExecaResponse,
-  createMockSpinner
+  createMockSpinner,
 } from '../utils/test-helpers'
 
 // モック設定
@@ -27,11 +27,13 @@ describe('health command', () => {
     // GitWorktreeManagerのモック
     mockGitManager = {
       isGitRepository: vi.fn().mockResolvedValue(true),
-      listWorktrees: vi.fn().mockResolvedValue([
-        createMockWorktree({ path: '/repo/.', branch: 'refs/heads/main' }),
-        createMockWorktree({ path: '/repo/worktree-1', branch: 'refs/heads/feature-a' }),
-        createMockWorktree({ path: '/repo/worktree-2', branch: 'refs/heads/feature-b' }),
-      ]),
+      listWorktrees: vi
+        .fn()
+        .mockResolvedValue([
+          createMockWorktree({ path: '/repo/.', branch: 'refs/heads/main' }),
+          createMockWorktree({ path: '/repo/worktree-1', branch: 'refs/heads/feature-a' }),
+          createMockWorktree({ path: '/repo/worktree-2', branch: 'refs/heads/feature-b' }),
+        ]),
       deleteWorktree: vi.fn().mockResolvedValue(true),
     }
     vi.mocked(GitWorktreeManager).mockImplementation(() => mockGitManager)
@@ -74,7 +76,7 @@ describe('health command', () => {
     vi.spyOn(console, 'error').mockImplementation(() => {})
 
     // process.exitのモック
-    vi.spyOn(process, 'exit').mockImplementation((code) => {
+    vi.spyOn(process, 'exit').mockImplementation(code => {
       throw new Error(`process.exit called with code ${code}`)
     })
   })
@@ -88,16 +90,22 @@ describe('health command', () => {
       await healthCommand.parseAsync(['node', 'test'])
 
       expect(mockSpinner.stop).toHaveBeenCalled()
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('🏥 Worktree健全性チェック結果'))
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('✨ すべてのworktreeは健全です！'))
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringContaining('🏥 Worktree健全性チェック結果')
+      )
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringContaining('✨ すべてのworktreeは健全です！')
+      )
     })
 
     it('影分身が存在しない場合は終了する', async () => {
       mockGitManager.listWorktrees.mockResolvedValue([
-        createMockWorktree({ path: '/repo/.', branch: 'refs/heads/main' })
+        createMockWorktree({ path: '/repo/.', branch: 'refs/heads/main' }),
       ])
 
-      await expect(healthCommand.parseAsync(['node', 'test'])).rejects.toThrow('process.exit called with code 0')
+      await expect(healthCommand.parseAsync(['node', 'test'])).rejects.toThrow(
+        'process.exit called with code 0'
+      )
 
       expect(mockSpinner.succeed).toHaveBeenCalledWith('影分身が存在しません')
     })
@@ -114,7 +122,9 @@ describe('health command', () => {
 
       await healthCommand.parseAsync(['node', 'test'])
 
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('2個の未コミット変更があります'))
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringContaining('2個の未コミット変更があります')
+      )
       expect(console.log).toHaveBeenCalledWith(expect.stringContaining('⚠️  警告: 2個'))
     })
 
@@ -131,7 +141,9 @@ describe('health command', () => {
 
       await healthCommand.parseAsync(['node', 'test'])
 
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('mainから25コミット遅れています'))
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringContaining('mainから25コミット遅れています')
+      )
     })
 
     it('古いworktreeを検出する', async () => {
@@ -154,7 +166,9 @@ describe('health command', () => {
     it('マージ競合を検出する', async () => {
       vi.mocked(execa).mockImplementation(async (cmd: string, args: string[]) => {
         if (cmd === 'git' && args[0] === 'ls-files' && args[1] === '--unmerged') {
-          return createMockExecaResponse('100644 hash1 1\tsrc/conflict.ts\n100644 hash2 2\tsrc/conflict.ts')
+          return createMockExecaResponse(
+            '100644 hash1 1\tsrc/conflict.ts\n100644 hash2 2\tsrc/conflict.ts'
+          )
         }
         if (cmd === 'git' && args[0] === 'log') {
           return createMockExecaResponse(new Date().toISOString())
@@ -164,7 +178,9 @@ describe('health command', () => {
 
       await healthCommand.parseAsync(['node', 'test'])
 
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('マージ競合が解決されていません'))
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringContaining('マージ競合が解決されていません')
+      )
       expect(console.log).toHaveBeenCalledWith(expect.stringContaining('🚨 重大: 2個'))
     })
 
@@ -173,7 +189,9 @@ describe('health command', () => {
 
       await healthCommand.parseAsync(['node', 'test'])
 
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('Worktreeディレクトリが存在しません'))
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringContaining('Worktreeディレクトリが存在しません')
+      )
     })
 
     it('リモートブランチが存在しない場合を検出する', async () => {
@@ -189,7 +207,9 @@ describe('health command', () => {
 
       await healthCommand.parseAsync(['node', 'test'])
 
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('リモートブランチが存在しません'))
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringContaining('リモートブランチが存在しません')
+      )
     })
   })
 
@@ -213,12 +233,14 @@ describe('health command', () => {
 
       await healthCommand.parseAsync(['node', 'test', '--fix'])
 
-      expect(inquirer.prompt).toHaveBeenCalledWith(expect.arrayContaining([
-        expect.objectContaining({
-          name: 'confirmFix',
-          message: '自動修正を実行しますか？'
-        })
-      ]))
+      expect(inquirer.prompt).toHaveBeenCalledWith(
+        expect.arrayContaining([
+          expect.objectContaining({
+            name: 'confirmFix',
+            message: '自動修正を実行しますか？',
+          }),
+        ])
+      )
       expect(execa).toHaveBeenCalledWith('git', ['merge', 'main', '--no-edit'], expect.any(Object))
       expect(mockSpinner.succeed).toHaveBeenCalledWith('2個の問題を修正しました')
     })
@@ -229,7 +251,12 @@ describe('health command', () => {
 
       await healthCommand.parseAsync(['node', 'test', '--fix'])
 
-      expect(execa).toHaveBeenCalledWith('git', ['worktree', 'remove', expect.any(String), '--force'])
+      expect(execa).toHaveBeenCalledWith('git', [
+        'worktree',
+        'remove',
+        expect.any(String),
+        '--force',
+      ])
     })
   })
 
@@ -249,12 +276,14 @@ describe('health command', () => {
 
       await healthCommand.parseAsync(['node', 'test', '--prune'])
 
-      expect(inquirer.prompt).toHaveBeenCalledWith(expect.arrayContaining([
-        expect.objectContaining({
-          name: 'confirmPrune',
-          message: 'これらを削除しますか？'
-        })
-      ]))
+      expect(inquirer.prompt).toHaveBeenCalledWith(
+        expect.arrayContaining([
+          expect.objectContaining({
+            name: 'confirmPrune',
+            message: 'これらを削除しますか？',
+          }),
+        ])
+      )
       expect(mockGitManager.deleteWorktree).toHaveBeenCalledTimes(2)
       expect(mockSpinner.succeed).toHaveBeenCalledWith('2個のworktreeを削除しました')
     })
@@ -309,7 +338,9 @@ describe('health command', () => {
       await healthCommand.parseAsync(['node', 'test'])
 
       expect(console.log).toHaveBeenCalledWith(expect.stringContaining('💡 推奨事項:'))
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('--fix オプションで修正可能な問題を自動修正できます'))
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringContaining('--fix オプションで修正可能な問題を自動修正できます')
+      )
     })
 
     it('古いworktreeがある場合、--pruneオプションを推奨する', async () => {
@@ -325,7 +356,9 @@ describe('health command', () => {
 
       await healthCommand.parseAsync(['node', 'test'])
 
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('--prune オプションで古いworktreeを削除できます'))
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringContaining('--prune オプションで古いworktreeを削除できます')
+      )
     })
   })
 
@@ -333,7 +366,9 @@ describe('health command', () => {
     it('Gitリポジトリでない場合エラーを表示する', async () => {
       mockGitManager.isGitRepository.mockResolvedValue(false)
 
-      await expect(healthCommand.parseAsync(['node', 'test'])).rejects.toThrow('process.exit called with code 1')
+      await expect(healthCommand.parseAsync(['node', 'test'])).rejects.toThrow(
+        'process.exit called with code 1'
+      )
 
       expect(mockSpinner.fail).toHaveBeenCalledWith('このディレクトリはGitリポジトリではありません')
     })
@@ -361,10 +396,14 @@ describe('health command', () => {
     it('健全性チェック中のエラーを処理する', async () => {
       mockGitManager.listWorktrees.mockRejectedValue(new Error('Failed to list worktrees'))
 
-      await expect(healthCommand.parseAsync(['node', 'test'])).rejects.toThrow('process.exit called with code 1')
+      await expect(healthCommand.parseAsync(['node', 'test'])).rejects.toThrow(
+        'process.exit called with code 1'
+      )
 
       expect(mockSpinner.fail).toHaveBeenCalledWith('健全性チェックに失敗しました')
-      expect(console.error).toHaveBeenCalledWith(expect.stringContaining('Failed to list worktrees'))
+      expect(console.error).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to list worktrees')
+      )
     })
   })
 })

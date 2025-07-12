@@ -6,12 +6,12 @@ import fs from 'fs/promises'
 import inquirer from 'inquirer'
 import ora from 'ora'
 import { batchCommand } from '../../commands/batch'
-import { 
-  createMockWorktree, 
-  createMockConfig, 
+import {
+  createMockWorktree,
+  createMockConfig,
   createMockSpinner,
   createMockExecaResponse,
-  createMockIssue
+  createMockIssue,
 } from '../utils/test-helpers'
 
 // モック設定
@@ -52,7 +52,7 @@ describe('batch command', () => {
     vi.spyOn(console, 'warn').mockImplementation(() => {})
 
     // process.exitのモック
-    vi.spyOn(process, 'exit').mockImplementation((code) => {
+    vi.spyOn(process, 'exit').mockImplementation(code => {
       throw new Error(`process.exit called with code ${code}`)
     })
   })
@@ -68,7 +68,7 @@ describe('batch command', () => {
         createMockIssue({ number: 123, title: 'Feature A' }),
         createMockIssue({ number: 456, title: 'Feature B' }),
       ]
-      
+
       vi.mocked(execa).mockImplementation((cmd: string, args: string[]) => {
         if (cmd === 'gh' && args[0] === 'issue' && args[1] === 'list') {
           return Promise.resolve(createMockExecaResponse(JSON.stringify(mockIssues)))
@@ -79,12 +79,12 @@ describe('batch command', () => {
       // inquirerのモック - Issue選択
       vi.mocked(inquirer.prompt).mockImplementation(async (questions: any) => {
         const question = Array.isArray(questions) ? questions[0] : questions
-        
+
         if (question.name === 'inputMethod') {
           return { inputMethod: 'issues' }
         }
         if (question.name === 'selectedIssues') {
-          return { 
+          return {
             selectedIssues: [
               {
                 name: `issue-123`,
@@ -95,8 +95,8 @@ describe('batch command', () => {
                 name: `issue-456`,
                 description: 'Feature B',
                 issueNumber: '456',
-              }
-            ]
+              },
+            ],
           }
         }
         if (question.name === 'confirmCreate') {
@@ -122,7 +122,9 @@ describe('batch command', () => {
       vi.mocked(inquirer.prompt).mockResolvedValue({ inputMethod: 'issues' })
 
       // コマンド実行
-      await expect(batchCommand.parseAsync(['node', 'test'])).rejects.toThrow('process.exit called with code 1')
+      await expect(batchCommand.parseAsync(['node', 'test'])).rejects.toThrow(
+        'process.exit called with code 1'
+      )
 
       expect(mockSpinner.fail).toHaveBeenCalledWith('GitHub Issueの取得に失敗しました')
     })
@@ -185,9 +187,9 @@ feature-b | Feature B
       const mockResponses = [
         { branchName: 'feature-x', description: 'Feature X', continueAdding: true },
         { branchName: 'feature-y', description: 'Feature Y', continueAdding: false },
-        { confirmCreate: true }
+        { confirmCreate: true },
       ]
-      
+
       vi.mocked(inquirer.prompt).mockImplementation(async () => {
         const response = mockResponses[Math.floor(callIndex / 3)]
         callIndex++
@@ -224,7 +226,7 @@ feature-b | Feature B
 
       // 3つのworktreeを作成するようモック
       vi.mocked(fs.readFile).mockResolvedValue('feature-1\nfeature-2\nfeature-3')
-      
+
       await batchCommand.parseAsync(['node', 'test', '--from-file', 'batch.txt'])
 
       // 成功と失敗のサマリーが表示される
@@ -238,7 +240,14 @@ feature-b | Feature B
       vi.mocked(fs.readFile).mockResolvedValue('feature-test')
       vi.mocked(inquirer.prompt).mockResolvedValue({ confirmCreate: true })
 
-      await batchCommand.parseAsync(['node', 'test', '--from-file', 'batch.txt', '--base', 'develop'])
+      await batchCommand.parseAsync([
+        'node',
+        'test',
+        '--from-file',
+        'batch.txt',
+        '--base',
+        'develop',
+      ])
 
       expect(mockGitManager.createWorktree).toHaveBeenCalledWith('feature/feature-test', 'develop')
     })
@@ -246,7 +255,7 @@ feature-b | Feature B
     it('--setupオプションで環境セットアップを実行する', async () => {
       vi.mocked(fs.readFile).mockResolvedValue('feature-test')
       vi.mocked(inquirer.prompt).mockResolvedValue({ confirmCreate: true })
-      
+
       // npm installのモック
       vi.mocked(execa).mockImplementation((cmd: string) => {
         if (cmd === 'npm') {
@@ -261,14 +270,18 @@ feature-b | Feature B
       await batchCommand.parseAsync(['node', 'test', '--from-file', 'batch.txt', '--setup'])
 
       // npm installが呼ばれることを確認
-      expect(execa).toHaveBeenCalledWith('npm', ['install'], expect.objectContaining({
-        cwd: expect.stringContaining('/path/to/worktree')
-      }))
+      expect(execa).toHaveBeenCalledWith(
+        'npm',
+        ['install'],
+        expect.objectContaining({
+          cwd: expect.stringContaining('/path/to/worktree'),
+        })
+      )
     })
 
     it('--openオプションでエディタで開く確認を行う', async () => {
       vi.mocked(fs.readFile).mockResolvedValue('feature-test')
-      
+
       // inquirerのモック
       let promptCount = 0
       vi.mocked(inquirer.prompt).mockImplementation(async (questions: any) => {
@@ -292,7 +305,9 @@ feature-b | Feature B
     it('Gitリポジトリでない場合エラーを表示する', async () => {
       mockGitManager.isGitRepository.mockResolvedValue(false)
 
-      await expect(batchCommand.parseAsync(['node', 'test'])).rejects.toThrow('process.exit called with code 1')
+      await expect(batchCommand.parseAsync(['node', 'test'])).rejects.toThrow(
+        'process.exit called with code 1'
+      )
 
       expect(mockSpinner.fail).toHaveBeenCalledWith('このディレクトリはGitリポジトリではありません')
     })
@@ -304,7 +319,9 @@ feature-b | Feature B
       await batchCommand.parseAsync(['node', 'test'])
 
       expect(mockGitManager.createWorktree).not.toHaveBeenCalled()
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('作成するworktreeがありません'))
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringContaining('作成するworktreeがありません')
+      )
     })
 
     it('作成確認でキャンセルした場合は作成をスキップする', async () => {

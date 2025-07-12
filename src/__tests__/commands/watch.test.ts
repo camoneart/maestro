@@ -7,11 +7,11 @@ import inquirer from 'inquirer'
 import ora from 'ora'
 import path from 'path'
 import { watchCommand } from '../../commands/watch'
-import { 
-  createMockWorktree, 
+import {
+  createMockWorktree,
   createMockWorktrees,
   createMockConfig,
-  createMockSpinner
+  createMockSpinner,
 } from '../utils/test-helpers'
 import { EventEmitter } from 'events'
 import { createHash } from 'crypto'
@@ -36,17 +36,17 @@ describe('watch command', () => {
     mockGitManager = {
       isGitRepository: vi.fn().mockResolvedValue(true),
       listWorktrees: vi.fn().mockResolvedValue([
-        createMockWorktree({ 
-          path: '/repo/.', 
-          branch: 'refs/heads/main' 
+        createMockWorktree({
+          path: '/repo/.',
+          branch: 'refs/heads/main',
         }),
-        createMockWorktree({ 
-          path: '/repo/worktree-1', 
-          branch: 'refs/heads/feature-a' 
+        createMockWorktree({
+          path: '/repo/worktree-1',
+          branch: 'refs/heads/feature-a',
         }),
-        createMockWorktree({ 
-          path: '/repo/worktree-2', 
-          branch: 'refs/heads/feature-b' 
+        createMockWorktree({
+          path: '/repo/worktree-2',
+          branch: 'refs/heads/feature-b',
         }),
       ]),
     }
@@ -59,8 +59,8 @@ describe('watch command', () => {
         ...createMockConfig(),
         watch: {
           patterns: ['src/**/*', 'config/**/*'],
-          exclude: ['node_modules/**', '*.log']
-        }
+          exclude: ['node_modules/**', '*.log'],
+        },
       }),
     }
     vi.mocked(ConfigManager).mockImplementation(() => mockConfigManager)
@@ -92,7 +92,7 @@ describe('watch command', () => {
     // cryptoのモック
     vi.mocked(createHash).mockReturnValue({
       update: vi.fn().mockReturnThis(),
-      digest: vi.fn().mockReturnValue('mock-hash-value')
+      digest: vi.fn().mockReturnValue('mock-hash-value'),
     } as any)
 
     // pathのモック
@@ -103,7 +103,7 @@ describe('watch command', () => {
       return to
     })
     vi.spyOn(path, 'join').mockImplementation((...args) => args.join('/'))
-    vi.spyOn(path, 'dirname').mockImplementation((p) => p.split('/').slice(0, -1).join('/'))
+    vi.spyOn(path, 'dirname').mockImplementation(p => p.split('/').slice(0, -1).join('/'))
 
     // process.cwdのモック
     vi.spyOn(process, 'cwd').mockReturnValue('/repo/worktree-1')
@@ -113,7 +113,7 @@ describe('watch command', () => {
     vi.spyOn(console, 'error').mockImplementation(() => {})
 
     // process.exitのモック
-    vi.spyOn(process, 'exit').mockImplementation((code) => {
+    vi.spyOn(process, 'exit').mockImplementation(code => {
       throw new Error(`process.exit called with code ${code}`)
     })
 
@@ -137,11 +137,15 @@ describe('watch command', () => {
         expect.objectContaining({
           cwd: '/repo/worktree-1',
           ignored: ['node_modules/**', '*.log'],
-          persistent: true
+          persistent: true,
         })
       )
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('🔍 ファイル監視を開始しました'))
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('監視パターン: src/**/*、config/**/*'))
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringContaining('🔍 ファイル監視を開始しました')
+      )
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringContaining('監視パターン: src/**/*、config/**/*')
+      )
 
       // watcherを閉じる
       mockWatcher.emit('error', new Error('Test complete'))
@@ -163,8 +167,12 @@ describe('watch command', () => {
         '/repo/worktree-1/src/new-file.ts',
         '/repo/worktree-2/src/new-file.ts'
       )
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('📝 ファイル追加: src/new-file.ts'))
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('✓ refs/heads/feature-b: src/new-file.ts'))
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringContaining('📝 ファイル追加: src/new-file.ts')
+      )
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringContaining('✓ refs/heads/feature-b: src/new-file.ts')
+      )
 
       // watcherを閉じる
       mockWatcher.emit('error', new Error('Test complete'))
@@ -184,7 +192,9 @@ describe('watch command', () => {
         '/repo/worktree-1/src/existing.ts',
         '/repo/worktree-2/src/existing.ts'
       )
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('✏️  ファイル変更: src/existing.ts'))
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringContaining('✏️  ファイル変更: src/existing.ts')
+      )
 
       mockWatcher.emit('error', new Error('Test complete'))
     })
@@ -200,7 +210,9 @@ describe('watch command', () => {
       await new Promise(resolve => setTimeout(resolve, 50))
 
       expect(fs.unlink).toHaveBeenCalledWith('/repo/worktree-2/src/deleted.ts')
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('🗑️  ファイル削除: src/deleted.ts'))
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringContaining('🗑️  ファイル削除: src/deleted.ts')
+      )
 
       mockWatcher.emit('error', new Error('Test complete'))
     })
@@ -208,27 +220,34 @@ describe('watch command', () => {
 
   describe('オプション処理', () => {
     it('--patternsでカスタムパターンを指定できる', async () => {
-      const watchPromise = watchCommand.parseAsync(['node', 'test', '--patterns', '*.js,*.ts,lib/**/*'])
+      const watchPromise = watchCommand.parseAsync([
+        'node',
+        'test',
+        '--patterns',
+        '*.js,*.ts,lib/**/*',
+      ])
 
       await new Promise(resolve => setTimeout(resolve, 50))
 
-      expect(chokidar.watch).toHaveBeenCalledWith(
-        ['*.js', '*.ts', 'lib/**/*'],
-        expect.any(Object)
-      )
+      expect(chokidar.watch).toHaveBeenCalledWith(['*.js', '*.ts', 'lib/**/*'], expect.any(Object))
 
       mockWatcher.emit('error', new Error('Test complete'))
     })
 
     it('--excludeで除外パターンを追加できる', async () => {
-      const watchPromise = watchCommand.parseAsync(['node', 'test', '--exclude', '*.test.ts,dist/**'])
+      const watchPromise = watchCommand.parseAsync([
+        'node',
+        'test',
+        '--exclude',
+        '*.test.ts,dist/**',
+      ])
 
       await new Promise(resolve => setTimeout(resolve, 50))
 
       expect(chokidar.watch).toHaveBeenCalledWith(
         expect.any(Array),
         expect.objectContaining({
-          ignored: ['node_modules/**', '*.log', '*.test.ts', 'dist/**']
+          ignored: ['node_modules/**', '*.log', '*.test.ts', 'dist/**'],
         })
       )
 
@@ -294,12 +313,14 @@ describe('watch command', () => {
 
       await new Promise(resolve => setTimeout(resolve, 50))
 
-      expect(inquirer.prompt).toHaveBeenCalledWith(expect.arrayContaining([
-        expect.objectContaining({
-          name: 'confirmSync',
-          message: expect.stringContaining('他のworktreeに同期しますか？')
-        })
-      ]))
+      expect(inquirer.prompt).toHaveBeenCalledWith(
+        expect.arrayContaining([
+          expect.objectContaining({
+            name: 'confirmSync',
+            message: expect.stringContaining('他のworktreeに同期しますか？'),
+          }),
+        ])
+      )
       expect(fs.copyFile).toHaveBeenCalled()
 
       mockWatcher.emit('error', new Error('Test complete'))
@@ -328,7 +349,9 @@ describe('watch command', () => {
     it('Gitリポジトリでない場合エラーを表示する', async () => {
       mockGitManager.isGitRepository.mockResolvedValue(false)
 
-      await expect(watchCommand.parseAsync(['node', 'test'])).rejects.toThrow('process.exit called with code 1')
+      await expect(watchCommand.parseAsync(['node', 'test'])).rejects.toThrow(
+        'process.exit called with code 1'
+      )
 
       expect(mockSpinner.fail).toHaveBeenCalledWith('このディレクトリはGitリポジトリではありません')
     })
@@ -336,17 +359,21 @@ describe('watch command', () => {
     it('worktreeが存在しない場合エラーを表示する', async () => {
       vi.spyOn(process, 'cwd').mockReturnValue('/other/path')
 
-      await expect(watchCommand.parseAsync(['node', 'test'])).rejects.toThrow('process.exit called with code 1')
+      await expect(watchCommand.parseAsync(['node', 'test'])).rejects.toThrow(
+        'process.exit called with code 1'
+      )
 
       expect(mockSpinner.fail).toHaveBeenCalledWith('現在のディレクトリはworktreeではありません')
     })
 
     it('影分身が存在しない場合エラーを表示する', async () => {
       mockGitManager.listWorktrees.mockResolvedValue([
-        createMockWorktree({ path: '/repo/.', branch: 'refs/heads/main' })
+        createMockWorktree({ path: '/repo/.', branch: 'refs/heads/main' }),
       ])
 
-      await expect(watchCommand.parseAsync(['node', 'test'])).rejects.toThrow('process.exit called with code 1')
+      await expect(watchCommand.parseAsync(['node', 'test'])).rejects.toThrow(
+        'process.exit called with code 1'
+      )
 
       expect(mockSpinner.fail).toHaveBeenCalledWith('他の影分身が存在しません')
     })
@@ -385,7 +412,9 @@ describe('watch command', () => {
       // SIGINTをトリガー
       listeners['SIGINT']()
 
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('ファイル監視を停止しています...'))
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringContaining('ファイル監視を停止しています...')
+      )
       expect(mockWatcher.close).toHaveBeenCalled()
     })
   })

@@ -4,11 +4,11 @@ import { execa } from 'execa'
 import fs from 'fs/promises'
 import ora from 'ora'
 import { graphCommand } from '../../commands/graph'
-import { 
-  createMockWorktree, 
+import {
+  createMockWorktree,
   createMockWorktrees,
   createMockExecaResponse,
-  createMockSpinner
+  createMockSpinner,
 } from '../utils/test-helpers'
 
 // モック設定
@@ -27,17 +27,17 @@ describe('graph command', () => {
       isGitRepository: vi.fn().mockResolvedValue(true),
       listWorktrees: vi.fn().mockResolvedValue([
         createMockWorktree({ path: '/repo/.', branch: 'refs/heads/main' }),
-        createMockWorktree({ 
-          path: '/repo/worktree-1', 
-          branch: 'refs/heads/feature-a' 
+        createMockWorktree({
+          path: '/repo/worktree-1',
+          branch: 'refs/heads/feature-a',
         }),
-        createMockWorktree({ 
-          path: '/repo/worktree-2', 
-          branch: 'refs/heads/feature-b' 
+        createMockWorktree({
+          path: '/repo/worktree-2',
+          branch: 'refs/heads/feature-b',
         }),
-        createMockWorktree({ 
-          path: '/repo/worktree-3', 
-          branch: 'refs/heads/feature-c' 
+        createMockWorktree({
+          path: '/repo/worktree-3',
+          branch: 'refs/heads/feature-c',
         }),
       ]),
     }
@@ -75,7 +75,7 @@ describe('graph command', () => {
     vi.spyOn(console, 'error').mockImplementation(() => {})
 
     // process.exitのモック
-    vi.spyOn(process, 'exit').mockImplementation((code) => {
+    vi.spyOn(process, 'exit').mockImplementation(code => {
       throw new Error(`process.exit called with code ${code}`)
     })
   })
@@ -120,8 +120,12 @@ describe('graph command', () => {
 
       await graphCommand.parseAsync(['node', 'test'])
 
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('⚠️  10コミット以上遅れているブランチ: 1個'))
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('feature-c (15コミット遅れ)'))
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringContaining('⚠️  10コミット以上遅れているブランチ: 1個')
+      )
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringContaining('feature-c (15コミット遅れ)')
+      )
     })
   })
 
@@ -132,16 +136,22 @@ describe('graph command', () => {
       expect(console.log).toHaveBeenCalledWith(expect.stringContaining('```mermaid'))
       expect(console.log).toHaveBeenCalledWith(expect.stringContaining('graph TD'))
       expect(console.log).toHaveBeenCalledWith(expect.stringContaining('main[main]'))
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('feature_a[feature-a<br/>↑3 ↓2]'))
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringContaining('feature_a[feature-a<br/>↑3 ↓2]')
+      )
       expect(console.log).toHaveBeenCalledWith(expect.stringContaining('main --> feature_a'))
     })
 
     it('DOT形式で出力する', async () => {
       await graphCommand.parseAsync(['node', 'test', '--format', 'dot'])
 
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('digraph worktree_dependencies'))
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringContaining('digraph worktree_dependencies')
+      )
       expect(console.log).toHaveBeenCalledWith(expect.stringContaining('rankdir=TB'))
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('"feature-a" [label="feature-a\\n↑3 ↓2"'))
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringContaining('"feature-a" [label="feature-a\\n↑3 ↓2"')
+      )
       expect(console.log).toHaveBeenCalledWith(expect.stringContaining('"main" -> "feature-a"'))
     })
   })
@@ -150,7 +160,9 @@ describe('graph command', () => {
     it('--show-commitsで最新コミットを表示する', async () => {
       await graphCommand.parseAsync(['node', 'test', '--show-commits'])
 
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('abc1234: feat: add new feature'))
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringContaining('abc1234: feat: add new feature')
+      )
     })
 
     it('--show-datesで最終更新日を表示する', async () => {
@@ -170,8 +182,13 @@ describe('graph command', () => {
 
       await graphCommand.parseAsync(['node', 'test', '--output', 'graph.txt'])
 
-      expect(fs.writeFile).toHaveBeenCalledWith('graph.txt', expect.stringContaining('🌳 Worktree依存関係グラフ'))
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('✨ グラフを graph.txt に保存しました'))
+      expect(fs.writeFile).toHaveBeenCalledWith(
+        'graph.txt',
+        expect.stringContaining('🌳 Worktree依存関係グラフ')
+      )
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringContaining('✨ グラフを graph.txt に保存しました')
+      )
     })
 
     it('DOT形式でPNG画像を生成する', async () => {
@@ -180,7 +197,9 @@ describe('graph command', () => {
       await graphCommand.parseAsync(['node', 'test', '--format', 'dot', '--output', 'graph.dot'])
 
       expect(execa).toHaveBeenCalledWith('dot', ['-Tpng', 'graph.dot', '-o', 'graph.png'])
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('🖼️  画像を graph.png に生成しました'))
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringContaining('🖼️  画像を graph.png に生成しました')
+      )
     })
 
     it('Graphvizがない場合はヒントを表示する', async () => {
@@ -194,7 +213,9 @@ describe('graph command', () => {
 
       await graphCommand.parseAsync(['node', 'test', '--format', 'dot', '--output', 'graph.dot'])
 
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('💡 ヒント: Graphvizをインストールすると画像を生成できます'))
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringContaining('💡 ヒント: Graphvizをインストールすると画像を生成できます')
+      )
       expect(console.log).toHaveBeenCalledWith(expect.stringContaining('brew install graphviz'))
     })
   })
@@ -247,7 +268,9 @@ describe('graph command', () => {
     it('Gitリポジトリでない場合エラーを表示する', async () => {
       mockGitManager.isGitRepository.mockResolvedValue(false)
 
-      await expect(graphCommand.parseAsync(['node', 'test'])).rejects.toThrow('process.exit called with code 1')
+      await expect(graphCommand.parseAsync(['node', 'test'])).rejects.toThrow(
+        'process.exit called with code 1'
+      )
 
       expect(mockSpinner.fail).toHaveBeenCalledWith('このディレクトリはGitリポジトリではありません')
     })
@@ -255,10 +278,12 @@ describe('graph command', () => {
     it('影分身が存在しない場合は終了する', async () => {
       // メインブランチのみ
       mockGitManager.listWorktrees.mockResolvedValue([
-        createMockWorktree({ path: '/repo/.', branch: 'refs/heads/main' })
+        createMockWorktree({ path: '/repo/.', branch: 'refs/heads/main' }),
       ])
 
-      await expect(graphCommand.parseAsync(['node', 'test'])).rejects.toThrow('process.exit called with code 0')
+      await expect(graphCommand.parseAsync(['node', 'test'])).rejects.toThrow(
+        'process.exit called with code 0'
+      )
 
       expect(mockSpinner.fail).toHaveBeenCalledWith('影分身が存在しません')
     })
@@ -267,10 +292,14 @@ describe('graph command', () => {
       // listWorktreesでエラーを発生させる
       mockGitManager.listWorktrees.mockRejectedValue(new Error('Failed to list worktrees'))
 
-      await expect(graphCommand.parseAsync(['node', 'test'])).rejects.toThrow('process.exit called with code 1')
+      await expect(graphCommand.parseAsync(['node', 'test'])).rejects.toThrow(
+        'process.exit called with code 1'
+      )
 
       expect(mockSpinner.fail).toHaveBeenCalledWith('グラフの生成に失敗しました')
-      expect(console.error).toHaveBeenCalledWith(expect.stringContaining('Failed to list worktrees'))
+      expect(console.error).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to list worktrees')
+      )
     })
   })
 })

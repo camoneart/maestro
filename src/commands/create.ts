@@ -261,9 +261,9 @@ export const createCommand = new Command('create')
             },
             development: {
               ...config.development,
-              autoSetup: templateConfig.autoSetup ?? config.development?.autoSetup,
-              syncFiles: templateConfig.syncFiles || config.development?.syncFiles,
-              defaultEditor: templateConfig.editor || config.development?.defaultEditor,
+              autoSetup: templateConfig.autoSetup ?? config.development?.autoSetup ?? true,
+              syncFiles: templateConfig.syncFiles || config.development?.syncFiles || ['.env', '.env.local'],
+              defaultEditor: templateConfig.editor || config.development?.defaultEditor || 'cursor',
             },
             hooks: templateConfig.hooks || config.hooks,
           }
@@ -448,7 +448,12 @@ export const createCommand = new Command('create')
       if (options.tmux || (options.tmux === undefined && config.tmux?.enabled)) {
         await createTmuxSession(branchName, worktreePath, {
           ...config,
-          claude: { autoStart: options.claude || config.claude?.autoStart },
+          claude: {
+            autoStart: options.claude || config.claude?.autoStart || false,
+            markdownMode: config.claude?.markdownMode || 'shared',
+            initialCommands: config.claude?.initialCommands || [],
+            costOptimization: config.claude?.costOptimization
+          },
         })
       }
 
