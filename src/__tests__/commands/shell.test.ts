@@ -188,38 +188,34 @@ describe('shell command', () => {
       expect(mockFzfProcess.stdin.write).toHaveBeenCalled()
     })
 
-    it(
-      'fzfでキャンセルした場合は終了する',
-      async () => {
-        // fzfプロセスのモックをキャンセル状態で作成
-        const canceledFzfProcess = new EventEmitter() as any
-        canceledFzfProcess.stdin = {
-          write: vi.fn(),
-          end: vi.fn(),
+    it('fzfでキャンセルした場合は終了する', async () => {
+      // fzfプロセスのモックをキャンセル状態で作成
+      const canceledFzfProcess = new EventEmitter() as any
+      canceledFzfProcess.stdin = {
+        write: vi.fn(),
+        end: vi.fn(),
+      }
+      canceledFzfProcess.stdout = new EventEmitter()
+
+      // beforeEachで設定されたspawnのモックを上書き
+      vi.mocked(spawn).mockImplementation((command: string) => {
+        if (command === 'fzf') {
+          // 即座にcloseイベントを発火
+          process.nextTick(() => {
+            canceledFzfProcess.emit('close', 1)
+          })
+          return canceledFzfProcess
         }
-        canceledFzfProcess.stdout = new EventEmitter()
+        return mockShellProcess
+      })
 
-        // beforeEachで設定されたspawnのモックを上書き
-        vi.mocked(spawn).mockImplementation((command: string) => {
-          if (command === 'fzf') {
-            // 即座にcloseイベントを発火
-            process.nextTick(() => {
-              canceledFzfProcess.emit('close', 1)
-            })
-            return canceledFzfProcess
-          }
-          return mockShellProcess
-        })
+      // コマンドがexitで終了することを確認
+      await expect(shellCommand.parseAsync(['node', 'test', '--fzf'])).rejects.toThrow(
+        'process.exit called with code 0'
+      )
 
-        // コマンドがexitで終了することを確認
-        await expect(shellCommand.parseAsync(['node', 'test', '--fzf'])).rejects.toThrow(
-          'process.exit called with code 0'
-        )
-
-        expect(console.log).toHaveBeenCalledWith(expect.stringContaining('キャンセルされました'))
-      },
-      10000
-    )
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('キャンセルされました'))
+    }, 10000)
   })
 
   describe('コマンド実行オプション', () => {
