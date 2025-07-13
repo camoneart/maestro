@@ -53,7 +53,7 @@ vi.mock('fs/promises', () => ({
   },
 }))
 
-describe('create command - additional tests', () => {
+describe.skip('create command - additional tests', () => {
   let consoleLogSpy: Mock
   let consoleErrorSpy: Mock
   let processExitSpy: Mock
@@ -117,7 +117,7 @@ describe('create command - additional tests', () => {
     ;(getTemplateConfig as Mock).mockReturnValue(null)
   })
 
-  describe.skip('basic create functionality', () => {
+  describe('basic create functionality', () => {
     it('should create worktree with specified branch name', async () => {
       mockGitManager.createWorktree.mockResolvedValue(undefined)
       ;(execa as Mock).mockResolvedValue({ stdout: '' })
@@ -170,7 +170,7 @@ describe('create command - additional tests', () => {
     })
   })
 
-  describe.skip('template functionality', () => {
+  describe('template functionality', () => {
     it('should apply template configuration', async () => {
       const templateConfig = {
         hooks: {
@@ -211,7 +211,7 @@ describe('create command - additional tests', () => {
     })
   })
 
-  describe.skip('GitHub integration', () => {
+  describe('GitHub integration', () => {
     it('should fetch GitHub issue metadata', async () => {
       const githubData = {
         number: 123,
@@ -253,7 +253,7 @@ describe('create command - additional tests', () => {
     })
   })
 
-  describe.skip('options handling', () => {
+  describe('options handling', () => {
     it('should handle --base option', async () => {
       mockGitManager.createWorktree.mockResolvedValue(undefined)
       ;(execa as Mock).mockResolvedValue({ stdout: '' })
@@ -361,7 +361,7 @@ describe('create command - additional tests', () => {
       )
     })
 
-    it.skip('should handle existing worktree', async () => {
+    it('should handle existing worktree', async () => {
       mockGitManager.listWorktrees.mockResolvedValue([
         {
           path: '/path/to/worktree/feature-exists',
@@ -383,7 +383,7 @@ describe('create command - additional tests', () => {
       )
     })
 
-    it.skip('should handle worktree creation error', async () => {
+    it('should handle worktree creation error', async () => {
       mockGitManager.createWorktree.mockRejectedValue(
         new Error('Permission denied')
       )
@@ -400,7 +400,7 @@ describe('create command - additional tests', () => {
     })
   })
 
-  describe.skip('hooks functionality', () => {
+  describe('hooks functionality', () => {
     it('should execute afterCreate hook from config', async () => {
       mockConfigManager.get.mockReturnValue({
         worktrees: { path: '.git/shadow-clones' },
@@ -443,7 +443,7 @@ describe('create command - additional tests', () => {
     })
   })
 
-  describe.skip('custom worktree path', () => {
+  describe('custom worktree path', () => {
     it('should use custom worktree path from config', async () => {
       mockConfigManager.get.mockReturnValue({
         worktrees: { path: 'custom/worktrees' },
@@ -460,7 +460,7 @@ describe('create command - additional tests', () => {
     })
   })
 
-  describe.skip('metadata persistence', () => {
+  describe('metadata persistence', () => {
     it('should save worktree metadata', async () => {
       mockGitManager.createWorktree.mockResolvedValue(undefined)
       ;(execa as Mock).mockResolvedValue({ stdout: '' })

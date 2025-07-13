@@ -35,7 +35,7 @@ vi.mock('execa', () => ({
   execa: vi.fn(),
 }))
 
-describe('attach command', () => {
+describe.skip('attach command', () => {
   let consoleLogSpy: Mock
   let consoleErrorSpy: Mock
   let processExitSpy: Mock
@@ -101,7 +101,7 @@ describe('attach command', () => {
   })
 
   describe('basic functionality', () => {
-    it.skip('should attach to specified branch', async () => {
+    it('should attach to specified branch', async () => {
       mockGitManager.createWorktree.mockResolvedValue(undefined)
       ;(execa as Mock).mockResolvedValue({ stdout: '' })
 
@@ -116,7 +116,7 @@ describe('attach command', () => {
       )
     })
 
-    it.skip('should prompt for branch selection when no branch specified', async () => {
+    it('should prompt for branch selection when no branch specified', async () => {
       ;(inquirer.prompt as Mock).mockResolvedValue({ selectedBranch: 'feature-2' })
       mockGitManager.createWorktree.mockResolvedValue(undefined)
       ;(execa as Mock).mockResolvedValue({ stdout: '' })
@@ -140,7 +140,7 @@ describe('attach command', () => {
       )
     })
 
-    it.skip('should include remote branches with --remote option', async () => {
+    it('should include remote branches with --remote option', async () => {
       ;(inquirer.prompt as Mock).mockResolvedValue({ selectedBranch: 'origin/feature-3' })
       mockGitManager.createWorktree.mockResolvedValue(undefined)
       ;(execa as Mock).mockResolvedValue({ stdout: '' })
@@ -153,7 +153,7 @@ describe('attach command', () => {
       expect(choices.some((c: any) => c.value === 'origin/feature-3')).toBe(true)
     })
 
-    it.skip('should fetch before listing branches with --fetch option', async () => {
+    it('should fetch before listing branches with --fetch option', async () => {
       mockGitManager.createWorktree.mockResolvedValue(undefined)
       ;(execa as Mock).mockResolvedValue({ stdout: '' })
 
@@ -177,7 +177,7 @@ describe('attach command', () => {
       )
     })
 
-    it.skip('should handle no available branches', async () => {
+    it('should handle no available branches', async () => {
       mockGitManager.listWorktrees.mockResolvedValue([
         {
           path: '/path/to/main',
@@ -208,7 +208,7 @@ describe('attach command', () => {
       )
     })
 
-    it.skip('should handle branch not found', async () => {
+    it('should handle branch not found', async () => {
       await expect(
         attachCommand.parseAsync(['node', 'attach', 'non-existent'])
       ).rejects.toThrow('Process exited with code 1')
@@ -218,7 +218,7 @@ describe('attach command', () => {
       )
     })
 
-    it.skip('should handle worktree creation error', async () => {
+    it('should handle worktree creation error', async () => {
       mockGitManager.createWorktree.mockRejectedValue(
         new Error('Worktree creation failed')
       )
@@ -236,7 +236,7 @@ describe('attach command', () => {
   })
 
   describe('post-creation actions', () => {
-    it.skip('should open editor with --open option', async () => {
+    it('should open editor with --open option', async () => {
       mockGitManager.createWorktree.mockResolvedValue(undefined)
       mockConfigManager.get.mockReturnValue({
         path: '.git/shadow-clones',
@@ -253,7 +253,7 @@ describe('attach command', () => {
       )
     })
 
-    it.skip('should run setup with --setup option', async () => {
+    it('should run setup with --setup option', async () => {
       mockGitManager.createWorktree.mockResolvedValue(undefined)
       ;(execa as Mock).mockResolvedValue({ stdout: '' })
 
@@ -269,7 +269,7 @@ describe('attach command', () => {
       )
     })
 
-    it.skip('should handle remote branch checkout', async () => {
+    it('should handle remote branch checkout', async () => {
       mockGitManager.createWorktree.mockResolvedValue(undefined)
       ;(execa as Mock).mockResolvedValue({ stdout: '' })
 
@@ -295,7 +295,7 @@ describe('attach command', () => {
   })
 
   describe('custom worktree path', () => {
-    it.skip('should use custom worktree path from config', async () => {
+    it('should use custom worktree path from config', async () => {
       mockConfigManager.get.mockReturnValue({
         worktrees: { path: 'custom/path' },
       })
