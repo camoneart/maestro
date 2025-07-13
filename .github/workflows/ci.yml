@@ -112,15 +112,22 @@ jobs:
       - name: Run E2E tests
         run: pnpm run test:e2e
 
+      - name: Skip coverage upload (no token)
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '20' && secrets.CODECOV_TOKEN == ''
+        run: |
+          echo "⚠️  Codecov token not available - skipping coverage upload"
+          echo "To enable coverage reporting, add CODECOV_TOKEN to repository secrets"
+          echo "Visit: https://app.codecov.io/github/hashiramaendure/shadow-clone-jutsu"
+
       - name: Upload coverage reports
-        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '20'
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '20' && secrets.CODECOV_TOKEN != ''
         uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           file: ./coverage/lcov.info
           flags: unittests
           name: shadow-clone-jutsu
-          fail_ci_if_error: true
+          fail_ci_if_error: false
 
       - name: Check coverage thresholds
         if: matrix.os == 'ubuntu-latest' && matrix.node-version == '20'

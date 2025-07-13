@@ -80,3 +80,40 @@ Added user authentication middleware with JWT token validation.
 - Use before important commits or merges
 - Save reviews for code review discussions
 - Combine with `--commit` for review + commit message
+
+---
+
+# Codecov Configuration
+
+This project uses Codecov for test coverage reporting. The coverage reports are uploaded automatically via GitHub Actions.
+
+## Setup for Repository Maintainers
+
+1. **Visit Codecov**:
+   - Go to [https://app.codecov.io/github/hashiramaendure/shadow-clone-jutsu](https://app.codecov.io/github/hashiramaendure/shadow-clone-jutsu)
+   - Sign in with GitHub account
+
+2. **Get Upload Token**:
+   - Navigate to Settings → Repository Upload Token
+   - Copy the token value
+
+3. **Add to GitHub Secrets**:
+   - Go to GitHub repository → Settings → Secrets and variables → Actions
+   - Click "New repository secret"
+   - Name: `CODECOV_TOKEN`
+   - Value: Paste the token from step 2
+   - Click "Add secret"
+
+## Behavior
+
+- **With Token**: Coverage reports are uploaded to Codecov after tests run
+- **Without Token**: CI skips upload step and continues (no failure)
+- **Coverage Threshold**: Minimum 40% line coverage required
+- **Upload Conditions**: Only on `ubuntu-latest` + Node 20 combination
+
+## Troubleshooting
+
+If you see "Token required - not valid tokenless upload" error:
+- The token is missing or empty in GitHub Secrets
+- CI will now skip upload gracefully instead of failing
+- All tests and other CI checks continue to work normally
