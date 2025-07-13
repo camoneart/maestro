@@ -41,6 +41,9 @@ importers:
       ora:
         specifier: 8.2.0
         version: 8.2.0
+      p-limit:
+        specifier: 6.2.0
+        version: 6.2.0
       simple-git:
         specifier: 3.28.0
         version: 3.28.0
@@ -75,9 +78,6 @@ importers:
       eslint-config-prettier:
         specifier: 10.1.5
         version: 10.1.5(eslint@9.30.1)
-      p-limit:
-        specifier: 6.2.0
-        version: 6.2.0
       prettier:
         specifier: 3.6.2
         version: 3.6.2
