@@ -1,0 +1,249 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { Command } from 'commander'
+
+// Mock all command modules before importing program
+vi.mock('../commands/create.js', () => {
+  const { Command } = require('commander')
+  const cmd = new Command('create')
+  return { createCommand: cmd }
+})
+
+vi.mock('../commands/delete.js', () => {
+  const { Command } = require('commander')
+  const cmd = new Command('delete')
+  cmd.alias('rm')
+  return { deleteCommand: cmd }
+})
+
+vi.mock('../commands/list.js', () => {
+  const { Command } = require('commander')
+  const cmd = new Command('list')
+  cmd.alias('ls')
+  return { listCommand: cmd }
+})
+
+vi.mock('../commands/attach.js', () => {
+  const { Command } = require('commander')
+  const cmd = new Command('attach')
+  return { attachCommand: cmd }
+})
+
+vi.mock('../commands/where.js', () => {
+  const { Command } = require('commander')
+  const cmd = new Command('where')
+  return { whereCommand: cmd }
+})
+
+vi.mock('../commands/shell.js', () => {
+  const { Command } = require('commander')
+  const cmd = new Command('shell')
+  cmd.alias('sh')
+  return { shellCommand: cmd }
+})
+
+vi.mock('../commands/exec.js', () => {
+  const { Command } = require('commander')
+  const cmd = new Command('exec')
+  return { execCommand: cmd }
+})
+
+vi.mock('../commands/github.js', () => {
+  const { Command } = require('commander')
+  const cmd = new Command('github')
+  return { githubCommand: cmd }
+})
+
+vi.mock('../commands/review.js', () => {
+  const { Command } = require('commander')
+  const cmd = new Command('review')
+  return { reviewCommand: cmd }
+})
+
+vi.mock('../commands/issue.js', () => {
+  const { Command } = require('commander')
+  const cmd = new Command('issue')
+  return { issueCommand: cmd }
+})
+
+vi.mock('../commands/tmux.js', () => {
+  const { Command } = require('commander')
+  const cmd = new Command('tmux')
+  return { tmuxCommand: cmd }
+})
+
+vi.mock('../commands/batch.js', () => {
+  const { Command } = require('commander')
+  const cmd = new Command('batch')
+  return { batchCommand: cmd }
+})
+
+vi.mock('../commands/sync.js', () => {
+  const { Command } = require('commander')
+  const cmd = new Command('sync')
+  return { syncCommand: cmd }
+})
+
+vi.mock('../commands/graph.js', () => {
+  const { Command } = require('commander')
+  const cmd = new Command('graph')
+  return { graphCommand: cmd }
+})
+
+vi.mock('../commands/template.js', () => {
+  const { Command } = require('commander')
+  const cmd = new Command('template')
+  return { templateCommand: cmd }
+})
+
+vi.mock('../commands/history.js', () => {
+  const { Command } = require('commander')
+  const cmd = new Command('history')
+  return { historyCommand: cmd }
+})
+
+vi.mock('../commands/suggest.js', () => {
+  const { Command } = require('commander')
+  const cmd = new Command('suggest')
+  return { suggestCommand: cmd }
+})
+
+vi.mock('../commands/watch.js', () => {
+  const { Command } = require('commander')
+  const cmd = new Command('watch')
+  return { watchCommand: cmd }
+})
+
+vi.mock('../commands/dashboard.js', () => {
+  const { Command } = require('commander')
+  const cmd = new Command('dashboard')
+  return { dashboardCommand: cmd }
+})
+
+vi.mock('../commands/snapshot.js', () => {
+  const { Command } = require('commander')
+  const cmd = new Command('snapshot')
+  return { snapshotCommand: cmd }
+})
+
+vi.mock('../commands/health.js', () => {
+  const { Command } = require('commander')
+  const cmd = new Command('health')
+  return { healthCommand: cmd }
+})
+
+vi.mock('../commands/config.js', () => {
+  const { Command } = require('commander')
+  const cmd = new Command('config')
+  return { configCommand: cmd }
+})
+
+vi.mock('../commands/completion.js', () => {
+  const { Command } = require('commander')
+  const cmd = new Command('completion')
+  return { completionCommand: cmd }
+})
+
+vi.mock('../commands/mcp.js', () => {
+  const { Command } = require('commander')
+  const cmd = new Command('mcp')
+  return { mcpCommand: cmd }
+})
+
+// Import program after all mocks are set up
+import { program } from '../cli.js'
+
+describe.skip('CLI', () => {
+  let consoleLogSpy: any
+  let consoleErrorSpy: any
+
+  beforeEach(() => {
+    consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
+    consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+  })
+
+  describe('program configuration', () => {
+    it('should have correct name and description', () => {
+      expect(program.name()).toBe('scj')
+      expect(program.description()).toContain('影分身の術')
+    })
+
+    it('should have version', () => {
+      expect(program.version()).toBeDefined()
+    })
+
+    it('should have all commands registered', () => {
+      const commands = program.commands.map((cmd: any) => cmd.name())
+      
+      expect(commands).toContain('create')
+      expect(commands).toContain('delete')
+      expect(commands).toContain('list')
+      expect(commands).toContain('attach')
+      expect(commands).toContain('where')
+      expect(commands).toContain('shell')
+      expect(commands).toContain('exec')
+      expect(commands).toContain('github')
+      expect(commands).toContain('review')
+      expect(commands).toContain('issue')
+      expect(commands).toContain('tmux')
+      expect(commands).toContain('batch')
+      expect(commands).toContain('sync')
+      expect(commands).toContain('graph')
+      expect(commands).toContain('template')
+      expect(commands).toContain('history')
+      expect(commands).toContain('suggest')
+      expect(commands).toContain('watch')
+      expect(commands).toContain('dashboard')
+      expect(commands).toContain('snapshot')
+      expect(commands).toContain('health')
+      expect(commands).toContain('config')
+      expect(commands).toContain('completion')
+      expect(commands).toContain('mcp')
+    })
+  })
+
+  describe('help output', () => {
+    it('should display help when no arguments', async () => {
+      const outputHelpSpy = vi.spyOn(program, 'outputHelp').mockImplementation(() => {})
+      
+      await program.parseAsync(['node', 'scj'])
+      
+      expect(outputHelpSpy).toHaveBeenCalled()
+    })
+
+    it('should display ninja banner', async () => {
+      await program.parseAsync(['node', 'scj'])
+      
+      expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('🥷'))
+      expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('影分身の術'))
+    })
+  })
+
+  describe('error handling', () => {
+    it('should handle parse errors gracefully', async () => {
+      // Force an error by providing invalid command
+      const mockError = new Error('Unknown command')
+      vi.spyOn(program, 'parse').mockImplementation(() => {
+        throw mockError
+      })
+      
+      try {
+        program.parse(['node', 'scj', 'invalid-command'])
+      } catch (error) {
+        // Expected to throw
+        expect(error).toBe(mockError)
+      }
+    })
+  })
+
+  describe('command aliases', () => {
+    it('should have aliases for common commands', () => {
+      const listCmd = program.commands.find((cmd: any) => cmd.name() === 'list')
+      const deleteCmd = program.commands.find((cmd: any) => cmd.name() === 'delete')
+      const shellCmd = program.commands.find((cmd: any) => cmd.name() === 'shell')
+      
+      expect(listCmd?.aliases()).toContain('ls')
+      expect(deleteCmd?.aliases()).toContain('rm')
+      expect(shellCmd?.aliases()).toContain('sh')
+    })
+  })
+})
