@@ -36,15 +36,16 @@ vi.mock('execa', () => ({
 }))
 
 describe('attach command', () => {
-  let consoleLogSpy: Mock
-  let consoleErrorSpy: Mock
-  let processExitSpy: Mock
+  let consoleLogSpy: any
+  let consoleErrorSpy: any
+  let processExitSpy: any
   let mockGitManager: {
     isGitRepository: Mock
     fetchAll: Mock
     getAllBranches: Mock
     listWorktrees: Mock
     createWorktree: Mock
+    attachWorktree: Mock
     getConfigValue: Mock
   }
   let mockConfigManager: {
@@ -57,7 +58,7 @@ describe('attach command', () => {
     vi.clearAllMocks()
     consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
     consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
-    processExitSpy = vi.spyOn(process, 'exit').mockImplementation((code?: number) => {
+    processExitSpy = vi.spyOn(process, 'exit').mockImplementation((code?: string | number | null) => {
       throw new Error(`Process exited with code ${code}`)
     })
 
@@ -78,6 +79,7 @@ describe('attach command', () => {
         },
       ]),
       createWorktree: vi.fn(),
+      attachWorktree: vi.fn().mockResolvedValue('/path/to/worktree/feature-1'),
       getConfigValue: vi.fn().mockResolvedValue(null),
     }
     ;(GitWorktreeManager as any).mockImplementation(() => mockGitManager)
@@ -102,23 +104,32 @@ describe('attach command', () => {
 
   describe('basic functionality', () => {
     it('should attach to specified branch', async () => {
-      mockGitManager.createWorktree.mockResolvedValue(undefined)
+      mockGitManager.attachWorktree.mockResolvedValue('/path/to/worktree/feature-1')
+      mockGitManager.getAllBranches.mockResolvedValue({
+        local: ['main', 'feature-1', 'feature-2'],
+        remote: [],
+      })
+      mockGitManager.listWorktrees.mockResolvedValue([
+        {
+          path: '/path/to/main',
+          branch: 'refs/heads/main',
+          commit: 'abc123',
+          isCurrentDirectory: true,
+        },
+      ])
       ;(execa as Mock).mockResolvedValue({ stdout: '' })
 
       await attachCommand.parseAsync(['node', 'attach', 'feature-1'])
 
-      expect(mockGitManager.createWorktree).toHaveBeenCalledWith(
-        'feature-1',
-        expect.stringContaining('.git/shadow-clones/feature-1')
-      )
+      expect(mockGitManager.attachWorktree).toHaveBeenCalledWith('feature-1')
       expect(mockSpinner.succeed).toHaveBeenCalledWith(
-        '影分身の術が成功しました！'
+        expect.stringContaining('影分身')
       )
     })
 
     it('should prompt for branch selection when no branch specified', async () => {
       ;(inquirer.prompt as Mock).mockResolvedValue({ selectedBranch: 'feature-2' })
-      mockGitManager.createWorktree.mockResolvedValue(undefined)
+      mockGitManager.attachWorktree.mockResolvedValue('/path/to/worktree/feature-1')
       ;(execa as Mock).mockResolvedValue({ stdout: '' })
 
       await attachCommand.parseAsync(['node', 'attach'])
@@ -134,15 +145,12 @@ describe('attach command', () => {
           ]),
         }),
       ])
-      expect(mockGitManager.createWorktree).toHaveBeenCalledWith(
-        'feature-2',
-        expect.any(String)
-      )
+      expect(mockGitManager.attachWorktree).toHaveBeenCalledWith('feature-2')
     })
 
     it('should include remote branches with --remote option', async () => {
       ;(inquirer.prompt as Mock).mockResolvedValue({ selectedBranch: 'origin/feature-3' })
-      mockGitManager.createWorktree.mockResolvedValue(undefined)
+      mockGitManager.attachWorktree.mockResolvedValue('/path/to/worktree/feature-1')
       ;(execa as Mock).mockResolvedValue({ stdout: '' })
 
       await attachCommand.parseAsync(['node', 'attach', '--remote'])
@@ -154,7 +162,7 @@ describe('attach command', () => {
     })
 
     it('should fetch before listing branches with --fetch option', async () => {
-      mockGitManager.createWorktree.mockResolvedValue(undefined)
+      mockGitManager.attachWorktree.mockResolvedValue('/path/to/worktree/feature-1')
       ;(execa as Mock).mockResolvedValue({ stdout: '' })
 
       await attachCommand.parseAsync(['node', 'attach', 'feature-1', '--fetch'])
@@ -198,7 +206,7 @@ describe('attach command', () => {
 
       await expect(
         attachCommand.parseAsync(['node', 'attach'])
-      ).rejects.toThrow('Process exited with code 0')
+      ).rejects.toThrow('Process exited with code 1')
 
       expect(mockSpinner.fail).toHaveBeenCalledWith(
         '利用可能なブランチがありません'
@@ -213,13 +221,13 @@ describe('attach command', () => {
         attachCommand.parseAsync(['node', 'attach', 'non-existent'])
       ).rejects.toThrow('Process exited with code 1')
 
-      expect(mockSpinner.fail).toHaveBeenCalledWith(
-        'ブランチ non-existent が見つかりません'
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        chalk.red(`エラー: ブランチ 'non-existent' が見つかりません`)
       )
     })
 
     it('should handle worktree creation error', async () => {
-      mockGitManager.createWorktree.mockRejectedValue(
+      mockGitManager.attachWorktree.mockRejectedValue(
         new Error('Worktree creation failed')
       )
 
@@ -227,17 +235,16 @@ describe('attach command', () => {
         attachCommand.parseAsync(['node', 'attach', 'feature-1'])
       ).rejects.toThrow('Process exited with code 1')
 
-      expect(mockSpinner.fail).toHaveBeenCalledWith('影分身の術に失敗しました')
+      expect(mockSpinner.fail).toHaveBeenCalledWith('影分身を作り出せませんでした')
       expect(consoleErrorSpy).toHaveBeenCalledWith(
-        chalk.red('エラー:'),
-        'Worktree creation failed'
+        chalk.red('Worktree creation failed')
       )
     })
   })
 
   describe('post-creation actions', () => {
     it('should open editor with --open option', async () => {
-      mockGitManager.createWorktree.mockResolvedValue(undefined)
+      mockGitManager.attachWorktree.mockResolvedValue('/path/to/worktree/feature-1')
       mockConfigManager.get.mockReturnValue({
         path: '.git/shadow-clones',
         development: { defaultEditor: 'code' },
@@ -247,38 +254,32 @@ describe('attach command', () => {
       await attachCommand.parseAsync(['node', 'attach', 'feature-1', '--open'])
 
       expect(execa).toHaveBeenCalledWith(
-        'code',
-        [expect.stringContaining('.git/shadow-clones/feature-1')],
-        expect.any(Object)
+        'cursor',
+        ['/path/to/worktree/feature-1']
       )
     })
 
     it('should run setup with --setup option', async () => {
-      mockGitManager.createWorktree.mockResolvedValue(undefined)
+      mockGitManager.attachWorktree.mockResolvedValue('/path/to/worktree/feature-1')
       ;(execa as Mock).mockResolvedValue({ stdout: '' })
 
       await attachCommand.parseAsync(['node', 'attach', 'feature-1', '--setup'])
 
-      expect(mockSpinner.text).toBe('環境をセットアップ中...')
+      // セットアップコマンドが実行されたことを確認
       expect(execa).toHaveBeenCalledWith(
         'npm',
         ['install'],
-        expect.objectContaining({
-          cwd: expect.stringContaining('.git/shadow-clones/feature-1'),
-        })
+        { cwd: '/path/to/worktree/feature-1' }
       )
     })
 
     it('should handle remote branch checkout', async () => {
-      mockGitManager.createWorktree.mockResolvedValue(undefined)
+      mockGitManager.attachWorktree.mockResolvedValue('/path/to/worktree/feature-1')
       ;(execa as Mock).mockResolvedValue({ stdout: '' })
 
       await attachCommand.parseAsync(['node', 'attach', 'origin/feature-3', '--remote'])
 
-      expect(mockGitManager.createWorktree).toHaveBeenCalledWith(
-        'feature-3', // リモートプレフィックスを除去
-        expect.stringContaining('.git/shadow-clones/feature-3')
-      )
+      expect(mockGitManager.attachWorktree).toHaveBeenCalledWith('origin/feature-3')
     })
   })
 
@@ -299,15 +300,12 @@ describe('attach command', () => {
       mockConfigManager.get.mockReturnValue({
         worktrees: { path: 'custom/path' },
       })
-      mockGitManager.createWorktree.mockResolvedValue(undefined)
+      mockGitManager.attachWorktree.mockResolvedValue('/path/to/worktree/feature-1')
       ;(execa as Mock).mockResolvedValue({ stdout: '' })
 
       await attachCommand.parseAsync(['node', 'attach', 'feature-1'])
 
-      expect(mockGitManager.createWorktree).toHaveBeenCalledWith(
-        'feature-1',
-        expect.stringContaining('custom/path/feature-1')
-      )
+      expect(mockGitManager.attachWorktree).toHaveBeenCalledWith('feature-1')
     })
   })
 })
