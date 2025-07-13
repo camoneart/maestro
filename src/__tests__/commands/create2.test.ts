@@ -53,7 +53,7 @@ vi.mock('fs/promises', () => ({
   },
 }))
 
-describe.skip('create command - additional tests', () => {
+describe('create command - additional tests', () => {
   let consoleLogSpy: Mock
   let consoleErrorSpy: Mock
   let processExitSpy: Mock
