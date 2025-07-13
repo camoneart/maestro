@@ -271,6 +271,7 @@ export function handleError(error: unknown, context?: string): never {
 /**
  * エラーをキャッチして適切にハンドリングするデコレーター
  */
+// eslint-disable-next-line no-unused-vars
 export function withErrorHandling<T extends unknown[], R>(
   fn: (...args: T) => Promise<R>,
   context?: string
