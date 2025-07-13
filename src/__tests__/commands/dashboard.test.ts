@@ -334,8 +334,9 @@ describe('dashboard command', () => {
       // サーバーが起動するまで待つ
       await new Promise(resolve => setTimeout(resolve, 50))
 
-      // サーバーが正常に作成されたことを確認
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('🔍 ダッシュボードサーバーを起動中...'))
+      // サーバーが正常に作成されたことを確認（spinnerの成功メッセージをチェック）
+      expect(mockSpinner.succeed).toHaveBeenCalledWith('ダッシュボードサーバーが起動しました')
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('🌐 http://localhost:8765'))
     })
   })
 

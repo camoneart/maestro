@@ -139,9 +139,12 @@ describe('shell command', () => {
         'process.exit called with code 1'
       )
 
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('類似した影分身:'))
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('feature-a'))
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('feature-b'))
+      expect(console.error).toHaveBeenCalledWith(
+        expect.stringContaining("[shell] エラー: 影分身 'feat' が見つかりません")
+      )
+      expect(console.error).toHaveBeenCalledWith(
+        expect.stringContaining('類似した影分身: feature-a, feature-b')
+      )
     })
   })
 
@@ -418,8 +421,7 @@ describe('shell command', () => {
       )
 
       expect(console.error).toHaveBeenCalledWith(
-        expect.stringContaining('エラー:'),
-        expect.stringContaining('Git error')
+        expect.stringContaining('[shell] エラー: Git error')
       )
     })
   })
