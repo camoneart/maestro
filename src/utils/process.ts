@@ -8,7 +8,7 @@ class ProcessManager {
   private static instance: ProcessManager
   private cleanupHandlers: Set<CleanupHandler> = new Set()
   private isExiting = false
-  private readonly listeners: Map<string, (() => void)> = new Map()
+  private readonly listeners: Map<string, () => void> = new Map()
 
   constructor() {
     this.setupSignalHandlers()

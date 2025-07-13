@@ -593,7 +593,7 @@ export const dashboardCommand = new Command('dashboard')
       // サーバーのクリーンアップを登録
       processManager.addCleanupHandler(async () => {
         console.log(chalk.yellow('\nダッシュボードサーバーを停止中...'))
-        return new Promise<void>((resolve) => {
+        return new Promise<void>(resolve => {
           server.close(() => {
             console.log(chalk.green('停止しました'))
             resolve()

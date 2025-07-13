@@ -123,7 +123,9 @@ export const shellCommand = new Command('shell')
         if (!targetWorktree) {
           // 類似した名前を検索
           const similarBranches = shadowClones
-            .filter(wt => wt.branch && wt.branch.toLowerCase().includes((branchName || '').toLowerCase()))
+            .filter(
+              wt => wt.branch && wt.branch.toLowerCase().includes((branchName || '').toLowerCase())
+            )
             .map(wt => wt.branch?.replace('refs/heads/', '') || '')
             .filter(Boolean)
 

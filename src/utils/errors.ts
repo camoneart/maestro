@@ -6,21 +6,21 @@
 export enum ErrorCode {
   // Git関連
   NOT_GIT_REPOSITORY = 'NOT_GIT_REPOSITORY',
-  WORKTREE_NOT_FOUND = 'WORKTREE_NOT_FOUND', 
+  WORKTREE_NOT_FOUND = 'WORKTREE_NOT_FOUND',
   WORKTREE_ALREADY_EXISTS = 'WORKTREE_ALREADY_EXISTS',
-  
+
   // 外部ツール関連
   EXTERNAL_TOOL_NOT_FOUND = 'EXTERNAL_TOOL_NOT_FOUND',
-  
+
   // GitHub関連
   GITHUB_AUTH_REQUIRED = 'GITHUB_AUTH_REQUIRED',
-  
+
   // 一般的なエラー
   OPERATION_CANCELLED = 'OPERATION_CANCELLED',
   VALIDATION_ERROR = 'VALIDATION_ERROR',
   NETWORK_ERROR = 'NETWORK_ERROR',
   PERMISSION_DENIED = 'PERMISSION_DENIED',
-  UNKNOWN_ERROR = 'UNKNOWN_ERROR'
+  UNKNOWN_ERROR = 'UNKNOWN_ERROR',
 }
 /* eslint-enable no-unused-vars */
 
@@ -58,7 +58,7 @@ export class ShadowCloneError extends Error {
    */
   getFormattedMessage(): string {
     let message = `エラー: ${this.message}`
-    
+
     if (this.suggestions.length > 0) {
       message += '\n\n解決方法:'
       this.suggestions.forEach((suggestion, index) => {
@@ -82,17 +82,19 @@ export class ShadowCloneError extends Error {
 export class ErrorFactory {
   static notGitRepository(path?: string): ShadowCloneError {
     return new ShadowCloneError(
-      path ? `${path} はGitリポジトリではありません` : 'このディレクトリはGitリポジトリではありません',
+      path
+        ? `${path} はGitリポジトリではありません`
+        : 'このディレクトリはGitリポジトリではありません',
       ErrorCode.NOT_GIT_REPOSITORY,
       [
         {
           message: 'Gitリポジトリを初期化する',
-          command: 'git init'
+          command: 'git init',
         },
         {
           message: '既存のリポジトリをクローンする',
-          command: 'git clone <repository-url>'
-        }
+          command: 'git clone <repository-url>',
+        },
       ]
     )
   }
@@ -101,13 +103,13 @@ export class ErrorFactory {
     const suggestions: SolutionSuggestion[] = [
       {
         message: '影分身を作成する',
-        command: `scj create ${branch}`
-      }
+        command: `scj create ${branch}`,
+      },
     ]
 
     if (similar && similar.length > 0) {
       suggestions.unshift({
-        message: `類似した影分身: ${similar.join(', ')}`
+        message: `類似した影分身: ${similar.join(', ')}`,
       })
     }
 
@@ -125,30 +127,34 @@ export class ErrorFactory {
       [
         {
           message: '既存の影分身を削除してから再作成する',
-          command: `scj delete ${branch}`
+          command: `scj delete ${branch}`,
         },
         {
           message: '既存の影分身に移動する',
-          command: `scj shell ${branch}`
-        }
+          command: `scj shell ${branch}`,
+        },
       ]
     )
   }
 
-  static externalToolNotFound(tool: string, installCommand?: string, url?: string): ShadowCloneError {
+  static externalToolNotFound(
+    tool: string,
+    installCommand?: string,
+    url?: string
+  ): ShadowCloneError {
     const suggestions: SolutionSuggestion[] = []
-    
+
     if (installCommand) {
       suggestions.push({
         message: `${tool}をインストールする`,
-        command: installCommand
+        command: installCommand,
       })
     }
-    
+
     if (url) {
       suggestions.push({
         message: '公式サイトからダウンロード',
-        url
+        url,
       })
     }
 
@@ -160,21 +166,17 @@ export class ErrorFactory {
   }
 
   static githubAuthRequired(): ShadowCloneError {
-    return new ShadowCloneError(
-      'GitHub CLIが認証されていません',
-      ErrorCode.GITHUB_AUTH_REQUIRED,
-      [
-        {
-          message: 'GitHub CLIで認証する',
-          command: 'gh auth login'
-        },
-        {
-          message: 'GitHub CLIをインストールする',
-          command: 'brew install gh',
-          url: 'https://cli.github.com/'
-        }
-      ]
-    )
+    return new ShadowCloneError('GitHub CLIが認証されていません', ErrorCode.GITHUB_AUTH_REQUIRED, [
+      {
+        message: 'GitHub CLIで認証する',
+        command: 'gh auth login',
+      },
+      {
+        message: 'GitHub CLIをインストールする',
+        command: 'brew install gh',
+        url: 'https://cli.github.com/',
+      },
+    ])
   }
 
   static operationCancelled(operation?: string): ShadowCloneError {
@@ -197,11 +199,11 @@ export class ErrorFactory {
       ErrorCode.NETWORK_ERROR,
       [
         {
-          message: 'インターネット接続を確認してください'
+          message: 'インターネット接続を確認してください',
         },
         {
-          message: 'プロキシ設定を確認してください'
-        }
+          message: 'プロキシ設定を確認してください',
+        },
       ],
       originalError
     )
@@ -214,19 +216,19 @@ export class ErrorFactory {
 
     // 既知のエラーパターンを検出
     const message = error.message.toLowerCase()
-    
+
     if (message.includes('not a git repository')) {
       return ErrorFactory.notGitRepository()
     }
-    
+
     if (message.includes('permission denied')) {
       return new ShadowCloneError(
         `権限エラー: ${error.message}`,
         ErrorCode.PERMISSION_DENIED,
         [
           {
-            message: 'ファイル・ディレクトリの権限を確認してください'
-          }
+            message: 'ファイル・ディレクトリの権限を確認してください',
+          },
         ],
         error
       )
@@ -242,12 +244,7 @@ export class ErrorFactory {
     }
 
     // 一般的なエラーとして扱う
-    return new ShadowCloneError(
-      error.message,
-      ErrorCode.UNKNOWN_ERROR,
-      [],
-      error
-    )
+    return new ShadowCloneError(error.message, ErrorCode.UNKNOWN_ERROR, [], error)
   }
 }
 
@@ -255,9 +252,10 @@ export class ErrorFactory {
  * エラーハンドリングのユーティリティ関数
  */
 export function handleError(error: unknown, context?: string): never {
-  const shadowError = error instanceof ShadowCloneError 
-    ? error 
-    : ErrorFactory.fromError(error instanceof Error ? error : new Error(String(error)))
+  const shadowError =
+    error instanceof ShadowCloneError
+      ? error
+      : ErrorFactory.fromError(error instanceof Error ? error : new Error(String(error)))
 
   if (context) {
     console.error(`[${context}] ${shadowError.getFormattedMessage()}`)
