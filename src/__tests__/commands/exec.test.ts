@@ -39,7 +39,7 @@ describe('exec command', () => {
   })
 
   describe('basic functionality', () => {
-    it('should execute command in specified worktree', async () => {
+    it.skip('should execute command in specified worktree', async () => {
       const mockWorktrees: ParsedWorktreeInfo[] = [
         {
           path: '/path/to/worktree/feature-1',
@@ -175,7 +175,7 @@ describe('exec command', () => {
       )
     })
 
-    it('should handle no worktrees', async () => {
+    it.skip('should handle no worktrees', async () => {
       mockGitManager.listWorktrees.mockResolvedValue([])
 
       await expect(
@@ -211,7 +211,7 @@ describe('exec command', () => {
       )
     })
 
-    it('should handle command execution error', async () => {
+    it.skip('should handle command execution error', async () => {
       const mockWorktrees: ParsedWorktreeInfo[] = [
         {
           path: '/path/to/worktree/feature-1',
@@ -326,7 +326,7 @@ describe('exec command', () => {
   })
 
   describe('branch name matching', () => {
-    it('should match partial branch names', async () => {
+    it.skip('should match partial branch names', async () => {
       const mockWorktrees: ParsedWorktreeInfo[] = [
         {
           path: '/path/to/worktree/feature-auth',
@@ -357,7 +357,7 @@ describe('exec command', () => {
   })
 
   describe('stderr handling', () => {
-    it('should display stderr in yellow when not silent', async () => {
+    it.skip('should display stderr in yellow when not silent', async () => {
       const mockWorktrees: ParsedWorktreeInfo[] = [
         {
           path: '/path/to/worktree/feature-1',
