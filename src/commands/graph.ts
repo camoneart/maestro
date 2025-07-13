@@ -25,7 +25,9 @@ interface BranchRelation {
 }
 
 // ブランチの関係性を分析
-async function analyzeBranchRelations(worktrees: any[]): Promise<BranchRelation[]> {
+import { Worktree } from '../types/index.js'
+
+async function analyzeBranchRelations(worktrees: Worktree[]): Promise<BranchRelation[]> {
   const relations: BranchRelation[] = []
 
   for (const worktree of worktrees) {

@@ -2,11 +2,13 @@ import { Command } from 'commander'
 import chalk from 'chalk'
 import ora from 'ora'
 import { GitWorktreeManager } from '../core/git.js'
+import { Worktree } from '../types/index.js'
 import { createServer } from 'http'
 import { readFile } from 'fs/promises'
 import { execa } from 'execa'
 import open from 'open'
 import path from 'path'
+import { processManager } from '../utils/process.js'
 
 interface DashboardOptions {
   port?: number
@@ -395,17 +397,52 @@ const htmlTemplate = `
 </html>
 `
 
+// 拡張Worktree型定義
+interface EnhancedWorktree extends Worktree {
+  isMain: boolean
+  metadata: WorktreeMetadata | null
+  lastCommit: { date: string; message: string; hash: string } | null
+  health: string[]
+  uncommittedChanges: boolean
+}
+
+// worktreeメタデータ型定義
+interface WorktreeMetadata {
+  createdAt: string
+  branch: string
+  worktreePath: string
+  github?: {
+    type: 'issue' | 'pr'
+    title: string
+    body: string
+    author: string
+    labels: string[]
+    assignees: string[]
+    milestone?: string
+    url: string
+    issueNumber?: string
+  }
+  template?: string
+}
+
 // APIデータを取得
-async function getWorktreeData(): Promise<any> {
+async function getWorktreeData(): Promise<{
+  worktrees: EnhancedWorktree[]
+  stats: { active: number; needsAttention: number; githubLinked: number }
+}> {
   const gitManager = new GitWorktreeManager()
   const worktrees = await gitManager.listWorktrees()
 
   const enhancedWorktrees = await Promise.all(
     worktrees.map(async wt => {
-      const result: any = {
+      const result: EnhancedWorktree = {
         ...wt,
         isMain: wt.path.endsWith('.'),
         branch: wt.branch?.replace('refs/heads/', '') || wt.branch,
+        metadata: null,
+        lastCommit: null,
+        health: [],
+        uncommittedChanges: false,
       }
 
       // メタデータを取得
@@ -553,12 +590,14 @@ export const dashboardCommand = new Command('dashboard')
         }
       })
 
-      // 終了時の処理
-      process.on('SIGINT', () => {
-        console.log(chalk.yellow('\n\nダッシュボードサーバーを停止中...'))
-        server.close(() => {
-          console.log(chalk.green('停止しました'))
-          process.exit(0)
+      // サーバーのクリーンアップを登録
+      processManager.addCleanupHandler(async () => {
+        console.log(chalk.yellow('\nダッシュボードサーバーを停止中...'))
+        return new Promise<void>(resolve => {
+          server.close(() => {
+            console.log(chalk.green('停止しました'))
+            resolve()
+          })
         })
       })
     } catch (error) {

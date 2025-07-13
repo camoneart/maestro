@@ -253,8 +253,23 @@ async function saveTemplate(name: string, global: boolean): Promise<void> {
   }
 }
 
+// テンプレート設定型定義
+interface TemplateConfig {
+  branchPrefix?: string
+  autoSetup?: boolean
+  syncFiles?: string[]
+  editor?: 'vscode' | 'cursor' | 'none'
+  tmux?: boolean
+  claude?: boolean
+  hooks?: {
+    afterCreate?: string
+    beforeDelete?: string
+  }
+  customFiles?: Array<{ path: string; content: string }>
+}
+
 // テンプレートを適用
-async function applyTemplate(templateName: string): Promise<Record<string, any>> {
+async function applyTemplate(templateName: string): Promise<TemplateConfig> {
   // デフォルトテンプレートを確認
   let template = defaultTemplates.find(t => t.name === templateName)
 
@@ -349,7 +364,7 @@ export const templateCommand = new Command('template')
   })
 
 // テンプレート設定を取得する関数（createコマンドから使用）
-export async function getTemplateConfig(templateName: string): Promise<Record<string, any> | null> {
+export async function getTemplateConfig(templateName: string): Promise<TemplateConfig | null> {
   try {
     return await applyTemplate(templateName)
   } catch {

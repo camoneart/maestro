@@ -11,10 +11,13 @@ interface HealthOptions {
   prune?: boolean
   days?: number
   verbose?: boolean
+  json?: boolean
 }
 
+import { Worktree } from '../types/index.js'
+
 interface HealthIssue {
-  worktree: any
+  worktree: Worktree
   type: 'stale' | 'orphaned' | 'diverged' | 'uncommitted' | 'conflict' | 'missing'
   severity: 'critical' | 'warning' | 'info'
   message: string
@@ -23,7 +26,7 @@ interface HealthIssue {
 
 // worktreeの健全性をチェック
 async function checkWorktreeHealth(
-  worktree: any,
+  worktree: Worktree,
   mainBranch: string,
   daysThreshold: number
 ): Promise<HealthIssue[]> {
@@ -243,6 +246,7 @@ export const healthCommand = new Command('health')
   .option('-p, --prune', '古いworktreeを削除')
   .option('-d, --days <number>', '古いと判定する日数', '30')
   .option('-v, --verbose', '詳細情報を表示')
+  .option('-j, --json', 'JSON形式で出力')
   .action(async (options: HealthOptions) => {
     const spinner = ora('worktreeの健全性をチェック中...').start()
 
@@ -292,6 +296,31 @@ export const healthCommand = new Command('health')
       }
 
       spinner.stop()
+
+      // JSON出力の場合
+      if (options.json) {
+        const jsonOutput = {
+          summary: {
+            total: allIssues.length,
+            critical: allIssues.filter(i => i.severity === 'critical').length,
+            warning: allIssues.filter(i => i.severity === 'warning').length,
+            info: allIssues.filter(i => i.severity === 'info').length,
+          },
+          issues: allIssues.map(issue => ({
+            worktree: {
+              branch: issue.worktree.branch?.replace('refs/heads/', '') || issue.worktree.branch,
+              path: issue.worktree.path,
+            },
+            type: issue.type,
+            severity: issue.severity,
+            message: issue.message,
+            fixable: issue.fixable,
+          })),
+          checkedAt: new Date().toISOString(),
+        }
+        console.log(JSON.stringify(jsonOutput, null, 2))
+        return
+      }
 
       // レポートを表示
       displayHealthReport(allIssues, options.verbose || false)

@@ -9,6 +9,7 @@ import { spawn } from 'child_process'
 import cliProgress from 'cli-progress'
 import fs from 'fs/promises'
 import path from 'path'
+import pLimit from 'p-limit'
 
 interface SyncOptions {
   all?: boolean
@@ -20,6 +21,7 @@ interface SyncOptions {
   files?: boolean
   interactive?: boolean
   preset?: string
+  concurrency?: number
 }
 
 interface SyncResult {
@@ -44,6 +46,7 @@ export const syncCommand = new Command('sync')
   .option('-f, --files', '環境変数・設定ファイルを同期')
   .option('-i, --interactive', 'インタラクティブモードで同期するファイルを選択')
   .option('-p, --preset <name>', '同期プリセットを使用（env, config, all）')
+  .option('-c, --concurrency <number>', '並列実行数 (デフォルト: 5)', parseInt)
   .action(async (branchName?: string, options: SyncOptions = {}) => {
     const spinner = ora('影分身を確認中...').start()
 
@@ -265,74 +268,80 @@ export const syncCommand = new Command('sync')
       const results: SyncResult[] = []
       progressBar.start(targetWorktrees.length, 0)
 
-      const syncPromises = targetWorktrees.map(async (worktree, index) => {
-        const branchName = worktree.branch?.replace('refs/heads/', '') || worktree.branch
+      // 並列実行制限を設定
+      const concurrency = options.concurrency || 5
+      const limit = pLimit(concurrency)
 
-        try {
-          // 現在のブランチの状態を保存
-          const { stdout: status } = await execa('git', ['status', '--porcelain'], {
-            cwd: worktree.path,
-          })
+      const syncPromises = targetWorktrees.map((worktree, index) =>
+        limit(async () => {
+          const branchName = worktree.branch?.replace('refs/heads/', '') || worktree.branch
 
-          if (status.trim()) {
-            return { branch: branchName, status: 'skipped' as const, reason: '未コミットの変更' }
-          }
-
-          // up-to-dateチェック
-          const { stdout: behind } = await execa(
-            'git',
-            ['rev-list', '--count', `${branchName}..${mainBranch}`],
-            {
+          try {
+            // 現在のブランチの状態を保存
+            const { stdout: status } = await execa('git', ['status', '--porcelain'], {
               cwd: worktree.path,
-            }
-          )
+            })
 
-          const behindCount = parseInt(behind.trim())
-
-          if (behindCount === 0) {
-            return { branch: branchName, status: 'up-to-date' as const, reason: '既に最新' }
-          }
-
-          // 同期実行
-          if (options.rebase) {
-            await execa('git', ['rebase', mainBranch], { cwd: worktree.path })
-
-            // pushオプション
-            if (options.push) {
-              await execa('git', ['push', '--force-with-lease'], { cwd: worktree.path })
+            if (status.trim()) {
+              return { branch: branchName, status: 'skipped' as const, reason: '未コミットの変更' }
             }
 
+            // up-to-dateチェック
+            const { stdout: behind } = await execa(
+              'git',
+              ['rev-list', '--count', `${branchName}..${mainBranch}`],
+              {
+                cwd: worktree.path,
+              }
+            )
+
+            const behindCount = parseInt(behind.trim())
+
+            if (behindCount === 0) {
+              return { branch: branchName, status: 'up-to-date' as const, reason: '既に最新' }
+            }
+
+            // 同期実行
+            if (options.rebase) {
+              await execa('git', ['rebase', mainBranch], { cwd: worktree.path })
+
+              // pushオプション
+              if (options.push) {
+                await execa('git', ['push', '--force-with-lease'], { cwd: worktree.path })
+              }
+
+              return {
+                branch: branchName,
+                status: 'success' as const,
+                method: 'rebase' as const,
+                pushed: options.push,
+              }
+            } else {
+              await execa('git', ['merge', mainBranch, '--no-edit'], { cwd: worktree.path })
+
+              // pushオプション
+              if (options.push) {
+                await execa('git', ['push'], { cwd: worktree.path })
+              }
+
+              return {
+                branch: branchName,
+                status: 'success' as const,
+                method: 'merge' as const,
+                pushed: options.push,
+              }
+            }
+          } catch (error) {
             return {
               branch: branchName,
-              status: 'success' as const,
-              method: 'rebase' as const,
-              pushed: options.push,
+              status: 'failed' as const,
+              error: error instanceof Error ? error.message : '不明なエラー',
             }
-          } else {
-            await execa('git', ['merge', mainBranch, '--no-edit'], { cwd: worktree.path })
-
-            // pushオプション
-            if (options.push) {
-              await execa('git', ['push'], { cwd: worktree.path })
-            }
-
-            return {
-              branch: branchName,
-              status: 'success' as const,
-              method: 'merge' as const,
-              pushed: options.push,
-            }
+          } finally {
+            progressBar.update(index + 1, { branch: branchName })
           }
-        } catch (error) {
-          return {
-            branch: branchName,
-            status: 'failed' as const,
-            error: error instanceof Error ? error.message : '不明なエラー',
-          }
-        } finally {
-          progressBar.update(index + 1, { branch: branchName })
-        }
-      })
+        })
+      )
 
       const syncResults = await Promise.allSettled(syncPromises)
 
@@ -417,9 +426,11 @@ export const syncCommand = new Command('sync')
   })
 
 // 環境変数・設定ファイルの同期
+import { Worktree } from '../types/index.js'
+
 async function syncEnvironmentFiles(
-  allWorktrees: any[],
-  targetWorktrees: any[],
+  allWorktrees: Worktree[],
+  targetWorktrees: Worktree[],
   options: SyncOptions
 ): Promise<void> {
   console.log(chalk.bold('\n🔧 環境変数・設定ファイルの同期\n'))

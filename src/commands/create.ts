@@ -4,11 +4,42 @@ import ora from 'ora'
 import inquirer from 'inquirer'
 import { GitWorktreeManager } from '../core/git.js'
 import { CreateOptions } from '../types/index.js'
-import { ConfigManager } from '../core/config.js'
+import { ConfigManager, Config } from '../core/config.js'
 import { getTemplateConfig } from './template.js'
 import { execa } from 'execa'
 import path from 'path'
 import fs from 'fs/promises'
+
+// GitHubラベル型定義
+interface GithubLabel {
+  name: string
+}
+
+// GitHubユーザー型定義
+interface GithubUser {
+  login: string
+}
+
+// GitHub PR/Issue型定義
+interface GithubMetadata {
+  type: 'issue' | 'pr'
+  title: string
+  body: string
+  author: string
+  labels: string[]
+  assignees: string[]
+  milestone?: string
+  url: string
+}
+
+// worktreeメタデータ型定義
+interface WorktreeMetadata {
+  createdAt: string
+  branch: string
+  worktreePath: string
+  github?: GithubMetadata & { issueNumber?: string }
+  template?: string
+}
 
 // Issue番号からブランチ名を生成する関数
 function parseIssueNumber(input: string): {
@@ -35,16 +66,7 @@ function parseIssueNumber(input: string): {
 }
 
 // GitHub Issue/PRの情報を取得
-async function fetchGitHubMetadata(issueNumber: string): Promise<{
-  type: 'issue' | 'pr'
-  title: string
-  body: string
-  author: string
-  labels: string[]
-  assignees: string[]
-  milestone?: string
-  url: string
-} | null> {
+async function fetchGitHubMetadata(issueNumber: string): Promise<GithubMetadata | null> {
   try {
     // まずPRとして試す
     try {
@@ -61,8 +83,8 @@ async function fetchGitHubMetadata(issueNumber: string): Promise<{
         title: pr.title,
         body: pr.body || '',
         author: pr.author?.login || '',
-        labels: pr.labels?.map((l: any) => l.name) || [],
-        assignees: pr.assignees?.map((a: any) => a.login) || [],
+        labels: pr.labels?.map((l: GithubLabel) => l.name) || [],
+        assignees: pr.assignees?.map((a: GithubUser) => a.login) || [],
         milestone: pr.milestone?.title,
         url: pr.url,
       }
@@ -81,8 +103,8 @@ async function fetchGitHubMetadata(issueNumber: string): Promise<{
         title: issue.title,
         body: issue.body || '',
         author: issue.author?.login || '',
-        labels: issue.labels?.map((l: any) => l.name) || [],
-        assignees: issue.assignees?.map((a: any) => a.login) || [],
+        labels: issue.labels?.map((l: GithubLabel) => l.name) || [],
+        assignees: issue.assignees?.map((a: GithubUser) => a.login) || [],
         milestone: issue.milestone?.title,
         url: issue.url,
       }
@@ -97,7 +119,7 @@ async function fetchGitHubMetadata(issueNumber: string): Promise<{
 async function saveWorktreeMetadata(
   worktreePath: string,
   branchName: string,
-  metadata: any
+  metadata: Partial<WorktreeMetadata>
 ): Promise<void> {
   const metadataPath = path.join(worktreePath, '.scj-metadata.json')
   const metadataContent = {
@@ -118,7 +140,7 @@ async function saveWorktreeMetadata(
 async function createTmuxSession(
   branchName: string,
   worktreePath: string,
-  config: any
+  config: Config
 ): Promise<void> {
   const sessionName = branchName.replace(/[^a-zA-Z0-9_-]/g, '-')
 
@@ -159,7 +181,7 @@ async function createTmuxSession(
 }
 
 // Claude.mdの処理
-async function handleClaudeMarkdown(worktreePath: string, config: any): Promise<void> {
+async function handleClaudeMarkdown(worktreePath: string, config: Config): Promise<void> {
   const claudeMode = config.claude?.markdownMode || 'shared'
   const rootClaudePath = path.join(process.cwd(), 'CLAUDE.md')
   const worktreeClaudePath = path.join(worktreePath, 'CLAUDE.md')
@@ -239,9 +261,10 @@ export const createCommand = new Command('create')
             },
             development: {
               ...config.development,
-              autoSetup: templateConfig.autoSetup ?? config.development?.autoSetup,
-              syncFiles: templateConfig.syncFiles || config.development?.syncFiles,
-              defaultEditor: templateConfig.editor || config.development?.defaultEditor,
+              autoSetup: templateConfig.autoSetup ?? config.development?.autoSetup ?? true,
+              syncFiles: templateConfig.syncFiles ||
+                config.development?.syncFiles || ['.env', '.env.local'],
+              defaultEditor: templateConfig.editor || config.development?.defaultEditor || 'cursor',
             },
             hooks: templateConfig.hooks || config.hooks,
           }
@@ -269,7 +292,7 @@ export const createCommand = new Command('create')
       }
 
       // Issue番号が指定された場合の追加情報を表示とメタデータ取得
-      let githubMetadata = null
+      let githubMetadata: GithubMetadata | null = null
       if (isIssue && issueNumber) {
         console.log(chalk.blue(`📝 Issue #${issueNumber} に基づいてブランチを作成します`))
 
@@ -307,7 +330,10 @@ export const createCommand = new Command('create')
       }
 
       // ブランチ名の確認
-      if (!(options as any).yes) {
+      interface CreateOptionsWithYes extends CreateOptions {
+        yes?: boolean
+      }
+      if (!(options as CreateOptionsWithYes).yes) {
         const { confirmCreate } = await inquirer.prompt([
           {
             type: 'confirm',
@@ -335,7 +361,7 @@ export const createCommand = new Command('create')
 
       // メタデータを保存
       if (githubMetadata || options.template) {
-        const metadata: any = {}
+        const metadata: Partial<WorktreeMetadata> = {}
 
         if (githubMetadata) {
           metadata.github = {
@@ -423,7 +449,12 @@ export const createCommand = new Command('create')
       if (options.tmux || (options.tmux === undefined && config.tmux?.enabled)) {
         await createTmuxSession(branchName, worktreePath, {
           ...config,
-          claude: { autoStart: options.claude || config.claude?.autoStart },
+          claude: {
+            autoStart: options.claude || config.claude?.autoStart || false,
+            markdownMode: config.claude?.markdownMode || 'shared',
+            initialCommands: config.claude?.initialCommands || [],
+            costOptimization: config.claude?.costOptimization,
+          },
         })
       }
 

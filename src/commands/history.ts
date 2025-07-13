@@ -3,7 +3,7 @@ import chalk from 'chalk'
 import ora from 'ora'
 import inquirer from 'inquirer'
 import { GitWorktreeManager } from '../core/git.js'
-import { ConfigManager } from '../core/config.js'
+import { ConfigManager, Config } from '../core/config.js'
 import path from 'path'
 import fs from 'fs/promises'
 import { homedir } from 'os'
@@ -15,6 +15,7 @@ interface HistoryOptions {
   merge?: boolean
   cleanup?: boolean
   sync?: boolean
+  json?: boolean
 }
 
 interface ClaudeHistory {
@@ -31,7 +32,7 @@ function getClaudeHistoryDir(): string {
 }
 
 // ブランチ名から履歴ファイルパスを生成
-function getHistoryPathForBranch(branchName: string, config: any): string {
+function getHistoryPathForBranch(branchName: string, config: Config): string {
   const template = config.claude?.costOptimization?.historyPath || '~/.claude/history/{branch}.md'
   const expandedPath = template
     .replace('~', homedir())
@@ -42,7 +43,7 @@ function getHistoryPathForBranch(branchName: string, config: any): string {
 // 全ての履歴を検索
 async function findAllHistories(
   gitManager: GitWorktreeManager,
-  config: any
+  config: Config
 ): Promise<ClaudeHistory[]> {
   const histories: ClaudeHistory[] = []
   const worktrees = await gitManager.listWorktrees()
@@ -141,10 +142,17 @@ async function exportHistories(histories: ClaudeHistory[], outputPath: string): 
   const spinner = ora('履歴をエクスポート中...').start()
 
   try {
+    interface HistoryExport {
+      branch: string
+      worktreePath: string
+      lastModified?: Date
+      content: string
+    }
+
     const exportData = {
       exportedAt: new Date().toISOString(),
       totalHistories: histories.length,
-      histories: [] as any[],
+      histories: [] as HistoryExport[],
     }
 
     for (const history of histories) {
@@ -262,7 +270,7 @@ async function cleanupHistories(histories: ClaudeHistory[]): Promise<void> {
 }
 
 // 履歴を同期（worktreeパスに移動）
-async function syncHistories(histories: ClaudeHistory[], config: any): Promise<void> {
+async function syncHistories(histories: ClaudeHistory[], config: Config): Promise<void> {
   const spinner = ora('履歴を同期中...').start()
   let syncedCount = 0
 
@@ -297,6 +305,7 @@ export const historyCommand = new Command('history')
   .option('-m, --merge <path>', '全履歴を1ファイルにマージ')
   .option('-c, --cleanup', '不要な履歴をクリーンアップ')
   .option('--sync', '履歴を正しいパスに同期')
+  .option('-j, --json', 'JSON形式で出力')
   .action(async (options: HistoryOptions) => {
     try {
       const gitManager = new GitWorktreeManager()
@@ -311,8 +320,21 @@ export const historyCommand = new Command('history')
         options.list ||
         (!options.show && !options.export && !options.merge && !options.cleanup && !options.sync)
       ) {
-        // デフォルトは一覧表示
-        await listHistories(histories)
+        // JSON出力の場合
+        if (options.json) {
+          const jsonOutput = histories.map(history => ({
+            branch: history.branch,
+            worktreePath: history.worktreePath,
+            historyPath: history.historyPath,
+            lastModified: history.lastModified?.toISOString() || null,
+            size: history.size || 0,
+            exists: !!history.worktreePath,
+          }))
+          console.log(JSON.stringify(jsonOutput, null, 2))
+        } else {
+          // デフォルトは一覧表示
+          await listHistories(histories)
+        }
       }
 
       if (options.show) {

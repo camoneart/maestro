@@ -57,8 +57,20 @@ export const createMockWorktreeOutput = (worktrees: Worktree[]): string => {
     .join('\n')
 }
 
+// GitHub PR型定義
+interface MockPullRequest {
+  number: number
+  title: string
+  author: { login: string }
+  headRefName: string
+  baseRefName: string
+  state: string
+  url: string
+  draft: boolean
+}
+
 // GitHub PR/Issueモックデータ
-export const createMockPullRequest = (overrides?: any) => ({
+export const createMockPullRequest = (overrides?: Partial<MockPullRequest>): MockPullRequest => ({
   number: 123,
   title: 'Test Pull Request',
   author: { login: 'testuser' },
@@ -70,7 +82,17 @@ export const createMockPullRequest = (overrides?: any) => ({
   ...overrides,
 })
 
-export const createMockIssue = (overrides?: any) => ({
+// GitHub Issue型定義
+interface MockIssue {
+  number: number
+  title: string
+  author: { login: string }
+  state: string
+  url: string
+  labels: string[]
+}
+
+export const createMockIssue = (overrides?: Partial<MockIssue>): MockIssue => ({
   number: 456,
   title: 'Test Issue',
   author: { login: 'testuser' },
@@ -108,7 +130,9 @@ export const createMockSpinner = () => {
 }
 
 // Config モックヘルパー
-export const createMockConfig = (overrides?: any) => ({
+import { Config } from '../../core/config'
+
+export const createMockConfig = (overrides?: Partial<Config>): Config => ({
   worktrees: {
     path: '.git/shadow-clones',
     branchPrefix: 'feature/',
@@ -128,9 +152,15 @@ export const createMockConfig = (overrides?: any) => ({
   ...overrides,
 })
 
+// コマンドエラー型定義
+interface CommandError extends Error {
+  exitCode: number
+  stderr: string
+}
+
 // エラーレスポンスヘルパー
-export const createCommandError = (message: string, code = 1) => {
-  const error = new Error(message) as any
+export const createCommandError = (message: string, code = 1): CommandError => {
+  const error = new Error(message) as CommandError
   error.exitCode = code
   error.stderr = message
   return error
