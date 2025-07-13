@@ -133,8 +133,8 @@ describe('snapshot command', () => {
 
       expect(mockSpinner.succeed).toHaveBeenCalledWith('スナップショットを作成しました')
       expect(fs.writeFile).toHaveBeenCalledWith(
-        expect.stringContaining('.json'),
-        expect.stringContaining('"branch":"refs/heads/feature-a"')
+        expect.stringContaining('/repo/worktree-1/.scj/snapshots/'),
+        expect.stringContaining('"branch": "feature-a"')
       )
       expect(console.log).toHaveBeenCalledWith(
         expect.stringContaining('📸 作成されたスナップショット:')
@@ -327,6 +327,20 @@ describe('snapshot command', () => {
           id: 'snapshot-123456789',
         })
       )
+      
+      // Setup execa mock for restore process specifically for this test
+      vi.mocked(execa).mockImplementation(async (cmd: string, args: string[]) => {
+        if (cmd === 'git' && args[0] === 'stash' && args[1] === 'list') {
+          return createMockExecaResponse(
+            'stash@{0}: Shadow Clone Snapshot: snapshot-123456789\nstash@{1}: Other stash'
+          )
+        }
+        if (cmd === 'git' && args[0] === 'stash' && args[1] === 'apply') {
+          return createMockExecaResponse()
+        }
+        // Return default mock for other git commands
+        return createMockExecaResponse()
+      })
 
       await snapshotCommand.parseAsync(['node', 'test', '--restore', 'snapshot-123'])
 
@@ -382,7 +396,7 @@ describe('snapshot command', () => {
     it('--deleteオプションでスナップショットを削除する', async () => {
       await snapshotCommand.parseAsync(['node', 'test', '--delete', 'snapshot-123'])
 
-      expect(fs.unlink).toHaveBeenCalledWith('/repo/.scj/snapshots/snapshot-123.json')
+      expect(fs.unlink).toHaveBeenCalledWith('/repo/worktree-1/.scj/snapshots/snapshot-123.json')
       expect(console.log).toHaveBeenCalledWith(
         expect.stringContaining("✨ スナップショット 'snapshot-123' を削除しました")
       )
@@ -400,7 +414,7 @@ describe('snapshot command', () => {
 
       await snapshotCommand.parseAsync(['node', 'test', '--delete', 'snapshot-123'])
 
-      expect(fs.unlink).toHaveBeenCalledWith('/repo/.scj/snapshots/snapshot-123456789.json')
+      expect(fs.unlink).toHaveBeenCalledWith('/repo/worktree-1/.scj/snapshots/snapshot-123456789.json')
       expect(console.log).toHaveBeenCalledWith(
         expect.stringContaining("✨ スナップショット 'snapshot-123456789' を削除しました")
       )

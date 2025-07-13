@@ -220,6 +220,9 @@ describe('health command', () => {
     it('--fixオプションで修正可能な問題を修正する', async () => {
       // mainから大幅に遅れている状態
       vi.mocked(execa).mockImplementation(async (cmd: string, args: string[]) => {
+        if (cmd === 'git' && args[0] === 'symbolic-ref' && args[1] === 'refs/remotes/origin/HEAD') {
+          return createMockExecaResponse('refs/remotes/origin/main')
+        }
         if (cmd === 'git' && args[0] === 'rev-list' && args[1] === '--count') {
           return createMockExecaResponse('25')
         }

@@ -107,12 +107,8 @@ async function syncFileChange(
 
 export const watchCommand = new Command('watch')
   .description('ファイル変更を監視して他のworktreeに自動同期')
-  .option('-p, --patterns <patterns...>', '監視するファイルパターン', ['*.ts', '*.js', '*.json'])
-  .option('-e, --exclude <patterns...>', '除外するパターン', [
-    'node_modules/**',
-    '.git/**',
-    'dist/**',
-  ])
+  .option('-p, --patterns <patterns...>', '監視するファイルパターン')
+  .option('-e, --exclude <patterns...>', '除外するパターン')
   .option('-a, --all', '全てのworktreeに同期')
   .option('-d, --dry', 'ドライラン（実際の同期は行わない）')
   .option('--auto', '確認なしで自動同期')
@@ -178,7 +174,7 @@ export const watchCommand = new Command('watch')
       }
 
       // 監視設定
-      const patterns = options.patterns || ['*.ts', '*.js', '*.json', '*.md']
+      const patterns = options.patterns || ['**/*.ts', '**/*.js', '**/*.json', '**/*.md']
       const excludePatterns = options.exclude || [
         'node_modules/**',
         '.git/**',

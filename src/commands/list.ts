@@ -74,7 +74,7 @@ export const listCommand = new Command('list')
         }
 
         // 最終コミット情報を取得
-        if (options.lastCommit || options.json) {
+        if (options.lastCommit || options.json || options.sort === 'age') {
           for (const worktree of worktrees) {
             try {
               const lastCommit = await gitManager.getLastCommit(worktree.path)

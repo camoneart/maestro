@@ -189,20 +189,32 @@ describe('shell command', () => {
     })
 
     it('fzfでキャンセルした場合は終了する', async () => {
-      // parseAsyncを開始してfzfプロセスが開始されるのを待つ
+      // fzfプロセスのモックをキャンセル状態で作成
+      const canceledFzfProcess = new EventEmitter() as any
+      canceledFzfProcess.stdin = {
+        write: vi.fn(),
+        end: vi.fn(),
+      }
+      canceledFzfProcess.stdout = new EventEmitter()
+
+      // beforeEachで設定されたspawnのモックを上書き
+      const mockSpawn = vi.mocked(spawn)
+      mockSpawn.mockReset()
+      mockSpawn.mockReturnValue(canceledFzfProcess)
+
+      // parseAsyncを開始して、その後即座にキャンセルを発火
       const commandPromise = shellCommand.parseAsync(['node', 'test', '--fzf'])
       
-      // fzfプロセスが開始されるのを少し待つ
-      await new Promise(resolve => setTimeout(resolve, 100))
-      
-      // fzfプロセスをキャンセル（終了コード1）
-      mockFzfProcess.emit('close', 1)
-      
+      // 非同期でキャンセルを実行
+      process.nextTick(() => {
+        canceledFzfProcess.emit('close', 1)
+      })
+
       // コマンドがexitで終了することを確認
       await expect(commandPromise).rejects.toThrow('process.exit called with code 0')
 
       expect(console.log).toHaveBeenCalledWith(expect.stringContaining('キャンセルされました'))
-    }, 10000)
+    })
   })
 
   describe('コマンド実行オプション', () => {
