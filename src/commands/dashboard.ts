@@ -8,6 +8,7 @@ import { readFile } from 'fs/promises'
 import { execa } from 'execa'
 import open from 'open'
 import path from 'path'
+import { processManager } from '../utils/process.js'
 
 interface DashboardOptions {
   port?: number
@@ -589,12 +590,14 @@ export const dashboardCommand = new Command('dashboard')
         }
       })
 
-      // 終了時の処理
-      process.on('SIGINT', () => {
-        console.log(chalk.yellow('\n\nダッシュボードサーバーを停止中...'))
-        server.close(() => {
-          console.log(chalk.green('停止しました'))
-          process.exit(0)
+      // サーバーのクリーンアップを登録
+      processManager.addCleanupHandler(async () => {
+        console.log(chalk.yellow('\nダッシュボードサーバーを停止中...'))
+        return new Promise<void>((resolve) => {
+          server.close(() => {
+            console.log(chalk.green('停止しました'))
+            resolve()
+          })
         })
       })
     } catch (error) {

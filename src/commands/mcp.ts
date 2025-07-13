@@ -3,6 +3,7 @@ import chalk from 'chalk'
 import { spawn } from 'child_process'
 import path from 'path'
 import { fileURLToPath } from 'url'
+import { processManager } from '../utils/process.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -54,14 +55,10 @@ export const mcpCommand = new Command('mcp')
       }
     })
 
-    // プロセス終了時のクリーンアップ
-    process.on('SIGINT', () => {
-      serverProcess.kill('SIGINT')
-      process.exit(0)
-    })
-
-    process.on('SIGTERM', () => {
-      serverProcess.kill('SIGTERM')
-      process.exit(0)
+    // MCPサーバープロセスのクリーンアップを登録
+    processManager.addCleanupHandler(() => {
+      if (!serverProcess.killed) {
+        serverProcess.kill('SIGTERM')
+      }
     })
   })

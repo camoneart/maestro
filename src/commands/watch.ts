@@ -8,6 +8,7 @@ import chokidar from 'chokidar'
 import path from 'path'
 import fs from 'fs/promises'
 import { createHash } from 'crypto'
+import { processManager } from '../utils/process.js'
 
 interface WatchOptions {
   patterns?: string[]
@@ -294,11 +295,13 @@ export const watchCommand = new Command('watch')
           console.error(chalk.red(`監視エラー: ${error}`))
         })
 
-      // 終了処理
-      process.on('SIGINT', () => {
-        console.log(chalk.yellow('\n\n監視を終了しています...'))
-        watcher.close()
-        process.exit(0)
+      // watcherのクリーンアップを登録
+      processManager.addCleanupHandler(async () => {
+        console.log(chalk.yellow('\n監視を終了しています...'))
+        await watcher.close()
+        if (syncTimeout) {
+          clearTimeout(syncTimeout)
+        }
       })
     } catch (error) {
       spinner.fail('エラーが発生しました')

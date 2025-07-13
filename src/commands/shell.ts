@@ -5,6 +5,7 @@ import { Worktree } from '../types/index.js'
 import { spawn } from 'child_process'
 import inquirer from 'inquirer'
 import { execa } from 'execa'
+import { ErrorFactory, handleError } from '../utils/errors.js'
 
 export const shellCommand = new Command('shell')
   .alias('sh')
@@ -21,8 +22,7 @@ export const shellCommand = new Command('shell')
         // Gitリポジトリかチェック
         const isGitRepo = await gitManager.isGitRepository()
         if (!isGitRepo) {
-          console.error(chalk.red('エラー: このディレクトリはGitリポジトリではありません'))
-          process.exit(1)
+          throw ErrorFactory.notGitRepository()
         }
 
         const worktrees = await gitManager.listWorktrees()
@@ -121,21 +121,13 @@ export const shellCommand = new Command('shell')
         })
 
         if (!targetWorktree) {
-          console.error(chalk.red(`エラー: 影分身 '${branchName}' が見つかりません`))
-
-          // 類似した名前を提案
+          // 類似した名前を検索
           const similarBranches = shadowClones
-            .filter(wt => wt.branch && wt.branch.includes(branchName || ''))
-            .map(wt => wt.branch)
+            .filter(wt => wt.branch && wt.branch.toLowerCase().includes((branchName || '').toLowerCase()))
+            .map(wt => wt.branch?.replace('refs/heads/', '') || '')
+            .filter(Boolean)
 
-          if (similarBranches.length > 0) {
-            console.log(chalk.yellow('\n類似した影分身:'))
-            similarBranches.forEach(branch => {
-              console.log(`  - ${chalk.cyan(branch)}`)
-            })
-          }
-
-          process.exit(1)
+          throw ErrorFactory.worktreeNotFound(branchName || '', similarBranches)
         }
 
         console.log(chalk.green(`\n🥷 影分身 '${chalk.cyan(branchName)}' に入ります...`))
@@ -279,8 +271,7 @@ export const shellCommand = new Command('shell')
           }
         }
       } catch (error) {
-        console.error(chalk.red('エラー:'), error instanceof Error ? error.message : '不明なエラー')
-        process.exit(1)
+        handleError(error, 'shell')
       }
     }
   )

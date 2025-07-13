@@ -23,6 +23,9 @@ describe('shell command', () => {
   let mockFzfProcess: any
 
   beforeEach(() => {
+    // EventEmitterの警告を抑制
+    process.setMaxListeners(30)
+    
     // GitWorktreeManagerのモック
     mockGitManager = {
       isGitRepository: vi.fn().mockResolvedValue(true),
