@@ -1,0 +1,2195 @@
+
+> shadow-clone-jutsu@0.1.0 test /Users/aoyamaisaoosamu/Desktop/dev/projects/250709_shadow-clone-jutsu/shadow-clone-jutsu
+> vitest -- --reporter=json
+
+
+ RUN  v3.2.4 /Users/aoyamaisaoosamu/Desktop/dev/projects/250709_shadow-clone-jutsu/shadow-clone-jutsu
+
+ ❯ src/__tests__/commands/attach.test.ts (13 tests | 11 failed) 64ms
+   × attach command > basic functionality > should attach to specified branch 30ms
+     → Process exited with code 1
+   × attach command > basic functionality > should prompt for branch selection when no branch specified 1ms
+     → Process exited with code 1
+   × attach command > basic functionality > should include remote branches with --remote option 3ms
+     → Process exited with code 1
+   × attach command > basic functionality > should fetch before listing branches with --fetch option 5ms
+     → Process exited with code 1
+   ✓ attach command > error handling > should handle not a git repository 5ms
+   × attach command > error handling > should handle no available branches 5ms
+     → expected [Function] to throw error including 'Process exited with code 0' but got 'Process exited with code 1'
+   × attach command > error handling > should handle branch not found 7ms
+     → expected "spy" to be called with arguments: [ 'ブランチ non-existent が見つかりません' ][90m
+
+Received: 
+
+[1m  1st spy call:
+
+[22m[2m  [[22m
+[32m-   "ブランチ non-existent が見つかりません",[90m
+[31m+   "影分身を作り出せませんでした",[90m
+[2m  ][22m
+[39m[90m
+
+Number of calls: [1m1[22m
+[39m
+   × attach command > error handling > should handle worktree creation error 1ms
+     → expected "spy" to be called with arguments: [ '影分身の術に失敗しました' ][90m
+
+Received: 
+
+[1m  1st spy call:
+
+[22m[2m  [[22m
+[32m-   "影分身の術に失敗しました",[90m
+[31m+   "影分身を作り出せませんでした",[90m
+[2m  ][22m
+[39m[90m
+
+Number of calls: [1m1[22m
+[39m
+   × attach command > post-creation actions > should open editor with --open option 1ms
+     → Process exited with code 1
+   × attach command > post-creation actions > should run setup with --setup option 0ms
+     → Process exited with code 1
+   × attach command > post-creation actions > should handle remote branch checkout 1ms
+     → Process exited with code 1
+   ✓ attach command > user cancellation > should handle user cancellation in branch selection 2ms
+   × attach command > custom worktree path > should use custom worktree path from config 2ms
+     → Process exited with code 1
+ ❯ src/__tests__/utils/process.test.ts (22 tests | 4 failed) 116ms
+   ✓ ProcessManager > singleton instance > should return same instance 8ms
+   ✓ ProcessManager > cleanup handlers > should add and execute cleanup handler 10ms
+   ✓ ProcessManager > cleanup handlers > should remove cleanup handler 1ms
+   ✓ ProcessManager > cleanup handlers > should execute multiple handlers 1ms
+   ✓ ProcessManager > cleanup handlers > should handle async cleanup handlers 1ms
+   ✓ ProcessManager > cleanup handlers > should handle cleanup handler errors 4ms
+   ✓ ProcessManager > cleanup handlers > should prevent double cleanup execution 1ms
+   × ProcessManager > signal handling > should setup signal handlers for SIGINT and SIGTERM 26ms
+     → expected 0 to be greater than 0
+   × ProcessManager > signal handling > should handle SIGINT signal 1ms
+     → expected undefined to be defined
+   × ProcessManager > signal handling > should handle SIGTERM signal 2ms
+     → expected undefined to be defined
+   ✓ ProcessManager > setMaxListeners > should set max listeners on process 3ms
+   ✓ ProcessManager > exit > should execute cleanup and exit with code 28ms
+   ✓ ProcessManager > exit > should exit with code 0 by default 5ms
+   × ProcessManager > removeAllListeners > should remove all signal listeners 0ms
+     → expected 0 to be greater than 0
+   ✓ ProcessManager > removeAllListeners > should clear all cleanup handlers 0ms
+   ✓ ProcessManager > removeAllListeners > should reset exit state 0ms
+   ✓ withCleanup > should register cleanup handler 1ms
+   ✓ withCleanup > should auto-register close method 0ms
+   ✓ withCleanup > should handle async close method 0ms
+   ✓ withCleanup > should handle close method errors 0ms
+   ✓ createManagedEventEmitter > should register removeAllListeners cleanup 1ms
+   ✓ createManagedEventEmitter > should handle emitter without removeAllListeners 18ms
+ ❯ src/__tests__/commands/where.test.ts (14 tests | 1 failed) 21ms
+   ✓ where command > basic functionality > should display path for existing worktree 2ms
+   ✓ where command > basic functionality > should display current worktree path with --current option 1ms
+   ✓ where command > basic functionality > should handle worktree not found 2ms
+   ✓ where command > basic functionality > should suggest similar worktrees when not found 1ms
+   ✓ where command > error handling > should handle not a git repository 0ms
+   ✓ where command > error handling > should show usage when no branch name provided 1ms
+   ✓ where command > error handling > should handle errors gracefully 0ms
+   ✓ where command > fzf integration > should handle fzf selection 3ms
+   ✓ where command > fzf integration > should handle fzf cancellation 0ms
+   × where command > fzf integration > should handle empty worktrees with fzf option 8ms
+     → expected [Function] to throw error including 'Process exited with code 0' but got 'Process exited with code 1'
+   ✓ where command > fzf integration > should display selected path from fzf 1ms
+   ✓ where command > branch name handling > should handle refs/heads/ prefix 0ms
+   ✓ where command > branch name handling > should match partial branch names 0ms
+   ✓ where command > worktree status display > should display locked and prunable status in fzf 0ms
+ ❯ src/__tests__/commands/create2.test.ts (21 tests | 20 failed) 86ms
+   × create command - additional tests > basic create functionality > should create worktree with specified branch name 19ms
+     → Process exited with code 1
+   × create command - additional tests > basic create functionality > should handle issue number format 3ms
+     → Process exited with code 1
+   × create command - additional tests > basic create functionality > should handle issue number with # prefix 2ms
+     → Process exited with code 1
+   × create command - additional tests > basic create functionality > should handle issue-prefixed format 9ms
+     → Process exited with code 1
+   × create command - additional tests > template functionality > should apply template configuration 2ms
+     → Process exited with code 1
+   × create command - additional tests > template functionality > should copy template files 1ms
+     → Process exited with code 1
+   × create command - additional tests > GitHub integration > should fetch GitHub issue metadata 1ms
+     → Process exited with code 1
+   × create command - additional tests > GitHub integration > should handle GitHub API errors gracefully 1ms
+     → Process exited with code 1
+   × create command - additional tests > options handling > should handle --base option 5ms
+     → Process exited with code 1
+   × create command - additional tests > options handling > should handle --open option 1ms
+     → Process exited with code 1
+   × create command - additional tests > options handling > should handle --setup option 1ms
+     → Process exited with code 1
+   × create command - additional tests > options handling > should handle --tmux option 10ms
+     → Process exited with code 1
+   × create command - additional tests > options handling > should handle --claude option 4ms
+     → Process exited with code 1
+   × create command - additional tests > options handling > should handle --draft-pr option 2ms
+     → Process exited with code 1
+   ✓ create command - additional tests > error handling > should handle not a git repository 2ms
+   × create command - additional tests > error handling > should handle existing worktree 14ms
+     → expected "spy" to be called with arguments: [ StringContaining "既に存在します" ][90m
+
+Received: 
+
+[1m  1st spy call:
+
+[22m[2m  [[22m
+[32m-   StringContaining "既に存在します",[90m
+[31m+   "影分身を作り出せませんでした",[90m
+[2m  ][22m
+[39m[90m
+
+Number of calls: [1m1[22m
+[39m
+   × create command - additional tests > error handling > should handle worktree creation error 3ms
+     → expected "spy" to be called with arguments: [ '影分身の術に失敗しました' ][90m
+
+Received: 
+
+[1m  1st spy call:
+
+[22m[2m  [[22m
+[32m-   "影分身の術に失敗しました",[90m
+[31m+   "影分身を作り出せませんでした",[90m
+[2m  ][22m
+[39m[90m
+
+Number of calls: [1m1[22m
+[39m
+   × create command - additional tests > hooks functionality > should execute afterCreate hook from config 1ms
+     → Process exited with code 1
+   × create command - additional tests > hooks functionality > should handle hook execution errors 1ms
+     → Process exited with code 1
+   × create command - additional tests > custom worktree path > should use custom worktree path from config 1ms
+     → Process exited with code 1
+   × create command - additional tests > metadata persistence > should save worktree metadata 1ms
+     → Process exited with code 1
+Usage: scj [options] [command]
+
+🥷 shadow-clone-jutsu - 影分身の術でClaude Codeとパラレル開発
+
+Options:
+  -V, --version   output the version number
+  -h, --help      display help for command
+
+Commands:
+  create
+  list
+  delete
+  shell
+  exec
+  attach
+  mcp
+  config
+  github
+  completion
+  tmux
+  where
+  sync
+  review
+  issue
+  batch
+  history
+  suggest
+  graph
+  template
+  watch
+  health
+  dashboard
+  snapshot
+  help [command]  display help for command
+ ✓ src/__tests__/cli.test.ts (3 tests) 112ms
+ ❯ src/__tests__/commands/exec.test.ts (12 tests | 5 failed) 58ms
+   × exec command > basic functionality > should execute command in specified worktree 23ms
+     → expected "log" to be called with arguments: [ 'Command output' ][90m
+
+Received: 
+
+[1m  1st log call:
+
+[22m[2m  [[22m
+[32m-   "Command output",[90m
+[31m+   "[90m
+[31m+ 🥷 影分身 'feature-1' でコマンドを実行",[90m
+[2m  ][22m
+
+[1m  2nd log call:
+
+[22m[2m  [[22m
+[32m-   "Command output",[90m
+[31m+   "📁 /path/to/worktree/feature-1",[90m
+[2m  ][22m
+
+[1m  3rd log call:
+
+[22m[2m  [[22m
+[32m-   "Command output",[90m
+[31m+   "$ echo hello[90m
+[31m+ ",[90m
+[2m  ][22m
+
+[1m  4th log call:
+
+[22m[2m  [[22m
+[32m-   "Command output",[90m
+[31m+   "[90m
+[31m+ Command output",[90m
+[2m  ][22m
+[39m[90m
+
+Number of calls: [1m4[22m
+[39m
+   ✓ exec command > basic functionality > should execute command in all worktrees with --all option 9ms
+   ✓ exec command > basic functionality > should suppress output with --silent option 1ms
+   ✓ exec command > basic functionality > should handle command with multiple parts 1ms
+   ✓ exec command > error handling > should handle not a git repository 4ms
+   × exec command > error handling > should handle no worktrees 1ms
+     → expected [Function] to throw error including 'Process exited with code 0' but got 'Process exited with code 1'
+   ✓ exec command > error handling > should handle worktree not found 0ms
+   × exec command > error handling > should handle command execution error 1ms
+     → expected "error" to be called with arguments: [ 'コマンドの実行に失敗しました (exit code: 1)' ][90m
+
+Received: 
+
+[1m  1st error call:
+
+[22m[2m  [[22m
+[32m-   "コマンドの実行に失敗しました (exit code: 1)",[90m
+[31m+   "[90m
+[31m+ コマンドが失敗しました (exit code: 1)",[90m
+[2m  ][22m
+
+[1m  2nd error call:
+
+[22m[2m  [[22m
+[32m-   "コマンドの実行に失敗しました (exit code: 1)",[90m
+[31m+   "Error message",[90m
+[2m  ][22m
+
+[1m  3rd error call:
+
+[22m[2m  [[22m
+[32m-   "コマンドの実行に失敗しました (exit code: 1)",[90m
+[31m+   "エラー:",[90m
+[31m+   "Process exited with code 1",[90m
+[2m  ][22m
+[39m[90m
+
+Number of calls: [1m3[22m
+[39m
+   ✓ exec command > error handling > should continue execution in --all mode even if one fails 1ms
+   ✓ exec command > worktree filtering > should filter out dotfiles from worktrees 0ms
+   × exec command > branch name matching > should match partial branch names 9ms
+     → Process exited with code 1
+   × exec command > stderr handling > should display stderr in yellow when not silent 6ms
+     → expected "error" to be called with arguments: [ 'Warning message' ][90m
+
+Received: 
+
+[1m  1st error call:
+
+[22m[2m  [[22m
+[32m-   "Warning message",[90m
+[31m+   "[90m
+[31m+ Warning message",[90m
+[2m  ][22m
+[39m[90m
+
+Number of calls: [1m1[22m
+[39m
+ ✓ src/__tests__/commands/list.test.ts (20 tests) 237ms
+stdout | src/__tests__/commands/tmux.test.ts > tmux command > session creation > should handle detach mode
+
+新しいtmuxセッション 'refs-heads-feature-1' を作成しました
+
+stdout | src/__tests__/commands/tmux.test.ts > tmux command > session creation > should handle detach mode
+アクティブなセッションはありません
+
+stdout | src/__tests__/commands/tmux.test.ts > tmux command > editor integration > should launch editor after session creation
+
+新しいtmuxセッション 'refs-heads-feature-1' を作成しました
+
+stdout | src/__tests__/commands/tmux.test.ts > tmux command > editor integration > should launch editor after session creation
+アクティブなセッションはありません
+
+stdout | src/__tests__/commands/tmux.test.ts > tmux command > branch specification > should open specific branch without fzf
+
+新しいtmuxセッション 'feature-1' を作成します...
+
+stdout | src/__tests__/commands/tmux.test.ts > tmux command > branch specification > should handle non-existent branch
+影分身が存在しません
+
+作成方法:
+  scj create <branch-name>
+
+stdout | src/__tests__/commands/tmux.test.ts > tmux command > error handling > should handle tmux not installed
+
+インストール方法:
+  brew install tmux
+  または https://github.com/tmux/tmux
+
+stdout | src/__tests__/commands/tmux.test.ts > tmux command > error handling > should handle fzf not installed
+
+インストール方法:
+  brew install fzf
+  または https://github.com/junegunn/fzf
+
+ ✓ src/__tests__/commands/tmux.test.ts (8 tests) 102ms
+stdout | src/__tests__/commands/github.test.ts > github command > issue type > should create branch from issue
+
+✨ GitHub統合による影分身の作成が完了しました！
+
+cd /path/to/worktree で移動できます
+
+stdout | src/__tests__/commands/github.test.ts > github command > issue type > should use custom branch naming
+
+✨ GitHub統合による影分身の作成が完了しました！
+
+cd /path/to/worktree で移動できます
+
+stdout | src/__tests__/commands/github.test.ts > github command > error handling > should handle gh CLI not installed
+
+インストール方法:
+  brew install gh
+  または https://cli.github.com/
+
+stdout | src/__tests__/commands/github.test.ts > github command > error handling > should handle unauthenticated gh CLI
+
+認証方法:
+  gh auth login
+
+ ✓ src/__tests__/commands/github.test.ts (11 tests) 84ms
+ ✓ src/__tests__/commands/sync.test.ts (22 tests) 87ms
+ ✓ src/__tests__/commands/dashboard.test.ts (16 tests) 378ms
+stdout | process.listener (/Users/aoyamaisaoosamu/Desktop/dev/projects/250709_shadow-clone-jutsu/shadow-clone-jutsu/src/utils/process.ts:70:17)
+
+受信したシグナル: SIGTERM
+
+stdout | src/commands/dashboard.ts:595:17
+
+ダッシュボードサーバーを停止中...
+
+ダッシュボードサーバーを停止中...
+
+ダッシュボードサーバーを停止中...
+
+ダッシュボードサーバーを停止中...
+
+ダッシュボードサーバーを停止中...
+
+ダッシュボードサーバーを停止中...
+
+ダッシュボードサーバーを停止中...
+
+ダッシュボードサーバーを停止中...
+
+ダッシュボードサーバーを停止中...
+
+ダッシュボードサーバーを停止中...
+
+ダッシュボードサーバーを停止中...
+
+ダッシュボードサーバーを停止中...
+
+ダッシュボードサーバーを停止中...
+
+ダッシュボードサーバーを停止中...
+
+ダッシュボードサーバーを停止中...
+
+stdout | src/commands/dashboard.ts:598:21
+停止しました
+停止しました
+停止しました
+停止しました
+停止しました
+停止しました
+停止しました
+停止しました
+停止しました
+停止しました
+停止しました
+停止しました
+停止しました
+停止しました
+停止しました
+
+ ✓ src/__tests__/commands/shell.test.ts (19 tests) 81ms
+stdout | src/__tests__/commands/review.test.ts > review command > basic review > should request changes on a PR
+Author: user1
+Branch: feature-x → main
+URL: https://github.com/owner/repo/pull/123
+
+stdout | src/__tests__/commands/review.test.ts > review command > basic review > should add a comment to PR
+Author: user1
+Branch: feature-x → main
+URL: https://github.com/owner/repo/pull/123
+
+stdout | src/__tests__/commands/review.test.ts > review command > interactive review > should review interactively when no options provided
+Author: user1
+Branch: feature-x → main
+URL: https://github.com/owner/repo/pull/123
+
+
+stdout | src/__tests__/commands/review.test.ts > review command > reviewer assignment > should assign a reviewer
+Author: user1
+Branch: feature-x → main
+URL: https://github.com/owner/repo/pull/123
+
+stdout | src/__tests__/commands/review.test.ts > review command > error handling > should handle network errors
+gh CLIがインストールされていないか、認証されていません
+
+ ✓ src/__tests__/commands/review.test.ts (7 tests) 76ms
+stdout | src/__tests__/commands/issue.test.ts > issue command > create option > should create an issue with interactive prompts
+URL: https://github.com/owner/repo/issues/1
+
+stdout | src/__tests__/commands/issue.test.ts > issue command > view issue > should view an issue by number
+
+📋 Issue #1: Issue Title
+
+Author: user1
+State: OPEN
+Labels: [bug]
+Assignees: dev1
+URL: undefined
+
+--- 本文 ---
+Issue body
+
+
+stdout | src/__tests__/commands/issue.test.ts > issue command > view issue > should view an issue by number
+キャンセルされました
+
+stdout | src/__tests__/commands/issue.test.ts > issue command > view issue > should handle web view option
+
+🌐 ブラウザでIssue #1 を開いています...
+
+stdout | src/__tests__/commands/issue.test.ts > issue command > error handling > should handle network errors
+gh CLIがインストールされていないか、認証されていません
+
+ ✓ src/__tests__/commands/issue.test.ts (6 tests) 66ms
+ ✓ src/__tests__/commands/graph.test.ts (15 tests) 16ms
+ ✓ src/__tests__/commands/batch.test.ts (13 tests) 17ms
+ ✓ src/__tests__/commands/snapshot.test.ts (21 tests) 41ms
+ ✓ src/__tests__/commands/history.test.ts (19 tests) 42ms
+ ✓ src/__tests__/commands/config.test.ts (11 tests) 10ms
+ ✓ src/__tests__/commands/template.test.ts (13 tests) 24ms
+ ✓ src/__tests__/core/git.test.ts (12 tests) 11ms
+ ✓ src/__tests__/commands/health.test.ts (18 tests) 23ms
+ ✓ src/__tests__/utils/errors.test.ts (31 tests) 8ms
+ ✓ src/__tests__/core/config.test.ts (13 tests) 8ms
+ ✓ src/__tests__/commands/delete.test.ts (12 tests) 5ms
+ ✓ src/__tests__/commands/create.test.ts (11 tests) 8ms
+ ❯ src/__tests__/commands/delete2.test.ts (13 tests | 12 failed) 5111ms
+   × delete command - additional tests > basic delete functionality > should delete specified worktree 42ms
+     → expected "spy" to be called with arguments: [ Array(2) ][90m
+
+Number of calls: [1m0[22m
+[39m
+   × delete command - additional tests > basic delete functionality > should handle --force option 1ms
+     → expected "spy" to be called with arguments: [ '/path/to/worktree/feature-1', true ][90m
+
+Number of calls: [1m0[22m
+[39m
+   × delete command - additional tests > basic delete functionality > should delete current worktree with --current option 7ms
+     → expected "spy" to be called with arguments: [ …(2) ][90m
+
+Number of calls: [1m0[22m
+[39m
+   × delete command - additional tests > remote branch deletion > should delete remote branch with --remove-remote option 30ms
+     → expected "spy" to be called with arguments: [ 'git', [ 'push', 'origin', …(2) ] ][90m
+
+Received: 
+
+[1m  1st spy call:
+
+[22m[2m  [[22m
+[32m-   "git",[90m
+[31m+   "du",[90m
+[2m    [[22m
+[32m-     "push",[90m
+[32m-     "origin",[90m
+[32m-     "--delete",[90m
+[32m-     "feature-1",[90m
+[31m+     "-sh",[90m
+[31m+     "/path/to/worktree/feature-1",[90m
+[2m    ],[22m
+[2m  ][22m
+[39m[90m
+
+Number of calls: [1m1[22m
+[39m
+   × delete command - additional tests > remote branch deletion > should handle non-existent remote branch 1ms
+     → expected "spy" to be called with arguments: [ StringContaining "リモートブランチ" ][90m
+
+Number of calls: [1m0[22m
+[39m
+   × delete command - additional tests > fzf integration > should handle fzf selection 5005ms
+     → Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+   × delete command - additional tests > error handling > should handle not a git repository 11ms
+     → promise resolved "Command{ _events: { …(4) }, …(43), …(2) }" instead of rejecting
+   × delete command - additional tests > error handling > should handle no worktrees available 4ms
+     → promise resolved "Command{ _events: { …(4) }, …(43), …(2) }" instead of rejecting
+   × delete command - additional tests > error handling > should handle worktree not found 4ms
+     → promise resolved "Command{ _events: { …(4) }, …(43), …(2) }" instead of rejecting
+   × delete command - additional tests > error handling > should handle delete cancellation 2ms
+     → expected "log" to be called with arguments: [ '削除をキャンセルしました' ][90m
+
+Received: 
+
+[1m  1st log call:
+
+[22m[2m  [[22m
+[32m-   "削除をキャンセルしました",[90m
+[31m+   "[90m
+[31m+ 🗑️  削除対象の影分身:[90m
+[31m+ ",[90m
+[2m  ][22m
+
+[1m  2nd log call:
+
+[22m[2m  [[22m
+[32m-   "削除をキャンセルしました",[90m
+[31m+   "  feature-1 (unknown) - /path/to/worktree/feature-1",[90m
+[2m  ][22m
+
+[1m  3rd log call:
+
+[22m[2m  [[22m
+[32m-   "削除をキャンセルしました",[90m
+[31m+   "[90m
+[31m+ 合計: 1 個の影分身",[90m
+[2m  ][22m
+
+[1m  4th log call:
+
+[22m[2m  [[22m
+[32m-   "削除をキャンセルしました",[90m
+[31m+   "キャンセルされました",[90m
+[2m  ][22m
+[39m[90m
+
+Number of calls: [1m4[22m
+[39m
+   × delete command - additional tests > error handling > should handle directory size retrieval error 1ms
+     → expected "spy" to be called at least once
+   ✓ delete command - additional tests > locked worktree handling > should warn about locked worktree 1ms
+   × delete command - additional tests > detached HEAD handling > should handle detached HEAD worktree 1ms
+     → expected "spy" to be called at least once
+ ✓ src/__tests__/commands/watch.test.ts (16 tests) 10491ms
+   ✓ watch command > 基本的な動作 > ファイル追加を検出して同期する  1306ms
+   ✓ watch command > 基本的な動作 > ファイル変更を検出して同期する  1307ms
+   ✓ watch command > 基本的な動作 > ファイル削除を検出して同期する  1307ms
+   ✓ watch command > オプション処理 > --dryでドライランモードで実行する  1157ms
+   ✓ watch command > オプション処理 > --autoで確認なしに同期する  1156ms
+   ✓ watch command > インタラクティブモード > --autoなしの場合は同期確認を行う  1308ms
+   ✓ watch command > インタラクティブモード > 同期をキャンセルできる  1307ms
+   ✓ watch command > エラーハンドリング > ファイル同期エラーを処理する  1304ms
+stdout | process.listener (/Users/aoyamaisaoosamu/Desktop/dev/projects/250709_shadow-clone-jutsu/shadow-clone-jutsu/src/utils/process.ts:70:17)
+
+受信したシグナル: SIGTERM
+
+stdout | src/commands/watch.ts:300:17
+
+監視を終了しています...
+
+監視を終了しています...
+
+監視を終了しています...
+
+監視を終了しています...
+
+監視を終了しています...
+
+監視を終了しています...
+
+監視を終了しています...
+
+監視を終了しています...
+
+監視を終了しています...
+
+監視を終了しています...
+
+監視を終了しています...
+
+監視を終了しています...
+
+監視を終了しています...
+
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 53 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/__tests__/commands/attach.test.ts > attach command > basic functionality > should attach to specified branch
+Error: Process exited with code 1
+ ❯ process.<anonymous> src/__tests__/commands/attach.test.ts:61:13
+     59|     consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(()…
+     60|     processExitSpy = vi.spyOn(process, 'exit').mockImplementation((cod…
+     61|       throw new Error(`Process exited with code ${code}`)
+       |             ^
+     62|     })
+     63| 
+ ❯ Command.<anonymous> src/commands/attach.ts:147:17
+ ❯ Command.parseAsync node_modules/.pnpm/commander@14.0.0/node_modules/commander/lib/command.js:1123:5
+ ❯ src/__tests__/commands/attach.test.ts:108:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/53]⎯
+
+ FAIL  src/__tests__/commands/attach.test.ts > attach command > basic functionality > should prompt for branch selection when no branch specified
+Error: Process exited with code 1
+ ❯ process.<anonymous> src/__tests__/commands/attach.test.ts:61:13
+     59|     consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(()…
+     60|     processExitSpy = vi.spyOn(process, 'exit').mockImplementation((cod…
+     61|       throw new Error(`Process exited with code ${code}`)
+       |             ^
+     62|     })
+     63| 
+ ❯ Command.<anonymous> src/commands/attach.ts:147:17
+ ❯ Command.parseAsync node_modules/.pnpm/commander@14.0.0/node_modules/commander/lib/command.js:1123:5
+ ❯ src/__tests__/commands/attach.test.ts:124:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/53]⎯
+
+ FAIL  src/__tests__/commands/attach.test.ts > attach command > basic functionality > should include remote branches with --remote option
+Error: Process exited with code 1
+ ❯ process.<anonymous> src/__tests__/commands/attach.test.ts:61:13
+     59|     consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(()…
+     60|     processExitSpy = vi.spyOn(process, 'exit').mockImplementation((cod…
+     61|       throw new Error(`Process exited with code ${code}`)
+       |             ^
+     62|     })
+     63| 
+ ❯ Command.<anonymous> src/commands/attach.ts:147:17
+ ❯ Command.parseAsync node_modules/.pnpm/commander@14.0.0/node_modules/commander/lib/command.js:1123:5
+ ❯ src/__tests__/commands/attach.test.ts:148:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/53]⎯
+
+ FAIL  src/__tests__/commands/attach.test.ts > attach command > basic functionality > should fetch before listing branches with --fetch option
+Error: Process exited with code 1
+ ❯ process.<anonymous> src/__tests__/commands/attach.test.ts:61:13
+     59|     consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(()…
+     60|     processExitSpy = vi.spyOn(process, 'exit').mockImplementation((cod…
+     61|       throw new Error(`Process exited with code ${code}`)
+       |             ^
+     62|     })
+     63| 
+ ❯ Command.<anonymous> src/commands/attach.ts:147:17
+ ❯ Command.parseAsync node_modules/.pnpm/commander@14.0.0/node_modules/commander/lib/command.js:1123:5
+ ❯ src/__tests__/commands/attach.test.ts:160:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/53]⎯
+
+ FAIL  src/__tests__/commands/attach.test.ts > attach command > error handling > should handle no available branches
+AssertionError: expected [Function] to throw error including 'Process exited with code 0' but got 'Process exited with code 1'
+
+Expected: [32m"Process exited with code [7m0[27m"[39m
+Received: [31m"Process exited with code [7m1[27m"[39m
+
+ ❯ src/__tests__/commands/attach.test.ts:199:7
+    197|       ])
+    198| 
+    199|       await expect(
+       |       ^
+    200|         attachCommand.parseAsync(['node', 'attach'])
+    201|       ).rejects.toThrow('Process exited with code 0')
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/53]⎯
+
+ FAIL  src/__tests__/commands/attach.test.ts > attach command > error handling > should handle branch not found
+AssertionError: expected "spy" to be called with arguments: [ 'ブランチ non-existent が見つかりません' ][90m
+
+Received: 
+
+[1m  1st spy call:
+
+[22m[2m  [[22m
+[32m-   "ブランチ non-existent が見つかりません",[90m
+[31m+   "影分身を作り出せませんでした",[90m
+[2m  ][22m
+[39m[90m
+
+Number of calls: [1m1[22m
+[39m
+ ❯ src/__tests__/commands/attach.test.ts:216:32
+    214|       ).rejects.toThrow('Process exited with code 1')
+    215| 
+    216|       expect(mockSpinner.fail).toHaveBeenCalledWith(
+       |                                ^
+    217|         'ブランチ non-existent が見つかりません'
+    218|       )
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/53]⎯
+
+ FAIL  src/__tests__/commands/attach.test.ts > attach command > error handling > should handle worktree creation error
+AssertionError: expected "spy" to be called with arguments: [ '影分身の術に失敗しました' ][90m
+
+Received: 
+
+[1m  1st spy call:
+
+[22m[2m  [[22m
+[32m-   "影分身の術に失敗しました",[90m
+[31m+   "影分身を作り出せませんでした",[90m
+[2m  ][22m
+[39m[90m
+
+Number of calls: [1m1[22m
+[39m
+ ❯ src/__tests__/commands/attach.test.ts:230:32
+    228|       ).rejects.toThrow('Process exited with code 1')
+    229| 
+    230|       expect(mockSpinner.fail).toHaveBeenCalledWith('影分身の術に失敗しました')
+       |                                ^
+    231|       expect(consoleErrorSpy).toHaveBeenCalledWith(
+    232|         chalk.red('エラー:'),
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/53]⎯
+
+ FAIL  src/__tests__/commands/attach.test.ts > attach command > post-creation actions > should open editor with --open option
+Error: Process exited with code 1
+ ❯ process.<anonymous> src/__tests__/commands/attach.test.ts:61:13
+     59|     consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(()…
+     60|     processExitSpy = vi.spyOn(process, 'exit').mockImplementation((cod…
+     61|       throw new Error(`Process exited with code ${code}`)
+       |             ^
+     62|     })
+     63| 
+ ❯ Command.<anonymous> src/commands/attach.ts:147:17
+ ❯ Command.parseAsync node_modules/.pnpm/commander@14.0.0/node_modules/commander/lib/command.js:1123:5
+ ❯ src/__tests__/commands/attach.test.ts:247:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/53]⎯
+
+ FAIL  src/__tests__/commands/attach.test.ts > attach command > post-creation actions > should run setup with --setup option
+Error: Process exited with code 1
+ ❯ process.<anonymous> src/__tests__/commands/attach.test.ts:61:13
+     59|     consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(()…
+     60|     processExitSpy = vi.spyOn(process, 'exit').mockImplementation((cod…
+     61|       throw new Error(`Process exited with code ${code}`)
+       |             ^
+     62|     })
+     63| 
+ ❯ Command.<anonymous> src/commands/attach.ts:147:17
+ ❯ Command.parseAsync node_modules/.pnpm/commander@14.0.0/node_modules/commander/lib/command.js:1123:5
+ ❯ src/__tests__/commands/attach.test.ts:260:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/53]⎯
+
+ FAIL  src/__tests__/commands/attach.test.ts > attach command > post-creation actions > should handle remote branch checkout
+Error: Process exited with code 1
+ ❯ process.<anonymous> src/__tests__/commands/attach.test.ts:61:13
+     59|     consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(()…
+     60|     processExitSpy = vi.spyOn(process, 'exit').mockImplementation((cod…
+     61|       throw new Error(`Process exited with code ${code}`)
+       |             ^
+     62|     })
+     63| 
+ ❯ Command.<anonymous> src/commands/attach.ts:147:17
+ ❯ Command.parseAsync node_modules/.pnpm/commander@14.0.0/node_modules/commander/lib/command.js:1123:5
+ ❯ src/__tests__/commands/attach.test.ts:276:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/53]⎯
+
+ FAIL  src/__tests__/commands/attach.test.ts > attach command > custom worktree path > should use custom worktree path from config
+Error: Process exited with code 1
+ ❯ process.<anonymous> src/__tests__/commands/attach.test.ts:61:13
+     59|     consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(()…
+     60|     processExitSpy = vi.spyOn(process, 'exit').mockImplementation((cod…
+     61|       throw new Error(`Process exited with code ${code}`)
+       |             ^
+     62|     })
+     63| 
+ ❯ Command.<anonymous> src/commands/attach.ts:147:17
+ ❯ Command.parseAsync node_modules/.pnpm/commander@14.0.0/node_modules/commander/lib/command.js:1123:5
+ ❯ src/__tests__/commands/attach.test.ts:305:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/53]⎯
+
+ FAIL  src/__tests__/commands/create2.test.ts > create command - additional tests > basic create functionality > should create worktree with specified branch name
+Error: Process exited with code 1
+ ❯ process.<anonymous> src/__tests__/commands/create2.test.ts:80:13
+     78|     consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(()…
+     79|     processExitSpy = vi.spyOn(process, 'exit').mockImplementation((cod…
+     80|       throw new Error(`Process exited with code ${code}`)
+       |             ^
+     81|     })
+     82|     processCwdSpy = vi.spyOn(process, 'cwd').mockReturnValue('/project…
+ ❯ Command.<anonymous> src/commands/create.ts:546:15
+ ❯ Command.parseAsync node_modules/.pnpm/commander@14.0.0/node_modules/commander/lib/command.js:1123:5
+ ❯ src/__tests__/commands/create2.test.ts:125:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/53]⎯
+
+ FAIL  src/__tests__/commands/create2.test.ts > create command - additional tests > basic create functionality > should handle issue number format
+Error: Process exited with code 1
+ ❯ process.<anonymous> src/__tests__/commands/create2.test.ts:80:13
+     78|     consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(()…
+     79|     processExitSpy = vi.spyOn(process, 'exit').mockImplementation((cod…
+     80|       throw new Error(`Process exited with code ${code}`)
+       |             ^
+     81|     })
+     82|     processCwdSpy = vi.spyOn(process, 'cwd').mockReturnValue('/project…
+ ❯ Command.<anonymous> src/commands/create.ts:546:15
+ ❯ Command.parseAsync node_modules/.pnpm/commander@14.0.0/node_modules/commander/lib/command.js:1123:5
+ ❯ src/__tests__/commands/create2.test.ts:140:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/53]⎯
+
+ FAIL  src/__tests__/commands/create2.test.ts > create command - additional tests > basic create functionality > should handle issue number with # prefix
+Error: Process exited with code 1
+ ❯ process.<anonymous> src/__tests__/commands/create2.test.ts:80:13
+     78|     consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(()…
+     79|     processExitSpy = vi.spyOn(process, 'exit').mockImplementation((cod…
+     80|       throw new Error(`Process exited with code ${code}`)
+       |             ^
+     81|     })
+     82|     processCwdSpy = vi.spyOn(process, 'cwd').mockReturnValue('/project…
+ ❯ Command.<anonymous> src/commands/create.ts:546:15
+ ❯ Command.parseAsync node_modules/.pnpm/commander@14.0.0/node_modules/commander/lib/command.js:1123:5
+ ❯ src/__tests__/commands/create2.test.ts:152:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[14/53]⎯
+
+ FAIL  src/__tests__/commands/create2.test.ts > create command - additional tests > basic create functionality > should handle issue-prefixed format
+Error: Process exited with code 1
+ ❯ process.<anonymous> src/__tests__/commands/create2.test.ts:80:13
+     78|     consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(()…
+     79|     processExitSpy = vi.spyOn(process, 'exit').mockImplementation((cod…
+     80|       throw new Error(`Process exited with code ${code}`)
+       |             ^
+     81|     })
+     82|     processCwdSpy = vi.spyOn(process, 'cwd').mockReturnValue('/project…
+ ❯ Command.<anonymous> src/commands/create.ts:546:15
+ ❯ Command.parseAsync node_modules/.pnpm/commander@14.0.0/node_modules/commander/lib/command.js:1123:5
+ ❯ src/__tests__/commands/create2.test.ts:164:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[15/53]⎯
+
+ FAIL  src/__tests__/commands/create2.test.ts > create command - additional tests > template functionality > should apply template configuration
+Error: Process exited with code 1
+ ❯ process.<anonymous> src/__tests__/commands/create2.test.ts:80:13
+     78|     consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(()…
+     79|     processExitSpy = vi.spyOn(process, 'exit').mockImplementation((cod…
+     80|       throw new Error(`Process exited with code ${code}`)
+       |             ^
+     81|     })
+     82|     processCwdSpy = vi.spyOn(process, 'cwd').mockReturnValue('/project…
+ ❯ Command.<anonymous> src/commands/create.ts:546:15
+ ❯ Command.parseAsync node_modules/.pnpm/commander@14.0.0/node_modules/commander/lib/command.js:1123:5
+ ❯ src/__tests__/commands/create2.test.ts:188:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[16/53]⎯
+
+ FAIL  src/__tests__/commands/create2.test.ts > create command - additional tests > template functionality > should copy template files
+Error: Process exited with code 1
+ ❯ process.<anonymous> src/__tests__/commands/create2.test.ts:80:13
+     78|     consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(()…
+     79|     processExitSpy = vi.spyOn(process, 'exit').mockImplementation((cod…
+     80|       throw new Error(`Process exited with code ${code}`)
+       |             ^
+     81|     })
+     82|     processCwdSpy = vi.spyOn(process, 'cwd').mockReturnValue('/project…
+ ❯ Command.<anonymous> src/commands/create.ts:546:15
+ ❯ Command.parseAsync node_modules/.pnpm/commander@14.0.0/node_modules/commander/lib/command.js:1123:5
+ ❯ src/__tests__/commands/create2.test.ts:208:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[17/53]⎯
+
+ FAIL  src/__tests__/commands/create2.test.ts > create command - additional tests > GitHub integration > should fetch GitHub issue metadata
+Error: Process exited with code 1
+ ❯ process.<anonymous> src/__tests__/commands/create2.test.ts:80:13
+     78|     consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(()…
+     79|     processExitSpy = vi.spyOn(process, 'exit').mockImplementation((cod…
+     80|       throw new Error(`Process exited with code ${code}`)
+       |             ^
+     81|     })
+     82|     processCwdSpy = vi.spyOn(process, 'cwd').mockReturnValue('/project…
+ ❯ Command.<anonymous> src/commands/create.ts:546:15
+ ❯ Command.parseAsync node_modules/.pnpm/commander@14.0.0/node_modules/commander/lib/command.js:1123:5
+ ❯ src/__tests__/commands/create2.test.ts:230:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[18/53]⎯
+
+ FAIL  src/__tests__/commands/create2.test.ts > create command - additional tests > GitHub integration > should handle GitHub API errors gracefully
+Error: Process exited with code 1
+ ❯ process.<anonymous> src/__tests__/commands/create2.test.ts:80:13
+     78|     consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(()…
+     79|     processExitSpy = vi.spyOn(process, 'exit').mockImplementation((cod…
+     80|       throw new Error(`Process exited with code ${code}`)
+       |             ^
+     81|     })
+     82|     processCwdSpy = vi.spyOn(process, 'cwd').mockReturnValue('/project…
+ ❯ Command.<anonymous> src/commands/create.ts:546:15
+ ❯ Command.parseAsync node_modules/.pnpm/commander@14.0.0/node_modules/commander/lib/command.js:1123:5
+ ❯ src/__tests__/commands/create2.test.ts:249:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[19/53]⎯
+
+ FAIL  src/__tests__/commands/create2.test.ts > create command - additional tests > options handling > should handle --base option
+Error: Process exited with code 1
+ ❯ process.<anonymous> src/__tests__/commands/create2.test.ts:80:13
+     78|     consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(()…
+     79|     processExitSpy = vi.spyOn(process, 'exit').mockImplementation((cod…
+     80|       throw new Error(`Process exited with code ${code}`)
+       |             ^
+     81|     })
+     82|     processCwdSpy = vi.spyOn(process, 'cwd').mockReturnValue('/project…
+ ❯ Command.<anonymous> src/commands/create.ts:546:15
+ ❯ Command.parseAsync node_modules/.pnpm/commander@14.0.0/node_modules/commander/lib/command.js:1123:5
+ ❯ src/__tests__/commands/create2.test.ts:261:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[20/53]⎯
+
+ FAIL  src/__tests__/commands/create2.test.ts > create command - additional tests > options handling > should handle --open option
+Error: Process exited with code 1
+ ❯ process.<anonymous> src/__tests__/commands/create2.test.ts:80:13
+     78|     consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(()…
+     79|     processExitSpy = vi.spyOn(process, 'exit').mockImplementation((cod…
+     80|       throw new Error(`Process exited with code ${code}`)
+       |             ^
+     81|     })
+     82|     processCwdSpy = vi.spyOn(process, 'cwd').mockReturnValue('/project…
+ ❯ Command.<anonymous> src/commands/create.ts:546:15
+ ❯ Command.parseAsync node_modules/.pnpm/commander@14.0.0/node_modules/commander/lib/command.js:1123:5
+ ❯ src/__tests__/commands/create2.test.ts:278:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[21/53]⎯
+
+ FAIL  src/__tests__/commands/create2.test.ts > create command - additional tests > options handling > should handle --setup option
+Error: Process exited with code 1
+ ❯ process.<anonymous> src/__tests__/commands/create2.test.ts:80:13
+     78|     consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(()…
+     79|     processExitSpy = vi.spyOn(process, 'exit').mockImplementation((cod…
+     80|       throw new Error(`Process exited with code ${code}`)
+       |             ^
+     81|     })
+     82|     processCwdSpy = vi.spyOn(process, 'cwd').mockReturnValue('/project…
+ ❯ Command.<anonymous> src/commands/create.ts:546:15
+ ❯ Command.parseAsync node_modules/.pnpm/commander@14.0.0/node_modules/commander/lib/command.js:1123:5
+ ❯ src/__tests__/commands/create2.test.ts:291:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[22/53]⎯
+
+ FAIL  src/__tests__/commands/create2.test.ts > create command - additional tests > options handling > should handle --tmux option
+Error: Process exited with code 1
+ ❯ process.<anonymous> src/__tests__/commands/create2.test.ts:80:13
+     78|     consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(()…
+     79|     processExitSpy = vi.spyOn(process, 'exit').mockImplementation((cod…
+     80|       throw new Error(`Process exited with code ${code}`)
+       |             ^
+     81|     })
+     82|     processCwdSpy = vi.spyOn(process, 'cwd').mockReturnValue('/project…
+ ❯ Command.<anonymous> src/commands/create.ts:546:15
+ ❯ Command.parseAsync node_modules/.pnpm/commander@14.0.0/node_modules/commander/lib/command.js:1123:5
+ ❯ src/__tests__/commands/create2.test.ts:307:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[23/53]⎯
+
+ FAIL  src/__tests__/commands/create2.test.ts > create command - additional tests > options handling > should handle --claude option
+Error: Process exited with code 1
+ ❯ process.<anonymous> src/__tests__/commands/create2.test.ts:80:13
+     78|     consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(()…
+     79|     processExitSpy = vi.spyOn(process, 'exit').mockImplementation((cod…
+     80|       throw new Error(`Process exited with code ${code}`)
+       |             ^
+     81|     })
+     82|     processCwdSpy = vi.spyOn(process, 'cwd').mockReturnValue('/project…
+ ❯ Command.<anonymous> src/commands/create.ts:546:15
+ ❯ Command.parseAsync node_modules/.pnpm/commander@14.0.0/node_modules/commander/lib/command.js:1123:5
+ ❯ src/__tests__/commands/create2.test.ts:326:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[24/53]⎯
+
+ FAIL  src/__tests__/commands/create2.test.ts > create command - additional tests > options handling > should handle --draft-pr option
+Error: Process exited with code 1
+ ❯ process.<anonymous> src/__tests__/commands/create2.test.ts:80:13
+     78|     consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(()…
+     79|     processExitSpy = vi.spyOn(process, 'exit').mockImplementation((cod…
+     80|       throw new Error(`Process exited with code ${code}`)
+       |             ^
+     81|     })
+     82|     processCwdSpy = vi.spyOn(process, 'cwd').mockReturnValue('/project…
+ ❯ Command.<anonymous> src/commands/create.ts:546:15
+ ❯ Command.parseAsync node_modules/.pnpm/commander@14.0.0/node_modules/commander/lib/command.js:1123:5
+ ❯ src/__tests__/commands/create2.test.ts:341:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[25/53]⎯
+
+ FAIL  src/__tests__/commands/create2.test.ts > create command - additional tests > error handling > should handle existing worktree
+AssertionError: expected "spy" to be called with arguments: [ StringContaining "既に存在します" ][90m
+
+Received: 
+
+[1m  1st spy call:
+
+[22m[2m  [[22m
+[32m-   StringContaining "既に存在します",[90m
+[31m+   "影分身を作り出せませんでした",[90m
+[2m  ][22m
+[39m[90m
+
+Number of calls: [1m1[22m
+[39m
+ ❯ src/__tests__/commands/create2.test.ts:381:32
+    379|       ).rejects.toThrow('Process exited with code 1')
+    380| 
+    381|       expect(mockSpinner.fail).toHaveBeenCalledWith(
+       |                                ^
+    382|         expect.stringContaining('既に存在します')
+    383|       )
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[26/53]⎯
+
+ FAIL  src/__tests__/commands/create2.test.ts > create command - additional tests > error handling > should handle worktree creation error
+AssertionError: expected "spy" to be called with arguments: [ '影分身の術に失敗しました' ][90m
+
+Received: 
+
+[1m  1st spy call:
+
+[22m[2m  [[22m
+[32m-   "影分身の術に失敗しました",[90m
+[31m+   "影分身を作り出せませんでした",[90m
+[2m  ][22m
+[39m[90m
+
+Number of calls: [1m1[22m
+[39m
+ ❯ src/__tests__/commands/create2.test.ts:395:32
+    393|       ).rejects.toThrow('Process exited with code 1')
+    394| 
+    395|       expect(mockSpinner.fail).toHaveBeenCalledWith('影分身の術に失敗しました')
+       |                                ^
+    396|       expect(consoleErrorSpy).toHaveBeenCalledWith(
+    397|         chalk.red('エラー:'),
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[27/53]⎯
+
+ FAIL  src/__tests__/commands/create2.test.ts > create command - additional tests > hooks functionality > should execute afterCreate hook from config
+Error: Process exited with code 1
+ ❯ process.<anonymous> src/__tests__/commands/create2.test.ts:80:13
+     78|     consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(()…
+     79|     processExitSpy = vi.spyOn(process, 'exit').mockImplementation((cod…
+     80|       throw new Error(`Process exited with code ${code}`)
+       |             ^
+     81|     })
+     82|     processCwdSpy = vi.spyOn(process, 'cwd').mockReturnValue('/project…
+ ❯ Command.<anonymous> src/commands/create.ts:546:15
+ ❯ Command.parseAsync node_modules/.pnpm/commander@14.0.0/node_modules/commander/lib/command.js:1123:5
+ ❯ src/__tests__/commands/create2.test.ts:414:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[28/53]⎯
+
+ FAIL  src/__tests__/commands/create2.test.ts > create command - additional tests > hooks functionality > should handle hook execution errors
+Error: Process exited with code 1
+ ❯ process.<anonymous> src/__tests__/commands/create2.test.ts:80:13
+     78|     consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(()…
+     79|     processExitSpy = vi.spyOn(process, 'exit').mockImplementation((cod…
+     80|       throw new Error(`Process exited with code ${code}`)
+       |             ^
+     81|     })
+     82|     processCwdSpy = vi.spyOn(process, 'cwd').mockReturnValue('/project…
+ ❯ Command.<anonymous> src/commands/create.ts:546:15
+ ❯ Command.parseAsync node_modules/.pnpm/commander@14.0.0/node_modules/commander/lib/command.js:1123:5
+ ❯ src/__tests__/commands/create2.test.ts:437:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[29/53]⎯
+
+ FAIL  src/__tests__/commands/create2.test.ts > create command - additional tests > custom worktree path > should use custom worktree path from config
+Error: Process exited with code 1
+ ❯ process.<anonymous> src/__tests__/commands/create2.test.ts:80:13
+     78|     consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(()…
+     79|     processExitSpy = vi.spyOn(process, 'exit').mockImplementation((cod…
+     80|       throw new Error(`Process exited with code ${code}`)
+       |             ^
+     81|     })
+     82|     processCwdSpy = vi.spyOn(process, 'cwd').mockReturnValue('/project…
+ ❯ Command.<anonymous> src/commands/create.ts:546:15
+ ❯ Command.parseAsync node_modules/.pnpm/commander@14.0.0/node_modules/commander/lib/command.js:1123:5
+ ❯ src/__tests__/commands/create2.test.ts:454:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[30/53]⎯
+
+ FAIL  src/__tests__/commands/create2.test.ts > create command - additional tests > metadata persistence > should save worktree metadata
+Error: Process exited with code 1
+ ❯ process.<anonymous> src/__tests__/commands/create2.test.ts:80:13
+     78|     consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(()…
+     79|     processExitSpy = vi.spyOn(process, 'exit').mockImplementation((cod…
+     80|       throw new Error(`Process exited with code ${code}`)
+       |             ^
+     81|     })
+     82|     processCwdSpy = vi.spyOn(process, 'cwd').mockReturnValue('/project…
+ ❯ Command.<anonymous> src/commands/create.ts:546:15
+ ❯ Command.parseAsync node_modules/.pnpm/commander@14.0.0/node_modules/commander/lib/command.js:1123:5
+ ❯ src/__tests__/commands/create2.test.ts:468:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[31/53]⎯
+
+ FAIL  src/__tests__/commands/delete2.test.ts > delete command - additional tests > basic delete functionality > should delete specified worktree
+AssertionError: expected "spy" to be called with arguments: [ Array(2) ][90m
+
+Number of calls: [1m0[22m
+[39m
+ ❯ src/__tests__/commands/delete2.test.ts:101:45
+     99|       await deleteCommand.parseAsync(['node', 'delete', 'feature-1'])
+    100| 
+    101|       expect(mockGitManager.removeWorktree).toHaveBeenCalledWith(
+       |                                             ^
+    102|         '/path/to/worktree/feature-1',
+    103|         false
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[32/53]⎯
+
+ FAIL  src/__tests__/commands/delete2.test.ts > delete command - additional tests > basic delete functionality > should handle --force option
+AssertionError: expected "spy" to be called with arguments: [ '/path/to/worktree/feature-1', true ][90m
+
+Number of calls: [1m0[22m
+[39m
+ ❯ src/__tests__/commands/delete2.test.ts:128:45
+    126| 
+    127|       expect(inquirer.prompt).not.toHaveBeenCalled()
+    128|       expect(mockGitManager.removeWorktree).toHaveBeenCalledWith(
+       |                                             ^
+    129|         '/path/to/worktree/feature-1',
+    130|         true
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[33/53]⎯
+
+ FAIL  src/__tests__/commands/delete2.test.ts > delete command - additional tests > basic delete functionality > should delete current worktree with --current option
+AssertionError: expected "spy" to be called with arguments: [ …(2) ][90m
+
+Number of calls: [1m0[22m
+[39m
+ ❯ src/__tests__/commands/delete2.test.ts:152:45
+    150|       await deleteCommand.parseAsync(['node', 'delete', '--current'])
+    151| 
+    152|       expect(mockGitManager.removeWorktree).toHaveBeenCalledWith(proce…
+       |                                             ^
+    153|     })
+    154|   })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[34/53]⎯
+
+ FAIL  src/__tests__/commands/delete2.test.ts > delete command - additional tests > remote branch deletion > should delete remote branch with --remove-remote option
+AssertionError: expected "spy" to be called with arguments: [ 'git', [ 'push', 'origin', …(2) ] ][90m
+
+Received: 
+
+[1m  1st spy call:
+
+[22m[2m  [[22m
+[32m-   "git",[90m
+[31m+   "du",[90m
+[2m    [[22m
+[32m-     "push",[90m
+[32m-     "origin",[90m
+[32m-     "--delete",[90m
+[32m-     "feature-1",[90m
+[31m+     "-sh",[90m
+[31m+     "/path/to/worktree/feature-1",[90m
+[2m    ],[22m
+[2m  ][22m
+[39m[90m
+
+Number of calls: [1m1[22m
+[39m
+ ❯ src/__tests__/commands/delete2.test.ts:179:21
+    177|       await deleteCommand.parseAsync(['node', 'delete', 'feature-1', '…
+    178| 
+    179|       expect(execa).toHaveBeenCalledWith('git', ['push', 'origin', '--…
+       |                     ^
+    180|     })
+    181| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[35/53]⎯
+
+ FAIL  src/__tests__/commands/delete2.test.ts > delete command - additional tests > remote branch deletion > should handle non-existent remote branch
+AssertionError: expected "spy" to be called with arguments: [ StringContaining "リモートブランチ" ][90m
+
+Number of calls: [1m0[22m
+[39m
+ ❯ src/__tests__/commands/delete2.test.ts:203:32
+    201|       await deleteCommand.parseAsync(['node', 'delete', 'feature-1', '…
+    202| 
+    203|       expect(mockSpinner.warn).toHaveBeenCalledWith(
+       |                                ^
+    204|         expect.stringContaining('リモートブランチ')
+    205|       )
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[36/53]⎯
+
+ FAIL  src/__tests__/commands/delete2.test.ts > delete command - additional tests > fzf integration > should handle fzf selection
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/__tests__/commands/delete2.test.ts:210:5
+    208| 
+    209|   describe('fzf integration', () => {
+    210|     it('should handle fzf selection', async () => {
+       |     ^
+    211|       const mockWorktrees: ParsedWorktreeInfo[] = [
+    212|         {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[37/53]⎯
+
+ FAIL  src/__tests__/commands/delete2.test.ts > delete command - additional tests > error handling > should handle not a git repository
+AssertionError: promise resolved "Command{ _events: { …(4) }, …(43), …(2) }" instead of rejecting
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- Error {[39m
+[32m-   "message": "rejected promise",[39m
+[31m+ Command {[39m
+[31m+   "_actionHandler": [Function listener],[39m
+[31m+   "_addImplicitHelpCommand": undefined,[39m
+[31m+   "_aliases": [[39m
+[31m+     "rm",[39m
+[31m+   ],[39m
+[31m+   "_allowExcessArguments": false,[39m
+[31m+   "_allowUnknownOption": false,[39m
+[31m+   "_args": [[39m
+[31m+     Argument {[39m
+[31m+       "_name": "branch-name",[39m
+[31m+       "argChoices": undefined,[39m
+[31m+       "defaultValue": undefined,[39m
+[31m+       "defaultValueDescription": undefined,[39m
+[31m+       "description": "削除するブランチ名",[39m
+[31m+       "parseArg": undefined,[39m
+[31m+       "required": false,[39m
+[31m+       "variadic": false,[39m
+[31m+     },[39m
+[31m+   ],[39m
+[31m+   "_argsDescription": undefined,[39m
+[31m+   "_combineFlagAndOptionalValue": true,[39m
+[31m+   "_defaultCommandGroup": undefined,[39m
+[31m+   "_defaultCommandName": null,[39m
+[31m+   "_defaultOptionGroup": undefined,[39m
+[31m+   "_description": "影分身（worktree）を削除",[39m
+[31m+   "_enablePositionalOptions": false,[39m
+[31m+   "_events": {[39m
+[31m+     "option:current": [Function anonymous],[39m
+[31m+     "option:force": [Function anonymous],[39m
+[31m+     "option:fzf": [Function anonymous],[39m
+[31m+     "option:remove-remote": [Function anonymous],[39m
+[31m+   },[39m
+[31m+   "_eventsCount": 4,[39m
+[31m+   "_executableDir": null,[39m
+[31m+   "_executableFile": null,[39m
+[31m+   "_executableHandler": false,[39m
+[31m+   "_exitCallback": null,[39m
+[31m+   "_helpCommand": undefined,[39m
+[31m+   "_helpConfiguration": {},[39m
+[31m+   "_helpGroupHeading": undefined,[39m
+[31m+   "_helpOption": Option {[39m
+[31m+     "argChoices": undefined,[39m
+[31m+     "conflictsWith": [],[39m
+[31m+     "defaultValue": undefined,[39m
+[31m+     "defaultValueDescription": undefined,[39m
+[31m+     "description": "display help for command",[39m
+[31m+     "envVar": undefined,[39m
+[31m+     "flags": "-h, --help",[39m
+[31m+     "helpGroupHeading": undefined,[39m
+[31m+     "hidden": false,[39m
+[31m+     "implied": undefined,[39m
+[31m+     "long": "--help",[39m
+[31m+     "mandatory": false,[39m
+[31m+     "negate": false,[39m
+[31m+     "optional": false,[39m
+[31m+     "parseArg": undefined,[39m
+[31m+     "presetArg": undefined,[39m
+[31m+     "required": false,[39m
+[31m+     "short": "-h",[39m
+[31m+     "variadic": false,[39m
+[31m+   },[39m
+[31m+   "_hidden": false,[39m
+[31m+   "_lifeCycleHooks": {},[39m
+[31m+   "_maxListeners": undefined,[39m
+[31m+   "_name": "delete",[39m
+[31m+   "_optionValueSources": {},[39m
+[31m+   "_optionValues": {},[39m
+[31m+   "_outputConfiguration": {[39m
+[31m+     "getErrHasColors": [Function getErrHasColors],[39m
+[31m+     "getErrHelpWidth": [Function getErrHelpWidth],[39m
+[31m+     "getOutHasColors": [Function getOutHasColors],[39m
+[31m+     "getOutHelpWidth": [Function getOutHelpWidth],[39m
+[31m+     "outputError": [Function outputError],[39m
+[31m+     "stripColor": [Function stripColor],[39m
+[31m+     "writeErr": [Function writeErr],[39m
+[31m+     "writeOut": [Function writeOut],[39m
+[31m+   },[39m
+[31m+   "_passThroughOptions": false,[39m
+[31m+   "_savedState": {[39m
+[31m+     "_name": "delete",[39m
+[31m+     "_optionValueSources": {},[39m
+[31m+     "_optionValues": {},[39m
+[31m+   },[39m
+[31m+   "_scriptPath": "delete",[39m
+[31m+   "_showHelpAfterError": false,[39m
+[31m+   "_showSuggestionAfterError": true,[39m
+[31m+   "_storeOptionsAsProperties": false,[39m
+[31m+   "_summary": "",[39m
+[31m+   "args": [[39m
+[31m+     "feature-1",[39m
+[31m+   ],[39m
+[31m+   "commands": [],[39m
+[31m+   "options": [[39m
+[31m+     Option {[39m
+[31m+       "argChoices": undefined,[39m
+[31m+       "conflictsWith": [],[39m
+[31m+       "defaultValue": undefined,[39m
+[31m+       "defaultValueDescription": undefined,[39m
+[31m+       "description": "強制削除",[39m
+[31m+       "envVar": undefined,[39m
+[31m+       "flags": "-f, --force",[39m
+[31m+       "helpGroupHeading": undefined,[39m
+[31m+       "hidden": false,[39m
+[31m+       "implied": undefined,[39m
+[31m+       "long": "--force",[39m
+[31m+       "mandatory": false,[39m
+[31m+       "negate": false,[39m
+[31m+       "optional": false,[39m
+[31m+       "parseArg": undefined,[39m
+[31m+       "presetArg": undefined,[39m
+[31m+       "required": false,[39m
+[31m+       "short": "-f",[39m
+[31m+       "variadic": false,[39m
+[31m+     },[39m
+[31m+     Option {[39m
+[31m+       "argChoices": undefined,[39m
+[31m+       "conflictsWith": [],[39m
+[31m+       "defaultValue": undefined,[39m
+[31m+       "defaultValueDescription": undefined,[39m
+[31m+       "description": "リモートブランチも削除",[39m
+[31m+       "envVar": undefined,[39m
+[31m+       "flags": "-r, --remove-remote",[39m
+[31m+       "helpGroupHeading": undefined,[39m
+[31m+       "hidden": false,[39m
+[31m+       "implied": undefined,[39m
+[31m+       "long": "--remove-remote",[39m
+[31m+       "mandatory": false,[39m
+[31m+       "negate": false,[39m
+[31m+       "optional": false,[39m
+[31m+       "parseArg": undefined,[39m
+[31m+       "presetArg": undefined,[39m
+[31m+       "required": false,[39m
+[31m+       "short": "-r",[39m
+[31m+       "variadic": false,[39m
+[31m+     },[39m
+[31m+     Option {[39m
+[31m+       "argChoices": undefined,[39m
+[31m+       "conflictsWith": [],[39m
+[31m+       "defaultValue": undefined,[39m
+[31m+       "defaultValueDescription": undefined,[39m
+[31m+       "description": "fzfで選択（複数選択可）",[39m
+[31m+       "envVar": undefined,[39m
+[31m+       "flags": "--fzf",[39m
+[31m+       "helpGroupHeading": undefined,[39m
+[31m+       "hidden": false,[39m
+[31m+       "implied": undefined,[39m
+[31m+       "long": "--fzf",[39m
+[31m+       "mandatory": false,[39m
+[31m+       "negate": false,[39m
+[31m+       "optional": false,[39m
+[31m+       "parseArg": undefined,[39m
+[31m+       "presetArg": undefined,[39m
+[31m+       "required": false,[39m
+[31m+       "short": undefined,[39m
+[31m+       "variadic": false,[39m
+[31m+     },[39m
+[31m+     Option {[39m
+[31m+       "argChoices": undefined,[39m
+[31m+       "conflictsWith": [],[39m
+[31m+       "defaultValue": undefined,[39m
+[31m+       "defaultValueDescription": undefined,[39m
+[31m+       "description": "現在のworktreeを削除",[39m
+[31m+       "envVar": undefined,[39m
+[31m+       "flags": "--current",[39m
+[31m+       "helpGroupHeading": undefined,[39m
+[31m+       "hidden": false,[39m
+[31m+       "implied": undefined,[39m
+[31m+       "long": "--current",[39m
+[31m+       "mandatory": false,[39m
+[31m+       "negate": false,[39m
+[31m+       "optional": false,[39m
+[31m+       "parseArg": undefined,[39m
+[31m+       "presetArg": undefined,[39m
+[31m+       "required": false,[39m
+[31m+       "short": undefined,[39m
+[31m+       "variadic": false,[39m
+[31m+     },[39m
+[31m+   ],[39m
+[31m+   "parent": null,[39m
+[31m+   "processedArgs": [[39m
+[31m+     "feature-1",[39m
+[31m+   ],[39m
+[31m+   "rawArgs": [[39m
+[31m+     "node",[39m
+[31m+     "delete",[39m
+[31m+     "feature-1",[39m
+[31m+   ],[39m
+[31m+   "registeredArguments": [[39m
+[31m+     Argument {[39m
+[31m+       "_name": "branch-name",[39m
+[31m+       "argChoices": undefined,[39m
+[31m+       "defaultValue": undefined,[39m
+[31m+       "defaultValueDescription": undefined,[39m
+[31m+       "description": "削除するブランチ名",[39m
+[31m+       "parseArg": undefined,[39m
+[31m+       "required": false,[39m
+[31m+       "variadic": false,[39m
+[31m+     },[39m
+[31m+   ],[39m
+[31m+   Symbol(shapeMode): false,[39m
+[31m+   Symbol(kCapture): false,[39m
+[2m  }[22m
+
+ ❯ src/__tests__/commands/delete2.test.ts:265:7
+    263|       await expect(
+    264|         deleteCommand.parseAsync(['node', 'delete', 'feature-1'])
+    265|       ).rejects.toThrow('Process exited with code 1')
+       |       ^
+    266| 
+    267|       expect(mockSpinner.fail).toHaveBeenCalledWith(
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[38/53]⎯
+
+ FAIL  src/__tests__/commands/delete2.test.ts > delete command - additional tests > error handling > should handle no worktrees available
+AssertionError: promise resolved "Command{ _events: { …(4) }, …(43), …(2) }" instead of rejecting
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- Error {[39m
+[32m-   "message": "rejected promise",[39m
+[31m+ Command {[39m
+[31m+   "_actionHandler": [Function listener],[39m
+[31m+   "_addImplicitHelpCommand": undefined,[39m
+[31m+   "_aliases": [[39m
+[31m+     "rm",[39m
+[31m+   ],[39m
+[31m+   "_allowExcessArguments": false,[39m
+[31m+   "_allowUnknownOption": false,[39m
+[31m+   "_args": [[39m
+[31m+     Argument {[39m
+[31m+       "_name": "branch-name",[39m
+[31m+       "argChoices": undefined,[39m
+[31m+       "defaultValue": undefined,[39m
+[31m+       "defaultValueDescription": undefined,[39m
+[31m+       "description": "削除するブランチ名",[39m
+[31m+       "parseArg": undefined,[39m
+[31m+       "required": false,[39m
+[31m+       "variadic": false,[39m
+[31m+     },[39m
+[31m+   ],[39m
+[31m+   "_argsDescription": undefined,[39m
+[31m+   "_combineFlagAndOptionalValue": true,[39m
+[31m+   "_defaultCommandGroup": undefined,[39m
+[31m+   "_defaultCommandName": null,[39m
+[31m+   "_defaultOptionGroup": undefined,[39m
+[31m+   "_description": "影分身（worktree）を削除",[39m
+[31m+   "_enablePositionalOptions": false,[39m
+[31m+   "_events": {[39m
+[31m+     "option:current": [Function anonymous],[39m
+[31m+     "option:force": [Function anonymous],[39m
+[31m+     "option:fzf": [Function anonymous],[39m
+[31m+     "option:remove-remote": [Function anonymous],[39m
+[31m+   },[39m
+[31m+   "_eventsCount": 4,[39m
+[31m+   "_executableDir": null,[39m
+[31m+   "_executableFile": null,[39m
+[31m+   "_executableHandler": false,[39m
+[31m+   "_exitCallback": null,[39m
+[31m+   "_helpCommand": undefined,[39m
+[31m+   "_helpConfiguration": {},[39m
+[31m+   "_helpGroupHeading": undefined,[39m
+[31m+   "_helpOption": Option {[39m
+[31m+     "argChoices": undefined,[39m
+[31m+     "conflictsWith": [],[39m
+[31m+     "defaultValue": undefined,[39m
+[31m+     "defaultValueDescription": undefined,[39m
+[31m+     "description": "display help for command",[39m
+[31m+     "envVar": undefined,[39m
+[31m+     "flags": "-h, --help",[39m
+[31m+     "helpGroupHeading": undefined,[39m
+[31m+     "hidden": false,[39m
+[31m+     "implied": undefined,[39m
+[31m+     "long": "--help",[39m
+[31m+     "mandatory": false,[39m
+[31m+     "negate": false,[39m
+[31m+     "optional": false,[39m
+[31m+     "parseArg": undefined,[39m
+[31m+     "presetArg": undefined,[39m
+[31m+     "required": false,[39m
+[31m+     "short": "-h",[39m
+[31m+     "variadic": false,[39m
+[31m+   },[39m
+[31m+   "_hidden": false,[39m
+[31m+   "_lifeCycleHooks": {},[39m
+[31m+   "_maxListeners": undefined,[39m
+[31m+   "_name": "delete",[39m
+[31m+   "_optionValueSources": {},[39m
+[31m+   "_optionValues": {},[39m
+[31m+   "_outputConfiguration": {[39m
+[31m+     "getErrHasColors": [Function getErrHasColors],[39m
+[31m+     "getErrHelpWidth": [Function getErrHelpWidth],[39m
+[31m+     "getOutHasColors": [Function getOutHasColors],[39m
+[31m+     "getOutHelpWidth": [Function getOutHelpWidth],[39m
+[31m+     "outputError": [Function outputError],[39m
+[31m+     "stripColor": [Function stripColor],[39m
+[31m+     "writeErr": [Function writeErr],[39m
+[31m+     "writeOut": [Function writeOut],[39m
+[31m+   },[39m
+[31m+   "_passThroughOptions": false,[39m
+[31m+   "_savedState": {[39m
+[31m+     "_name": "delete",[39m
+[31m+     "_optionValueSources": {},[39m
+[31m+     "_optionValues": {},[39m
+[31m+   },[39m
+[31m+   "_scriptPath": "delete",[39m
+[31m+   "_showHelpAfterError": false,[39m
+[31m+   "_showSuggestionAfterError": true,[39m
+[31m+   "_storeOptionsAsProperties": false,[39m
+[31m+   "_summary": "",[39m
+[31m+   "args": [[39m
+[31m+     "feature-1",[39m
+[31m+   ],[39m
+[31m+   "commands": [],[39m
+[31m+   "options": [[39m
+[31m+     Option {[39m
+[31m+       "argChoices": undefined,[39m
+[31m+       "conflictsWith": [],[39m
+[31m+       "defaultValue": undefined,[39m
+[31m+       "defaultValueDescription": undefined,[39m
+[31m+       "description": "強制削除",[39m
+[31m+       "envVar": undefined,[39m
+[31m+       "flags": "-f, --force",[39m
+[31m+       "helpGroupHeading": undefined,[39m
+[31m+       "hidden": false,[39m
+[31m+       "implied": undefined,[39m
+[31m+       "long": "--force",[39m
+[31m+       "mandatory": false,[39m
+[31m+       "negate": false,[39m
+[31m+       "optional": false,[39m
+[31m+       "parseArg": undefined,[39m
+[31m+       "presetArg": undefined,[39m
+[31m+       "required": false,[39m
+[31m+       "short": "-f",[39m
+[31m+       "variadic": false,[39m
+[31m+     },[39m
+[31m+     Option {[39m
+[31m+       "argChoices": undefined,[39m
+[31m+       "conflictsWith": [],[39m
+[31m+       "defaultValue": undefined,[39m
+[31m+       "defaultValueDescription": undefined,[39m
+[31m+       "description": "リモートブランチも削除",[39m
+[31m+       "envVar": undefined,[39m
+[31m+       "flags": "-r, --remove-remote",[39m
+[31m+       "helpGroupHeading": undefined,[39m
+[31m+       "hidden": false,[39m
+[31m+       "implied": undefined,[39m
+[31m+       "long": "--remove-remote",[39m
+[31m+       "mandatory": false,[39m
+[31m+       "negate": false,[39m
+[31m+       "optional": false,[39m
+[31m+       "parseArg": undefined,[39m
+[31m+       "presetArg": undefined,[39m
+[31m+       "required": false,[39m
+[31m+       "short": "-r",[39m
+[31m+       "variadic": false,[39m
+[31m+     },[39m
+[31m+     Option {[39m
+[31m+       "argChoices": undefined,[39m
+[31m+       "conflictsWith": [],[39m
+[31m+       "defaultValue": undefined,[39m
+[31m+       "defaultValueDescription": undefined,[39m
+[31m+       "description": "fzfで選択（複数選択可）",[39m
+[31m+       "envVar": undefined,[39m
+[31m+       "flags": "--fzf",[39m
+[31m+       "helpGroupHeading": undefined,[39m
+[31m+       "hidden": false,[39m
+[31m+       "implied": undefined,[39m
+[31m+       "long": "--fzf",[39m
+[31m+       "mandatory": false,[39m
+[31m+       "negate": false,[39m
+[31m+       "optional": false,[39m
+[31m+       "parseArg": undefined,[39m
+[31m+       "presetArg": undefined,[39m
+[31m+       "required": false,[39m
+[31m+       "short": undefined,[39m
+[31m+       "variadic": false,[39m
+[31m+     },[39m
+[31m+     Option {[39m
+[31m+       "argChoices": undefined,[39m
+[31m+       "conflictsWith": [],[39m
+[31m+       "defaultValue": undefined,[39m
+[31m+       "defaultValueDescription": undefined,[39m
+[31m+       "description": "現在のworktreeを削除",[39m
+[31m+       "envVar": undefined,[39m
+[31m+       "flags": "--current",[39m
+[31m+       "helpGroupHeading": undefined,[39m
+[31m+       "hidden": false,[39m
+[31m+       "implied": undefined,[39m
+[31m+       "long": "--current",[39m
+[31m+       "mandatory": false,[39m
+[31m+       "negate": false,[39m
+[31m+       "optional": false,[39m
+[31m+       "parseArg": undefined,[39m
+[31m+       "presetArg": undefined,[39m
+[31m+       "required": false,[39m
+[31m+       "short": undefined,[39m
+[31m+       "variadic": false,[39m
+[31m+     },[39m
+[31m+   ],[39m
+[31m+   "parent": null,[39m
+[31m+   "processedArgs": [[39m
+[31m+     "feature-1",[39m
+[31m+   ],[39m
+[31m+   "rawArgs": [[39m
+[31m+     "node",[39m
+[31m+     "delete",[39m
+[31m+     "feature-1",[39m
+[31m+   ],[39m
+[31m+   "registeredArguments": [[39m
+[31m+     Argument {[39m
+[31m+       "_name": "branch-name",[39m
+[31m+       "argChoices": undefined,[39m
+[31m+       "defaultValue": undefined,[39m
+[31m+       "defaultValueDescription": undefined,[39m
+[31m+       "description": "削除するブランチ名",[39m
+[31m+       "parseArg": undefined,[39m
+[31m+       "required": false,[39m
+[31m+       "variadic": false,[39m
+[31m+     },[39m
+[31m+   ],[39m
+[31m+   Symbol(shapeMode): false,[39m
+[31m+   Symbol(kCapture): false,[39m
+[2m  }[22m
+
+ ❯ src/__tests__/commands/delete2.test.ts:277:7
+    275|       await expect(
+    276|         deleteCommand.parseAsync(['node', 'delete', 'feature-1'])
+    277|       ).rejects.toThrow('Process exited with code 0')
+       |       ^
+    278| 
+    279|       expect(consoleLogSpy).toHaveBeenCalledWith(chalk.yellow('影分身が存在し…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[39/53]⎯
+
+ FAIL  src/__tests__/commands/delete2.test.ts > delete command - additional tests > error handling > should handle worktree not found
+AssertionError: promise resolved "Command{ _events: { …(4) }, …(43), …(2) }" instead of rejecting
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- Error {[39m
+[32m-   "message": "rejected promise",[39m
+[31m+ Command {[39m
+[31m+   "_actionHandler": [Function listener],[39m
+[31m+   "_addImplicitHelpCommand": undefined,[39m
+[31m+   "_aliases": [[39m
+[31m+     "rm",[39m
+[31m+   ],[39m
+[31m+   "_allowExcessArguments": false,[39m
+[31m+   "_allowUnknownOption": false,[39m
+[31m+   "_args": [[39m
+[31m+     Argument {[39m
+[31m+       "_name": "branch-name",[39m
+[31m+       "argChoices": undefined,[39m
+[31m+       "defaultValue": undefined,[39m
+[31m+       "defaultValueDescription": undefined,[39m
+[31m+       "description": "削除するブランチ名",[39m
+[31m+       "parseArg": undefined,[39m
+[31m+       "required": false,[39m
+[31m+       "variadic": false,[39m
+[31m+     },[39m
+[31m+   ],[39m
+[31m+   "_argsDescription": undefined,[39m
+[31m+   "_combineFlagAndOptionalValue": true,[39m
+[31m+   "_defaultCommandGroup": undefined,[39m
+[31m+   "_defaultCommandName": null,[39m
+[31m+   "_defaultOptionGroup": undefined,[39m
+[31m+   "_description": "影分身（worktree）を削除",[39m
+[31m+   "_enablePositionalOptions": false,[39m
+[31m+   "_events": {[39m
+[31m+     "option:current": [Function anonymous],[39m
+[31m+     "option:force": [Function anonymous],[39m
+[31m+     "option:fzf": [Function anonymous],[39m
+[31m+     "option:remove-remote": [Function anonymous],[39m
+[31m+   },[39m
+[31m+   "_eventsCount": 4,[39m
+[31m+   "_executableDir": null,[39m
+[31m+   "_executableFile": null,[39m
+[31m+   "_executableHandler": false,[39m
+[31m+   "_exitCallback": null,[39m
+[31m+   "_helpCommand": undefined,[39m
+[31m+   "_helpConfiguration": {},[39m
+[31m+   "_helpGroupHeading": undefined,[39m
+[31m+   "_helpOption": Option {[39m
+[31m+     "argChoices": undefined,[39m
+[31m+     "conflictsWith": [],[39m
+[31m+     "defaultValue": undefined,[39m
+[31m+     "defaultValueDescription": undefined,[39m
+[31m+     "description": "display help for command",[39m
+[31m+     "envVar": undefined,[39m
+[31m+     "flags": "-h, --help",[39m
+[31m+     "helpGroupHeading": undefined,[39m
+[31m+     "hidden": false,[39m
+[31m+     "implied": undefined,[39m
+[31m+     "long": "--help",[39m
+[31m+     "mandatory": false,[39m
+[31m+     "negate": false,[39m
+[31m+     "optional": false,[39m
+[31m+     "parseArg": undefined,[39m
+[31m+     "presetArg": undefined,[39m
+[31m+     "required": false,[39m
+[31m+     "short": "-h",[39m
+[31m+     "variadic": false,[39m
+[31m+   },[39m
+[31m+   "_hidden": false,[39m
+[31m+   "_lifeCycleHooks": {},[39m
+[31m+   "_maxListeners": undefined,[39m
+[31m+   "_name": "delete",[39m
+[31m+   "_optionValueSources": {},[39m
+[31m+   "_optionValues": {},[39m
+[31m+   "_outputConfiguration": {[39m
+[31m+     "getErrHasColors": [Function getErrHasColors],[39m
+[31m+     "getErrHelpWidth": [Function getErrHelpWidth],[39m
+[31m+     "getOutHasColors": [Function getOutHasColors],[39m
+[31m+     "getOutHelpWidth": [Function getOutHelpWidth],[39m
+[31m+     "outputError": [Function outputError],[39m
+[31m+     "stripColor": [Function stripColor],[39m
+[31m+     "writeErr": [Function writeErr],[39m
+[31m+     "writeOut": [Function writeOut],[39m
+[31m+   },[39m
+[31m+   "_passThroughOptions": false,[39m
+[31m+   "_savedState": {[39m
+[31m+     "_name": "delete",[39m
+[31m+     "_optionValueSources": {},[39m
+[31m+     "_optionValues": {},[39m
+[31m+   },[39m
+[31m+   "_scriptPath": "delete",[39m
+[31m+   "_showHelpAfterError": false,[39m
+[31m+   "_showSuggestionAfterError": true,[39m
+[31m+   "_storeOptionsAsProperties": false,[39m
+[31m+   "_summary": "",[39m
+[31m+   "args": [[39m
+[31m+     "non-existent",[39m
+[31m+   ],[39m
+[31m+   "commands": [],[39m
+[31m+   "options": [[39m
+[31m+     Option {[39m
+[31m+       "argChoices": undefined,[39m
+[31m+       "conflictsWith": [],[39m
+[31m+       "defaultValue": undefined,[39m
+[31m+       "defaultValueDescription": undefined,[39m
+[31m+       "description": "強制削除",[39m
+[31m+       "envVar": undefined,[39m
+[31m+       "flags": "-f, --force",[39m
+[31m+       "helpGroupHeading": undefined,[39m
+[31m+       "hidden": false,[39m
+[31m+       "implied": undefined,[39m
+[31m+       "long": "--force",[39m
+[31m+       "mandatory": false,[39m
+[31m+       "negate": false,[39m
+[31m+       "optional": false,[39m
+[31m+       "parseArg": undefined,[39m
+[31m+       "presetArg": undefined,[39m
+[31m+       "required": false,[39m
+[31m+       "short": "-f",[39m
+[31m+       "variadic": false,[39m
+[31m+     },[39m
+[31m+     Option {[39m
+[31m+       "argChoices": undefined,[39m
+[31m+       "conflictsWith": [],[39m
+[31m+       "defaultValue": undefined,[39m
+[31m+       "defaultValueDescription": undefined,[39m
+[31m+       "description": "リモートブランチも削除",[39m
+[31m+       "envVar": undefined,[39m
+[31m+       "flags": "-r, --remove-remote",[39m
+[31m+       "helpGroupHeading": undefined,[39m
+[31m+       "hidden": false,[39m
+[31m+       "implied": undefined,[39m
+[31m+       "long": "--remove-remote",[39m
+[31m+       "mandatory": false,[39m
+[31m+       "negate": false,[39m
+[31m+       "optional": false,[39m
+[31m+       "parseArg": undefined,[39m
+[31m+       "presetArg": undefined,[39m
+[31m+       "required": false,[39m
+[31m+       "short": "-r",[39m
+[31m+       "variadic": false,[39m
+[31m+     },[39m
+[31m+     Option {[39m
+[31m+       "argChoices": undefined,[39m
+[31m+       "conflictsWith": [],[39m
+[31m+       "defaultValue": undefined,[39m
+[31m+       "defaultValueDescription": undefined,[39m
+[31m+       "description": "fzfで選択（複数選択可）",[39m
+[31m+       "envVar": undefined,[39m
+[31m+       "flags": "--fzf",[39m
+[31m+       "helpGroupHeading": undefined,[39m
+[31m+       "hidden": false,[39m
+[31m+       "implied": undefined,[39m
+[31m+       "long": "--fzf",[39m
+[31m+       "mandatory": false,[39m
+[31m+       "negate": false,[39m
+[31m+       "optional": false,[39m
+[31m+       "parseArg": undefined,[39m
+[31m+       "presetArg": undefined,[39m
+[31m+       "required": false,[39m
+[31m+       "short": undefined,[39m
+[31m+       "variadic": false,[39m
+[31m+     },[39m
+[31m+     Option {[39m
+[31m+       "argChoices": undefined,[39m
+[31m+       "conflictsWith": [],[39m
+[31m+       "defaultValue": undefined,[39m
+[31m+       "defaultValueDescription": undefined,[39m
+[31m+       "description": "現在のworktreeを削除",[39m
+[31m+       "envVar": undefined,[39m
+[31m+       "flags": "--current",[39m
+[31m+       "helpGroupHeading": undefined,[39m
+[31m+       "hidden": false,[39m
+[31m+       "implied": undefined,[39m
+[31m+       "long": "--current",[39m
+[31m+       "mandatory": false,[39m
+[31m+       "negate": false,[39m
+[31m+       "optional": false,[39m
+[31m+       "parseArg": undefined,[39m
+[31m+       "presetArg": undefined,[39m
+[31m+       "required": false,[39m
+[31m+       "short": undefined,[39m
+[31m+       "variadic": false,[39m
+[31m+     },[39m
+[31m+   ],[39m
+[31m+   "parent": null,[39m
+[31m+   "processedArgs": [[39m
+[31m+     "non-existent",[39m
+[31m+   ],[39m
+[31m+   "rawArgs": [[39m
+[31m+     "node",[39m
+[31m+     "delete",[39m
+[31m+     "non-existent",[39m
+[31m+   ],[39m
+[31m+   "registeredArguments": [[39m
+[31m+     Argument {[39m
+[31m+       "_name": "branch-name",[39m
+[31m+       "argChoices": undefined,[39m
+[31m+       "defaultValue": undefined,[39m
+[31m+       "defaultValueDescription": undefined,[39m
+[31m+       "description": "削除するブランチ名",[39m
+[31m+       "parseArg": undefined,[39m
+[31m+       "required": false,[39m
+[31m+       "variadic": false,[39m
+[31m+     },[39m
+[31m+   ],[39m
+[31m+   Symbol(shapeMode): false,[39m
+[31m+   Symbol(kCapture): false,[39m
+[2m  }[22m
+
+ ❯ src/__tests__/commands/delete2.test.ts:298:7
+    296|       await expect(
+    297|         deleteCommand.parseAsync(['node', 'delete', 'non-existent'])
+    298|       ).rejects.toThrow('Process exited with code 1')
+       |       ^
+    299| 
+    300|       expect(mockSpinner.fail).toHaveBeenCalledWith(
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[40/53]⎯
+
+ FAIL  src/__tests__/commands/delete2.test.ts > delete command - additional tests > error handling > should handle delete cancellation
+AssertionError: expected "log" to be called with arguments: [ '削除をキャンセルしました' ][90m
+
+Received: 
+
+[1m  1st log call:
+
+[22m[2m  [[22m
+[32m-   "削除をキャンセルしました",[90m
+[31m+   "[90m
+[31m+ 🗑️  削除対象の影分身:[90m
+[31m+ ",[90m
+[2m  ][22m
+
+[1m  2nd log call:
+
+[22m[2m  [[22m
+[32m-   "削除をキャンセルしました",[90m
+[31m+   "  feature-1 (unknown) - /path/to/worktree/feature-1",[90m
+[2m  ][22m
+
+[1m  3rd log call:
+
+[22m[2m  [[22m
+[32m-   "削除をキャンセルしました",[90m
+[31m+   "[90m
+[31m+ 合計: 1 個の影分身",[90m
+[2m  ][22m
+
+[1m  4th log call:
+
+[22m[2m  [[22m
+[32m-   "削除をキャンセルしました",[90m
+[31m+   "キャンセルされました",[90m
+[2m  ][22m
+[39m[90m
+
+Number of calls: [1m4[22m
+[39m
+ ❯ src/__tests__/commands/delete2.test.ts:323:29
+    321| 
+    322|       expect(mockGitManager.removeWorktree).not.toHaveBeenCalled()
+    323|       expect(consoleLogSpy).toHaveBeenCalledWith(chalk.gray('削除をキャンセルし…
+       |                             ^
+    324|     })
+    325| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[41/53]⎯
+
+ FAIL  src/__tests__/commands/delete2.test.ts > delete command - additional tests > error handling > should handle directory size retrieval error
+AssertionError: expected "spy" to be called at least once
+ ❯ src/__tests__/commands/delete2.test.ts:346:45
+    344| 
+    345|       // Should still proceed with deletion even if size retrieval fai…
+    346|       expect(mockGitManager.removeWorktree).toHaveBeenCalled()
+       |                                             ^
+    347|     })
+    348|   })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[42/53]⎯
+
+ FAIL  src/__tests__/commands/delete2.test.ts > delete command - additional tests > detached HEAD handling > should handle detached HEAD worktree
+AssertionError: expected "spy" to be called at least once
+ ❯ src/__tests__/commands/delete2.test.ts:394:45
+    392|       await deleteCommand.parseAsync(['node', 'delete', 'detached'])
+    393| 
+    394|       expect(mockGitManager.removeWorktree).toHaveBeenCalled()
+       |                                             ^
+    395|     })
+    396|   })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[43/53]⎯
+
+ FAIL  src/__tests__/commands/exec.test.ts > exec command > basic functionality > should execute command in specified worktree
+AssertionError: expected "log" to be called with arguments: [ 'Command output' ][90m
+
+Received: 
+
+[1m  1st log call:
+
+[22m[2m  [[22m
+[32m-   "Command output",[90m
+[31m+   "[90m
+[31m+ 🥷 影分身 'feature-1' でコマンドを実行",[90m
+[2m  ][22m
+
+[1m  2nd log call:
+
+[22m[2m  [[22m
+[32m-   "Command output",[90m
+[31m+   "📁 /path/to/worktree/feature-1",[90m
+[2m  ][22m
+
+[1m  3rd log call:
+
+[22m[2m  [[22m
+[32m-   "Command output",[90m
+[31m+   "$ echo hello[90m
+[31m+ ",[90m
+[2m  ][22m
+
+[1m  4th log call:
+
+[22m[2m  [[22m
+[32m-   "Command output",[90m
+[31m+   "[90m
+[31m+ Command output",[90m
+[2m  ][22m
+[39m[90m
+
+Number of calls: [1m4[22m
+[39m
+ ❯ src/__tests__/commands/exec.test.ts:73:29
+     71|         })
+     72|       )
+     73|       expect(consoleLogSpy).toHaveBeenCalledWith('Command output')
+       |                             ^
+     74|     })
+     75| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[44/53]⎯
+
+ FAIL  src/__tests__/commands/exec.test.ts > exec command > error handling > should handle no worktrees
+AssertionError: expected [Function] to throw error including 'Process exited with code 0' but got 'Process exited with code 1'
+
+Expected: [32m"Process exited with code [7m0[27m"[39m
+Received: [31m"Process exited with code [7m1[27m"[39m
+
+ ❯ src/__tests__/commands/exec.test.ts:181:7
+    179|       mockGitManager.listWorktrees.mockResolvedValue([])
+    180| 
+    181|       await expect(
+       |       ^
+    182|         execCommand.parseAsync(['node', 'exec', 'feature-1', 'echo', '…
+    183|       ).rejects.toThrow('Process exited with code 0')
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[45/53]⎯
+
+ FAIL  src/__tests__/commands/exec.test.ts > exec command > error handling > should handle command execution error
+AssertionError: expected "error" to be called with arguments: [ 'コマンドの実行に失敗しました (exit code: 1)' ][90m
+
+Received: 
+
+[1m  1st error call:
+
+[22m[2m  [[22m
+[32m-   "コマンドの実行に失敗しました (exit code: 1)",[90m
+[31m+   "[90m
+[31m+ コマンドが失敗しました (exit code: 1)",[90m
+[2m  ][22m
+
+[1m  2nd error call:
+
+[22m[2m  [[22m
+[32m-   "コマンドの実行に失敗しました (exit code: 1)",[90m
+[31m+   "Error message",[90m
+[2m  ][22m
+
+[1m  3rd error call:
+
+[22m[2m  [[22m
+[32m-   "コマンドの実行に失敗しました (exit code: 1)",[90m
+[31m+   "エラー:",[90m
+[31m+   "Process exited with code 1",[90m
+[2m  ][22m
+[39m[90m
+
+Number of calls: [1m3[22m
+[39m
+ ❯ src/__tests__/commands/exec.test.ts:237:31
+    235|       ).rejects.toThrow('Process exited with code 1')
+    236| 
+    237|       expect(consoleErrorSpy).toHaveBeenCalledWith(
+       |                               ^
+    238|         chalk.red('コマンドの実行に失敗しました (exit code: 1)')
+    239|       )
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[46/53]⎯
+
+ FAIL  src/__tests__/commands/exec.test.ts > exec command > branch name matching > should match partial branch names
+Error: Process exited with code 1
+ ❯ process.<anonymous> src/__tests__/commands/exec.test.ts:30:13
+     28|     consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(()…
+     29|     processExitSpy = vi.spyOn(process, 'exit').mockImplementation((cod…
+     30|       throw new Error(`Process exited with code ${code}`)
+       |             ^
+     31|     })
+     32| 
+ ❯ Command.<anonymous> src/commands/exec.ts:148:17
+ ❯ Command.parseAsync node_modules/.pnpm/commander@14.0.0/node_modules/commander/lib/command.js:1123:5
+ ❯ src/__tests__/commands/exec.test.ts:347:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[47/53]⎯
+
+ FAIL  src/__tests__/commands/exec.test.ts > exec command > stderr handling > should display stderr in yellow when not silent
+AssertionError: expected "error" to be called with arguments: [ 'Warning message' ][90m
+
+Received: 
+
+[1m  1st error call:
+
+[22m[2m  [[22m
+[32m-   "Warning message",[90m
+[31m+   "[90m
+[31m+ Warning message",[90m
+[2m  ][22m
+[39m[90m
+
+Number of calls: [1m1[22m
+[39m
+ ❯ src/__tests__/commands/exec.test.ts:380:31
+    378|       await execCommand.parseAsync(['node', 'exec', 'feature-1', 'echo…
+    379| 
+    380|       expect(consoleErrorSpy).toHaveBeenCalledWith(chalk.yellow('Warni…
+       |                               ^
+    381|     })
+    382|   })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[48/53]⎯
+
+ FAIL  src/__tests__/commands/where.test.ts > where command > fzf integration > should handle empty worktrees with fzf option
+AssertionError: expected [Function] to throw error including 'Process exited with code 0' but got 'Process exited with code 1'
+
+Expected: [32m"Process exited with code [7m0[27m"[39m
+Received: [31m"Process exited with code [7m1[27m"[39m
+
+ ❯ src/__tests__/commands/where.test.ts:245:7
+    243|       mockGitManager.listWorktrees.mockResolvedValue([])
+    244| 
+    245|       await expect(
+       |       ^
+    246|         whereCommand.parseAsync(['node', 'where', '--fzf'])
+    247|       ).rejects.toThrow('Process exited with code 0')
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[49/53]⎯
+
+ FAIL  src/__tests__/utils/process.test.ts > ProcessManager > signal handling > should setup signal handlers for SIGINT and SIGTERM
+AssertionError: expected 0 to be greater than 0
+ ❯ src/__tests__/utils/process.test.ts:121:34
+    119|       const sigtermCalls = processOnSpy.mock.calls.filter(call => call…
+    120|       
+    121|       expect(sigintCalls.length).toBeGreaterThan(0)
+       |                                  ^
+    122|       expect(sigtermCalls.length).toBeGreaterThan(0)
+    123|     })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[50/53]⎯
+
+ FAIL  src/__tests__/utils/process.test.ts > ProcessManager > signal handling > should handle SIGINT signal
+AssertionError: expected undefined to be defined
+ ❯ src/__tests__/utils/process.test.ts:134:30
+    132| 
+    133|       // SIGINTリスナーが存在することを確認
+    134|       expect(sigintListener).toBeDefined()
+       |                              ^
+    135|       
+    136|       // リスナーを実行
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[51/53]⎯
+
+ FAIL  src/__tests__/utils/process.test.ts > ProcessManager > signal handling > should handle SIGTERM signal
+AssertionError: expected undefined to be defined
+ ❯ src/__tests__/utils/process.test.ts:158:31
+    156| 
+    157|       // SIGTERMリスナーが存在することを確認
+    158|       expect(sigtermListener).toBeDefined()
+       |                               ^
+    159|       
+    160|       // リスナーを実行
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[52/53]⎯
+
+ FAIL  src/__tests__/utils/process.test.ts > ProcessManager > removeAllListeners > should remove all signal listeners
+AssertionError: expected 0 to be greater than 0
+ ❯ src/__tests__/utils/process.test.ts:217:40
+    215|       )
+    216|       
+    217|       expect(sigintRemoveCalls.length).toBeGreaterThan(0)
+       |                                        ^
+    218|       expect(sigtermRemoveCalls.length).toBeGreaterThan(0)
+    219|     })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[53/53]⎯
+
+
+ Test Files  6 failed | 22 passed (28)
+      Tests  53 failed | 359 passed (412)
+   Start at  02:31:21
+   Duration  13.08s (transform 1.57s, setup 676ms, collect 9.08s, tests 17.38s, environment 5ms, prepare 4.40s)
+
+ ELIFECYCLE  Test failed. See above for more details.
