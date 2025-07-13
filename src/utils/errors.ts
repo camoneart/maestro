@@ -7,30 +7,15 @@ export enum ErrorCode {
   NOT_GIT_REPOSITORY = 'NOT_GIT_REPOSITORY',
   WORKTREE_NOT_FOUND = 'WORKTREE_NOT_FOUND',
   WORKTREE_ALREADY_EXISTS = 'WORKTREE_ALREADY_EXISTS',
-  GIT_OPERATION_FAILED = 'GIT_OPERATION_FAILED',
-  BRANCH_NOT_FOUND = 'BRANCH_NOT_FOUND',
-
-  // ファイルシステム関連
-  FILE_NOT_FOUND = 'FILE_NOT_FOUND',
-  FILE_PERMISSION_DENIED = 'FILE_PERMISSION_DENIED',
-  DIRECTORY_NOT_FOUND = 'DIRECTORY_NOT_FOUND',
-
+  
   // 外部ツール関連
   EXTERNAL_TOOL_NOT_FOUND = 'EXTERNAL_TOOL_NOT_FOUND',
-  EXTERNAL_COMMAND_FAILED = 'EXTERNAL_COMMAND_FAILED',
   
   // GitHub関連
   GITHUB_AUTH_REQUIRED = 'GITHUB_AUTH_REQUIRED',
-  GITHUB_API_ERROR = 'GITHUB_API_ERROR',
   
-  // 設定関連
-  CONFIG_INVALID = 'CONFIG_INVALID',
-  CONFIG_NOT_FOUND = 'CONFIG_NOT_FOUND',
-
   // 一般的なエラー
   OPERATION_CANCELLED = 'OPERATION_CANCELLED',
-  VALIDATION_ERROR = 'VALIDATION_ERROR',
-  NETWORK_ERROR = 'NETWORK_ERROR',
   PERMISSION_DENIED = 'PERMISSION_DENIED',
   UNKNOWN_ERROR = 'UNKNOWN_ERROR'
 }
@@ -195,7 +180,7 @@ export class ErrorFactory {
     )
   }
 
-  static validationError(field: string, value: any, expected: string): ShadowCloneError {
+  static validationError(field: string, value: unknown, expected: string): ShadowCloneError {
     return new ShadowCloneError(
       `不正な値: ${field} = '${value}' (期待値: ${expected})`,
       ErrorCode.VALIDATION_ERROR
@@ -282,13 +267,13 @@ export function handleError(error: unknown, context?: string): never {
 /**
  * エラーをキャッチして適切にハンドリングするデコレーター
  */
-export function withErrorHandling<T extends any[], R>(
+export function withErrorHandling<T extends unknown[], R>(
   fn: (...args: T) => Promise<R>,
   context?: string
 ) {
-  return async (...args: T): Promise<R> => {
+  return async (..._args: T): Promise<R> => {
     try {
-      return await fn(...args)
+      return await fn(..._args)
     } catch (error) {
       handleError(error, context)
     }

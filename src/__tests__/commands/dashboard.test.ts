@@ -28,6 +28,7 @@ describe('dashboard command', () => {
   let mockSpinner: any
   let mockServer: any
   let mockCreateServer: Mock
+  let processOnSpy: SpyInstance
   let processExitSpy: SpyInstance
 
   beforeEach(() => {
