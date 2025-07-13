@@ -35,7 +35,7 @@ vi.mock('execa', () => ({
   execa: vi.fn(),
 }))
 
-describe.skip('attach command', () => {
+describe('attach command', () => {
   let consoleLogSpy: Mock
   let consoleErrorSpy: Mock
   let processExitSpy: Mock

@@ -37,7 +37,7 @@ vi.mock('child_process', () => ({
   spawn: vi.fn(),
 }))
 
-describe.skip('delete command - additional tests', () => {
+describe('delete command - additional tests', () => {
   let consoleLogSpy: Mock
   let consoleErrorSpy: Mock
   let processExitSpy: Mock
