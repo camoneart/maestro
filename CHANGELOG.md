@@ -1,8 +1,13 @@
-# shadow-clone-jutsu
+# Changelog
 
-## 0.1.0
+All notable changes to this project will be documented in this file.
 
-### Minor Changes
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [0.1.0] - 2025-07-13
+
+### Added
 
 - Initial release of shadow-clone-jutsu
 - Core features:
@@ -42,3 +47,16 @@
   - Code coverage with codecov
   - Cross-platform support (macOS, Linux, Windows)
   - Installation via npm, Homebrew, and Scoop
+
+### Security
+
+- Added security policy (SECURITY.md)
+- No hardcoded secrets or sensitive information in codebase
+- All dependencies with compatible open source licenses
+
+### Documentation
+
+- Comprehensive README with installation instructions and usage examples
+- MIT License file
+- Third-party licenses documentation
+- Security vulnerability reporting guidelines

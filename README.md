@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/hashiramaendure/shadow-clone-jutsu/actions/workflows/ci.yml/badge.svg)](https://github.com/hashiramaendure/shadow-clone-jutsu/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/hashiramaendure/shadow-clone-jutsu/branch/main/graph/badge.svg)](https://codecov.io/gh/hashiramaendure/shadow-clone-jutsu)
-[![npm version](https://badge.fury.io/js/shadow-clone-jutsu.svg)](https://badge.fury.io/js/shadow-clone-jutsu)
+[![npm version](https://badge.fury.io/js/shadow-clone-jutsu.svg)](https://www.npmjs.com/package/shadow-clone-jutsu)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 影分身の術（Git Worktree）で、Claude Codeとパラレル開発を実現するCLIツール
@@ -32,6 +32,10 @@ shadow-clone-jutsuは、Git Worktreeをより直感的に管理できるCLIツ�
 ```bash
 # 1. インストール（お好みの方法で）
 npm install -g shadow-clone-jutsu
+# または
+pnpm add -g shadow-clone-jutsu
+# または直接実行
+npx shadow-clone-jutsu
 
 # 2. プロジェクトディレクトリに移動
 cd your-git-project
@@ -142,6 +146,29 @@ git push
 
 ### インストール方法
 
+#### npm / pnpm / yarn
+
+```bash
+# npm
+npm install -g shadow-clone-jutsu
+
+# pnpm
+pnpm add -g shadow-clone-jutsu
+
+# yarn
+yarn global add shadow-clone-jutsu
+```
+
+#### npx（インストール不要）
+
+```bash
+# 直接実行
+npx shadow-clone-jutsu create feature/new-feature
+
+# エイリアスを設定して使いやすく
+alias scj='npx shadow-clone-jutsu'
+```
+
 #### Homebrew (macOS)
 
 ```bash
@@ -156,12 +183,6 @@ brew install shadow-clone-jutsu
 ```powershell
 scoop bucket add hashiramaendure https://github.com/hashiramaendure/scoop-bucket
 scoop install shadow-clone-jutsu
-```
-
-#### npm
-
-```bash
-npm install -g shadow-clone-jutsu
 ```
 
 #### ソースからインストール
@@ -798,7 +819,7 @@ git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf
 
 ## ライセンス
 
-MIT
+[MIT License](./LICENSE)
 
 ## 貢献
 
