@@ -2,10 +2,11 @@
  * shadow-clone-jutsu用の統一エラークラス
  */
 
+/* eslint-disable no-unused-vars */
 export enum ErrorCode {
   // Git関連
   NOT_GIT_REPOSITORY = 'NOT_GIT_REPOSITORY',
-  WORKTREE_NOT_FOUND = 'WORKTREE_NOT_FOUND',
+  WORKTREE_NOT_FOUND = 'WORKTREE_NOT_FOUND', 
   WORKTREE_ALREADY_EXISTS = 'WORKTREE_ALREADY_EXISTS',
   
   // 外部ツール関連
@@ -21,6 +22,7 @@ export enum ErrorCode {
   PERMISSION_DENIED = 'PERMISSION_DENIED',
   UNKNOWN_ERROR = 'UNKNOWN_ERROR'
 }
+/* eslint-enable no-unused-vars */
 
 interface SolutionSuggestion {
   message: string
@@ -270,12 +272,12 @@ export function handleError(error: unknown, context?: string): never {
  * エラーをキャッチして適切にハンドリングするデコレーター
  */
 export function withErrorHandling<T extends unknown[], R>(
-  fn: (..._args: T) => Promise<R>,
+  fn: (...args: T) => Promise<R>,
   context?: string
 ) {
-  return async (..._args: T): Promise<R> => {
+  return async (...args: T): Promise<R> => {
     try {
-      return await fn(..._args)
+      return await fn(...args)
     } catch (error) {
       handleError(error, context)
     }
