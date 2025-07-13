@@ -8,7 +8,7 @@ class ProcessManager {
   private static instance: ProcessManager
   private cleanupHandlers: Set<CleanupHandler> = new Set()
   private isExiting = false
-  private readonly listeners: Map<string, NodeJS.SignalsListener> = new Map()
+  private readonly listeners: Map<string, (() => void)> = new Map()
 
   constructor() {
     this.setupSignalHandlers()
@@ -58,7 +58,7 @@ class ProcessManager {
    * シグナルハンドラーをセットアップ
    */
   private setupSignalHandlers(): void {
-    const signals: NodeJS.Signals[] = ['SIGINT', 'SIGTERM']
+    const signals = ['SIGINT', 'SIGTERM'] as const
 
     signals.forEach(signal => {
       // 既存のリスナーを削除
@@ -66,7 +66,7 @@ class ProcessManager {
         process.removeListener(signal, this.listeners.get(signal)!)
       }
 
-      const listener: NodeJS.SignalsListener = async () => {
+      const listener = async () => {
         console.log(`\n受信したシグナル: ${signal}`)
         await this.executeCleanup()
         process.exit(0)

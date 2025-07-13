@@ -16,6 +16,8 @@ export enum ErrorCode {
   
   // 一般的なエラー
   OPERATION_CANCELLED = 'OPERATION_CANCELLED',
+  VALIDATION_ERROR = 'VALIDATION_ERROR',
+  NETWORK_ERROR = 'NETWORK_ERROR',
   PERMISSION_DENIED = 'PERMISSION_DENIED',
   UNKNOWN_ERROR = 'UNKNOWN_ERROR'
 }
@@ -268,7 +270,7 @@ export function handleError(error: unknown, context?: string): never {
  * エラーをキャッチして適切にハンドリングするデコレーター
  */
 export function withErrorHandling<T extends unknown[], R>(
-  fn: (...args: T) => Promise<R>,
+  fn: (..._args: T) => Promise<R>,
   context?: string
 ) {
   return async (..._args: T): Promise<R> => {
