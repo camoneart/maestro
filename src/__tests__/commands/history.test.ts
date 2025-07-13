@@ -146,7 +146,10 @@ describe('history command', () => {
       // ログ出力を確認して順序を検証
       const logCalls = vi.mocked(console.log).mock.calls
       const branchLogs = logCalls.filter(
-        call => call[0] && typeof call[0] === 'string' && (call[0].includes('feature-') || call[0].includes('old-branch'))
+        call =>
+          call[0] &&
+          typeof call[0] === 'string' &&
+          (call[0].includes('feature-') || call[0].includes('old-branch'))
       )
 
       // 最新の日付が最初に表示されることを確認

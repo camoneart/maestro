@@ -90,7 +90,11 @@ describe('sync command', () => {
         if (args[0] === 'symbolic-ref' && args[1] === 'refs/remotes/origin/HEAD') {
           return createMockExecaResponse('refs/remotes/origin/main')
         }
-        if (args[0] === 'branch' && args[1] === '--list' && args[2] === '--format=%(refname:short)') {
+        if (
+          args[0] === 'branch' &&
+          args[1] === '--list' &&
+          args[2] === '--format=%(refname:short)'
+        ) {
           return createMockExecaResponse('main\nfeature-a\nfeature-b')
         }
         if (args[0] === 'fetch') {

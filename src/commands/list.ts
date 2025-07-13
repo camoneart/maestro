@@ -181,7 +181,9 @@ export const listCommand = new Command('list')
         console.log(chalk.bold('\n🥷 影分身一覧:\n'))
 
         // メインワークツリーを先頭に表示
-        const mainWorktree = worktrees.find(wt => wt.branch === 'refs/heads/main' || wt.isCurrentDirectory)
+        const mainWorktree = worktrees.find(
+          wt => wt.branch === 'refs/heads/main' || wt.isCurrentDirectory
+        )
         const cloneWorktrees = worktrees.filter(wt => wt !== mainWorktree)
 
         if (mainWorktree) {

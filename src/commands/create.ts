@@ -262,7 +262,8 @@ export const createCommand = new Command('create')
             development: {
               ...config.development,
               autoSetup: templateConfig.autoSetup ?? config.development?.autoSetup ?? true,
-              syncFiles: templateConfig.syncFiles || config.development?.syncFiles || ['.env', '.env.local'],
+              syncFiles: templateConfig.syncFiles ||
+                config.development?.syncFiles || ['.env', '.env.local'],
               defaultEditor: templateConfig.editor || config.development?.defaultEditor || 'cursor',
             },
             hooks: templateConfig.hooks || config.hooks,
@@ -452,7 +453,7 @@ export const createCommand = new Command('create')
             autoStart: options.claude || config.claude?.autoStart || false,
             markdownMode: config.claude?.markdownMode || 'shared',
             initialCommands: config.claude?.initialCommands || [],
-            costOptimization: config.claude?.costOptimization
+            costOptimization: config.claude?.costOptimization,
           },
         })
       }

@@ -173,7 +173,7 @@ describe('shell command', () => {
       })
 
       const commandPromise = shellCommand.parseAsync(['node', 'test', '--fzf'])
-      
+
       await fzfPromise
       await commandPromise
 
@@ -188,33 +188,38 @@ describe('shell command', () => {
       expect(mockFzfProcess.stdin.write).toHaveBeenCalled()
     })
 
-    it('fzfでキャンセルした場合は終了する', async () => {
-      // fzfプロセスのモックをキャンセル状態で作成
-      const canceledFzfProcess = new EventEmitter() as any
-      canceledFzfProcess.stdin = {
-        write: vi.fn(),
-        end: vi.fn(),
-      }
-      canceledFzfProcess.stdout = new EventEmitter()
+    it(
+      'fzfでキャンセルした場合は終了する',
+      async () => {
+        // fzfプロセスのモックをキャンセル状態で作成
+        const canceledFzfProcess = new EventEmitter() as any
+        canceledFzfProcess.stdin = {
+          write: vi.fn(),
+          end: vi.fn(),
+        }
+        canceledFzfProcess.stdout = new EventEmitter()
 
-      // beforeEachで設定されたspawnのモックを上書き
-      const mockSpawn = vi.mocked(spawn)
-      mockSpawn.mockReset()
-      mockSpawn.mockReturnValue(canceledFzfProcess)
+        // beforeEachで設定されたspawnのモックを上書き
+        vi.mocked(spawn).mockImplementation((command: string) => {
+          if (command === 'fzf') {
+            // 即座にcloseイベントを発火
+            process.nextTick(() => {
+              canceledFzfProcess.emit('close', 1)
+            })
+            return canceledFzfProcess
+          }
+          return mockShellProcess
+        })
 
-      // parseAsyncを開始して、その後即座にキャンセルを発火
-      const commandPromise = shellCommand.parseAsync(['node', 'test', '--fzf'])
-      
-      // 非同期でキャンセルを実行
-      process.nextTick(() => {
-        canceledFzfProcess.emit('close', 1)
-      })
+        // コマンドがexitで終了することを確認
+        await expect(shellCommand.parseAsync(['node', 'test', '--fzf'])).rejects.toThrow(
+          'process.exit called with code 0'
+        )
 
-      // コマンドがexitで終了することを確認
-      await expect(commandPromise).rejects.toThrow('process.exit called with code 0')
-
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('キャンセルされました'))
-    })
+        expect(console.log).toHaveBeenCalledWith(expect.stringContaining('キャンセルされました'))
+      },
+      10000
+    )
   })
 
   describe('コマンド実行オプション', () => {

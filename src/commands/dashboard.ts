@@ -425,7 +425,10 @@ interface WorktreeMetadata {
 }
 
 // APIデータを取得
-async function getWorktreeData(): Promise<{ worktrees: EnhancedWorktree[]; stats: { active: number; needsAttention: number; githubLinked: number } }> {
+async function getWorktreeData(): Promise<{
+  worktrees: EnhancedWorktree[]
+  stats: { active: number; needsAttention: number; githubLinked: number }
+}> {
   const gitManager = new GitWorktreeManager()
   const worktrees = await gitManager.listWorktrees()
 

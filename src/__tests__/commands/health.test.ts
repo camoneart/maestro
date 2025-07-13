@@ -247,7 +247,9 @@ describe('health command', () => {
           }),
         ])
       )
-      expect(execa).toHaveBeenCalledWith('git', ['merge', 'main', '--no-edit'], 
+      expect(execa).toHaveBeenCalledWith(
+        'git',
+        ['merge', 'main', '--no-edit'],
         expect.objectContaining({ cwd: expect.any(String) })
       )
       expect(mockSpinner.succeed).toHaveBeenCalledWith('2個の問題を修正しました')

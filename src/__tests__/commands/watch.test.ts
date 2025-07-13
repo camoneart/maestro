@@ -146,9 +146,7 @@ describe('watch command', () => {
           ignoreInitial: true,
         })
       )
-      expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining('🔍 ファイル監視設定:')
-      )
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('🔍 ファイル監視設定:'))
       expect(console.log).toHaveBeenCalledWith(
         expect.stringContaining('監視パターン: **/*.ts, **/*.js, **/*.json, **/*.md')
       )
@@ -174,9 +172,7 @@ describe('watch command', () => {
         '/repo/worktree-1/src/new-file.ts',
         '/repo/worktree-2/src/new-file.ts'
       )
-      expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining('📝 追加: src/new-file.ts')
-      )
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('📝 追加: src/new-file.ts'))
       expect(console.log).toHaveBeenCalledWith(
         expect.stringContaining('✓ refs/heads/feature-b: src/new-file.ts')
       )
@@ -200,9 +196,7 @@ describe('watch command', () => {
         '/repo/worktree-1/src/existing.ts',
         '/repo/worktree-2/src/existing.ts'
       )
-      expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining('📝 変更: src/existing.ts')
-      )
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('📝 変更: src/existing.ts'))
 
       mockWatcher.emit('error', new Error('Test complete'))
     })
@@ -219,9 +213,7 @@ describe('watch command', () => {
       await new Promise(resolve => setTimeout(resolve, 1200))
 
       expect(fs.unlink).toHaveBeenCalledWith('/repo/worktree-2/src/deleted.ts')
-      expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining('🗑️  削除: src/deleted.ts')
-      )
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('🗑️  削除: src/deleted.ts'))
 
       mockWatcher.emit('error', new Error('Test complete'))
     })
@@ -236,7 +228,7 @@ describe('watch command', () => {
         '*.js',
         '*.ts',
         'lib/**/*',
-        '--all'
+        '--all',
       ])
 
       await new Promise(resolve => setTimeout(resolve, 50))
@@ -253,7 +245,7 @@ describe('watch command', () => {
         '--exclude',
         '*.test.ts',
         'dist/**',
-        '--all'
+        '--all',
       ])
 
       await new Promise(resolve => setTimeout(resolve, 50))
@@ -275,7 +267,7 @@ describe('watch command', () => {
 
       // 1つのwatcherが作成され、全てのworktreeを同期対象とする
       expect(chokidar.watch).toHaveBeenCalledTimes(1)
-      
+
       // コンソールメッセージで同期先確認
       expect(console.log).toHaveBeenCalledWith(
         expect.stringContaining('同期先: refs/heads/main, refs/heads/feature-b')
@@ -355,7 +347,11 @@ describe('watch command', () => {
       expect(fs.copyFile).not.toHaveBeenCalled()
       // スキップメッセージが出力されることを確認
       const consoleCalls = vi.mocked(console.log).mock.calls.map(call => call[0])
-      expect(consoleCalls.some(call => typeof call === 'string' && call.includes('同期をスキップしました'))).toBe(true)
+      expect(
+        consoleCalls.some(
+          call => typeof call === 'string' && call.includes('同期をスキップしました')
+        )
+      ).toBe(true)
 
       mockWatcher.emit('error', new Error('Test complete'))
     })
@@ -384,22 +380,29 @@ describe('watch command', () => {
 
     it('影分身が存在しない場合エラーを表示する', async () => {
       // 他のworktreeが存在しない場合のテスト（現在のworktreeのみ）
+      // メインworktreeと現在のworktreeの両方を含める
       mockGitManager.listWorktrees.mockResolvedValue([
+        createMockWorktree({
+          path: '/repo/.', // メインworktree
+          branch: 'refs/heads/main',
+        }),
         createMockWorktree({
           path: '/repo/worktree-1', // process.cwd() と同じパス
           branch: 'refs/heads/feature-a',
         }),
       ])
-      
+
       // configManager.loadProjectConfig がエラーを投げないように確実に設定
       mockConfigManager.loadProjectConfig.mockResolvedValue(undefined)
-      
+
       // 自分自身以外のworktreeがないため、同期先選択でエラー
       await expect(watchCommand.parseAsync(['node', 'test'])).rejects.toThrow(
         'process.exit called with code 0'
       )
 
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('他のworktreeが存在しません'))
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringContaining('他のworktreeが存在しません')
+      )
     })
 
     it('ファイル同期エラーを処理する', async () => {
@@ -454,9 +457,7 @@ describe('watch command', () => {
         expect(error).toEqual(new Error('process.exit called with code 0'))
       }
 
-      expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining('監視を終了しています...')
-      )
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('監視を終了しています...'))
       expect(mockWatcher.close).toHaveBeenCalled()
     })
   })

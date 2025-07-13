@@ -327,7 +327,7 @@ describe('snapshot command', () => {
           id: 'snapshot-123456789',
         })
       )
-      
+
       // Setup execa mock for restore process specifically for this test
       vi.mocked(execa).mockImplementation(async (cmd: string, args: string[]) => {
         if (cmd === 'git' && args[0] === 'stash' && args[1] === 'list') {
@@ -414,7 +414,9 @@ describe('snapshot command', () => {
 
       await snapshotCommand.parseAsync(['node', 'test', '--delete', 'snapshot-123'])
 
-      expect(fs.unlink).toHaveBeenCalledWith('/repo/worktree-1/.scj/snapshots/snapshot-123456789.json')
+      expect(fs.unlink).toHaveBeenCalledWith(
+        '/repo/worktree-1/.scj/snapshots/snapshot-123456789.json'
+      )
       expect(console.log).toHaveBeenCalledWith(
         expect.stringContaining("✨ スナップショット 'snapshot-123456789' を削除しました")
       )

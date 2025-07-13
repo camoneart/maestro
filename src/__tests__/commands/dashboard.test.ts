@@ -65,7 +65,7 @@ describe('dashboard command', () => {
     }
 
     // createServerのモック
-    mockCreateServer = vi.fn((handler) => {
+    mockCreateServer = vi.fn(handler => {
       // リクエストハンドラーを保存
       if (typeof handler === 'function') {
         mockServer._requestHandler = handler
@@ -127,7 +127,7 @@ describe('dashboard command', () => {
   describe('サーバー起動', () => {
     it('デフォルトポートでサーバーを起動できる', async () => {
       const promise = dashboardCommand.parseAsync(['node', 'test'])
-      
+
       // サーバーが起動するまで待つ
       await new Promise(resolve => setTimeout(resolve, 50))
 
@@ -139,7 +139,7 @@ describe('dashboard command', () => {
 
     it('カスタムポートでサーバーを起動できる', async () => {
       const promise = dashboardCommand.parseAsync(['node', 'test', '--port', '3000'])
-      
+
       // サーバーが起動するまで待つ
       await new Promise(resolve => setTimeout(resolve, 50))
 
@@ -149,7 +149,7 @@ describe('dashboard command', () => {
 
     it('デフォルトでブラウザを自動で開く', async () => {
       const promise = dashboardCommand.parseAsync(['node', 'test'])
-      
+
       // サーバーが起動するまで待つ
       await new Promise(resolve => setTimeout(resolve, 50))
 
@@ -158,7 +158,7 @@ describe('dashboard command', () => {
 
     it('--no-openオプションでブラウザを開かない', async () => {
       const promise = dashboardCommand.parseAsync(['node', 'test', '--no-open'])
-      
+
       // サーバーが起動するまで待つ
       await new Promise(resolve => setTimeout(resolve, 50))
 
@@ -172,10 +172,10 @@ describe('dashboard command', () => {
     beforeEach(async () => {
       // コマンドを一度実行してサーバーを起動
       await dashboardCommand.parseAsync(['node', 'test'])
-      
+
       // createServerが呼ばれたことを確認
       expect(mockCreateServer).toHaveBeenCalled()
-      
+
       // createServerに渡されたリクエストハンドラーを取得
       requestHandler = mockCreateServer.mock.calls[0][0] as Function
     })
@@ -309,10 +309,7 @@ describe('dashboard command', () => {
         'Access-Control-Allow-Methods',
         'GET, POST, OPTIONS'
       )
-      expect(mockRes.setHeader).toHaveBeenCalledWith(
-        'Access-Control-Allow-Headers',
-        'Content-Type'
-      )
+      expect(mockRes.setHeader).toHaveBeenCalledWith('Access-Control-Allow-Headers', 'Content-Type')
     })
 
     it('OPTIONSリクエストに対応する', async () => {
@@ -333,7 +330,7 @@ describe('dashboard command', () => {
   describe('シグナルハンドリング', () => {
     it('SIGINTハンドラーが登録される', async () => {
       const promise = dashboardCommand.parseAsync(['node', 'test'])
-      
+
       // サーバーが起動するまで待つ
       await new Promise(resolve => setTimeout(resolve, 50))
 
@@ -365,10 +362,10 @@ describe('dashboard command', () => {
       mockGitManager.listWorktrees.mockRejectedValue(new Error('Database error'))
 
       const promise = dashboardCommand.parseAsync(['node', 'test'])
-      
+
       // サーバーが起動するまで待つ
       await new Promise(resolve => setTimeout(resolve, 50))
-      
+
       const requestHandler = mockCreateServer.mock.calls[0][0] as Function
 
       const mockReq = { url: '/api/worktrees', method: 'GET' }
@@ -381,9 +378,7 @@ describe('dashboard command', () => {
       await requestHandler(mockReq, mockRes)
 
       expect(mockRes.writeHead).toHaveBeenCalledWith(500)
-      expect(mockRes.end).toHaveBeenCalledWith(
-        expect.stringContaining('Database error')
-      )
+      expect(mockRes.end).toHaveBeenCalledWith(expect.stringContaining('Database error'))
     })
 
     it('メタデータ読み込みエラーを無視する', async () => {
@@ -391,10 +386,10 @@ describe('dashboard command', () => {
       vi.mocked(fs.readFile).mockRejectedValue(new Error('File not found'))
 
       const promise = dashboardCommand.parseAsync(['node', 'test'])
-      
+
       // サーバーが起動するまで待つ
       await new Promise(resolve => setTimeout(resolve, 50))
-      
+
       const requestHandler = mockCreateServer.mock.calls[0][0] as Function
 
       const mockReq = { url: '/api/worktrees', method: 'GET' }

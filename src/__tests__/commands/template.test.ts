@@ -179,9 +179,7 @@ describe('template command', () => {
       expect(console.log).toHaveBeenCalledWith(
         expect.stringContaining("✨ テンプレート 'feature' を適用します")
       )
-      expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining('適用される設定:')
-      )
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('適用される設定:'))
     })
 
     it('カスタムファイルを含むテンプレートを表示する', async () => {
@@ -203,9 +201,7 @@ describe('template command', () => {
       expect(console.log).toHaveBeenCalledWith(
         expect.stringContaining("✨ テンプレート 'feature' を適用します")
       )
-      expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining('適用される設定:')
-      )
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('適用される設定:'))
     })
 
     it('存在しないテンプレートはエラー', async () => {
@@ -251,7 +247,6 @@ describe('template command', () => {
     })
   })
 
-
   describe('デフォルト動作', () => {
     it('オプションなしでテンプレート一覧を表示', async () => {
       await templateCommand.parseAsync(['node', 'test'])
@@ -259,9 +254,7 @@ describe('template command', () => {
       expect(console.log).toHaveBeenCalledWith(
         expect.stringContaining('📋 利用可能なテンプレート:')
       )
-      expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining('デフォルトテンプレート:')
-      )
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('デフォルトテンプレート:'))
     })
   })
 

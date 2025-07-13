@@ -141,7 +141,7 @@ describe('list command', () => {
 
       expect(jsonData).toBeInstanceOf(Array)
       expect(jsonData).toHaveLength(4)
-      
+
       // Find the main worktree (path ends with '.')
       const mainWorktree = jsonData.find((wt: any) => wt.path === '/repo/.')
       expect(mainWorktree).toBeDefined()
@@ -214,10 +214,15 @@ describe('list command', () => {
 
       const logCalls = vi.mocked(console.log).mock.calls
       const output = logCalls.map(call => call[0]).join('\n')
-      
+
       // ブランチ情報を含む行を抽出
       const branchLines = logCalls
-        .filter(call => typeof call[0] === 'string' && call[0].includes('refs/heads/') && !call[0].includes('main'))
+        .filter(
+          call =>
+            typeof call[0] === 'string' &&
+            call[0].includes('refs/heads/') &&
+            !call[0].includes('main')
+        )
         .map(call => call[0])
 
       // feature-a, feature-b, feature-c の順でソートされていることを確認
@@ -248,7 +253,7 @@ describe('list command', () => {
       // regardless of sorting. This test verifies that the sort option runs without error.
       const logCalls = vi.mocked(console.log).mock.calls
       const output = logCalls.map(call => call[0]).join('\n')
-      
+
       // Verify that all expected branches are in the output
       expect(output).toContain('refs/heads/feature-b')
       expect(output).toContain('refs/heads/main')

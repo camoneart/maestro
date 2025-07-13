@@ -231,7 +231,7 @@ export const shellCommand = new Command('shell')
             console.error(chalk.red('エラー: targetWorktreeが未定義です'))
             process.exit(1)
           }
-          
+
           // シェルを自動判定
           const shell = getShell()
           const shellEnv = getShellEnv(shell, branchName!)
