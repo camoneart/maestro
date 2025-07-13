@@ -10,6 +10,9 @@ dist/
 *.js.map
 *.d.ts.map
 
+# Build cache
+.tsup-cache/
+
 # Logs
 *.log
 npm-debug.log*

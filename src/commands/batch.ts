@@ -3,10 +3,11 @@ import chalk from 'chalk'
 import ora from 'ora'
 import inquirer from 'inquirer'
 import { GitWorktreeManager } from '../core/git.js'
-import { ConfigManager } from '../core/config.js'
+import { ConfigManager, Config } from '../core/config.js'
 import { execa } from 'execa'
 import path from 'path'
 import fs from 'fs/promises'
+import pLimit from 'p-limit'
 
 interface BatchCreateOptions {
   base?: string
@@ -16,6 +17,7 @@ interface BatchCreateOptions {
   claude?: boolean
   fromFile?: string
   interactive?: boolean
+  concurrency?: number
 }
 
 interface BatchWorktree {
@@ -23,6 +25,18 @@ interface BatchWorktree {
   description?: string
   issueNumber?: string
   prNumber?: string
+}
+
+// GitHub Issue型定義
+interface GithubLabel {
+  name: string
+}
+
+interface GithubIssue {
+  number: number
+  title: string
+  labels: GithubLabel[]
+  assignees: Array<{ login: string }>
 }
 
 // ファイルから一括作成リストを読み込む
@@ -83,10 +97,10 @@ async function selectIssues(): Promise<BatchWorktree[]> {
         type: 'checkbox',
         name: 'selectedIssues',
         message: '作業するIssueを選択（スペースで選択、Enterで確定）:',
-        choices: issues.map((issue: any) => ({
+        choices: issues.map((issue: GithubIssue) => ({
           name: `#${issue.number} ${issue.title} ${
             issue.labels.length > 0
-              ? chalk.gray(`[${issue.labels.map((l: any) => l.name).join(', ')}]`)
+              ? chalk.gray(`[${issue.labels.map((l: GithubLabel) => l.name).join(', ')}]`)
               : ''
           }`,
           value: {
@@ -147,7 +161,7 @@ async function inputBatchWorktrees(): Promise<BatchWorktree[]> {
 async function createWorktreesInParallel(
   worktrees: BatchWorktree[],
   gitManager: GitWorktreeManager,
-  config: any,
+  config: Config,
   options: BatchCreateOptions
 ): Promise<void> {
   const results: Array<{
@@ -159,58 +173,67 @@ async function createWorktreesInParallel(
 
   console.log(chalk.bold(`\n🥷 ${worktrees.length}つの影分身を並列で作り出します...\n`))
 
+  // 並列実行制限を設定
+  const concurrency = options.concurrency || 5
+  const limit = pLimit(concurrency)
+
   // 並列実行
-  const promises = worktrees.map(async worktree => {
-    const spinner = ora(`${worktree.name} を作成中...`).start()
+  const promises = worktrees.map(worktree =>
+    limit(async () => {
+      const spinner = ora(`${worktree.name} を作成中...`).start()
 
-    try {
-      // ブランチ名にプレフィックスを追加
-      let branchName = worktree.name
-      if (config.worktrees?.branchPrefix && !branchName.startsWith(config.worktrees.branchPrefix)) {
-        branchName = config.worktrees.branchPrefix + branchName
-      }
-
-      // ワークツリーを作成
-      const worktreePath = await gitManager.createWorktree(branchName, options.base)
-
-      // 環境セットアップ（必要な場合）
-      if (options.setup || (options.setup === undefined && config.development?.autoSetup)) {
-        try {
-          await execa('npm', ['install'], { cwd: worktreePath })
-        } catch {
-          // npm installが失敗してもworktree作成は成功とする
+      try {
+        // ブランチ名にプレフィックスを追加
+        let branchName = worktree.name
+        if (
+          config.worktrees?.branchPrefix &&
+          !branchName.startsWith(config.worktrees.branchPrefix)
+        ) {
+          branchName = config.worktrees.branchPrefix + branchName
         }
 
-        // 同期ファイルのコピー
-        if (config.development?.syncFiles) {
-          for (const file of config.development.syncFiles) {
-            try {
-              const sourcePath = path.join(process.cwd(), file)
-              const destPath = path.join(worktreePath, file)
-              await fs.copyFile(sourcePath, destPath)
-            } catch {
-              // ファイルコピーエラーは無視
+        // ワークツリーを作成
+        const worktreePath = await gitManager.createWorktree(branchName, options.base)
+
+        // 環境セットアップ（必要な場合）
+        if (options.setup || (options.setup === undefined && config.development?.autoSetup)) {
+          try {
+            await execa('npm', ['install'], { cwd: worktreePath })
+          } catch {
+            // npm installが失敗してもworktree作成は成功とする
+          }
+
+          // 同期ファイルのコピー
+          if (config.development?.syncFiles) {
+            for (const file of config.development.syncFiles) {
+              try {
+                const sourcePath = path.join(process.cwd(), file)
+                const destPath = path.join(worktreePath, file)
+                await fs.copyFile(sourcePath, destPath)
+              } catch {
+                // ファイルコピーエラーは無視
+              }
             }
           }
         }
+
+        spinner.succeed(`${worktree.name} を作成しました`)
+
+        results.push({
+          worktree,
+          status: 'success',
+          path: worktreePath,
+        })
+      } catch (error) {
+        spinner.fail(`${worktree.name} の作成に失敗しました`)
+        results.push({
+          worktree,
+          status: 'failed',
+          error: error instanceof Error ? error.message : '不明なエラー',
+        })
       }
-
-      spinner.succeed(`${worktree.name} を作成しました`)
-
-      results.push({
-        worktree,
-        status: 'success',
-        path: worktreePath,
-      })
-    } catch (error) {
-      spinner.fail(`${worktree.name} の作成に失敗しました`)
-      results.push({
-        worktree,
-        status: 'failed',
-        error: error instanceof Error ? error.message : '不明なエラー',
-      })
-    }
-  })
+    })
+  )
 
   await Promise.all(promises)
 
@@ -279,6 +302,7 @@ export const batchCommand = new Command('batch')
   .option('-f, --from-file <path>', 'バッチファイルから読み込む')
   .option('-i, --interactive', 'インタラクティブモードで入力')
   .option('--from-issues', 'GitHub Issuesから選択')
+  .option('-c, --concurrency <number>', '並列実行数 (デフォルト: 5)', parseInt)
   .action(async (options: BatchCreateOptions) => {
     const spinner = ora('準備中...').start()
 

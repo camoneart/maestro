@@ -11,6 +11,26 @@ interface SnapshotOptions {
   message?: string
   stash?: boolean
   all?: boolean
+  json?: boolean
+}
+
+// worktreeメタデータ型定義
+interface WorktreeMetadata {
+  createdAt: string
+  branch: string
+  worktreePath: string
+  github?: {
+    type: 'issue' | 'pr'
+    title: string
+    body: string
+    author: string
+    labels: string[]
+    assignees: string[]
+    milestone?: string
+    url: string
+    issueNumber?: string
+  }
+  template?: string
 }
 
 interface WorktreeSnapshot {
@@ -38,7 +58,7 @@ interface WorktreeSnapshot {
     author: string
     date: string
   }
-  metadata?: any
+  metadata?: WorktreeMetadata
 }
 
 // スナップショットIDを生成
@@ -127,8 +147,10 @@ async function getLastCommitInfo(worktreePath: string): Promise<WorktreeSnapshot
 }
 
 // スナップショットを作成
+import { Worktree } from '../types/index.js'
+
 async function createSnapshot(
-  worktree: any,
+  worktree: Worktree,
   message: string,
   includeStash: boolean
 ): Promise<WorktreeSnapshot> {
@@ -315,6 +337,7 @@ export const snapshotCommand = new Command('snapshot')
   .option('-l, --list', 'スナップショット一覧を表示')
   .option('-r, --restore <id>', 'スナップショットを復元')
   .option('-d, --delete <id>', 'スナップショットを削除')
+  .option('-j, --json', 'JSON形式で出力')
   .action(
     async (options: SnapshotOptions & { list?: boolean; restore?: string; delete?: string }) => {
       try {
@@ -330,6 +353,31 @@ export const snapshotCommand = new Command('snapshot')
         // スナップショット一覧を表示
         if (options.list) {
           const snapshots = await listSnapshots()
+
+          if (options.json) {
+            // JSON形式で出力
+            const jsonOutput = snapshots.map(snapshot => ({
+              id: snapshot.id,
+              branch: snapshot.branch,
+              worktreePath: snapshot.worktreePath,
+              createdAt: snapshot.createdAt,
+              message: snapshot.message,
+              gitStatus: {
+                branch: snapshot.gitStatus.branch,
+                tracking: snapshot.gitStatus.tracking,
+                ahead: snapshot.gitStatus.ahead,
+                behind: snapshot.gitStatus.behind,
+                staged: snapshot.gitStatus.staged.length,
+                modified: snapshot.gitStatus.modified.length,
+                untracked: snapshot.gitStatus.untracked.length,
+              },
+              hasStash: !!snapshot.stash,
+              lastCommit: snapshot.lastCommit,
+              metadata: snapshot.metadata || null,
+            }))
+            console.log(JSON.stringify(jsonOutput, null, 2))
+            return
+          }
 
           if (snapshots.length === 0) {
             console.log(chalk.yellow('スナップショットが存在しません'))

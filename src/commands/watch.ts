@@ -8,6 +8,7 @@ import chokidar from 'chokidar'
 import path from 'path'
 import fs from 'fs/promises'
 import { createHash } from 'crypto'
+import { processManager } from '../utils/process.js'
 
 interface WatchOptions {
   patterns?: string[]
@@ -47,10 +48,12 @@ function isExcluded(filePath: string, excludePatterns: string[]): boolean {
 }
 
 // ファイル変更を他のworktreeに同期
+import { Worktree } from '../types/index.js'
+
 async function syncFileChange(
   change: FileChange,
   sourceWorktree: string,
-  targetWorktrees: any[],
+  targetWorktrees: Worktree[],
   dryRun: boolean
 ): Promise<void> {
   const relativePath = path.relative(sourceWorktree, change.path)
@@ -105,12 +108,8 @@ async function syncFileChange(
 
 export const watchCommand = new Command('watch')
   .description('ファイル変更を監視して他のworktreeに自動同期')
-  .option('-p, --patterns <patterns...>', '監視するファイルパターン', ['*.ts', '*.js', '*.json'])
-  .option('-e, --exclude <patterns...>', '除外するパターン', [
-    'node_modules/**',
-    '.git/**',
-    'dist/**',
-  ])
+  .option('-p, --patterns <patterns...>', '監視するファイルパターン')
+  .option('-e, --exclude <patterns...>', '除外するパターン')
   .option('-a, --all', '全てのworktreeに同期')
   .option('-d, --dry', 'ドライラン（実際の同期は行わない）')
   .option('--auto', '確認なしで自動同期')
@@ -142,7 +141,7 @@ export const watchCommand = new Command('watch')
       spinner.stop()
 
       // 同期先を選択
-      let targetWorktrees: any[] = []
+      let targetWorktrees: Worktree[] = []
 
       if (options.all) {
         targetWorktrees = worktrees.filter(wt => wt.path !== currentPath)
@@ -176,7 +175,7 @@ export const watchCommand = new Command('watch')
       }
 
       // 監視設定
-      const patterns = options.patterns || ['*.ts', '*.js', '*.json', '*.md']
+      const patterns = options.patterns || ['**/*.ts', '**/*.js', '**/*.json', '**/*.md']
       const excludePatterns = options.exclude || [
         'node_modules/**',
         '.git/**',
@@ -296,11 +295,13 @@ export const watchCommand = new Command('watch')
           console.error(chalk.red(`監視エラー: ${error}`))
         })
 
-      // 終了処理
-      process.on('SIGINT', () => {
-        console.log(chalk.yellow('\n\n監視を終了しています...'))
-        watcher.close()
-        process.exit(0)
+      // watcherのクリーンアップを登録
+      processManager.addCleanupHandler(async () => {
+        console.log(chalk.yellow('\n監視を終了しています...'))
+        await watcher.close()
+        if (syncTimeout) {
+          clearTimeout(syncTimeout)
+        }
       })
     } catch (error) {
       spinner.fail('エラーが発生しました')
