@@ -827,6 +827,8 @@ git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf
 
 プルリクエストも歓迎します！
 
+[貢献ガイドライン](./CONTRIBUTING.md) | [Code of Conduct](./CODE_OF_CONDUCT.md)
+
 ---
 
 🥷 Happy parallel development with shadow-clone-jutsu!
