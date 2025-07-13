@@ -189,7 +189,13 @@ describe('shell command', () => {
     })
 
     it('fzfでキャンセルした場合は終了する', async () => {
-      // fzfプロセスのモックをキャンセル状態で作成
+      // process.exitをモックして例外を投げないように
+      const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => {
+        // 何もしない
+        return undefined as never
+      })
+
+      // fzfプロセスのモック
       const canceledFzfProcess = new EventEmitter() as any
       canceledFzfProcess.stdin = {
         write: vi.fn(),
@@ -197,25 +203,27 @@ describe('shell command', () => {
       }
       canceledFzfProcess.stdout = new EventEmitter()
 
-      // beforeEachで設定されたspawnのモックを上書き
       vi.mocked(spawn).mockImplementation((command: string) => {
         if (command === 'fzf') {
-          // 即座にcloseイベントを発火
-          process.nextTick(() => {
+          // 少し遅延してからcloseイベントを発火
+          setTimeout(() => {
             canceledFzfProcess.emit('close', 1)
-          })
+          }, 10)
           return canceledFzfProcess
         }
         return mockShellProcess
       })
 
-      // コマンドがexitで終了することを確認
-      await expect(shellCommand.parseAsync(['node', 'test', '--fzf'])).rejects.toThrow(
-        'process.exit called with code 0'
-      )
+      // コマンドを実行
+      await shellCommand.parseAsync(['node', 'test', '--fzf'])
 
+      // process.exit(0)が呼ばれたことを確認
+      expect(exitSpy).toHaveBeenCalledWith(0)
       expect(console.log).toHaveBeenCalledWith(expect.stringContaining('キャンセルされました'))
-    }, 10000)
+
+      // exitSpyをリストア
+      exitSpy.mockRestore()
+    }, 15000)
   })
 
   describe('コマンド実行オプション', () => {

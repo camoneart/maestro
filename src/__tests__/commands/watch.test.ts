@@ -378,31 +378,31 @@ describe('watch command', () => {
       expect(mockSpinner.fail).toHaveBeenCalledWith('現在のディレクトリはworktreeではありません')
     })
 
-    it('影分身が存在しない場合エラーを表示する', async () => {
-      // 他のworktreeが存在しない場合のテスト（現在のworktreeのみ）
-      // メインworktreeと現在のworktreeの両方を含める
+    it('他のworktreeが存在しない場合メッセージを表示する', async () => {
+      // 現在のworktreeのみが存在する場合
       mockGitManager.listWorktrees.mockResolvedValue([
-        createMockWorktree({
-          path: '/repo/.', // メインworktree
-          branch: 'refs/heads/main',
-        }),
         createMockWorktree({
           path: '/repo/worktree-1', // process.cwd() と同じパス
           branch: 'refs/heads/feature-a',
         }),
       ])
 
-      // configManager.loadProjectConfig がエラーを投げないように確実に設定
-      mockConfigManager.loadProjectConfig.mockResolvedValue(undefined)
+      // process.exitをモックして例外を投げないように
+      const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => {
+        return undefined as never
+      })
 
-      // 自分自身以外のworktreeがないため、同期先選択でエラー
-      await expect(watchCommand.parseAsync(['node', 'test'])).rejects.toThrow(
-        'process.exit called with code 0'
-      )
+      // コマンドを実行
+      await watchCommand.parseAsync(['node', 'test'])
 
+      // 他のworktreeがないため、exit(0)で終了
+      expect(exitSpy).toHaveBeenCalledWith(0)
       expect(console.log).toHaveBeenCalledWith(
         expect.stringContaining('他のworktreeが存在しません')
       )
+
+      // exitSpyをリストア
+      exitSpy.mockRestore()
     })
 
     it('ファイル同期エラーを処理する', async () => {
