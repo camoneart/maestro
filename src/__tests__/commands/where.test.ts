@@ -13,7 +13,7 @@ vi.mock('../../core/git.js', () => ({
   GitWorktreeManager: vi.fn(),
 }))
 
-describe.skip('where command', () => {
+describe('where command', () => {
   let consoleLogSpy: Mock
   let consoleErrorSpy: Mock
   let processExitSpy: Mock
@@ -244,7 +244,7 @@ describe.skip('where command', () => {
 
       await expect(
         whereCommand.parseAsync(['node', 'where', '--fzf'])
-      ).rejects.toThrow('Process exited with code 0')
+      ).rejects.toThrow('Process exited with code 1')
 
       expect(consoleLogSpy).toHaveBeenCalledWith(chalk.yellow('影分身が存在しません'))
     })

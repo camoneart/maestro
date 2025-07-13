@@ -13,7 +13,7 @@ vi.mock('execa', () => ({
   execa: vi.fn(),
 }))
 
-describe.skip('exec command', () => {
+describe('exec command', () => {
   let consoleLogSpy: Mock
   let consoleErrorSpy: Mock
   let processExitSpy: Mock
@@ -70,7 +70,7 @@ describe.skip('exec command', () => {
           }),
         })
       )
-      expect(consoleLogSpy).toHaveBeenCalledWith('Command output')
+      expect(consoleLogSpy).toHaveBeenCalledWith('\nCommand output')
     })
 
     it('should execute command in all worktrees with --all option', async () => {
@@ -180,7 +180,7 @@ describe.skip('exec command', () => {
 
       await expect(
         execCommand.parseAsync(['node', 'exec', 'feature-1', 'echo', 'hello'])
-      ).rejects.toThrow('Process exited with code 0')
+      ).rejects.toThrow('Process exited with code 1')
 
       expect(consoleLogSpy).toHaveBeenCalledWith(chalk.yellow('影分身が存在しません'))
       expect(consoleLogSpy).toHaveBeenCalledWith(
@@ -235,7 +235,7 @@ describe.skip('exec command', () => {
       ).rejects.toThrow('Process exited with code 1')
 
       expect(consoleErrorSpy).toHaveBeenCalledWith(
-        chalk.red('コマンドの実行に失敗しました (exit code: 1)')
+        chalk.red('\nコマンドが失敗しました (exit code: 1)')
       )
       expect(consoleErrorSpy).toHaveBeenCalledWith(chalk.red('Error message'))
     })
@@ -344,7 +344,7 @@ describe.skip('exec command', () => {
         stderr: '',
       })
 
-      await execCommand.parseAsync(['node', 'exec', 'auth', 'echo', 'hello'])
+      await execCommand.parseAsync(['node', 'exec', 'feature/auth', 'echo', 'hello'])
 
       expect(execa).toHaveBeenCalledWith(
         'sh',
@@ -377,7 +377,7 @@ describe.skip('exec command', () => {
 
       await execCommand.parseAsync(['node', 'exec', 'feature-1', 'echo', 'hello'])
 
-      expect(consoleErrorSpy).toHaveBeenCalledWith(chalk.yellow('Warning message'))
+      expect(consoleErrorSpy).toHaveBeenCalledWith('\n' + chalk.yellow('Warning message'))
     })
   })
 })
