@@ -4,6 +4,12 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { CallToolRequestSchema, ListToolsRequestSchema } from '@modelcontextprotocol/sdk/types.js'
 import { z } from 'zod'
 import { GitWorktreeManager } from '../core/git.js'
+import { readFileSync } from 'fs'
+import { fileURLToPath } from 'url'
+import { dirname, join } from 'path'
+
+const __dirname = dirname(fileURLToPath(import.meta.url))
+const packageJson = JSON.parse(readFileSync(join(__dirname, '../../package.json'), 'utf-8'))
 
 // ツールのスキーマ定義
 const CreateWorktreeArgsSchema = z.object({
@@ -25,7 +31,7 @@ const ExecInWorktreeArgsSchema = z.object({
 const server = new Server(
   {
     name: 'shadow-clone-jutsu',
-    version: '0.1.0',
+    version: packageJson.version,
   },
   {
     capabilities: {

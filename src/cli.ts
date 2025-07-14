@@ -1,6 +1,12 @@
 #!/usr/bin/env node
 import { Command } from 'commander'
 import chalk from 'chalk'
+import { readFileSync } from 'fs'
+import { fileURLToPath } from 'url'
+import { dirname, join } from 'path'
+
+const __dirname = dirname(fileURLToPath(import.meta.url))
+const packageJson = JSON.parse(readFileSync(join(__dirname, '../package.json'), 'utf-8'))
 import { createCommand } from './commands/create.js'
 import { listCommand } from './commands/list.js'
 import { deleteCommand } from './commands/delete.js'
@@ -31,7 +37,7 @@ const program = new Command()
 program
   .name('scj')
   .description('🥷 shadow-clone-jutsu - 影分身の術でClaude Codeとパラレル開発')
-  .version('0.1.0')
+  .version(packageJson.version)
 
 // サブコマンドを追加
 program.addCommand(createCommand)
