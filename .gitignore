@@ -9,9 +9,17 @@ dist/
 *.d.ts
 *.js.map
 *.d.ts.map
+output.txt
+test-results.json
 
 # Build cache
 .tsup-cache/
+.vitest/
+.eslintcache
+*.tsbuildinfo
+.vscode-test/
+.history/
+.cache/
 
 # Logs
 *.log
@@ -19,6 +27,7 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+**/.pnpm-debug.log*
 
 # OS files
 .DS_Store
@@ -39,11 +48,18 @@ Thumbs.db
 # Test coverage
 coverage/
 .nyc_output/
+coverage-final.json
+*.lcov
+lcov-report/
 
 # Temporary files
 tmp/
 temp/
 *.tmp
+*.pid
+*.orig
+*.gz
+*.tgz
 
 # shadow-clone-jutsu specific
 .shadow-clones/
