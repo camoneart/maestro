@@ -20,12 +20,15 @@ export default defineConfig({
         '**/mockData/**',
         '**/__tests__/**',
         'tests/**',
+        'src/cli.ts',
+        'src/index.ts',
+        'src/bin/**',
       ],
       thresholds: {
-        statements: 70.5,
+        statements: 80,
         branches: 75,
-        functions: 71.5,
-        lines: 70.5
+        functions: 75,
+        lines: 80
       }
     },
   },

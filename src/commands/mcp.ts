@@ -57,7 +57,7 @@ export const mcpCommand = new Command('mcp')
 
     // MCPサーバープロセスのクリーンアップを登録
     processManager.addCleanupHandler(() => {
-      if (!serverProcess.killed) {
+      if (serverProcess && !serverProcess.killed && typeof serverProcess.kill === 'function') {
         serverProcess.kill('SIGTERM')
       }
     })
