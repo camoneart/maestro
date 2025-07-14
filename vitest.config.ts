@@ -13,6 +13,8 @@ export default defineConfig({
       exclude: [
         'node_modules/',
         'dist/',
+        'scripts/',
+        'src/types/',
         '**/*.d.ts',
         '**/*.config.*',
         '**/mockData/**',
@@ -20,10 +22,10 @@ export default defineConfig({
         'tests/**',
       ],
       thresholds: {
-        statements: 70,
+        statements: 70.5,
         branches: 75,
-        functions: 70,
-        lines: 70
+        functions: 71.5,
+        lines: 70.5
       }
     },
   },
