@@ -1,6 +1,6 @@
 {
   "name": "shadow-clone-jutsu",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "影分身の術(Git Worktree)で、Claude Codeとパラレル開発を実現するツール",
   "type": "module",
   "bin": {
@@ -31,8 +31,16 @@
     "claude",
     "development-tools"
   ],
-  "author": "",
+  "author": "hashiramaendure",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hashiramaendure/shadow-clone-jutsu.git"
+  },
+  "homepage": "https://github.com/hashiramaendure/shadow-clone-jutsu#readme",
+  "bugs": {
+    "url": "https://github.com/hashiramaendure/shadow-clone-jutsu/issues"
+  },
   "packageManager": "pnpm@10.13.1",
   "engines": {
     "node": ">=20.0.0"
