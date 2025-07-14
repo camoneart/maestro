@@ -6,6 +6,18 @@ This project uses the following open source packages with their respective licen
 
 The majority of dependencies use the MIT License, which is compatible with this project's MIT License.
 
+### Main Dependencies (MIT)
+
+- @modelcontextprotocol/sdk - Model Context Protocol SDK by Anthropic
+- chalk - Terminal string styling
+- commander - Node.js command-line interfaces
+- execa - A better child_process
+- inquirer - Interactive command line user interfaces
+- ora - Elegant terminal spinner
+- p-limit - Run multiple promise-returning & async functions with limited concurrency
+- simple-git - A light weight interface for running git commands
+- zod - TypeScript-first schema validation
+
 ## Apache License 2.0
 
 The following packages are licensed under Apache-2.0:
