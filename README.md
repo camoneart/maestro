@@ -27,23 +27,48 @@ shadow-clone-jutsuは、Git Worktreeをより直感的に管理できるCLIツ�
 
 ## Getting Started
 
+### インストール
+
+#### npm / pnpm / yarn
+
+```bash
+# npm
+npm install -g shadow-clone-jutsu
+
+# pnpm (推奨)
+pnpm add -g shadow-clone-jutsu
+
+# yarn
+yarn global add shadow-clone-jutsu
+
+# または直接実行
+npx shadow-clone-jutsu
+```
+
+#### Homebrew (macOS/Linux)
+
+```bash
+brew tap hashiramaendure/tap
+brew install shadow-clone-jutsu
+```
+
+#### Scoop (Windows)
+
+```bash
+scoop bucket add hashiramaendure https://github.com/hashiramaendure/scoop-bucket
+scoop install shadow-clone-jutsu
+```
+
 ### クイックスタート
 
 ```bash
-# 1. インストール（お好みの方法で）
-npm install -g shadow-clone-jutsu
-# または
-pnpm add -g shadow-clone-jutsu
-# または直接実行
-npx shadow-clone-jutsu
-
-# 2. プロジェクトディレクトリに移動
+# 1. プロジェクトディレクトリに移動
 cd your-git-project
 
-# 3. 新しい影分身（worktree）を作成
+# 2. 新しい影分身（worktree）を作成
 scj create feature/awesome-feature
 
-# 4. 作成した影分身で作業を開始
+# 3. 作成した影分身で作業を開始
 scj shell feature/awesome-feature
 ```
 
@@ -816,6 +841,22 @@ brew install fzf
 git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf
 ~/.fzf/install
 ```
+
+## ドキュメント
+
+### コマンドリファレンス
+
+各コマンドの詳細な使い方とオプションについては、以下のドキュメントを参照してください：
+
+- [`batch`](./docs/commands/batch.md) - 複数のworktreeを一括作成
+- [`create`](./docs/commands/create.md) - 新しいworktreeを作成
+- [`delete`](./docs/commands/delete.md) - worktreeを削除
+- [`github`](./docs/commands/github.md) - GitHub Issues/PRからworktreeを作成
+- [`health`](./docs/commands/health.md) - worktreeの健全性をチェック
+- [`history`](./docs/commands/history.md) - Claude Codeの会話履歴を管理
+- [`list`](./docs/commands/list.md) - worktree一覧を表示
+- [`snapshot`](./docs/commands/snapshot.md) - worktreeのスナップショットを管理
+- [`sync`](./docs/commands/sync.md) - worktree間でファイルを同期
 
 ## ライセンス
 
