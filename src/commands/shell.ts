@@ -1,7 +1,6 @@
 import { Command } from 'commander'
 import chalk from 'chalk'
 import { GitWorktreeManager } from '../core/git.js'
-import { Worktree } from '../types/index.js'
 import { spawn } from 'child_process'
 import inquirer from 'inquirer'
 import { execa } from 'execa'
@@ -35,8 +34,6 @@ export const shellCommand = new Command('shell')
           console.log(chalk.gray('scj create <branch-name> で影分身を作り出してください'))
           process.exit(0)
         }
-
-        let targetWorktree: Worktree | undefined
 
         // ブランチ名が指定されていない場合は選択
         if (!branchName) {
@@ -115,7 +112,7 @@ export const shellCommand = new Command('shell')
         }
 
         // 指定されたブランチのworktreeを探す
-        targetWorktree = shadowClones.find(wt => {
+        const targetWorktree = shadowClones.find(wt => {
           const branch = wt.branch?.replace('refs/heads/', '')
           return branch === branchName || wt.branch === branchName
         })

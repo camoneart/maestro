@@ -80,22 +80,20 @@ export const attachCommand = new Command('attach')
             },
           ])
           branchName = selectedBranch
-        } else {
+        } else if (!availableBranches.includes(branchName)) {
           // 指定されたブランチが存在するか確認
-          if (!availableBranches.includes(branchName)) {
-            console.error(chalk.red(`エラー: ブランチ '${branchName}' が見つかりません`))
+          console.error(chalk.red(`エラー: ブランチ '${branchName}' が見つかりません`))
 
-            // 類似した名前を提案
-            const similarBranches = availableBranches.filter(b => b.includes(branchName || ''))
-            if (similarBranches.length > 0) {
-              console.log(chalk.yellow('\n利用可能なブランチ:'))
-              similarBranches.forEach(branch => {
-                console.log(`  - ${chalk.cyan(branch)}`)
-              })
-            }
-
-            process.exit(1)
+          // 類似した名前を提案
+          const similarBranches = availableBranches.filter(b => b.includes(branchName || ''))
+          if (similarBranches.length > 0) {
+            console.log(chalk.yellow('\n利用可能なブランチ:'))
+            similarBranches.forEach(branch => {
+              console.log(`  - ${chalk.cyan(branch)}`)
+            })
           }
+
+          process.exit(1)
         }
 
         spinner.start(`影分身を作り出し中...`)

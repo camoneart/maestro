@@ -323,54 +323,52 @@ export const tmuxCommand = new Command('tmux')
               }
             }
           }
-        } else {
+        } else if (options?.newWindow) {
           // tmux内から実行された場合
-          if (options?.newWindow) {
-            // 新しいウィンドウで開く
-            const windowArgs = ['new-window', '-n', selectedBranch || '', '-c', selectedPath]
+          // 新しいウィンドウで開く
+          const windowArgs = ['new-window', '-n', selectedBranch || '', '-c', selectedPath]
 
-            // エディタオプションが指定されている場合
-            if (options.editor) {
-              const editorCmd = getEditorCommand(options.editor)
-              if (editorCmd) {
-                windowArgs.push(editorCmd)
-              }
+          // エディタオプションが指定されている場合
+          if (options.editor) {
+            const editorCmd = getEditorCommand(options.editor)
+            if (editorCmd) {
+              windowArgs.push(editorCmd)
             }
+          }
 
-            await execa('tmux', windowArgs)
-            console.log(chalk.green(`✨ 新しいウィンドウ '${selectedBranch}' を開きました`))
-          } else if (options?.splitPane) {
-            // ペインを分割して開く
-            const splitOption = options?.vertical ? '-h' : '-v'
-            const paneArgs = ['split-window', splitOption, '-c', selectedPath]
+          await execa('tmux', windowArgs)
+          console.log(chalk.green(`✨ 新しいウィンドウ '${selectedBranch}' を開きました`))
+        } else if (options?.splitPane) {
+          // ペインを分割して開く
+          const splitOption = options?.vertical ? '-h' : '-v'
+          const paneArgs = ['split-window', splitOption, '-c', selectedPath]
 
-            // エディタオプションが指定されている場合
-            if (options.editor) {
-              const editorCmd = getEditorCommand(options.editor)
-              if (editorCmd) {
-                paneArgs.push(editorCmd)
-              }
+          // エディタオプションが指定されている場合
+          if (options.editor) {
+            const editorCmd = getEditorCommand(options.editor)
+            if (editorCmd) {
+              paneArgs.push(editorCmd)
             }
+          }
 
-            await execa('tmux', paneArgs)
-            console.log(
-              chalk.green(
-                `✨ ペインを${options?.vertical ? '垂直' : '水平'}分割して '${selectedBranch}' を開きました`
-              )
+          await execa('tmux', paneArgs)
+          console.log(
+            chalk.green(
+              `✨ ペインを${options?.vertical ? '垂直' : '水平'}分割して '${selectedBranch}' を開きました`
             )
-          } else {
-            // デフォルト: 現在のペインでディレクトリを変更
-            console.log(chalk.green(`\n✨ 影分身 '${selectedBranch}' を選択しました`))
-            console.log(chalk.gray(`cd ${selectedPath} で移動してください`))
+          )
+        } else {
+          // デフォルト: 現在のペインでディレクトリを変更
+          console.log(chalk.green(`\n✨ 影分身 '${selectedBranch}' を選択しました`))
+          console.log(chalk.gray(`cd ${selectedPath} で移動してください`))
 
-            // エディタ起動オプションが指定されている場合
-            if (options.editor) {
-              const editorCmd = getEditorCommand(options.editor)
-              if (editorCmd) {
-                console.log(chalk.gray(`エディタを起動: ${editorCmd}`))
-                // 現在のディレクトリでエディタを起動
-                await execa('tmux', ['send-keys', `cd ${selectedPath} && ${editorCmd}`, 'Enter'])
-              }
+          // エディタ起動オプションが指定されている場合
+          if (options.editor) {
+            const editorCmd = getEditorCommand(options.editor)
+            if (editorCmd) {
+              console.log(chalk.gray(`エディタを起動: ${editorCmd}`))
+              // 現在のディレクトリでエディタを起動
+              await execa('tmux', ['send-keys', `cd ${selectedPath} && ${editorCmd}`, 'Enter'])
             }
           }
         }
