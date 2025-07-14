@@ -126,7 +126,7 @@ const defaultTemplates: WorktreeTemplate[] = [
       customFiles: [
         {
           path: 'NOTES.md',
-          content: '# ドキュメント作成メモ\n\n## TODO\n- [ ] \n',
+          content: '# ドキュメント作成メモ\n\n## 作業ログ\n- [ ] 要件整理\n- [ ] 設計検討\n- [ ] 実装方針決定\n\n## 参考資料\n- \n\n## メモ\n- \n',
         },
       ],
     },

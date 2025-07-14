@@ -508,7 +508,7 @@ export const createCommand = new Command('create')
             prBody += `### リンク\n${githubMetadata.url}\n\n`
           }
 
-          prBody += '## 作業内容\n\n- [ ] TODO: 実装内容を記載\n\n'
+          prBody += '## 作業内容\n\n- [ ] 機能実装\n- [ ] ドキュメント更新\n- [ ] 依存関係の確認\n\n'
           prBody += '## テスト\n\n- [ ] ユニットテスト追加\n- [ ] 動作確認完了\n\n'
           prBody += '---\n🥷 Created by shadow-clone-jutsu'
 
