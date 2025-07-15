@@ -32,7 +32,7 @@ describe.skip('CLI Entry Point Tests', () => {
       expect(program).toBeDefined()
       expect(program.name()).toBe('scj')
       expect(program.description()).toContain('shadow-clone-jutsu')
-      expect(program.version()).toBe('0.1.0')
+      expect(program.version()).toBe('1.0.0')
     })
 
     it('should have all required commands configured', async () => {
@@ -150,7 +150,7 @@ describe.skip('CLI Entry Point Tests', () => {
       const { program } = await import('../cli.js')
       
       // バージョン情報が設定されているか確認
-      expect(program.version()).toBe('0.1.0')
+      expect(program.version()).toBe('1.0.0')
     })
 
     it('should configure all commands with descriptions', async () => {

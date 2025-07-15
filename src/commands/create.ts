@@ -42,7 +42,7 @@ interface WorktreeMetadata {
 }
 
 // Issue番号からブランチ名を生成する関数
-function parseIssueNumber(input: string): {
+export function parseIssueNumber(input: string): {
   isIssue: boolean
   issueNumber?: string
   branchName: string
@@ -66,7 +66,7 @@ function parseIssueNumber(input: string): {
 }
 
 // GitHub Issue/PRの情報を取得
-async function fetchGitHubMetadata(issueNumber: string): Promise<GithubMetadata | null> {
+export async function fetchGitHubMetadata(issueNumber: string): Promise<GithubMetadata | null> {
   try {
     // まずPRとして試す
     try {
@@ -116,7 +116,7 @@ async function fetchGitHubMetadata(issueNumber: string): Promise<GithubMetadata 
 }
 
 // worktreeメタデータをファイルに保存
-async function saveWorktreeMetadata(
+export async function saveWorktreeMetadata(
   worktreePath: string,
   branchName: string,
   metadata: Partial<WorktreeMetadata>
@@ -137,7 +137,7 @@ async function saveWorktreeMetadata(
 }
 
 // tmuxセッションを作成してClaude Codeを起動する関数
-async function createTmuxSession(
+export async function createTmuxSession(
   branchName: string,
   worktreePath: string,
   config: Config
@@ -181,7 +181,7 @@ async function createTmuxSession(
 }
 
 // Claude.mdの処理
-async function handleClaudeMarkdown(worktreePath: string, config: Config): Promise<void> {
+export async function handleClaudeMarkdown(worktreePath: string, config: Config): Promise<void> {
   const claudeMode = config.claude?.markdownMode || 'shared'
   const rootClaudePath = path.join(process.cwd(), 'CLAUDE.md')
   const worktreeClaudePath = path.join(worktreePath, 'CLAUDE.md')
