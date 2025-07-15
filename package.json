@@ -21,7 +21,7 @@
     "update-scoop-manifest": "node scripts/update-scoop-manifest.js",
     "changeset": "changeset",
     "version": "changeset version",
-    "release": "pnpm build && changeset publish"
+    "release": "pnpm build && changeset publish --access public"
   },
   "keywords": [
     "git",
