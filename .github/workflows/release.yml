@@ -39,26 +39,15 @@ jobs:
       - name: Build
         run: pnpm build
 
-      - name: Create Release Pull Request or Publish
-        id: changesets
-        uses: changesets/action@v1
-        with:
-          publish: pnpm release
-          version: pnpm version
-          commit: "chore: release"
-          title: "chore: release"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-      - name: Update Homebrew Formula
-        if: steps.changesets.outputs.published == 'true'
+      - name: Skip Automated Release (Manual Process)
         run: |
-          pnpm run update-homebrew-formula
-          echo "Homebrew formula updated. Please update your tap repository."
-
-      - name: Update Scoop Manifest
-        if: steps.changesets.outputs.published == 'true'
-        run: |
-          pnpm run update-scoop-manifest
-          echo "Scoop manifest updated. Please update your bucket repository."
+          echo "🚫 Automated release disabled due to npm unpublish constraints"
+          echo "📝 Manual release process required:"
+          echo "   1. Wait 24h after npm unpublish for name reuse"
+          echo "   2. Run: pnpm publish --access public"
+          echo "   3. Update Homebrew/Scoop manifests manually"
+          echo ""
+          echo "📊 Current status:"
+          echo "   - Version: $(node -p 'require(\"./package.json\").version')"
+          echo "   - Git tag: $(git describe --tags --exact-match HEAD 2>/dev/null || echo 'No tag')"
+          echo "   - Repository: Public (ready for manual npm publish)"
