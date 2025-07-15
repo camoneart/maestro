@@ -81,3 +81,11 @@ _issues/
 
 # Homebrew tap (separate repository)
 homebrew-tap/
+
+# Test outputs
+test-output*.txt
+*-test-output.txt
+
+# Release artifacts
+release-*.md
+*-release.md
