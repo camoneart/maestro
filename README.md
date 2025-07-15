@@ -1,11 +1,14 @@
 # 🥷 shadow-clone-jutsu
 
-[![CI](https://github.com/hashiramaendure/shadow-clone-jutsu/actions/workflows/ci.yml/badge.svg)](https://github.com/hashiramaendure/shadow-clone-jutsu/actions/workflows/ci.yml)
-[![codecov](https://codecov.io/gh/hashiramaendure/shadow-clone-jutsu/branch/main/graph/badge.svg)](https://codecov.io/gh/hashiramaendure/shadow-clone-jutsu)
+**[English](/README.en.md)** | **日本語**
+
 [![npm version](https://badge.fury.io/js/shadow-clone-jutsu.svg)](https://www.npmjs.com/package/shadow-clone-jutsu)
+[![CI](https://github.com/hashiramaendure/scj/actions/workflows/ci.yml/badge.svg)](https://github.com/hashiramaendure/scj/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/hashiramaendure/scj/branch/main/graph/badge.svg)](https://codecov.io/gh/hashiramaendure/scj)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-**影分身の術（Git Worktree）で、Claude Codeとパラレル開発を実現するCLIツール**
+**影分身の術（Git Worktree）で、Claude Codeとパラレル開発を実現するCLIツール**  
+_Parallel Development CLI powered by Git Worktree & Claude AI_
 
 ![Demo Animation](https://via.placeholder.com/800x400/1a1a1a/00ff00?text=shadow-clone-jutsu+demo)
 
@@ -27,10 +30,11 @@ shadow-clone-jutsuは、Git Worktreeをより直感的に管理できるCLIツ�
 
 ### なぜ shadow-clone-jutsu？
 
-- **🚀 並行開発の効率化**: 複数の機能開発やバグ修正を同時進行
-- **🤖 AI駆動開発**: Claude Codeと完全統合し、AIペアプログラミングを実現
-- **🎯 直感的な操作**: 忍者テーマで楽しく、覚えやすいコマンド体系
-- **🔗 エコシステム統合**: GitHub、tmux、fzfとシームレスに連携
+**Pain**: 従来のGitワークフローでは複数機能の並行開発時に頻繁なブランチ切り替え、stash、コンテキストスイッチが発生し、開発効率が著しく低下します。
+
+**Solution**: shadow-clone-jutsuはGit Worktreeを活用して各ブランチを独立した「影分身」として作成し、完全並行開発とAI統合を実現します。
+
+**Benefit**: 開発者は複数機能を同時進行し、Claude Codeによる AI駆動開発、tmux/fzf統合による完璧なワークフロー効率を手に入れることができます。
 
 ## 主な特徴
 
@@ -55,20 +59,27 @@ shadow-clone-jutsuは、Git Worktreeをより直感的に管理できるCLIツ�
 
 ### インストール方法
 
-#### 📦 npm / pnpm / yarn
+#### 🌟 グローバルインストール（推奨）
 
 ```bash
-# npm
-npm install -g shadow-clone-jutsu
-
 # pnpm (推奨)
 pnpm add -g shadow-clone-jutsu
 
+# npm
+npm install -g shadow-clone-jutsu
+
 # yarn
 yarn global add shadow-clone-jutsu
+```
 
-# または直接実行
-npx shadow-clone-jutsu
+#### ⚡ ワンショット実行
+
+```bash
+# 試してみる場合
+npx shadow-clone-jutsu create feature/my-feature
+
+# また pnpm dlx も使用可能
+pnpm dlx shadow-clone-jutsu create feature/my-feature --tmux --claude --open
 ```
 
 #### 🍺 Homebrew (macOS/Linux)
@@ -88,8 +99,8 @@ scoop install shadow-clone-jutsu
 #### 📂 ソースからインストール
 
 ```bash
-git clone https://github.com/hashiramaendure/shadow-clone-jutsu.git
-cd shadow-clone-jutsu
+git clone https://github.com/hashiramaendure/scj.git
+cd scj
 pnpm install
 pnpm run build
 pnpm link
@@ -156,129 +167,41 @@ scj review --auto-flow
 
 ## コマンドリファレンス
 
-### 📊 主要コマンド一覧
+詳細なコマンドドキュメントは[docs/COMMANDS.md](./docs/COMMANDS.md)を参照してください。
 
-| コマンド | エイリアス | 説明 | 使用例 |
-|---------|-----------|------|-------|
-| `create` | `c` | 新しい影分身を作成 | `scj create feature/new` |
-| `list` | `ls`, `l` | 影分身の一覧表示 | `scj list --json` |
-| `delete` | `rm`, `d` | 影分身を削除 | `scj delete feature/old` |
-| `shell` | `sh` | 影分身のシェルに入る | `scj shell feature/new` |
-| `exec` | `e` | 影分身でコマンド実行 | `scj exec feature/new npm test` |
-| `where` | `w` | 影分身のパスを表示 | `scj where feature/new` |
-| `sync` | `s` | コード・ファイル同期 | `scj sync --all --files` |
-| `tmux` | `t` | tmux統合 | `scj tmux --new-window` |
-| `github` | `gh` | GitHub統合 | `scj github pr 123` |
-| `suggest` | `sg` | AI提案機能 | `scj suggest --review` |
-| `review` | `r` | PRレビュー支援 | `scj review --auto-flow` |
-| `batch` | `b` | 一括作成 | `scj batch` |
-| `health` | `check` | 健全性チェック | `scj health --fix` |
-| `snapshot` | `snap` | スナップショット | `scj snapshot -m "before refactor"` |
-| `dashboard` | `ui` | Web UI | `scj dashboard` |
+### 📊 主要コマンド（10選）
 
-### 🎯 よく使うコマンドの詳細
+| コマンド | 説明 | 使用例 |
+|---------|------|-------|
+| `create` | 新しい影分身を作成 | `scj create feature/new --tmux --claude --open` |
+| `list` | 影分身の一覧表示 | `scj list --details` |
+| `delete` | 影分身を削除 | `scj delete feature/old --fzf` |
+| `tmux` | tmuxセッションで開く | `scj tmux feature/new` |
+| `sync` | ファイル同期 | `scj sync --auto` |
+| `suggest` | AI提案機能 | `scj suggest --branch --description "新機能"` |
+| `github` | GitHub統合 | `scj github --issue 123` |
+| `dashboard` | Web UI起動 | `scj dashboard --open` |
+| `health` | 健全性チェック | `scj health --fix` |
+| `where` | 現在位置確認 | `scj where --verbose` |
 
-#### 📦 create - 影分身を作り出す
+### 🎯 クイックリファレンス
 
 ```bash
 # 基本的な使い方
-scj create feature/new-feature
-
-# Issue番号から作成
-scj create 123           # issue-123として作成
-scj create #123          # issue-123として作成
-scj create issue-123     # issue-123として作成
-
-# オプション付き
-scj create feature/new-feature \
-  --base develop \        # ベースブランチ指定
-  --open \               # エディタで開く
-  --setup \              # 環境セットアップ実行
-  --tmux \               # tmuxセッション作成
-  --claude \             # Claude Code起動
-  --draft-pr            # Draft PR作成
-```
-
-**オプション一覧:**
-
-| オプション | 短縮形 | 説明 |
-|-----------|--------|------|
-| `--base` | `-b` | ベースブランチを指定 |
-| `--open` | `-o` | 作成後にエディタで開く |
-| `--setup` | `-s` | npm install等を自動実行 |
-| `--tmux` | | tmuxセッション/ウィンドウを作成 |
-| `--claude` | | Claude Codeを自動起動 |
-| `--draft-pr` | | GitHub Draft PRを作成 |
-
-#### 📋 list - 影分身の一覧を表示
-
-```bash
-# 基本的な一覧表示
+scj create feature/awesome-feature
 scj list
+scj tmux feature/awesome-feature
 
-# JSON形式で出力（CI/CD連携用）
-scj list --json
+# 完全セットアップ
+scj create feature/full-setup --tmux --claude --open --setup
 
-# fzfで選択
-scj list --fzf
-
-# メタデータ付きで表示
-scj list --metadata
-```
-
-**出力例:**
-```
-🥷 影分身一覧:
-
-  main (current)
-  ├─ /Users/ninja/project
-  └─ 2 days ago
-
-  feature/auth 
-  ├─ /Users/ninja/project/.git/shadow-clones/feature-auth
-  └─ 5 hours ago
-
-  bugfix/login-issue [GitHub #123]
-  ├─ /Users/ninja/project/.git/shadow-clones/bugfix-login-issue
-  └─ 1 hour ago
-```
-
-#### 🔄 sync - worktree間でコード・ファイル同期
-
-```bash
-# 特定の影分身に同期
-scj sync feature-branch
-
-# 全ての影分身に同期
-scj sync --all
-
-# 環境変数・設定ファイルを同期
-scj sync --files
-
-# プリセットを使用
-scj sync --preset env     # .env系ファイルのみ
-scj sync --preset config  # 設定ファイルのみ
-scj sync --preset all     # 全ての設定ファイル
-
-# インタラクティブにファイル選択
-scj sync --interactive
-```
-
-#### 🤖 suggest - Claude Codeによる提案
-
-```bash
-# ブランチ名を提案
-scj suggest --branch -d "認証機能の実装"
-
-# コミットメッセージを提案
+# AI提案
+scj suggest --branch --description "ユーザー認証機能"
 scj suggest --commit --diff
 
-# AI差分レビュー
-scj suggest --review
-
-# Issue/PRから情報を取得して提案
-scj suggest -b --issue 123
-scj suggest -b --pr 456
+# GitHub統合
+scj github --issue 123
+scj github --create-pr
 ```
 
 ## 高度な機能
@@ -439,7 +362,7 @@ scj --verbose create feature/test
 
 ### 🤝 コントリビューション
 
-バグ報告や機能リクエストは[GitHub Issues](https://github.com/hashiramaendure/shadow-clone-jutsu/issues)へお願いします。
+バグ報告や機能リクエストは[GitHub Issues](https://github.com/hashiramaendure/scj/issues)へお願いします。
 
 プルリクエストも歓迎します！
 
@@ -454,8 +377,8 @@ scj --verbose create feature/test
 
 ```bash
 # リポジトリをクローン
-git clone https://github.com/hashiramaendure/shadow-clone-jutsu.git
-cd shadow-clone-jutsu
+git clone https://github.com/hashiramaendure/scj.git
+cd scj
 
 # 依存関係をインストール
 pnpm install
@@ -472,7 +395,7 @@ pnpm build
 
 ## ライセンス
 
-[MIT License](./LICENSE) © 2024 hashiramaendure
+[MIT License](./LICENSE) © 2025 hashiramaendure
 
 ---
 
@@ -480,9 +403,9 @@ pnpm build
 
 **🥷 Happy parallel development with shadow-clone-jutsu!**
 
-[GitHub](https://github.com/hashiramaendure/shadow-clone-jutsu) • 
+[GitHub](https://github.com/hashiramaendure/scj) • 
 [npm](https://www.npmjs.com/package/shadow-clone-jutsu) • 
-[Issues](https://github.com/hashiramaendure/shadow-clone-jutsu/issues) • 
-[Discussions](https://github.com/hashiramaendure/shadow-clone-jutsu/discussions)
+[Issues](https://github.com/hashiramaendure/scj/issues) • 
+[Discussions](https://github.com/hashiramaendure/scj/discussions)
 
 </div>
