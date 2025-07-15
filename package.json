@@ -1,6 +1,6 @@
 {
   "name": "shadow-clone-jutsu",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "影分身の術(Git Worktree)で、Claude Codeとパラレル開発を実現するツール",
   "type": "module",
   "bin": {
