@@ -212,7 +212,7 @@ describe('Comprehensive Coverage Tests', () => {
       // Test directory size
       mockExeca.mockResolvedValueOnce({ stdout: '1.5M\t/test' })
       const sizeResult = await getDirectorySize('/test')
-      expect(sizeResult).toContain('1.5') // du output varies, just check it contains size
+      expect(sizeResult).toBe('1.5M') // du output format is size<tab>path
 
       mockExeca.mockRejectedValueOnce(new Error('Error'))
       expect(await getDirectorySize('/test')).toBe('unknown')
@@ -443,7 +443,7 @@ describe('Comprehensive Coverage Tests', () => {
 
       expect(classifyError(new Error('File not found'))).toBe('NOT_FOUND')
       expect(classifyError(new Error('permission denied'))).toBe('PERMISSION')
-      expect(classifyError(new Error('Network error'))).toBe('NETWORK')
+      expect(classifyError(new Error('network error'))).toBe('NETWORK')
       expect(classifyError(new Error('Request timeout'))).toBe('TIMEOUT')
       expect(classifyError(new Error('Something else'))).toBe('UNKNOWN')
 
