@@ -37,8 +37,8 @@ jobs:
       - uses: changesets/action@v1
         with:
           version: pnpm changeset version
-          publish: pnpm release
+          # publish: pnpm release # npm公開は一時的に無効化
           createGithubReleases: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          # NPM_TOKEN: ${{ secrets.NPM_TOKEN }} # npm公開時に有効化
