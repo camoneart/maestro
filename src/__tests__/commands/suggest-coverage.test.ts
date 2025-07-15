@@ -1,5 +1,64 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
+// Mock all external dependencies
+const mockGitWorktreeManager = vi.fn(() => ({
+  createWorktree: vi.fn().mockResolvedValue(undefined),
+  isGitRepository: vi.fn().mockResolvedValue(true),
+}))
+
+const mockExeca = vi.fn()
+const mockFs = {
+  mkdtemp: vi.fn().mockResolvedValue('/tmp/scj-test'),
+  writeFile: vi.fn().mockResolvedValue(undefined),
+  readFile: vi.fn().mockResolvedValue('1. feature/test\n2. bugfix/test'),
+  rm: vi.fn().mockResolvedValue(undefined),
+}
+
+const mockInquirer = {
+  prompt: vi.fn().mockResolvedValue({ action: 'branch' }),
+}
+
+const mockOra = vi.fn(() => ({
+  start: vi.fn().mockReturnThis(),
+  succeed: vi.fn().mockReturnThis(),
+  fail: vi.fn().mockReturnThis(),
+  stop: vi.fn().mockReturnThis(),
+  text: '',
+}))
+
+const mockCommand = vi.fn(() => ({
+  alias: vi.fn().mockReturnThis(),
+  description: vi.fn().mockReturnThis(),
+  option: vi.fn().mockReturnThis(),
+  action: vi.fn().mockReturnThis(),
+}))
+
+const mockPath = {
+  join: vi.fn((...args) => args.join('/')),
+}
+
+const mockTmpdir = vi.fn(() => '/tmp')
+
+// Mock external dependencies
+vi.mock('commander', () => ({ Command: mockCommand }))
+vi.mock('execa', () => ({ execa: mockExeca }))
+vi.mock('fs/promises', () => ({ default: mockFs }))
+vi.mock('inquirer', () => ({ default: mockInquirer }))
+vi.mock('ora', () => ({ default: mockOra }))
+vi.mock('path', () => ({ default: mockPath }))
+vi.mock('os', () => ({ tmpdir: mockTmpdir }))
+vi.mock('chalk', () => ({
+  default: {
+    red: vi.fn((text) => text),
+    green: vi.fn((text) => text),
+    yellow: vi.fn((text) => text),
+    cyan: vi.fn((text) => text),
+    gray: vi.fn((text) => text),
+    bold: vi.fn((text) => text),
+  }
+}))
+vi.mock('../../core/git.js', () => ({ GitWorktreeManager: mockGitWorktreeManager }))
+
 describe('suggest command coverage', () => {
   beforeEach(() => {
     vi.clearAllMocks()

@@ -24,7 +24,7 @@ describe('shadow-clone-jutsu E2E basic tests', () => {
   it('should show version', async () => {
     const result = await execa('node', [scjPath, '--version'], { reject: false })
     const output = result.stdout + result.stderr
-    expect(output).toContain('0.1.0')
+    expect(output).toContain('1.0.0')
   })
 
   it('should handle list command in non-git directory with error', async () => {

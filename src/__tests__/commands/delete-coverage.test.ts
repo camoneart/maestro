@@ -1,5 +1,52 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
+// Mock all external dependencies
+const mockGitWorktreeManager = vi.fn(() => ({
+  deleteWorktree: vi.fn().mockResolvedValue(undefined),
+  listWorktrees: vi.fn().mockResolvedValue([]),
+  isGitRepository: vi.fn().mockResolvedValue(true),
+}))
+
+const mockExeca = vi.fn()
+const mockSpawn = vi.fn()
+const mockInquirer = {
+  prompt: vi.fn().mockResolvedValue({ confirmDelete: true }),
+}
+
+const mockOra = vi.fn(() => ({
+  start: vi.fn().mockReturnThis(),
+  succeed: vi.fn().mockReturnThis(),
+  fail: vi.fn().mockReturnThis(),
+  stop: vi.fn().mockReturnThis(),
+  warn: vi.fn().mockReturnThis(),
+}))
+
+const mockCommand = vi.fn(() => ({
+  alias: vi.fn().mockReturnThis(),
+  description: vi.fn().mockReturnThis(),
+  argument: vi.fn().mockReturnThis(),
+  option: vi.fn().mockReturnThis(),
+  action: vi.fn().mockReturnThis(),
+}))
+
+// Mock external dependencies
+vi.mock('commander', () => ({ Command: mockCommand }))
+vi.mock('execa', () => ({ execa: mockExeca }))
+vi.mock('child_process', () => ({ spawn: mockSpawn }))
+vi.mock('inquirer', () => ({ default: mockInquirer }))
+vi.mock('ora', () => ({ default: mockOra }))
+vi.mock('chalk', () => ({
+  default: {
+    red: vi.fn((text) => text),
+    green: vi.fn((text) => text),
+    yellow: vi.fn((text) => text),
+    cyan: vi.fn((text) => text),
+    gray: vi.fn((text) => text),
+    bold: vi.fn((text) => text),
+  }
+}))
+vi.mock('../../core/git.js', () => ({ GitWorktreeManager: mockGitWorktreeManager }))
+
 describe('delete command coverage', () => {
   beforeEach(() => {
     vi.clearAllMocks()
@@ -24,18 +71,20 @@ describe('delete command coverage', () => {
     const normalWorktree = {
       path: '/test/path',
       branch: 'feature-test',
-      commit: 'abc123',
+      head: 'abc123',
       locked: false,
       detached: false,
+      prunable: false,
     }
     expect(createWorktreeDisplay(normalWorktree)).toBe('feature-test')
 
     const lockedWorktree = {
       path: '/test/locked',
       branch: 'locked-branch',
-      commit: 'def456',
+      head: 'def456',
       locked: true,
       detached: false,
+      prunable: false,
     }
     expect(createWorktreeDisplay(lockedWorktree)).toBe('🔒 locked-branch')
 
@@ -48,90 +97,144 @@ describe('delete command coverage', () => {
       detached: true,
     }
     expect(createWorktreeDisplay(detachedWorktree)).toBe('⚠️  ghi789 (detached)')
+
+    // Test worktree without branch (using head)
+    const noBranchWorktree = {
+      path: '/test/nobranch',
+      branch: '',
+      head: 'xyz123',
+      locked: false,
+      detached: false,
+      prunable: false,
+    }
+    expect(createWorktreeDisplay(noBranchWorktree)).toBe('xyz123')
   })
 
-  it('should test getDirectorySize logic', async () => {
-    const mockExeca = vi.fn()
-    
-    const getDirectorySize = async (path: string): Promise<number> => {
-      try {
-        const { stdout } = await mockExeca('du', ['-sb', path])
-        const sizeMatch = stdout.match(/^(\d+)/)
-        return sizeMatch ? parseInt(sizeMatch[1], 10) : 0
-      } catch {
-        return 0
-      }
-    }
+  it('should test getDirectorySize function', async () => {
+    const { getDirectorySize } = await import('../../commands/delete.js')
 
     // Test successful size retrieval
-    mockExeca.mockResolvedValueOnce({ stdout: '1048576\t/test/path' })
+    mockExeca.mockResolvedValueOnce({ stdout: '1.5M\t/test/path' })
     const size1 = await getDirectorySize('/test/path')
-    expect(size1).toBe(1048576)
+    expect(size1).toBe('1.5M')
 
     // Test error handling
     mockExeca.mockRejectedValueOnce(new Error('Permission denied'))
     const size2 = await getDirectorySize('/test/path')
-    expect(size2).toBe(0)
-  })
+    expect(size2).toBe('unknown')
 
-  it('should test worktree deletion confirmation logic', () => {
-    const shouldConfirmDeletion = (worktree: any, options: any): boolean => {
-      if (options.force) return false
-      if (worktree.locked) return true
-      if (worktree.current) return true
-      return !options.yes
-    }
-
-    const normalWorktree = { locked: false, current: false }
-    const lockedWorktree = { locked: true, current: false }
-    const currentWorktree = { locked: false, current: true }
-
-    // Test force option bypasses all confirmation
-    expect(shouldConfirmDeletion(lockedWorktree, { force: true })).toBe(false)
-    
-    // Test locked worktree requires confirmation
-    expect(shouldConfirmDeletion(lockedWorktree, { force: false })).toBe(true)
-    
-    // Test current worktree requires confirmation
-    expect(shouldConfirmDeletion(currentWorktree, { force: false })).toBe(true)
-    
-    // Test normal worktree with yes option
-    expect(shouldConfirmDeletion(normalWorktree, { force: false, yes: true })).toBe(false)
-    
-    // Test normal worktree without yes option
-    expect(shouldConfirmDeletion(normalWorktree, { force: false, yes: false })).toBe(true)
-  })
-
-  it('should test remote branch deletion logic', async () => {
-    const mockExeca = vi.fn()
-    
-    const deleteRemoteBranch = async (branchName: string) => {
-      try {
-        // Get remote name
-        const { stdout: remote } = await mockExeca('git', ['config', '--get', `branch.${branchName}.remote`])
-        const remoteName = remote.trim() || 'origin'
-        
-        // Delete remote branch
-        await mockExeca('git', ['push', remoteName, '--delete', branchName])
-        return { success: true, remote: remoteName }
-      } catch (error) {
-        return { success: false, error }
-      }
-    }
-
-    // Test successful deletion
-    mockExeca.mockResolvedValueOnce({ stdout: 'origin\n' })
+    // Test empty output
     mockExeca.mockResolvedValueOnce({ stdout: '' })
+    const size3 = await getDirectorySize('/test/path')
+    expect(size3).toBe('unknown')
+  })
+
+  it('should test deleteRemoteBranch function', async () => {
+    const { deleteRemoteBranch } = await import('../../commands/delete.js')
+
+    // Test successful remote branch deletion
+    mockExeca
+      .mockResolvedValueOnce({ stdout: 'origin/feature-test\n  origin/main' })
+      .mockResolvedValueOnce({ stdout: '' })
+
+    await deleteRemoteBranch('feature-test')
+
+    expect(mockExeca).toHaveBeenCalledWith('git', ['branch', '-r'])
+    expect(mockExeca).toHaveBeenCalledWith('git', ['push', 'origin', '--delete', 'feature-test'])
+  })
+
+  it('should test deleteRemoteBranch when remote branch does not exist', async () => {
+    const { deleteRemoteBranch } = await import('../../commands/delete.js')
+
+    // Test when remote branch doesn't exist
+    mockExeca.mockResolvedValueOnce({ stdout: 'origin/main\n  origin/other' })
+
+    await deleteRemoteBranch('nonexistent-branch')
+
+    expect(mockExeca).toHaveBeenCalledWith('git', ['branch', '-r'])
+    // Should not call push command
+    expect(mockExeca).not.toHaveBeenCalledWith('git', ['push', 'origin', '--delete', 'nonexistent-branch'])
+  })
+
+  it('should test deleteRemoteBranch error handling', async () => {
+    const { deleteRemoteBranch } = await import('../../commands/delete.js')
+
+    // Test when git push fails
+    mockExeca
+      .mockResolvedValueOnce({ stdout: 'origin/feature-test' })
+      .mockRejectedValueOnce(new Error('Network error'))
+
+    await expect(deleteRemoteBranch('feature-test')).rejects.toThrow()
+  })
+
+  it('should test DeleteCommandError class', async () => {
+    // The DeleteCommandError is defined in the file but not exported
+    // We'll test error handling scenarios instead
+    const { deleteRemoteBranch } = await import('../../commands/delete.js')
+
+    mockExeca
+      .mockResolvedValueOnce({ stdout: 'origin/test-branch' })
+      .mockRejectedValueOnce(new Error('Permission denied'))
+
+    await expect(deleteRemoteBranch('test-branch')).rejects.toThrow('Permission denied')
+  })
+
+  it('should test command builder pattern', async () => {
+    const { deleteCommand } = await import('../../commands/delete.js')
     
-    const result1 = await deleteRemoteBranch('feature-test')
-    expect(result1.success).toBe(true)
-    expect(result1.remote).toBe('origin')
-    
-    // Test deletion failure
-    mockExeca.mockResolvedValueOnce({ stdout: 'upstream\n' })
-    mockExeca.mockRejectedValueOnce(new Error('Remote branch not found'))
-    
-    const result2 = await deleteRemoteBranch('feature-old')
-    expect(result2.success).toBe(false)
+    expect(deleteCommand).toBeDefined()
+    // The command may be created at module load time, so just check it exists
+  })
+
+  it('should test different directory size formats', async () => {
+    const { formatDirectorySize } = await import('../../commands/delete.js')
+
+    // Test edge cases
+    expect(formatDirectorySize(1023)).toBe('1023 B')
+    expect(formatDirectorySize(1025)).toBe('1.0 KB')
+    expect(formatDirectorySize(1048575)).toBe('1024.0 KB')
+    expect(formatDirectorySize(1048577)).toBe('1.0 MB')
+    expect(formatDirectorySize(1073741823)).toBe('1024.0 MB')
+    expect(formatDirectorySize(1073741825)).toBe('1.0 GB')
+  })
+
+  it('should test createWorktreeDisplay with all combinations', async () => {
+    const { createWorktreeDisplay } = await import('../../commands/delete.js')
+
+    // Test locked and detached
+    const lockedDetachedWorktree = {
+      path: '/test/both',
+      branch: 'test-branch',
+      head: 'abc123',
+      locked: true,
+      detached: true,
+      prunable: false,
+    }
+    expect(createWorktreeDisplay(lockedDetachedWorktree)).toBe('⚠️  🔒 test-branch (detached)')
+
+    // Test empty branch and head
+    const emptyWorktree = {
+      path: '/test/empty',
+      branch: '',
+      head: '',
+      locked: false,
+      detached: false,
+      prunable: false,
+    }
+    expect(createWorktreeDisplay(emptyWorktree)).toBe('')
+  })
+
+  it('should test getDirectorySize with various formats', async () => {
+    const { getDirectorySize } = await import('../../commands/delete.js')
+
+    // Test different du output formats
+    mockExeca.mockResolvedValueOnce({ stdout: '2.3G\t/large/dir' })
+    expect(await getDirectorySize('/large/dir')).toBe('2.3G')
+
+    mockExeca.mockResolvedValueOnce({ stdout: '500K\t/small/dir' })
+    expect(await getDirectorySize('/small/dir')).toBe('500K')
+
+    mockExeca.mockResolvedValueOnce({ stdout: '0\t/empty/dir' })
+    expect(await getDirectorySize('/empty/dir')).toBe('0')
   })
 })
