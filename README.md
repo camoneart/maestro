@@ -395,17 +395,4 @@ pnpm build
 
 ## ライセンス
 
-[MIT License](./LICENSE) © 2025 hashiramaendure
-
----
-
-<div align="center">
-
-**🥷 Happy parallel development with shadow-clone-jutsu!**
-
-[GitHub](https://github.com/hashiramaendure/scj) • 
-[npm](https://www.npmjs.com/package/shadow-clone-jutsu) • 
-[Issues](https://github.com/hashiramaendure/scj/issues) • 
-[Discussions](https://github.com/hashiramaendure/scj/discussions)
-
-</div>
+Licensed under the [MIT License](./LICENSE).
