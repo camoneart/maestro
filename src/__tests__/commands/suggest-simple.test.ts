@@ -223,4 +223,261 @@ describe('suggest command simple tests', () => {
     expect(getErrorMessage(new Error('Network error')))
       .toBe('エラーが発生しました: Network error')
   })
+
+  it('should test repository info gathering', () => {
+    const getRepositoryInfo = (remote: string): any => {
+      const match = remote.match(/github\.com[/:]([\w-]+)\/([\w-]+)/)
+      if (!match) return null
+      
+      return {
+        owner: match[1],
+        repo: match[2].replace(/\.git$/, ''),
+        url: `https://github.com/${match[1]}/${match[2].replace(/\.git$/, '')}`
+      }
+    }
+
+    const info1 = getRepositoryInfo('git@github.com:user/repo.git')
+    expect(info1?.owner).toBe('user')
+    expect(info1?.repo).toBe('repo')
+    expect(info1?.url).toBe('https://github.com/user/repo')
+
+    const info2 = getRepositoryInfo('https://github.com/org/project.git')
+    expect(info2?.owner).toBe('org')
+    expect(info2?.repo).toBe('project')
+
+    const info3 = getRepositoryInfo('invalid-url')
+    expect(info3).toBeNull()
+  })
+
+  it('should test diff analysis', () => {
+    const analyzeDiff = (diff: string): any => {
+      const analysis = {
+        addedLines: 0,
+        removedLines: 0,
+        modifiedFiles: new Set<string>(),
+        types: new Set<string>(),
+      }
+
+      const lines = diff.split('\n')
+      for (const line of lines) {
+        if (line.startsWith('+++')) {
+          const file = line.substring(4)
+          analysis.modifiedFiles.add(file)
+        } else if (line.startsWith('+') && !line.startsWith('+++')) {
+          analysis.addedLines++
+        } else if (line.startsWith('-') && !line.startsWith('---')) {
+          analysis.removedLines++
+        }
+      }
+
+      // Determine change type
+      if (analysis.addedLines > 0 && analysis.removedLines === 0) {
+        analysis.types.add('addition')
+      } else if (analysis.addedLines === 0 && analysis.removedLines > 0) {
+        analysis.types.add('deletion')
+      } else if (analysis.addedLines > 0 && analysis.removedLines > 0) {
+        analysis.types.add('modification')
+      }
+
+      return analysis
+    }
+
+    const diff = `+++ b/src/auth.js
++function login() {}
++function logout() {}
+--- a/src/utils.js
+-function oldFunction() {}`
+
+    const analysis = analyzeDiff(diff)
+    expect(analysis.addedLines).toBe(2)
+    expect(analysis.removedLines).toBe(1)
+    expect(analysis.modifiedFiles.has('b/src/auth.js')).toBe(true)
+    expect(analysis.types.has('modification')).toBe(true)
+  })
+
+  it('should test commit message analysis', () => {
+    const analyzeCommitMessage = (message: string): any => {
+      const analysis = {
+        type: 'unknown',
+        scope: null as string | null,
+        subject: message,
+        isConventional: false,
+      }
+
+      // Check for conventional commit format
+      const match = message.match(/^(feat|fix|docs|style|refactor|test|chore)(\([^)]+\))?\s*:\s*(.+)$/)
+      if (match) {
+        analysis.isConventional = true
+        analysis.type = match[1]
+        analysis.scope = match[2]?.slice(1, -1) || null
+        analysis.subject = match[3]
+      }
+
+      return analysis
+    }
+
+    const analysis1 = analyzeCommitMessage('feat(auth): add login functionality')
+    expect(analysis1.isConventional).toBe(true)
+    expect(analysis1.type).toBe('feat')
+    expect(analysis1.scope).toBe('auth')
+    expect(analysis1.subject).toBe('add login functionality')
+
+    const analysis2 = analyzeCommitMessage('fix: resolve login bug')
+    expect(analysis2.isConventional).toBe(true)
+    expect(analysis2.type).toBe('fix')
+    expect(analysis2.scope).toBeNull()
+
+    const analysis3 = analyzeCommitMessage('random commit message')
+    expect(analysis3.isConventional).toBe(false)
+    expect(analysis3.type).toBe('unknown')
+  })
+
+  it('should test branch name validation', () => {
+    const validateBranchName = (name: string): boolean => {
+      // Valid branch name rules
+      if (name.length === 0 || name.length > 255) return false
+      if (name.startsWith('.') || name.endsWith('.')) return false
+      if (name.includes('..') || name.includes('~')) return false
+      if (name.includes(' ') || name.includes('\t')) return false
+      if (name.includes('@{') || name.includes('\\')) return false
+      
+      return true
+    }
+
+    expect(validateBranchName('feature/user-auth')).toBe(true)
+    expect(validateBranchName('bugfix-login')).toBe(true)
+    expect(validateBranchName('hotfix/critical')).toBe(true)
+    expect(validateBranchName('')).toBe(false)
+    expect(validateBranchName('.hidden')).toBe(false)
+    expect(validateBranchName('branch with spaces')).toBe(false)
+    expect(validateBranchName('bad..branch')).toBe(false)
+    expect(validateBranchName('branch@{}')).toBe(false)
+  })
+
+  it('should test suggestion ranking', () => {
+    const rankSuggestions = (suggestions: string[], context: any): string[] => {
+      const scored = suggestions.map(suggestion => ({
+        text: suggestion,
+        score: 0,
+      }))
+
+      // Score based on context
+      scored.forEach(item => {
+        if (context.type === 'branch') {
+          if (item.text.includes('feature/')) item.score += 2
+          if (item.text.includes('fix')) item.score += 1
+          if (item.text.length <= 30) item.score += 1
+        } else if (context.type === 'commit') {
+          if (item.text.startsWith('feat:')) item.score += 2
+          if (item.text.startsWith('fix:')) item.score += 1
+          if (item.text.length <= 50) item.score += 1
+        }
+      })
+
+      return scored
+        .sort((a, b) => b.score - a.score)
+        .map(item => item.text)
+    }
+
+    const branchSuggestions = [
+      'feature/user-auth',
+      'long-branch-name-that-exceeds-limit',
+      'fix-login-bug',
+      'update-readme',
+    ]
+
+    const ranked = rankSuggestions(branchSuggestions, { type: 'branch' })
+    expect(ranked[0]).toBe('feature/user-auth')
+    expect(ranked[1]).toBe('fix-login-bug')
+  })
+
+  it('should test file path suggestion', () => {
+    const suggestFilePaths = (changedFiles: string[]): string[] => {
+      const suggestions: string[] = []
+      
+      for (const file of changedFiles) {
+        const parts = file.split('/')
+        const fileName = parts[parts.length - 1]
+        const extension = fileName.split('.').pop()
+        
+        if (extension === 'js' || extension === 'ts') {
+          suggestions.push(`${extension} file change`)
+        } else if (extension === 'md') {
+          suggestions.push('documentation update')
+        } else if (extension === 'json') {
+          suggestions.push('configuration change')
+        }
+      }
+      
+      return [...new Set(suggestions)]
+    }
+
+    const files = ['src/auth.js', 'README.md', 'package.json', 'src/utils.ts']
+    const suggestions = suggestFilePaths(files)
+    
+    expect(suggestions).toContain('js file change')
+    expect(suggestions).toContain('ts file change')
+    expect(suggestions).toContain('documentation update')
+    expect(suggestions).toContain('configuration change')
+  })
+
+  it('should test prompt optimization', () => {
+    const optimizePrompt = (prompt: string, maxLength: number): string => {
+      if (prompt.length <= maxLength) return prompt
+      
+      // Try to truncate while preserving structure
+      const parts = prompt.split('\n\n')
+      let result = parts[0] // Keep header
+      
+      for (let i = 1; i < parts.length; i++) {
+        const testResult = result + '\n\n' + parts[i]
+        if (testResult.length > maxLength) break
+        result = testResult
+      }
+      
+      if (result.length > maxLength) {
+        result = result.substring(0, maxLength - 3) + '...'
+      }
+      
+      return result
+    }
+
+    const longPrompt = 'Header\n\nVery long content that exceeds the maximum length limit and should be truncated'
+    const optimized = optimizePrompt(longPrompt, 50)
+    
+    expect(optimized.length).toBeLessThanOrEqual(50)
+    expect(optimized).toContain('Header')
+  })
+
+  it('should test output parsing', () => {
+    const parseClaudeOutput = (output: string): string[] => {
+      const lines = output.split('\n')
+      const suggestions: string[] = []
+      
+      for (const line of lines) {
+        const trimmed = line.trim()
+        if (trimmed.match(/^\d+\.\s/)) {
+          suggestions.push(trimmed)
+        }
+      }
+      
+      return suggestions
+    }
+
+    const output = `# Branch Suggestions
+
+1. feature/user-authentication
+2. feature/login-system
+3. auth/user-login
+
+Some other text here.
+
+4. bugfix/auth-issue
+5. hotfix/login-bug`
+
+    const suggestions = parseClaudeOutput(output)
+    expect(suggestions).toHaveLength(5)
+    expect(suggestions[0]).toBe('1. feature/user-authentication')
+    expect(suggestions[4]).toBe('5. hotfix/login-bug')
+  })
 })
