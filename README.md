@@ -5,31 +5,57 @@
 [![npm version](https://badge.fury.io/js/shadow-clone-jutsu.svg)](https://www.npmjs.com/package/shadow-clone-jutsu)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-影分身の術（Git Worktree）で、Claude Codeとパラレル開発を実現するCLIツール
+**影分身の術（Git Worktree）で、Claude Codeとパラレル開発を実現するCLIツール**
+
+![Demo Animation](https://via.placeholder.com/800x400/1a1a1a/00ff00?text=shadow-clone-jutsu+demo)
+
+## 📋 目次
+
+- [概要](#概要)
+- [主な特徴](#主な特徴)
+- [インストール](#インストール)
+- [クイックスタート](#クイックスタート)
+- [コマンドリファレンス](#コマンドリファレンス)
+- [高度な機能](#高度な機能)
+- [設定](#設定)
+- [トラブルシューティング](#トラブルシューティング)
+- [貢献](#貢献)
 
 ## 概要
 
 shadow-clone-jutsuは、Git Worktreeをより直感的に管理できるCLIツールです。複数のブランチで並行作業を行う際に、ディレクトリを切り替えることなく、各ブランチを独立した「影分身」として扱うことができます。
 
-### 主な特徴
+### なぜ shadow-clone-jutsu？
 
-- 🥷 **忍者テーマ**: Worktreeを「影分身」として扱う直感的なインターフェース
-- 🤖 **Claude Code統合**: MCP (Model Context Protocol) によるAI開発支援
-- 🔗 **GitHub統合**: PR/Issueから直接影分身を作成
-- 🎯 **tmux/fzf統合**: 効率的なワークフロー
-- 🎨 **インタラクティブUI**: 美しく使いやすいCLI体験
+- **🚀 並行開発の効率化**: 複数の機能開発やバグ修正を同時進行
+- **🤖 AI駆動開発**: Claude Codeと完全統合し、AIペアプログラミングを実現
+- **🎯 直感的な操作**: 忍者テーマで楽しく、覚えやすいコマンド体系
+- **🔗 エコシステム統合**: GitHub、tmux、fzfとシームレスに連携
 
-## デモ
+## 主な特徴
 
-<!-- デモGIFまたはasciinemaをここに追加 -->
-<!-- ![Demo](./docs/demo.gif) -->
-<!-- [![asciicast](https://asciinema.org/a/DEMO_ID.svg)](https://asciinema.org/a/DEMO_ID) -->
+| 機能 | 説明 |
+|------|------|
+| 🥷 **忍者テーマ** | Worktreeを「影分身」として扱う直感的なインターフェース |
+| 🤖 **Claude Code統合** | MCP (Model Context Protocol) によるAI開発支援 |
+| 🔗 **GitHub統合** | PR/Issueから直接影分身を作成 |
+| 🎯 **tmux/fzf統合** | 効率的なワークフロー |
+| 🎨 **インタラクティブUI** | 美しく使いやすいCLI体験 |
+| 📊 **ダッシュボード** | Web UIで全体を可視化 |
+| 🔄 **自動同期** | ファイル変更を検知して自動同期 |
+| 📸 **スナップショット** | 作業状態の保存と復元 |
 
-## Getting Started
+## インストール
 
-### インストール
+### 前提条件
 
-#### npm / pnpm / yarn
+- **Node.js** >= 20.0.0
+- **Git** >= 2.22.0
+- **npm** または **pnpm** (推奨)
+
+### インストール方法
+
+#### 📦 npm / pnpm / yarn
 
 ```bash
 # npm
@@ -45,21 +71,33 @@ yarn global add shadow-clone-jutsu
 npx shadow-clone-jutsu
 ```
 
-#### Homebrew (macOS/Linux)
+#### 🍺 Homebrew (macOS/Linux)
 
 ```bash
 brew tap hashiramaendure/tap
 brew install shadow-clone-jutsu
 ```
 
-#### Scoop (Windows)
+#### 🪟 Scoop (Windows)
 
-```bash
+```powershell
 scoop bucket add hashiramaendure https://github.com/hashiramaendure/scoop-bucket
 scoop install shadow-clone-jutsu
 ```
 
-### クイックスタート
+#### 📂 ソースからインストール
+
+```bash
+git clone https://github.com/hashiramaendure/shadow-clone-jutsu.git
+cd shadow-clone-jutsu
+pnpm install
+pnpm run build
+pnpm link
+```
+
+## クイックスタート
+
+### 🚀 3ステップで始める
 
 ```bash
 # 1. プロジェクトディレクトリに移動
@@ -72,12 +110,12 @@ scj create feature/awesome-feature
 scj shell feature/awesome-feature
 ```
 
-### 基本的な使い方
+### 📚 基本的な使用例
 
-#### 📦 複数の機能を並行開発
+#### 複数の機能を並行開発
 
 ```bash
-# 認証機能の開発
+# 認証機能の開発（Claude Code連携）
 scj create feature/auth --tmux --claude
 
 # バグ修正を並行で実施
@@ -87,10 +125,10 @@ scj create bugfix/login-issue
 scj list
 
 # 影分身間を素早く切り替え
-scj tmux --fzf
+scj tmux
 ```
 
-#### 🔄 GitHub連携
+#### GitHub連携
 
 ```bash
 # IssueからWorktreeを作成
@@ -103,7 +141,7 @@ scj github pr 456
 scj create feature/new-ui --draft-pr
 ```
 
-#### 🤖 Claude Code統合
+#### Claude Code統合
 
 ```bash
 # Claude Codeと一緒に開発を開始
@@ -116,649 +154,202 @@ scj suggest --review
 scj review --auto-flow
 ```
 
-### よくある使用例
+## コマンドリファレンス
 
-#### 1. 複数のIssueを並行で処理
+### 📊 主要コマンド一覧
 
-```bash
-# GitHub Issuesから複数選択して一括作成
-scj batch
+| コマンド | エイリアス | 説明 | 使用例 |
+|---------|-----------|------|-------|
+| `create` | `c` | 新しい影分身を作成 | `scj create feature/new` |
+| `list` | `ls`, `l` | 影分身の一覧表示 | `scj list --json` |
+| `delete` | `rm`, `d` | 影分身を削除 | `scj delete feature/old` |
+| `shell` | `sh` | 影分身のシェルに入る | `scj shell feature/new` |
+| `exec` | `e` | 影分身でコマンド実行 | `scj exec feature/new npm test` |
+| `where` | `w` | 影分身のパスを表示 | `scj where feature/new` |
+| `sync` | `s` | コード・ファイル同期 | `scj sync --all --files` |
+| `tmux` | `t` | tmux統合 | `scj tmux --new-window` |
+| `github` | `gh` | GitHub統合 | `scj github pr 123` |
+| `suggest` | `sg` | AI提案機能 | `scj suggest --review` |
+| `review` | `r` | PRレビュー支援 | `scj review --auto-flow` |
+| `batch` | `b` | 一括作成 | `scj batch` |
+| `health` | `check` | 健全性チェック | `scj health --fix` |
+| `snapshot` | `snap` | スナップショット | `scj snapshot -m "before refactor"` |
+| `dashboard` | `ui` | Web UI | `scj dashboard` |
 
-# 各影分身でそれぞれ作業
-scj shell issue-123  # Issue #123の修正
-scj shell issue-456  # Issue #456の機能実装
-```
+### 🎯 よく使うコマンドの詳細
 
-#### 2. 実験的な開発
-
-```bash
-# 実験用の影分身を作成
-scj create experiment/new-architecture --template experiment
-
-# メインの開発に影響なく実験
-# 実験が成功したらマージ、失敗したら削除
-scj delete experiment/new-architecture
-```
-
-#### 3. コードレビューフロー
-
-```bash
-# PRをローカルでチェックアウト
-scj github pr 789
-
-# AI差分レビューを実行
-scj suggest --review
-
-# レビューコメントを反映して更新
-git add -A && git commit -m "fix: review comments"
-git push
-```
-
-### Tips & Tricks
-
-- **tmux統合**: `--tmux` フラグを使うと自動的にtmuxセッション/ウィンドウが作成されます
-- **JSON出力**: `--json` フラグで多くのコマンドがJSON形式で出力できます（CI/CD連携に便利）
-- **fzf選択**: `--fzf` フラグでインタラクティブな選択が可能です
-- **一括操作**: `batch` コマンドで複数の影分身を効率的に管理できます
-
-## インストール
-
-### 前提条件
-
-- Node.js >= 20.0.0
-- Git >= 2.22.0
-- npm または yarn
-
-### インストール方法
-
-#### npm / pnpm / yarn
+#### 📦 create - 影分身を作り出す
 
 ```bash
-# npm
-npm install -g shadow-clone-jutsu
-
-# pnpm
-pnpm add -g shadow-clone-jutsu
-
-# yarn
-yarn global add shadow-clone-jutsu
-```
-
-#### npx（インストール不要）
-
-```bash
-# 直接実行
-npx shadow-clone-jutsu create feature/new-feature
-
-# エイリアスを設定して使いやすく
-alias scj='npx shadow-clone-jutsu'
-```
-
-#### Homebrew (macOS)
-
-```bash
-brew tap hashiramaendure/tap
-brew install shadow-clone-jutsu
-```
-
-※ 注意: npmパッケージ公開後に利用可能になります
-
-#### Scoop (Windows)
-
-```powershell
-scoop bucket add hashiramaendure https://github.com/hashiramaendure/scoop-bucket
-scoop install shadow-clone-jutsu
-```
-
-#### ソースからインストール
-
-```bash
-git clone https://github.com/hashiramaendure/shadow-clone-jutsu.git
-cd shadow-clone-jutsu
-npm install
-npm run build
-npm link
-```
-
-## 使い方
-
-### 基本コマンド
-
-#### 影分身を作り出す
-
-```bash
-# 新しい影分身を作成
+# 基本的な使い方
 scj create feature/new-feature
 
-# Issue番号から影分身を作成
+# Issue番号から作成
 scj create 123           # issue-123として作成
 scj create #123          # issue-123として作成
 scj create issue-123     # issue-123として作成
 
-# tmuxセッション付きで作成（Claude Code自動起動）
-scj create feature/new-feature --tmux --claude
-
-# Draft PRを自動作成
-scj create feature/new-feature --draft-pr
-
-# 設定可能なオプション
-scj create feature/new-feature --base main --open --setup --tmux --claude --draft-pr
-
-# ベースブランチを指定して作成
-scj create feature/new-feature --base develop
-
-# 作成後に自動でエディタを開く
-scj create feature/new-feature --open
+# オプション付き
+scj create feature/new-feature \
+  --base develop \        # ベースブランチ指定
+  --open \               # エディタで開く
+  --setup \              # 環境セットアップ実行
+  --tmux \               # tmuxセッション作成
+  --claude \             # Claude Code起動
+  --draft-pr            # Draft PR作成
 ```
 
-#### 影分身の一覧を表示
+**オプション一覧:**
+
+| オプション | 短縮形 | 説明 |
+|-----------|--------|------|
+| `--base` | `-b` | ベースブランチを指定 |
+| `--open` | `-o` | 作成後にエディタで開く |
+| `--setup` | `-s` | npm install等を自動実行 |
+| `--tmux` | | tmuxセッション/ウィンドウを作成 |
+| `--claude` | | Claude Codeを自動起動 |
+| `--draft-pr` | | GitHub Draft PRを作成 |
+
+#### 📋 list - 影分身の一覧を表示
 
 ```bash
-# 一覧表示
+# 基本的な一覧表示
 scj list
-scj ls  # エイリアス
 
-# JSON形式で出力
+# JSON形式で出力（CI/CD連携用）
 scj list --json
 
-# fzfで選択（選択したブランチ名を出力）
+# fzfで選択
 scj list --fzf
+
+# メタデータ付きで表示
+scj list --metadata
 ```
 
-#### 影分身のパスを表示
+**出力例:**
+```
+🥷 影分身一覧:
+
+  main (current)
+  ├─ /Users/ninja/project
+  └─ 2 days ago
+
+  feature/auth 
+  ├─ /Users/ninja/project/.git/shadow-clones/feature-auth
+  └─ 5 hours ago
+
+  bugfix/login-issue [GitHub #123]
+  ├─ /Users/ninja/project/.git/shadow-clones/bugfix-login-issue
+  └─ 1 hour ago
+```
+
+#### 🔄 sync - worktree間でコード・ファイル同期
 
 ```bash
-# 特定の影分身のパスを表示
-scj where feature/new-feature
-
-# 現在のworktreeのパスを表示
-scj where --current
-
-# fzfで選択してパスを表示
-scj where --fzf
-```
-
-#### 影分身のシェルに入る
-
-```bash
-# 特定の影分身のシェルに入る
-scj shell feature/new-feature
-
-# fzfで選択してシェルに入る
-scj shell --fzf
-
-# エイリアス
-scj sh feature/new-feature
-```
-
-#### 影分身でコマンドを実行
-
-```bash
-# 特定の影分身でコマンドを実行
-scj exec feature/new-feature npm test
-
-# 全ての影分身でコマンドを実行
-scj exec --all npm install
-
-# エイリアス
-scj e feature/new-feature npm test
-```
-
-#### 影分身を削除
-
-```bash
-# 影分身を削除
-scj delete feature/old-feature
-
-# 強制削除
-scj delete feature/old-feature --force
-
-# エイリアス
-scj rm feature/old-feature
-```
-
-### 高度な機能
-
-#### 自動レビュー&マージフロー
-
-```bash
-# 自動レビュー&マージフロー実行
-scj review --auto-flow
-
-# または特定のPRに対して
-scj review 123 --auto-flow
-
-# インタラクティブメニューから選択
-scj review 123  # メニューから「🚀 自動レビュー&マージフロー」を選択
-```
-
-**自動レビューフローの内容:**
-1. `git fetch origin main && git rebase origin/main`
-2. 競合発生時は`claude /resolve-conflict`でClaude Code起動
-3. `claude /review --diff origin/main`でコードレビュー実行
-4. Conventional Commitメッセージを自動生成
-5. GitHub PR作成
-
-#### GitHub統合
-
-```bash
-# PR から影分身を作成
-scj github pr 123
-
-# Issue から影分身を作成
-scj github issue 456
-
-# インタラクティブに選択
-scj github
-
-# エイリアス
-scj gh pr 123
-```
-
-#### 既存のブランチから影分身を作成
-
-```bash
-# リモートブランチから影分身を作成
-scj attach origin/feature/existing
-
-# インタラクティブに選択
-scj attach
-
-# エイリアス
-scj a
-```
-
-#### tmux統合
-
-```bash
-# fzfで選択してtmuxセッション/ウィンドウ/ペインで開く
-scj tmux
-
-# 新しいウィンドウで開く
-scj tmux --new-window
-
-# ペインを分割して開く
-scj tmux --split-pane
-
-# エイリアス
-scj t
-```
-
-#### 複数の影分身を一括作成（バッチ処理）
-
-```bash
-# GitHub Issuesから複数選択して一括作成
-scj batch
-
-# ファイルから一括作成
-scj batch --from-file worktrees.txt
-
-# インタラクティブに複数入力
-scj batch --interactive
-
-# オプション
-scj batch -o              # 作成後にエディタで開く
-scj batch -s              # 環境セットアップを実行
-scj batch -b main         # ベースブランチを指定
-
-# エイリアス
-scj b
-```
-
-**バッチファイルフォーマット:**
-```
-# コメント行
-branch-name | description | issue/pr番号
-feature-auth | 認証機能の実装 | #123
-bugfix-login | ログインバグの修正 | pr-45
-refactor-api | APIのリファクタリング
-```
-
-#### Claude Code会話履歴の管理
-
-```bash
-# 全ての履歴を一覧表示
-scj history --list
-
-# 特定ブランチの履歴を表示
-scj history --show feature-auth
-
-# 履歴をエクスポート
-scj history --export all-histories.json
-scj history --export all-histories.md
-
-# 全履歴を1ファイルにマージ
-scj history --merge merged-history.md
-
-# 不要な履歴をクリーンアップ
-scj history --cleanup
-
-# 履歴パスを同期
-scj history --sync
-
-# エイリアス
-scj h
-```
-
-#### Claude Codeによるブランチ名・コミットメッセージ提案
-
-```bash
-# ブランチ名を提案
-scj suggest --branch
-scj suggest -b -d "認証機能の実装"
-scj suggest -b --issue 123
-
-# コミットメッセージを提案
-scj suggest --commit
-scj suggest -c --diff
-
-# AI差分レビュー
-scj suggest --review
-scj suggest -r
-
-# 両方を提案
-scj suggest
-
-# Issueから情報を取得して提案
-scj suggest -b -i 123
-
-# PRから情報を取得して提案
-scj suggest -b -p 45
-
-# エイリアス
-scj sg
-```
-
-#### worktree間でのコード・ファイル同期
-
-```bash
-# メインブランチの変更を特定の影分身に同期
+# 特定の影分身に同期
 scj sync feature-branch
 
 # 全ての影分身に同期
 scj sync --all
 
-# インタラクティブに選択
-scj sync
-
-# rebaseで同期（デフォルトはmerge）
-scj sync --rebase
-
 # 環境変数・設定ファイルを同期
 scj sync --files
 
-# インタラクティブにファイルを選択して同期
-scj sync --interactive
-
-# プリセットを使用してファイル同期
+# プリセットを使用
 scj sync --preset env     # .env系ファイルのみ
 scj sync --preset config  # 設定ファイルのみ
 scj sync --preset all     # 全ての設定ファイル
 
-# コード同期とファイル同期を同時に実行
-scj sync --all --files
-
-# エイリアス
-scj s
+# インタラクティブにファイル選択
+scj sync --interactive
 ```
 
-#### worktree依存関係グラフの可視化
+#### 🤖 suggest - Claude Codeによる提案
 
 ```bash
-# テキスト形式で表示（デフォルト）
-scj graph
+# ブランチ名を提案
+scj suggest --branch -d "認証機能の実装"
 
-# 最新コミットと日付を表示
-scj graph --show-commits --show-dates
+# コミットメッセージを提案
+scj suggest --commit --diff
 
-# Mermaid形式で出力
-scj graph --format mermaid
+# AI差分レビュー
+scj suggest --review
 
-# Graphviz DOT形式で出力して画像生成
-scj graph --format dot --output graph.dot
-
-# エイリアス
-scj g
+# Issue/PRから情報を取得して提案
+scj suggest -b --issue 123
+scj suggest -b --pr 456
 ```
 
-#### worktreeテンプレート機能
+## 高度な機能
+
+### 🚀 自動レビュー&マージフロー
 
 ```bash
-# 利用可能なテンプレートを表示
-scj template --list
-
-# 現在の設定をテンプレートとして保存
-scj template --save my-template
-
-# グローバルテンプレートとして保存
-scj template --save my-template --global
-
-# テンプレートを適用して影分身を作成
-scj create feature-new --template feature
-scj create bug-fix --template bugfix
-
-# テンプレートを削除
-scj template --delete my-template
-
-# エイリアス
-scj tpl
+# 自動フローを実行
+scj review --auto-flow
 ```
 
-**デフォルトテンプレート:**
-- `feature`: 新機能開発用（Claude Code自動起動）
-- `bugfix`: バグ修正用
-- `experiment`: 実験的開発用（tmux統合）
-- `docs`: ドキュメント作成用（カスタムファイル付き）
+**実行される処理:**
+1. ✅ `git fetch origin main && git rebase origin/main`
+2. 🔧 競合発生時は`claude /resolve-conflict`でClaude Code起動
+3. 📝 `claude /review --diff origin/main`でコードレビュー実行
+4. 💬 Conventional Commitメッセージを自動生成
+5. 🚀 GitHub PR作成
 
-#### GitHub Issues/PR連携とメタデータ管理
-
-```bash
-# Issue番号から影分身を作成（自動的にGitHub情報を取得）
-scj create 123
-scj create #123
-scj create issue-123
-
-# 作成された影分身のメタデータを確認
-scj list --metadata
-
-# JSON形式でメタデータを含む一覧を取得
-scj list --json
-```
-
-**自動取得される情報:**
-- Issue/PRのタイトル、本文、作成者
-- ラベル、担当者、マイルストーン
-- 作成日時、worktree情報
-- 使用したテンプレート
-
-**メタデータの保存場所:**
-各worktreeの `.scj-metadata.json` ファイルに保存されます
-
-#### 自動コード同期機能（ファイル監視）
+### 📊 統合ダッシュボード
 
 ```bash
-# 現在のworktreeでファイル変更を監視
-scj watch
-
-# 全てのworktreeに自動同期
-scj watch --all
-
-# 特定のパターンのみ監視
-scj watch --patterns "*.ts" "*.js" "*.json"
-
-# 除外パターンを指定
-scj watch --exclude "node_modules/**" "dist/**"
-
-# ドライラン（実際の同期は行わない）
-scj watch --dry
-
-# 確認なしで自動同期
-scj watch --auto
-```
-
-#### 統合ダッシュボード（Web UI）
-
-```bash
-# ダッシュボードサーバーを起動（デフォルト: http://localhost:8765）
+# ダッシュボードを起動
 scj dashboard
 
 # カスタムポートで起動
 scj dashboard --port 3000
-
-# ブラウザを自動で開かない
-scj dashboard --no-open
-
-# エイリアス
-scj ui
 ```
 
-**ダッシュボードの機能:**
+**ダッシュボード機能:**
 - 全worktreeの状態を一覧表示
-- GitHub Issues/PR連携状況の表示
-- 健全性ステータスの可視化
-- 統計情報（総数、アクティブ数、要確認数）
-- エディタ・ターミナルで直接開く機能
-- 30秒ごとの自動更新
-- ダークテーマ対応
+- GitHub連携状況の可視化
+- 健全性ステータス表示
+- リアルタイム更新（30秒ごと）
 
-#### worktreeスナップショット機能
+### 📸 スナップショット機能
 
 ```bash
-# 現在のworktreeのスナップショットを作成
-scj snapshot
-scj snapshot -m "機能実装前の状態"
+# スナップショットを作成
+scj snapshot -m "リファクタリング前の状態"
 
-# 変更をスタッシュに保存してスナップショット作成
-scj snapshot --stash
-
-# 全てのworktreeのスナップショットを作成
+# 全worktreeのスナップショット
 scj snapshot --all
 
-# スナップショット一覧を表示
-scj snapshot --list
-
-# スナップショットを復元
+# スナップショットから復元
 scj snapshot --restore snapshot-xxxxx
-
-# スナップショットを削除
-scj snapshot --delete snapshot-xxxxx
-
-# エイリアス
-scj snap
 ```
 
-**スナップショットに保存される情報:**
-- Git状態（ブランチ、トラッキング、ahead/behind）
-- ステージング済み・変更・未追跡ファイル
-- 最終コミット情報
-- worktreeメタデータ
-- オプションでスタッシュ
-
-#### worktree健全性チェック
+### 🏥 worktree健全性チェック
 
 ```bash
-# 全てのworktreeの健全性をチェック
+# 健全性をチェック
 scj health
 
-# 修正可能な問題を自動修正
+# 自動修正
 scj health --fix
 
-# 古いworktreeを削除（デフォルト: 30日以上）
-scj health --prune
-
-# 古いと判定する日数を指定
-scj health --days 60
-
-# 詳細情報を表示
-scj health --verbose
-
-# エイリアス
-scj check
+# 古いworktreeを削除（30日以上）
+scj health --prune --days 30
 ```
 
 **検出される問題:**
-- `stale`: 長期間更新されていないworktree
-- `orphaned`: リモートブランチが存在しないworktree
-- `diverged`: メインブランチから大きく乖離したworktree
-- `uncommitted`: 未コミットの変更があるworktree
-- `conflict`: マージ競合が未解決のworktree
-- `missing`: ディレクトリが存在しないworktree
+- 🕰️ `stale`: 長期間更新されていない
+- 👻 `orphaned`: リモートブランチが存在しない
+- 🌊 `diverged`: メインブランチから大きく乖離
+- 📝 `uncommitted`: 未コミットの変更
+- ⚔️ `conflict`: マージ競合が未解決
+- ❌ `missing`: ディレクトリが存在しない
 
-### 設定管理
+## 設定
 
-#### プロジェクト設定の初期化
-
-```bash
-# .scj.json を作成
-scj config init
-```
-
-#### 設定の表示
-
-```bash
-# プロジェクト設定を表示
-scj config show
-
-# グローバル設定を表示
-scj config show --global
-```
-
-#### Claude Code統合設定
-
-プロジェクトまたはグローバル設定（`~/.scjrc`）で以下を設定可能:
-
-```json
-{
-  "claude": {
-    "autoStart": true,
-    "markdownMode": "shared",
-    "initialCommands": ["/model sonnet-3.5"],
-    "costOptimization": {
-      "stopHooks": ["/compact", "/clear"],
-      "maxOutputTokens": 5000,
-      "historyPath": "~/.claude/history/{branch}.md"
-    }
-  },
-  "tmux": {
-    "enabled": true,
-    "openIn": "window",
-    "sessionNaming": "{branch}"
-  }
-}
-```
-
-**CLAUDE.md処理モード:**
-- `shared`: ルートのCLAUDE.mdをシンボリックリンクで共有
-- `split`: 各worktreeに専用のCLAUDE.mdを作成
-
-**コスト最適化機能:**
-- `stopHooks`: Claude Code停止時の自動実行コマンド
-- `maxOutputTokens`: 最大出力トークン数制限
-- `historyPath`: ブランチ別セッション履歴保存先
-
-### MCP統合（Claude Code連携）
-
-```bash
-# MCPサーバーを起動
-scj mcp serve
-```
-
-Claude Codeの設定ファイル（`.claude/mcp_settings.json`）に以下を追加：
-
-```json
-{
-  "mcpServers": {
-    "shadow-clone-jutsu": {
-      "command": "scj",
-      "args": ["mcp", "serve"]
-    }
-  }
-}
-```
-
-## 設定ファイル
-
-### プロジェクト設定 (.scj.json)
+### 📁 プロジェクト設定 (.scj.json)
 
 ```json
 {
@@ -774,30 +365,40 @@ Claude Codeの設定ファイル（`.claude/mcp_settings.json`）に以下を追
   "hooks": {
     "afterCreate": "npm install",
     "beforeDelete": "echo \"影分身を削除します: $SHADOW_CLONE\""
+  },
+  "claude": {
+    "autoStart": true,
+    "markdownMode": "shared",
+    "initialCommands": ["/model sonnet-3.5"]
   }
 }
 ```
 
-### 設定オプション
+### 🤖 MCP統合設定
 
-- **worktrees.path**: 影分身を作成するディレクトリ
-- **worktrees.branchPrefix**: ブランチ名に自動付与するプレフィックス
-- **development.autoSetup**: 作成時に環境セットアップを自動実行
-- **development.syncFiles**: 同期するファイルのリスト
-- **development.defaultEditor**: デフォルトのエディタ（vscode/cursor/none）
-- **hooks.afterCreate**: 影分身作成後に実行するコマンド
-- **hooks.beforeDelete**: 影分身削除前に実行するコマンド
+Claude Codeの設定（`.claude/mcp_settings.json`）に追加:
 
-## シェル補完
+```json
+{
+  "mcpServers": {
+    "shadow-clone-jutsu": {
+      "command": "scj",
+      "args": ["mcp", "serve"]
+    }
+  }
+}
+```
 
-### Bash
+### 🐚 シェル補完
+
+#### Bash
 
 ```bash
 scj completion bash >> ~/.bashrc
 source ~/.bashrc
 ```
 
-### Zsh
+#### Zsh
 
 ```bash
 mkdir -p ~/.zsh/completions
@@ -807,7 +408,7 @@ echo 'autoload -U compinit && compinit' >> ~/.zshrc
 source ~/.zshrc
 ```
 
-### Fish
+#### Fish
 
 ```bash
 scj completion fish > ~/.config/fish/completions/scj.fish
@@ -815,61 +416,73 @@ scj completion fish > ~/.config/fish/completions/scj.fish
 
 ## トラブルシューティング
 
-### Git バージョンエラー
+### ❓ よくある問題と解決方法
 
-shadow-clone-jutsuはGit 2.22.0以上が必要です。以下のコマンドでGitをアップデートしてください：
+| 問題 | 解決方法 |
+|------|----------|
+| Git バージョンエラー | Git 2.22.0以上にアップデート: `brew install git` |
+| fzf が見つからない | fzfをインストール: `brew install fzf` |
+| tmux が見つからない | tmuxをインストール: `brew install tmux` |
+| Claude Codeが起動しない | MCPサーバー設定を確認 |
 
-```bash
-# macOS
-brew install git
-
-# Ubuntu/Debian
-sudo add-apt-repository ppa:git-core/ppa
-sudo apt update
-sudo apt install git
-```
-
-### fzf が見つからない
-
-tmuxコマンドや--fzfオプションを使用するにはfzfが必要です：
+### 🔍 デバッグモード
 
 ```bash
-# macOS
-brew install fzf
+# デバッグ情報を表示
+DEBUG=scj:* scj create feature/debug
 
-# Linux
-git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf
-~/.fzf/install
+# 詳細なログを出力
+scj --verbose create feature/test
 ```
-
-## ドキュメント
-
-### コマンドリファレンス
-
-各コマンドの詳細な使い方とオプションについては、以下のドキュメントを参照してください：
-
-- [`batch`](./docs/commands/batch.md) - 複数のworktreeを一括作成
-- [`create`](./docs/commands/create.md) - 新しいworktreeを作成
-- [`delete`](./docs/commands/delete.md) - worktreeを削除
-- [`github`](./docs/commands/github.md) - GitHub Issues/PRからworktreeを作成
-- [`health`](./docs/commands/health.md) - worktreeの健全性をチェック
-- [`history`](./docs/commands/history.md) - Claude Codeの会話履歴を管理
-- [`list`](./docs/commands/list.md) - worktree一覧を表示
-- [`snapshot`](./docs/commands/snapshot.md) - worktreeのスナップショットを管理
-- [`sync`](./docs/commands/sync.md) - worktree間でファイルを同期
-
-## ライセンス
-
-[MIT License](./LICENSE)
 
 ## 貢献
+
+### 🤝 コントリビューション
 
 バグ報告や機能リクエストは[GitHub Issues](https://github.com/hashiramaendure/shadow-clone-jutsu/issues)へお願いします。
 
 プルリクエストも歓迎します！
 
-[貢献ガイドライン](./CONTRIBUTING.md) | [Code of Conduct](./CODE_OF_CONDUCT.md)
+### 📚 関連ドキュメント
+
+- [貢献ガイドライン](./CONTRIBUTING.md)
+- [Code of Conduct](./CODE_OF_CONDUCT.md)
+- [変更履歴](./CHANGELOG.md)
+- [ライセンス](./LICENSE)
+
+### 🛠️ 開発
+
+```bash
+# リポジトリをクローン
+git clone https://github.com/hashiramaendure/shadow-clone-jutsu.git
+cd shadow-clone-jutsu
+
+# 依存関係をインストール
+pnpm install
+
+# 開発モードで実行
+pnpm dev
+
+# テストを実行
+pnpm test
+
+# ビルド
+pnpm build
+```
+
+## ライセンス
+
+[MIT License](./LICENSE) © 2024 hashiramaendure
 
 ---
 
-🥷 Happy parallel development with shadow-clone-jutsu!
+<div align="center">
+
+**🥷 Happy parallel development with shadow-clone-jutsu!**
+
+[GitHub](https://github.com/hashiramaendure/shadow-clone-jutsu) • 
+[npm](https://www.npmjs.com/package/shadow-clone-jutsu) • 
+[Issues](https://github.com/hashiramaendure/shadow-clone-jutsu/issues) • 
+[Discussions](https://github.com/hashiramaendure/shadow-clone-jutsu/discussions)
+
+</div>
