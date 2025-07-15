@@ -8,6 +8,10 @@ on:
     branches:
       - main
 
+permissions:
+  contents: read
+  pull-requests: read
+
 jobs:
   lint:
     name: Lint
@@ -121,13 +125,14 @@ jobs:
       - name: Check coverage thresholds
         if: matrix.os == 'ubuntu-latest' && matrix.node-version == '20'
         run: |
-          # Check if coverage meets minimum threshold (60%)
+          # Check if coverage meets minimum threshold (74% temporarily, target: 80%)
           COVERAGE=$(cat coverage/coverage-summary.json | jq '.total.lines.pct')
           echo "Current coverage: ${COVERAGE}%"
-          if (( $(echo "$COVERAGE < 60" | bc -l) )); then
-            echo "Coverage ${COVERAGE}% is below minimum threshold of 60%"
+          if (( $(echo "$COVERAGE < 74" | bc -l) )); then
+            echo "Coverage ${COVERAGE}% is below minimum threshold of 74% (temporary - target: 80%)"
             exit 1
           fi
+          echo "✅ Coverage ${COVERAGE}% meets temporary threshold (74%). Target: 80%"
 
   build:
     name: Build
