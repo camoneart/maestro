@@ -18,6 +18,32 @@ interface SuggestOptions {
   review?: boolean
 }
 
+// 重複を除去する関数
+export function filterDuplicateSuggestions(suggestions: string[]): string[] {
+  return [...new Set(suggestions)]
+}
+
+// 提案をフォーマットする関数
+export function formatSuggestions(suggestions: string[]): string {
+  if (suggestions.length === 0) return ''
+  return suggestions.map((s, i) => `${i + 1}. ${s}`).join('\n')
+}
+
+// Claudeのレスポンスを解析する関数
+export function parseClaudeResponse(response: string): string[] {
+  const lines = response.split('\n')
+  const suggestions: string[] = []
+  
+  for (const line of lines) {
+    const match = line.match(/^\d+\.\s*(.+)$/)
+    if (match && match[1]) {
+      suggestions.push(match[1].trim())
+    }
+  }
+  
+  return suggestions
+}
+
 // Claude Codeを使ってブランチ名を提案
 async function suggestBranchName(
   description: string,

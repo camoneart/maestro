@@ -15,8 +15,31 @@ class DeleteCommandError extends Error {
   }
 }
 
+// ディレクトリサイズをフォーマットする関数
+export function formatDirectorySize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+  if (bytes < 1024 * 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+  return `${(bytes / (1024 * 1024 * 1024)).toFixed(1)} GB`
+}
+
+// worktree表示文字列を作成する関数
+export function createWorktreeDisplay(worktree: Worktree): string {
+  let display = worktree.branch || worktree.head
+  
+  if (worktree.locked) {
+    display = `🔒 ${display}`
+  }
+  
+  if (worktree.detached) {
+    display = `⚠️  ${display} (detached)`
+  }
+  
+  return display
+}
+
 // ディレクトリサイズを取得する関数
-async function getDirectorySize(dirPath: string): Promise<string> {
+export async function getDirectorySize(dirPath: string): Promise<string> {
   try {
     const { stdout } = await execa('du', ['-sh', dirPath])
     const size = stdout.split('\t')[0]
@@ -27,7 +50,7 @@ async function getDirectorySize(dirPath: string): Promise<string> {
 }
 
 // リモートブランチを削除する関数
-async function deleteRemoteBranch(branchName: string): Promise<void> {
+export async function deleteRemoteBranch(branchName: string): Promise<void> {
   const remoteSpinner = ora('リモートブランチを削除中...').start()
 
   try {
