@@ -233,7 +233,7 @@ describe('create command refactored functions', () => {
 
       expect(mockSpinner.start).toHaveBeenCalled()
       expect(mockGitManager.createWorktree).toHaveBeenCalledWith('test-branch', undefined)
-      expect(mockSpinner.succeed).toHaveBeenCalledWith(expect.stringContaining('影分身を作成しました'))
+      expect(mockSpinner.succeed).toHaveBeenCalledWith(expect.stringContaining('影分身を作り出しました'))
     })
 
     it('should handle worktree creation failure', async () => {

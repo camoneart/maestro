@@ -433,7 +433,7 @@ export async function createWorktreeWithProgress(
       template: options.template,
     })
 
-    spinner.succeed(chalk.green(`✨ 影分身を作成しました: ${worktreePath}`))
+    spinner.succeed(chalk.green(`✨ 影分身を作り出しました: ${worktreePath}`))
 
     // 後処理の実行
     await executePostCreationTasks(worktreePath, branchName, options, config)
