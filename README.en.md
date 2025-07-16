@@ -9,7 +9,8 @@ _Parallel Development CLI powered by Git Worktree & Claude AI_
 [![codecov](https://codecov.io/gh/hashiramaendure/shadow-clone-jutsu/branch/main/graph/badge.svg)](https://codecov.io/gh/hashiramaendure/shadow-clone-jutsu)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-**A CLI tool that realizes parallel development with Claude Code using Shadow Clone Jutsu (Git Worktree)**
+**Shadow Clone Jutsu (Git Worktree) CLI Tool for Parallel Development with Claude Code**  
+_Parallel Development CLI powered by Git Worktree & Claude AI_
 
 ![Demo Animation](https://via.placeholder.com/800x400/1a1a1a/00ff00?text=shadow-clone-jutsu+demo)
 
@@ -31,24 +32,24 @@ shadow-clone-jutsu is a CLI tool that makes Git Worktree management more intuiti
 
 ### Why shadow-clone-jutsu?
 
-**Pain**: Traditional Git workflows require constant branch switching, stashing, and context switching when working on multiple features simultaneously.
+**Pain**: Traditional Git workflows involve frequent branch switching, stashing, and context switching when developing multiple features in parallel, significantly reducing development efficiency.
 
-**Solution**: shadow-clone-jutsu leverages Git Worktree to create isolated "shadow clones" for each branch, enabling true parallel development with seamless AI integration.
+**Solution**: shadow-clone-jutsu leverages Git Worktree to create each branch as an independent "shadow clone", enabling complete parallel development and AI integration.
 
-**Benefit**: Developers can work on multiple features simultaneously, leverage Claude Code for AI-powered development, and maintain perfect workflow efficiency with tmux/fzf integration.
+**Benefit**: Developers can work on multiple features simultaneously, with AI-driven development through Claude Code integration and perfect workflow efficiency through tmux/fzf integration.
 
 ## Key Features
 
 | Feature | Description |
 |---------|-------------|
 | 🥷 **Ninja Theme** | Intuitive interface treating Worktrees as "shadow clones" |
-| 🤖 **Claude Code Integration** | AI development support via MCP (Model Context Protocol) |
+| 🤖 **Claude Code Integration** | AI development assistance via MCP (Model Context Protocol) |
 | 🔗 **GitHub Integration** | Create shadow clones directly from PR/Issues |
-| 🎯 **tmux/fzf Integration** | Efficient workflow management |
+| 🎯 **tmux/fzf Integration** | Efficient workflow |
 | 🎨 **Interactive UI** | Beautiful and user-friendly CLI experience |
-| 📊 **Dashboard** | Web UI for comprehensive visualization |
-| 🔄 **Auto Sync** | Automatic synchronization on file changes |
-| 📸 **Snapshots** | Save and restore work states |
+| 📊 **Dashboard** | Visualize everything with Web UI |
+| 🔄 **Auto Sync** | Detect file changes and auto-sync |
+| 📸 **Snapshot** | Save and restore work states |
 
 ## Installation
 
@@ -97,102 +98,245 @@ scoop bucket add hashiramaendure https://github.com/hashiramaendure/scoop-bucket
 scoop install shadow-clone-jutsu
 ```
 
+#### 📂 Install from Source
+
+```bash
+git clone https://github.com/hashiramaendure/scj.git
+cd scj
+pnpm install
+pnpm run build
+pnpm link
+```
+
 ## Quick Start
 
 ### 🚀 Get Started in 3 Steps
 
 ```bash
-# 1. Navigate to your Git project directory
+# 1. Navigate to your project directory
 cd your-git-project
 
 # 2. Create a new shadow clone (worktree)
 scj create feature/awesome-feature
 
-# 3. Start developing in the new worktree
-cd ../worktrees/feature-awesome-feature
+# 3. Start working in the created shadow clone
+scj shell feature/awesome-feature
 ```
 
-### 🎯 Copy-Paste Ready Command
+### 📚 Basic Usage Examples
+
+#### Parallel Development of Multiple Features
 
 ```bash
-pnpm dlx shadow-clone-jutsu create feat/my-feature --tmux --claude --open
+# Develop authentication feature (with Claude Code integration)
+scj create feature/auth --tmux --claude
+
+# Work on bug fixes in parallel
+scj create bugfix/login-issue
+
+# Check list of shadow clones
+scj list
+
+# Quickly switch between shadow clones
+scj tmux
+```
+
+#### GitHub Integration
+
+```bash
+# Create Worktree from Issue
+scj create 123  # Created as issue-123
+
+# Create shadow clone from PR
+scj github pr 456
+
+# Auto-create Draft PR
+scj create feature/new-ui --draft-pr
+```
+
+#### Claude Code Integration
+
+```bash
+# Start development with Claude Code
+scj create feature/ai-integration --tmux --claude
+
+# Run AI diff review
+scj suggest --review
+
+# Auto review & merge flow
+scj review --auto-flow
 ```
 
 ## Command Reference
 
-For detailed command documentation, see [COMMANDS.md](./docs/COMMANDS.md).
+For detailed command documentation, see [docs/COMMANDS.md](./docs/COMMANDS.md).
 
-### Core Commands
+### 📊 Main Commands (Top 10)
 
-| Command | Description |
-|---------|-------------|
-| `scj create <branch>` | Create a new shadow clone |
-| `scj list` | List all shadow clones |
-| `scj delete <branch>` | Delete a shadow clone |
-| `scj tmux [branch]` | Open shadow clone in tmux |
-| `scj sync` | Synchronize files between worktrees |
-| `scj suggest` | AI-powered suggestions with Claude Code |
-| `scj github` | GitHub integration commands |
-| `scj dashboard` | Launch web dashboard |
-| `scj health` | Check shadow clone health |
-| `scj where` | Show current worktree location |
+| Command | Description | Example |
+|---------|-------------|---------|
+| `create` | Create new shadow clone | `scj create feature/new --tmux --claude --open` |
+| `list` | List shadow clones | `scj list --details` |
+| `delete` | Delete shadow clone | `scj delete feature/old --fzf` |
+| `tmux` | Open in tmux session | `scj tmux feature/new` |
+| `sync` | File synchronization | `scj sync --auto` |
+| `suggest` | AI suggestion feature | `scj suggest --branch --description "new feature"` |
+| `github` | GitHub integration | `scj github --issue 123` |
+| `dashboard` | Launch Web UI | `scj dashboard --open` |
+| `health` | Health check | `scj health --fix` |
+| `where` | Check current location | `scj where --verbose` |
+
+### 🎯 Quick Reference
+
+```bash
+# Basic usage
+scj create feature/awesome-feature
+scj list
+scj tmux feature/awesome-feature
+
+# Full setup
+scj create feature/full-setup --tmux --claude --open --setup
+
+# AI suggestions
+scj suggest --branch --description "user authentication feature"
+scj suggest --commit --diff
+
+# GitHub integration
+scj github --issue 123
+scj github --create-pr
+```
 
 ## Advanced Features
 
-### 🤖 Claude Code Integration
+### 🚀 Auto Review & Merge Flow
 
 ```bash
-# AI-powered branch name suggestions
-scj suggest --branch --description "fix login bug"
-
-# AI-powered commit message suggestions
-scj suggest --commit --diff
-
-# Create shadow clone with Claude Code setup
-scj create feature/ai-feature --claude
+# Run auto flow
+scj review --auto-flow
 ```
 
-### 🔗 GitHub Integration
+**Executed processes:**
+1. ✅ `git fetch origin main && git rebase origin/main`
+2. 🔧 On conflict: launch Claude Code with `claude /resolve-conflict`
+3. 📝 Execute code review with `claude /review --diff origin/main`
+4. 💬 Auto-generate Conventional Commit messages
+5. 🚀 Create GitHub PR
+
+### 📊 Integrated Dashboard
 
 ```bash
-# Create shadow clone from GitHub Issue
-scj github --issue 123
+# Launch dashboard
+scj dashboard
 
-# Create shadow clone from PR
-scj github --pr 456
+# Launch on custom port
+scj dashboard --port 3000
 ```
 
-### 🎯 tmux Integration
+**Dashboard features:**
+- List all worktree states
+- Visualize GitHub integration status
+- Display health status
+- Real-time updates (every 30 seconds)
+
+### 📸 Snapshot Feature
 
 ```bash
-# Open shadow clone in tmux session
-scj tmux feature/my-feature
+# Create snapshot
+scj snapshot -m "State before refactoring"
 
-# Auto-create tmux session when creating shadow clone
-scj create feature/tmux-feature --tmux
+# Snapshot all worktrees
+scj snapshot --all
+
+# Restore from snapshot
+scj snapshot --restore snapshot-xxxxx
 ```
+
+### 🏥 Worktree Health Check
+
+```bash
+# Check health
+scj health
+
+# Auto-fix
+scj health --fix
+
+# Remove old worktrees (30+ days)
+scj health --prune --days 30
+```
+
+**Detected issues:**
+- 🕰️ `stale`: Not updated for long time
+- 👻 `orphaned`: Remote branch doesn't exist
+- 🌊 `diverged`: Significantly diverged from main branch
+- 📝 `uncommitted`: Uncommitted changes
+- ⚔️ `conflict`: Unresolved merge conflicts
+- ❌ `missing`: Directory doesn't exist
 
 ## Configuration
 
-Configuration is managed through `scj.config.json`:
+### 📁 Project Configuration (.scj.json)
 
 ```json
 {
   "worktrees": {
-    "root": "../worktrees",
+    "path": ".git/shadow-clones",
     "branchPrefix": "feature/"
   },
   "development": {
-    "defaultEditor": "cursor",
     "autoSetup": true,
-    "syncFiles": [".env", ".env.local"]
+    "syncFiles": [".env", ".env.local"],
+    "defaultEditor": "cursor"
   },
-  "integrations": {
-    "claude": true,
-    "tmux": true,
-    "github": true
+  "hooks": {
+    "afterCreate": "npm install",
+    "beforeDelete": "echo \"Deleting shadow clone: $SHADOW_CLONE\""
+  },
+  "claude": {
+    "autoStart": true,
+    "markdownMode": "shared",
+    "initialCommands": ["/model sonnet-3.5"]
   }
 }
+```
+
+### 🤖 MCP Integration Setup
+
+Add to Claude Code configuration (`.claude/mcp_settings.json`):
+
+```json
+{
+  "mcpServers": {
+    "shadow-clone-jutsu": {
+      "command": "scj",
+      "args": ["mcp", "serve"]
+    }
+  }
+}
+```
+
+### 🐚 Shell Completion
+
+#### Bash
+
+```bash
+scj completion bash >> ~/.bashrc
+source ~/.bashrc
+```
+
+#### Zsh
+
+```bash
+mkdir -p ~/.zsh/completions
+scj completion zsh > ~/.zsh/completions/_scj
+echo 'fpath=(~/.zsh/completions $fpath)' >> ~/.zshrc
+echo 'autoload -U compinit && compinit' >> ~/.zshrc
+source ~/.zshrc
+```
+
+#### Fish
+
+```bash
+scj completion fish > ~/.config/fish/completions/scj.fish
 ```
 
 ## Troubleshooting

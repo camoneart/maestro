@@ -89,3 +89,4 @@ test-output*.txt
 # Release artifacts
 release-*.md
 *-release.md
+coverage_report.json
