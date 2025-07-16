@@ -26,6 +26,7 @@ export interface CreateOptions {
   tmux?: boolean
   claude?: boolean
   draftPr?: boolean
+  yes?: boolean
 }
 
 export interface DeleteOptions {
