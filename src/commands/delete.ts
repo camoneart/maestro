@@ -72,6 +72,101 @@ export async function deleteRemoteBranch(branchName: string): Promise<void> {
   }
 }
 
+// ワークツリー選択の前処理を行う純粋関数
+export function prepareWorktreeSelection(
+  worktrees: Worktree[],
+  branchName?: string,
+  options: { fzf?: boolean; current?: boolean } = {}
+): {
+  filteredWorktrees: Worktree[]
+  needsInteractiveSelection: boolean
+} {
+  const shadowClones = worktrees.filter(wt => !wt.path.endsWith('.'))
+  
+  if (shadowClones.length === 0) {
+    return { filteredWorktrees: [], needsInteractiveSelection: false }
+  }
+  
+  // 現在のworktreeを削除する場合
+  if (options.current) {
+    const currentWorktree = shadowClones.find(wt => 
+      process.cwd().startsWith(wt.path)
+    )
+    if (currentWorktree) {
+      return { filteredWorktrees: [currentWorktree], needsInteractiveSelection: false }
+    }
+  }
+  
+  // ブランチ名が指定されている場合
+  if (branchName && !options.fzf) {
+    const targetWorktree = shadowClones.find(wt => 
+      wt.branch === branchName || wt.branch === `refs/heads/${branchName}`
+    )
+    if (targetWorktree) {
+      return { filteredWorktrees: [targetWorktree], needsInteractiveSelection: false }
+    }
+  }
+  
+  // fzfで選択、またはインタラクティブ選択が必要
+  return { 
+    filteredWorktrees: shadowClones, 
+    needsInteractiveSelection: true 
+  }
+}
+
+// ワークツリー削除の安全性チェックを行う純粋関数
+export function validateWorktreeDeletion(
+  worktree: Worktree,
+  options: { force?: boolean } = {}
+): {
+  isValid: boolean
+  warnings: string[]
+  requiresConfirmation: boolean
+} {
+  const warnings: string[] = []
+  let requiresConfirmation = false
+  
+  // ロックされているかチェック
+  if (worktree.locked) {
+    warnings.push(`ワークツリーがロックされています: ${worktree.path}`)
+  }
+  
+  // 削除可能かチェック
+  if (worktree.prunable) {
+    warnings.push(`削除可能なワークツリーです: ${worktree.path}`)
+  }
+  
+  // 強制削除フラグがない場合は確認が必要
+  if (!options.force && warnings.length > 0) {
+    requiresConfirmation = true
+  }
+  
+  return {
+    isValid: true,
+    warnings,
+    requiresConfirmation
+  }
+}
+
+// ワークツリー削除の実行処理を行う純粋関数
+export async function executeWorktreeDeletion(
+  gitManager: GitWorktreeManager,
+  worktree: Worktree,
+  options: { force?: boolean; removeRemote?: boolean } = {}
+): Promise<{ success: boolean; branchName?: string }> {
+  try {
+    // ブランチ名を取得
+    const branchName = worktree.branch?.replace('refs/heads/', '') || worktree.branch
+    
+    // ワークツリーを削除
+    await gitManager.deleteWorktree(branchName!, options.force)
+    
+    return { success: true, branchName }
+  } catch (error) {
+    throw new DeleteCommandError(error instanceof Error ? error.message : '不明なエラー')
+  }
+}
+
 export const deleteCommand = new Command('delete')
   .alias('rm')
   .description('影分身（worktree）を削除')
@@ -98,20 +193,26 @@ export const deleteCommand = new Command('delete')
 
         // ワークツリー一覧を取得
         const worktrees = await gitManager.listWorktrees()
-        const shadowClones = worktrees.filter(wt => !wt.path.endsWith('.'))
+        const { filteredWorktrees, needsInteractiveSelection } = prepareWorktreeSelection(
+          worktrees,
+          branchName,
+          options
+        )
 
-        if (shadowClones.length === 0) {
+        if (filteredWorktrees.length === 0) {
           spinner.fail('影分身が存在しません')
           return
         }
 
         let targetWorktrees: Worktree[] = []
 
-        // fzfで複数選択
-        if (options.fzf && !branchName) {
+        // インタラクティブ選択が必要でない場合はそのまま使用
+        if (!needsInteractiveSelection) {
+          targetWorktrees = filteredWorktrees
+        } else if (options.fzf && !branchName) {
           spinner.stop()
 
-          const fzfInput = shadowClones
+          const fzfInput = filteredWorktrees
             .map(w => {
               const status = []
               if (w.locked) status.push(chalk.red('ロック'))
@@ -165,7 +266,7 @@ export const deleteCommand = new Command('delete')
                 )
                 .filter(Boolean)
 
-              targetWorktrees = shadowClones.filter(wt => {
+              targetWorktrees = filteredWorktrees.filter((wt: Worktree) => {
                 const branch = wt.branch?.replace('refs/heads/', '')
                 return selectedBranches.includes(branch)
               })
@@ -177,7 +278,7 @@ export const deleteCommand = new Command('delete')
           spinner.start()
         } else if (branchName) {
           // 単一のブランチを指定
-          const targetWorktree = worktrees.find(wt => {
+          const targetWorktree = filteredWorktrees.find(wt => {
             const branch = wt.branch?.replace('refs/heads/', '')
             return branch === branchName || wt.branch === branchName
           })
@@ -186,7 +287,7 @@ export const deleteCommand = new Command('delete')
             spinner.fail(`影分身 '${branchName}' が見つかりません`)
 
             // 類似した名前を提案
-            const similarBranches = worktrees
+            const similarBranches = filteredWorktrees
               .filter(wt => wt.branch && wt.branch.includes(branchName))
               .map(wt => wt.branch?.replace('refs/heads/', '') || wt.branch)
 
@@ -201,20 +302,6 @@ export const deleteCommand = new Command('delete')
           }
 
           targetWorktrees = [targetWorktree]
-        } else if (options.current) {
-          // 現在のworktreeを削除
-          const currentPath = process.cwd()
-          const currentWorktree = worktrees.find(wt => wt.path === currentPath)
-
-          if (!currentWorktree) {
-            throw new DeleteCommandError('現在のディレクトリはworktreeではありません')
-          }
-
-          if (currentWorktree.path.endsWith('.')) {
-            throw new DeleteCommandError('メインworktreeは削除できません')
-          }
-
-          targetWorktrees = [currentWorktree]
         } else {
           throw new DeleteCommandError('削除対象を指定してください')
         }
