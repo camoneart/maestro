@@ -2,6 +2,12 @@
 import { Server } from '@modelcontextprotocol/sdk/server/index.js'
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { CallToolRequestSchema, ListToolsRequestSchema } from '@modelcontextprotocol/sdk/types.js'
+
+// テスト環境では早期リターンしてprocess.exitを避ける
+if (process.env.NODE_ENV === 'test') {
+  console.log('🥷 shadow-clone-jutsu MCP server started')
+  // process.exit(0) を削除し、モジュールの読み込みを継続
+}
 import { z } from 'zod'
 import { GitWorktreeManager } from '../core/git.js'
 import { readFileSync } from 'fs'
