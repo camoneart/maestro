@@ -194,7 +194,7 @@ export const listCommand = new Command('list')
           displayWorktree(wt, false, options.lastCommit, options.metadata)
         )
 
-        console.log(chalk.gray(`\n合計: ${worktrees.length} 個の影分身`))
+        console.log(chalk.gray(`\n合計: ${worktrees.length} 対の影分身`))
       } catch (error) {
         console.error(chalk.red('エラー:'), error instanceof Error ? error.message : '不明なエラー')
         process.exit(1)
