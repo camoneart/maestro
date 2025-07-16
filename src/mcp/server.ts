@@ -161,7 +161,7 @@ server.setRequestHandler(CallToolRequestSchema, async request => {
               type: 'text',
               text:
                 shadowClones.length > 0
-                  ? `🥷 影分身一覧:\n${list}\n\n合計: ${shadowClones.length} 個の影分身`
+                  ? `🥷 影分身一覧:\n${list}\n\n合計: ${shadowClones.length} 対の影分身`
                   : '影分身が存在しません',
             },
           ],

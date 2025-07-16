@@ -367,14 +367,14 @@ describe('MCP Server - Implementation Tests', () => {
         content: [
           {
             type: 'text',
-            text: `🥷 影分身一覧:\n${list}\n\n合計: ${shadowClones.length} 個の影分身`,
+            text: `🥷 影分身一覧:\n${list}\n\n合計: ${shadowClones.length} 対の影分身`,
           },
         ],
       }
       
       expect(listResponse.content[0].text).toContain('🥷 影分身一覧')
       expect(listResponse.content[0].text).toContain('feature-1')
-      expect(listResponse.content[0].text).toContain('合計: 2 個の影分身')
+      expect(listResponse.content[0].text).toContain('合計: 2 対の影分身')
     })
   })
 })

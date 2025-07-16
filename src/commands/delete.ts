@@ -332,7 +332,7 @@ export const deleteCommand = new Command('delete')
           }
         })
 
-        console.log(chalk.gray(`\n合計: ${targetWorktrees.length} 個の影分身`))
+        console.log(chalk.gray(`\n合計: ${targetWorktrees.length} 対の影分身`))
 
         // 削除確認
         if (!options.force) {

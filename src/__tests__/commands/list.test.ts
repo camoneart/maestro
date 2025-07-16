@@ -112,7 +112,7 @@ describe('list command', () => {
       expect(console.log).toHaveBeenCalledWith(expect.stringContaining('🥷 refs/heads/feature-a'))
       expect(console.log).toHaveBeenCalledWith(expect.stringContaining('🥷 refs/heads/feature-b'))
       expect(console.log).toHaveBeenCalledWith(expect.stringContaining('🥷 refs/heads/feature-c'))
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('合計: 4 個の影分身'))
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('合計: 4 対の影分身'))
     })
 
     it('worktreeが存在しない場合は警告を表示', async () => {
@@ -192,7 +192,7 @@ describe('list command', () => {
       expect(output).not.toContain('refs/heads/main')
       expect(output).not.toContain('refs/heads/feature-b')
       expect(output).not.toContain('refs/heads/feature-c')
-      expect(output).toContain('合計: 1 個の影分身')
+      expect(output).toContain('合計: 1 対の影分身')
     })
 
     it('--filterオプションでパスをフィルタする', async () => {
@@ -204,7 +204,7 @@ describe('list command', () => {
       expect(output).toContain('refs/heads/feature-b')
       expect(output).not.toContain('refs/heads/main')
       expect(output).not.toContain('refs/heads/feature-a')
-      expect(output).toContain('合計: 1 個の影分身')
+      expect(output).toContain('合計: 1 対の影分身')
     })
   })
 

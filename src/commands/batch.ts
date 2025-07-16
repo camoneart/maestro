@@ -386,7 +386,7 @@ export const batchCommand = new Command('batch')
         {
           type: 'confirm',
           name: 'confirmCreate',
-          message: `${worktrees.length}個の影分身を作成しますか？`,
+          message: `${worktrees.length}対の影分身を作成しますか？`,
           default: true,
         },
       ])
