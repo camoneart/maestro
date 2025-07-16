@@ -219,6 +219,332 @@ Add specific instructions for this worktree here.
   }
 }
 
+// テンプレート設定を適用する純粋関数
+export async function applyTemplateConfig(
+  templateName: string,
+  options: CreateOptions & { template?: string },
+  baseConfig: Config
+): Promise<{ config: Config; updatedOptions: CreateOptions & { template?: string } }> {
+  const templateConfig = await getTemplateConfig(templateName)
+  
+  if (!templateConfig) {
+    return { config: baseConfig, updatedOptions: options }
+  }
+
+  // テンプレート設定でオプションを上書き
+  const updatedOptions = { ...options }
+  if (templateConfig.autoSetup !== undefined) updatedOptions.setup = templateConfig.autoSetup
+  if (templateConfig.editor !== 'none') updatedOptions.open = true
+  if (templateConfig.tmux) updatedOptions.tmux = true
+  if (templateConfig.claude) updatedOptions.claude = true
+
+  // 設定を一時的に上書き
+  const config = {
+    ...baseConfig,
+    worktrees: {
+      ...baseConfig.worktrees,
+      branchPrefix: templateConfig.branchPrefix || baseConfig.worktrees?.branchPrefix,
+    },
+    development: {
+      ...baseConfig.development,
+      autoSetup: templateConfig.autoSetup ?? baseConfig.development?.autoSetup ?? true,
+      syncFiles: templateConfig.syncFiles ||
+        baseConfig.development?.syncFiles || ['.env', '.env.local'],
+      defaultEditor: templateConfig.editor || baseConfig.development?.defaultEditor || 'cursor',
+    },
+    hooks: templateConfig.hooks || baseConfig.hooks,
+  }
+
+  return { config, updatedOptions }
+}
+
+// ブランチ名の解析と処理を行う純粋関数
+export function processBranchName(branchName: string, config: Config): {
+  isIssue: boolean
+  issueNumber: string | null
+  finalBranchName: string
+} {
+  const { isIssue, issueNumber, branchName: parsedBranchName } = parseIssueNumber(branchName)
+  
+  let finalBranchName = parsedBranchName
+  
+  // ブランチ名にプレフィックスを追加
+  if (config.worktrees?.branchPrefix && !finalBranchName.startsWith(config.worktrees.branchPrefix)) {
+    finalBranchName = config.worktrees.branchPrefix + finalBranchName
+  }
+  
+  return { isIssue, issueNumber: issueNumber || null, finalBranchName }
+}
+
+// GitHub情報を取得して表示する純粋関数
+export async function fetchAndDisplayGithubMetadata(
+  issueNumber: string,
+  initialBranchName: string
+): Promise<{ githubMetadata: GithubMetadata | null; enhancedBranchName: string }> {
+  const githubMetadata = await fetchGitHubMetadata(issueNumber)
+  
+  if (!githubMetadata) {
+    return { githubMetadata: null, enhancedBranchName: initialBranchName }
+  }
+
+  // タイトルからより適切なブランチ名を生成
+  const sanitizedTitle = githubMetadata.title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .substring(0, 30)
+  const enhancedBranchName = `${githubMetadata.type}-${issueNumber}-${sanitizedTitle}`
+  
+  return { githubMetadata, enhancedBranchName }
+}
+
+// メイン実行関数
+export async function executeCreateCommand(
+  branchName: string,
+  options: CreateOptions & { template?: string }
+): Promise<void> {
+  const manager = new GitWorktreeManager()
+  const configManager = new ConfigManager()
+  
+  // Git リポジトリの確認
+  if (!(await manager.isGitRepository())) {
+    console.error(chalk.red('エラー: このディレクトリはGitリポジトリではありません'))
+    process.exit(1)
+  }
+
+  // 設定の読み込み
+  await configManager.loadProjectConfig()
+  let config = configManager.getAll()
+  
+  // テンプレート設定の適用
+  if (options.template) {
+    const { config: updatedConfig, updatedOptions } = await applyTemplateConfig(
+      options.template,
+      options,
+      config
+    )
+    config = updatedConfig
+    Object.assign(options, updatedOptions)
+  }
+
+  // ブランチ名の処理
+  const { isIssue, issueNumber, finalBranchName } = processBranchName(branchName, config)
+
+  // GitHub情報の取得
+  let githubMetadata: GithubMetadata | null = null
+  let enhancedBranchName = finalBranchName
+
+  if (isIssue && issueNumber) {
+    const result = await fetchAndDisplayGithubMetadata(issueNumber, finalBranchName)
+    githubMetadata = result.githubMetadata
+    enhancedBranchName = result.enhancedBranchName
+
+    if (githubMetadata) {
+      console.log(chalk.cyan(`\n📋 ${githubMetadata.type === 'pr' ? 'PR' : 'Issue'} #${issueNumber}: ${githubMetadata.title}`))
+      console.log(chalk.gray(`👤 ${githubMetadata.author}`))
+      
+      if (githubMetadata.labels.length > 0) {
+        console.log(chalk.gray(`🏷️  ${githubMetadata.labels.join(', ')}`))
+      }
+      
+      if (githubMetadata.assignees.length > 0) {
+        console.log(chalk.gray(`👥 ${githubMetadata.assignees.join(', ')}`))
+      }
+      
+      console.log(chalk.gray(`🔗 ${githubMetadata.url}`))
+      console.log()
+    }
+  }
+
+  // 確認プロンプト
+  const shouldConfirm = await shouldPromptForConfirmation(
+    options,
+    enhancedBranchName,
+    githubMetadata
+  )
+  
+  if (shouldConfirm) {
+    const confirmed = await confirmWorktreeCreation(enhancedBranchName, githubMetadata)
+    if (!confirmed) {
+      console.log(chalk.yellow('キャンセルされました'))
+      return
+    }
+  }
+
+  // Worktreeの作成
+  await createWorktreeWithProgress(
+    manager,
+    enhancedBranchName,
+    options,
+    config,
+    githubMetadata,
+    issueNumber
+  )
+}
+
+// 確認プロンプトが必要かどうかを判定
+export async function shouldPromptForConfirmation(
+  options: CreateOptions & { template?: string },
+  branchName: string,
+  githubMetadata: GithubMetadata | null
+): Promise<boolean> {
+  return !options.yes && (githubMetadata !== null || branchName.includes('issue-'))
+}
+
+// 作成確認プロンプト
+export async function confirmWorktreeCreation(
+  branchName: string,
+  githubMetadata: GithubMetadata | null
+): Promise<boolean> {
+  const message = githubMetadata
+    ? `${githubMetadata.type === 'pr' ? 'PR' : 'Issue'} "${githubMetadata.title}" 用のworktreeを作成しますか？`
+    : `ブランチ "${branchName}" 用のworktreeを作成しますか？`
+
+  const { confirmed } = await inquirer.prompt([
+    {
+      type: 'confirm',
+      name: 'confirmed',
+      message,
+      default: true,
+    },
+  ])
+  
+  return confirmed
+}
+
+// Worktree作成のメイン処理
+export async function createWorktreeWithProgress(
+  manager: GitWorktreeManager,
+  branchName: string,
+  options: CreateOptions & { template?: string },
+  config: Config,
+  githubMetadata: GithubMetadata | null,
+  issueNumber: string | null
+): Promise<void> {
+  const spinner = ora('影分身を作成中...').start()
+  
+  try {
+    // Worktreeの作成
+    const worktreePath = await manager.createWorktree(branchName, options.base)
+    
+    // メタデータの保存
+    await saveWorktreeMetadata(worktreePath, branchName, {
+      github: githubMetadata ? { ...githubMetadata, issueNumber: issueNumber || undefined } : undefined,
+      template: options.template,
+    })
+
+    spinner.succeed(chalk.green(`✨ 影分身を作成しました: ${worktreePath}`))
+
+    // 後処理の実行
+    await executePostCreationTasks(worktreePath, branchName, options, config)
+    
+  } catch (error) {
+    spinner.fail(chalk.red(`影分身の作成に失敗しました: ${error}`))
+    throw error
+  }
+}
+
+// 作成後のタスクを実行
+export async function executePostCreationTasks(
+  worktreePath: string,
+  branchName: string,
+  options: CreateOptions & { template?: string },
+  config: Config
+): Promise<void> {
+  const tasks = []
+
+  // 環境セットアップ
+  if (options.setup || config.development?.autoSetup) {
+    tasks.push(setupEnvironment(worktreePath, config))
+  }
+
+  // エディタで開く
+  if (options.open) {
+    tasks.push(openInEditor(worktreePath, config))
+  }
+
+  // tmuxセッション作成
+  if (options.tmux || config.tmux?.enabled) {
+    tasks.push(createTmuxSession(branchName, worktreePath, config))
+  }
+
+  // Claude.md処理
+  if (options.claude || config.claude?.autoStart) {
+    tasks.push(handleClaudeMarkdown(worktreePath, config))
+  }
+
+  // Draft PR作成
+  if (options.draftPr) {
+    tasks.push(createDraftPR(branchName, worktreePath))
+  }
+
+  // 並行実行
+  await Promise.allSettled(tasks)
+}
+
+// 環境セットアップ
+export async function setupEnvironment(worktreePath: string, config: Config): Promise<void> {
+  const spinner = ora('環境をセットアップ中...').start()
+  
+  try {
+    // 依存関係のインストール
+    const packageManager = 'npm' // Default to npm for now
+    await execa(packageManager, ['install'], { cwd: worktreePath })
+    
+    // 設定ファイルの同期
+    if (config.development?.syncFiles) {
+      await syncConfigFiles(worktreePath, config.development.syncFiles)
+    }
+    
+    spinner.succeed(chalk.green('✨ 環境セットアップが完了しました'))
+  } catch (error) {
+    spinner.fail(chalk.red(`環境セットアップに失敗しました: ${error}`))
+  }
+}
+
+// 設定ファイルの同期
+export async function syncConfigFiles(worktreePath: string, syncFiles: string[]): Promise<void> {
+  const rootPath = process.cwd()
+  
+  for (const file of syncFiles) {
+    const sourcePath = path.join(rootPath, file)
+    const destPath = path.join(worktreePath, file)
+    
+    try {
+      await fs.copyFile(sourcePath, destPath)
+    } catch {
+      // ファイルが存在しない場合は無視
+    }
+  }
+}
+
+// エディタで開く
+export async function openInEditor(worktreePath: string, config: Config): Promise<void> {
+  const editor = config.development?.defaultEditor || 'cursor'
+  
+  try {
+    await execa(editor, [worktreePath], { detached: true })
+    console.log(chalk.green(`✨ ${editor}で開きました`))
+  } catch (error) {
+    console.error(chalk.red(`エディタの起動に失敗しました: ${error}`))
+  }
+}
+
+// Draft PR作成
+export async function createDraftPR(branchName: string, worktreePath: string): Promise<void> {
+  const spinner = ora('Draft PRを作成中...').start()
+  
+  try {
+    await execa('gh', ['pr', 'create', '--draft', '--title', `WIP: ${branchName}`, '--body', 'Work in progress'], {
+      cwd: worktreePath,
+    })
+    
+    spinner.succeed(chalk.green('✨ Draft PRを作成しました'))
+  } catch (error) {
+    spinner.fail(chalk.red(`Draft PRの作成に失敗しました: ${error}`))
+  }
+}
+
 export const createCommand = new Command('create')
   .description('新しい影分身（worktree）を作り出す')
   .argument('<branch-name>', 'ブランチ名または Issue# (例: 123, #123, issue-123)')
@@ -231,318 +557,5 @@ export const createCommand = new Command('create')
   .option('-y, --yes', '確認をスキップ')
   .option('--draft-pr', 'Draft PRを自動作成')
   .action(async (branchName: string, options: CreateOptions & { template?: string }) => {
-    const spinner = ora('影分身の術！').start()
-
-    try {
-      const gitManager = new GitWorktreeManager()
-      const configManager = new ConfigManager()
-      await configManager.loadProjectConfig()
-
-      let config = configManager.getAll()
-
-      // テンプレートが指定されている場合は適用
-      if (options.template) {
-        spinner.text = 'テンプレートを適用中...'
-        const templateConfig = await getTemplateConfig(options.template)
-
-        if (templateConfig) {
-          // テンプレート設定でオプションを上書き
-          if (templateConfig.autoSetup !== undefined) options.setup = templateConfig.autoSetup
-          if (templateConfig.editor !== 'none') options.open = true
-          if (templateConfig.tmux) options.tmux = true
-          if (templateConfig.claude) options.claude = true
-
-          // 設定を一時的に上書き
-          config = {
-            ...config,
-            worktrees: {
-              ...config.worktrees,
-              branchPrefix: templateConfig.branchPrefix || config.worktrees?.branchPrefix,
-            },
-            development: {
-              ...config.development,
-              autoSetup: templateConfig.autoSetup ?? config.development?.autoSetup ?? true,
-              syncFiles: templateConfig.syncFiles ||
-                config.development?.syncFiles || ['.env', '.env.local'],
-              defaultEditor: templateConfig.editor || config.development?.defaultEditor || 'cursor',
-            },
-            hooks: templateConfig.hooks || config.hooks,
-          }
-
-          console.log(chalk.green(`\n✨ テンプレート '${options.template}' を適用しました\n`))
-        } else {
-          spinner.warn(`テンプレート '${options.template}' が見つかりません`)
-        }
-      }
-
-      // Gitリポジトリかチェック
-      const isGitRepo = await gitManager.isGitRepository()
-      if (!isGitRepo) {
-        spinner.fail('このディレクトリはGitリポジトリではありません')
-        process.exit(1)
-      }
-
-      // Issue番号またはブランチ名を解析
-      const { isIssue, issueNumber, branchName: parsedBranchName } = parseIssueNumber(branchName)
-      branchName = parsedBranchName
-
-      // ブランチ名にプレフィックスを追加
-      if (config.worktrees?.branchPrefix && !branchName.startsWith(config.worktrees.branchPrefix)) {
-        branchName = config.worktrees.branchPrefix + branchName
-      }
-
-      // Issue番号が指定された場合の追加情報を表示とメタデータ取得
-      let githubMetadata: GithubMetadata | null = null
-      if (isIssue && issueNumber) {
-        console.log(chalk.blue(`📝 Issue #${issueNumber} に基づいてブランチを作成します`))
-
-        spinner.text = `GitHub Issue/PR #${issueNumber} の情報を取得中...`
-        githubMetadata = await fetchGitHubMetadata(issueNumber)
-
-        if (githubMetadata) {
-          spinner.stop()
-          console.log(
-            chalk.green(`✨ ${githubMetadata.type === 'pr' ? 'PR' : 'Issue'} の情報を取得しました`)
-          )
-          console.log(chalk.gray(`  タイトル: ${githubMetadata.title}`))
-          console.log(chalk.gray(`  作成者: ${githubMetadata.author}`))
-          if (githubMetadata.labels.length > 0) {
-            console.log(chalk.gray(`  ラベル: ${githubMetadata.labels.join(', ')}`))
-          }
-          if (githubMetadata.assignees.length > 0) {
-            console.log(chalk.gray(`  担当者: ${githubMetadata.assignees.join(', ')}`))
-          }
-          if (githubMetadata.milestone) {
-            console.log(chalk.gray(`  マイルストーン: ${githubMetadata.milestone}`))
-          }
-          console.log()
-
-          // タイトルからより適切なブランチ名を生成
-          const sanitizedTitle = githubMetadata.title
-            .toLowerCase()
-            .replace(/[^a-z0-9]+/g, '-')
-            .replace(/^-+|-+$/g, '')
-            .substring(0, 30)
-          branchName = `${githubMetadata.type}-${issueNumber}-${sanitizedTitle}`
-        } else {
-          spinner.stop()
-        }
-      }
-
-      // ブランチ名の確認
-      interface CreateOptionsWithYes extends CreateOptions {
-        yes?: boolean
-      }
-      if (!(options as CreateOptionsWithYes).yes) {
-        const { confirmCreate } = await inquirer.prompt([
-          {
-            type: 'confirm',
-            name: 'confirmCreate',
-            message: `ブランチ '${chalk.cyan(branchName)}' で影分身を作り出しますか？`,
-            default: true,
-          },
-        ])
-
-        if (!confirmCreate) {
-          spinner.info('キャンセルされました')
-          return
-        }
-      }
-
-      spinner.text = '影分身を作り出し中...'
-
-      // ワークツリーを作成
-      const worktreePath = await gitManager.createWorktree(branchName, options.base)
-
-      spinner.succeed(
-        `影分身 '${chalk.cyan(branchName)}' を作り出しました！\n` +
-          `  📁 ${chalk.gray(worktreePath)}`
-      )
-
-      // メタデータを保存
-      if (githubMetadata || options.template) {
-        const metadata: Partial<WorktreeMetadata> = {}
-
-        if (githubMetadata) {
-          metadata.github = {
-            ...githubMetadata,
-            issueNumber: issueNumber,
-          }
-        }
-
-        if (options.template) {
-          metadata.template = options.template
-        }
-
-        await saveWorktreeMetadata(worktreePath, branchName, metadata)
-      }
-
-      // 環境セットアップ（設定またはオプションで有効な場合）
-      if (options.setup || (options.setup === undefined && config.development?.autoSetup)) {
-        const setupSpinner = ora('環境をセットアップ中...').start()
-
-        // package.jsonが存在する場合はnpm install
-        try {
-          await execa('npm', ['install'], { cwd: worktreePath })
-          setupSpinner.succeed('npm install 完了')
-        } catch {
-          setupSpinner.warn('npm install をスキップ')
-        }
-
-        // 同期ファイルのコピー
-        if (config.development?.syncFiles) {
-          for (const file of config.development.syncFiles) {
-            try {
-              const sourcePath = path.join(process.cwd(), file)
-              const destPath = path.join(worktreePath, file)
-              await fs.copyFile(sourcePath, destPath)
-              setupSpinner.succeed(`${file} をコピーしました`)
-            } catch {
-              // ファイルが存在しない場合はスキップ
-            }
-          }
-        }
-      }
-
-      // エディタで開く（設定またはオプションで有効な場合）
-      if (
-        options.open ||
-        (options.open === undefined && config.development?.defaultEditor !== 'none')
-      ) {
-        const openSpinner = ora('エディタで開いています...').start()
-        const editor = config.development?.defaultEditor || 'cursor'
-
-        try {
-          if (editor === 'cursor') {
-            await execa('cursor', [worktreePath])
-            openSpinner.succeed('Cursorで開きました')
-          } else if (editor === 'vscode') {
-            await execa('code', [worktreePath])
-            openSpinner.succeed('VSCodeで開きました')
-          }
-        } catch {
-          openSpinner.warn(`${editor}が見つかりません`)
-        }
-      }
-
-      // CLAUDE.mdの処理
-      await handleClaudeMarkdown(worktreePath, config)
-
-      // テンプレートのカスタムファイルを作成
-      if (options.template) {
-        const templateConfig = await getTemplateConfig(options.template)
-        if (templateConfig?.customFiles) {
-          for (const file of templateConfig.customFiles) {
-            try {
-              const filePath = path.join(worktreePath, file.path)
-              await fs.mkdir(path.dirname(filePath), { recursive: true })
-              await fs.writeFile(filePath, file.content)
-              console.log(chalk.green(`✨ ${file.path} を作成しました`))
-            } catch {
-              console.warn(chalk.yellow(`${file.path} の作成に失敗しました`))
-            }
-          }
-        }
-      }
-
-      // tmuxセッションの作成（オプションまたは設定で有効な場合）
-      if (options.tmux || (options.tmux === undefined && config.tmux?.enabled)) {
-        await createTmuxSession(branchName, worktreePath, {
-          ...config,
-          claude: {
-            autoStart: options.claude || config.claude?.autoStart || false,
-            markdownMode: config.claude?.markdownMode || 'shared',
-            initialCommands: config.claude?.initialCommands || [],
-            costOptimization: config.claude?.costOptimization,
-          },
-        })
-      }
-
-      // Claude Codeの起動（tmuxセッションを使わない場合）
-      if ((options.claude || config.claude?.autoStart) && !options.tmux && !config.tmux?.enabled) {
-        const claudeSpinner = ora('Claude Codeを起動中...').start()
-        try {
-          // Claude Codeを起動（バックグラウンドで）
-          execa('claude', [], { cwd: worktreePath, detached: true })
-          claudeSpinner.succeed('Claude Codeを起動しました')
-        } catch {
-          claudeSpinner.warn('Claude Codeの起動に失敗しました')
-        }
-      }
-
-      // フック実行（afterCreate）
-      if (config.hooks?.afterCreate) {
-        const hookSpinner = ora('フックを実行中...').start()
-        try {
-          await execa('sh', ['-c', config.hooks.afterCreate], {
-            cwd: worktreePath,
-            env: {
-              ...process.env,
-              SHADOW_CLONE: branchName,
-              SHADOW_CLONE_PATH: worktreePath,
-            },
-          })
-          hookSpinner.succeed('フックを実行しました')
-        } catch {
-          hookSpinner.warn('フックの実行に失敗しました')
-        }
-      }
-
-      // Draft PR作成（オプションが有効な場合）
-      if (options.draftPr) {
-        const prSpinner = ora('Draft PRを作成中...').start()
-        try {
-          // まずブランチをpush
-          await execa('git', ['push', '-u', 'origin', branchName], { cwd: worktreePath })
-
-          // Draft PRを作成
-          let prTitle = branchName
-          let prBody = '## 概要\n\n'
-
-          // GitHub Issue/PRメタデータがある場合は利用
-          if (githubMetadata) {
-            prTitle = githubMetadata.title
-            prBody += `${githubMetadata.type === 'pr' ? 'PR' : 'Issue'} #${issueNumber} に関連する作業\n\n`
-            prBody += `### 元の${githubMetadata.type === 'pr' ? 'PR' : 'Issue'}の内容\n${githubMetadata.body}\n\n`
-            prBody += `### ラベル\n${githubMetadata.labels.join(', ')}\n\n`
-            prBody += `### リンク\n${githubMetadata.url}\n\n`
-          }
-
-          prBody += '## 作業内容\n\n- [ ] 機能実装\n- [ ] ドキュメント更新\n- [ ] 依存関係の確認\n\n'
-          prBody += '## テスト\n\n- [ ] ユニットテスト追加\n- [ ] 動作確認完了\n\n'
-          prBody += '---\n🥷 Created by shadow-clone-jutsu'
-
-          const { stdout } = await execa(
-            'gh',
-            [
-              'pr',
-              'create',
-              '--draft',
-              '--title',
-              prTitle,
-              '--body',
-              prBody,
-              '--base',
-              options.base || 'main',
-            ],
-            { cwd: worktreePath }
-          )
-
-          prSpinner.succeed('Draft PRを作成しました')
-          console.log(chalk.cyan(`\nPR URL: ${stdout.trim()}`))
-        } catch {
-          prSpinner.fail('Draft PRの作成に失敗しました')
-          console.error(
-            chalk.yellow('GitHub CLIがインストールされているか、認証されているか確認してください')
-          )
-        }
-      }
-
-      console.log(chalk.green('\n✨ 影分身を作り出しました！'))
-      console.log(chalk.gray(`\ncd ${worktreePath} で移動できます`))
-    } catch (error) {
-      spinner.fail('影分身を作り出せませんでした')
-      console.error(chalk.red(error instanceof Error ? error.message : '不明なエラー'))
-      process.exit(1)
-    }
+    await executeCreateCommand(branchName, options)
   })
