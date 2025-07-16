@@ -1,15 +1,24 @@
 # Changelog
 
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [Unreleased]
+
+### Changed
+
+- Internal: Improved test coverage from 78.21% to 81.23%
+- Internal: Refactored create.ts command to reduce complexity from 89 to smaller, maintainable functions
+- Internal: Added comprehensive error path tests for github.ts and issue.ts commands
+- Internal: Fixed MCP server process.exit issue in test environment
+
 ## 1.0.1
 
 ### Patch Changes
 
 - [`4fcf9d1`](https://github.com/hashiramaendure/scj/commit/4fcf9d1740864bc7d860cf32650cafde36f742e3) Thanks [@hashiramaendure](https://github.com/hashiramaendure)! - Test automatic versioning and release workflow setup
-
-All notable changes to this project will be documented in this file.
-
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [1.0.0] - 2025-07-15
 
