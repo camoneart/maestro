@@ -228,7 +228,7 @@ describe('create command refactored functions', () => {
       expect(mockSpinner.start).toHaveBeenCalled()
       expect(mockGitManager.createWorktree).toHaveBeenCalledWith('test-branch', undefined)
       expect(mockSpinner.succeed).toHaveBeenCalledWith(
-        expect.stringContaining('演奏者を作り出しました')
+        expect.stringContaining('新しい演奏者を招集しました')
       )
     })
 
@@ -240,7 +240,7 @@ describe('create command refactored functions', () => {
       ).rejects.toThrow('Creation failed')
 
       expect(mockSpinner.fail).toHaveBeenCalledWith(
-        expect.stringContaining('演奏者の作成に失敗しました')
+        expect.stringContaining('演奏者の招集に失敗しました')
       )
     })
   })

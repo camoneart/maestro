@@ -321,7 +321,7 @@ const htmlTemplate = `
         <div class="worktree-card \${wt.isMain ? 'main' : ''}">
           <div class="worktree-header">
             <div class="branch-name">
-              \${wt.isMain ? '📍' : '🎵'} \${wt.branch}
+              \${wt.isMain ? '📍' : '🎼'} \${wt.branch}
             </div>
           </div>
           

@@ -241,7 +241,7 @@ function displayWorktree(
   showLastCommit?: boolean,
   showMetadata?: boolean
 ) {
-  const prefix = isMain ? '📍' : '🎵'
+  const prefix = isMain ? '📍' : '🎼'
   const branchName = worktree.branch || '(detached)'
   const status = []
 

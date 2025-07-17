@@ -103,7 +103,7 @@ describe('exec command', () => {
       await execCommand.parseAsync(['node', 'exec', 'dummy', 'echo', 'hello', '--all'])
 
       expect(consoleLogSpy).toHaveBeenCalledWith(
-        chalk.bold(`\n🎵 すべての演奏者でコマンドを実行: ${chalk.cyan('echo hello')}\n`)
+        chalk.bold(`\n🎼 すべての演奏者でコマンドを実行: ${chalk.cyan('echo hello')}\n`)
       )
       expect(execa).toHaveBeenCalledTimes(2)
       expect(consoleLogSpy).toHaveBeenCalledWith(chalk.green('▶ feature-1'))

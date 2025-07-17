@@ -129,7 +129,7 @@ export const shellCommand = new Command('shell')
           throw ErrorFactory.worktreeNotFound(branchName || '', similarBranches)
         }
 
-        console.log(chalk.green(`\n🎵 演奏者 '${chalk.cyan(branchName)}' に入ります...`))
+        console.log(chalk.green(`\n🎼 演奏者 '${chalk.cyan(branchName)}' に入ります...`))
         console.log(chalk.gray(`📁 ${targetWorktree.path}\n`))
 
         // --cmd オプションの処理
@@ -255,17 +255,17 @@ export const shellCommand = new Command('shell')
           switch (shellName) {
             case 'zsh':
               return {
-                PS1: `${chalk.magenta('🎵')} [${chalk.cyan(branchName)}] ${chalk.yellow('%~')} $ `,
-                PROMPT: `${chalk.magenta('🎵')} [${chalk.cyan(branchName)}] ${chalk.yellow('%~')} $ `,
+                PS1: `${chalk.magenta('🎼')} [${chalk.cyan(branchName)}] ${chalk.yellow('%~')} $ `,
+                PROMPT: `${chalk.magenta('🎼')} [${chalk.cyan(branchName)}] ${chalk.yellow('%~')} $ `,
               }
             case 'fish':
               return {
-                fish_prompt: `echo "${chalk.magenta('🎵')} [${chalk.cyan(branchName)}] ${chalk.yellow('(prompt_pwd)')} $ "`,
+                fish_prompt: `echo "${chalk.magenta('🎼')} [${chalk.cyan(branchName)}] ${chalk.yellow('(prompt_pwd)')} $ "`,
               }
             case 'bash':
             default:
               return {
-                PS1: `${chalk.magenta('🎵')} [${chalk.cyan(branchName)}] ${chalk.yellow('\\W')} $ `,
+                PS1: `${chalk.magenta('🎼')} [${chalk.cyan(branchName)}] ${chalk.yellow('\\W')} $ `,
               }
           }
         }

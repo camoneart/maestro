@@ -59,7 +59,7 @@ async function checkWorktreeHealth(
         worktree,
         type: 'uncommitted',
         severity: 'warning',
-        message: `${lines}個の未コミット変更があります`,
+        message: `${lines}件の未コミット変更があります`,
         fixable: false,
       })
     }

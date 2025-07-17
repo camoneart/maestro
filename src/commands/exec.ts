@@ -41,7 +41,7 @@ export const execCommand = new Command('exec')
 
         // すべての演奏者で実行
         if (options?.all) {
-          console.log(chalk.bold(`\n🎵 すべての演奏者でコマンドを実行: ${chalk.cyan(command)}\n`))
+          console.log(chalk.bold(`\n🎼 すべての演奏者でコマンドを実行: ${chalk.cyan(command)}\n`))
 
           for (const worktree of orchestraMembers) {
             const branchName = worktree.branch?.replace('refs/heads/', '') || worktree.branch
@@ -107,7 +107,7 @@ export const execCommand = new Command('exec')
 
         if (!options?.silent) {
           console.log(
-            chalk.green(`\n🎵 演奏者 '${chalk.cyan(displayBranchName)}' でコマンドを実行`)
+            chalk.green(`\n🎼 演奏者 '${chalk.cyan(displayBranchName)}' でコマンドを実行`)
           )
           console.log(chalk.gray(`📁 ${targetWorktree.path}`))
           console.log(chalk.gray(`$ ${command}\n`))

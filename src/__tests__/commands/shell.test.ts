@@ -120,7 +120,7 @@ describe('shell command', () => {
 
       expect(console.log).toHaveBeenCalledWith(expect.stringContaining('演奏者が存在しません'))
       expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining('maestro create <branch-name> で演奏者を作り出してください')
+        expect.stringContaining('maestro create <branch-name> で演奏者を招集してください')
       )
     })
 

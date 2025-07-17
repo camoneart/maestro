@@ -349,7 +349,7 @@ export const issueCommand = new Command('issue')
             name: 'action',
             message: '何をしますか？',
             choices: [
-              { name: '🎵 このIssueから演奏者を招集する', value: 'create-branch' },
+              { name: '🎼 このIssueから演奏者を招集する', value: 'create-branch' },
               { name: '🌐 ブラウザで開く', value: 'web' },
               { name: '✅ Issueをクローズ', value: 'close' },
               { name: '👤 アサイン', value: 'assign' },

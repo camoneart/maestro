@@ -403,7 +403,7 @@ export const reviewCommand = new Command('review')
           name: 'action',
           message: '何をしますか？',
           choices: [
-            { name: '🎵 PRを演奏者として招集する', value: 'checkout' },
+            { name: '🎼 PRを演奏者として招集する', value: 'checkout' },
             { name: '📝 差分を表示', value: 'diff' },
             { name: '🌐 ブラウザで開く', value: 'web' },
             { name: '💬 コメントを追加', value: 'comment' },

@@ -109,9 +109,9 @@ describe('list command', () => {
 
       expect(console.log).toHaveBeenCalledWith(expect.stringContaining('🎼 オーケストラ編成:'))
       expect(console.log).toHaveBeenCalledWith(expect.stringContaining('📍 refs/heads/main'))
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('🎵 refs/heads/feature-a'))
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('🎵 refs/heads/feature-b'))
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('🎵 refs/heads/feature-c'))
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('🎼 refs/heads/feature-a'))
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('🎼 refs/heads/feature-b'))
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('🎼 refs/heads/feature-c'))
       expect(console.log).toHaveBeenCalledWith(expect.stringContaining('合計: 4 名の演奏者'))
     })
 
