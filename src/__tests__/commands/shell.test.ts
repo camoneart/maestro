@@ -1,4 +1,3 @@
-
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { GitWorktreeManager } from '../../core/git'
 import { spawn } from 'child_process'
@@ -298,7 +297,9 @@ describe('shell command', () => {
         })
       )
       expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining("📺 既存のtmuxセッション 'orchestra-member-feature-a' にアタッチします")
+        expect.stringContaining(
+          "📺 既存のtmuxセッション 'orchestra-member-feature-a' にアタッチします"
+        )
       )
     })
 

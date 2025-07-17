@@ -76,9 +76,11 @@ describe.skip('create command - additional tests', () => {
     vi.clearAllMocks()
     consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
     consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
-    processExitSpy = vi.spyOn(process, 'exit').mockImplementation((code?: string | number | null) => {
-      throw new Error(`Process exited with code ${code}`)
-    })
+    processExitSpy = vi
+      .spyOn(process, 'exit')
+      .mockImplementation((code?: string | number | null) => {
+        throw new Error(`Process exited with code ${code}`)
+      })
     processCwdSpy = vi.spyOn(process, 'cwd').mockReturnValue('/project/root')
 
     // GitWorktreeManagerのモック
@@ -115,10 +117,10 @@ describe.skip('create command - additional tests', () => {
 
     // getTemplateConfigのモック
     ;(getTemplateConfig as Mock).mockReturnValue(null)
-    
+
     // inquirerのモック - デフォルトで確認をYesにする
     ;(inquirer as any).default.prompt.mockResolvedValue({ confirmCreate: true })
-    
+
     // execaのモック
     ;(execa as Mock).mockResolvedValue({ stdout: '' })
   })
@@ -134,9 +136,7 @@ describe.skip('create command - additional tests', () => {
         'feature-new',
         expect.stringContaining('.git/orchestrations/feature-new')
       )
-      expect(mockSpinner.succeed).toHaveBeenCalledWith(
-        '演奏者の招集が成功しました！'
-      )
+      expect(mockSpinner.succeed).toHaveBeenCalledWith('演奏者の招集が成功しました！')
     })
 
     it('should handle issue number format', async () => {
@@ -145,10 +145,7 @@ describe.skip('create command - additional tests', () => {
 
       await createCommand.parseAsync(['node', 'create', '123'])
 
-      expect(mockGitManager.createWorktree).toHaveBeenCalledWith(
-        'issue-123',
-        expect.any(String)
-      )
+      expect(mockGitManager.createWorktree).toHaveBeenCalledWith('issue-123', expect.any(String))
     })
 
     it('should handle issue number with # prefix', async () => {
@@ -157,10 +154,7 @@ describe.skip('create command - additional tests', () => {
 
       await createCommand.parseAsync(['node', 'create', '#456'])
 
-      expect(mockGitManager.createWorktree).toHaveBeenCalledWith(
-        'issue-456',
-        expect.any(String)
-      )
+      expect(mockGitManager.createWorktree).toHaveBeenCalledWith('issue-456', expect.any(String))
     })
 
     it('should handle issue-prefixed format', async () => {
@@ -169,10 +163,7 @@ describe.skip('create command - additional tests', () => {
 
       await createCommand.parseAsync(['node', 'create', 'issue-789'])
 
-      expect(mockGitManager.createWorktree).toHaveBeenCalledWith(
-        'issue-789',
-        expect.any(String)
-      )
+      expect(mockGitManager.createWorktree).toHaveBeenCalledWith('issue-789', expect.any(String))
     })
   })
 
@@ -358,13 +349,11 @@ describe.skip('create command - additional tests', () => {
     it('should handle not a git repository', async () => {
       mockGitManager.isGitRepository.mockResolvedValue(false)
 
-      await expect(
-        createCommand.parseAsync(['node', 'create', 'feature-new'])
-      ).rejects.toThrow('Process exited with code 1')
-
-      expect(mockSpinner.fail).toHaveBeenCalledWith(
-        'このディレクトリはGitリポジトリではありません'
+      await expect(createCommand.parseAsync(['node', 'create', 'feature-new'])).rejects.toThrow(
+        'Process exited with code 1'
       )
+
+      expect(mockSpinner.fail).toHaveBeenCalledWith('このディレクトリはGitリポジトリではありません')
     })
 
     it('should handle existing worktree', async () => {
@@ -380,29 +369,22 @@ describe.skip('create command - additional tests', () => {
         },
       ])
 
-      await expect(
-        createCommand.parseAsync(['node', 'create', 'feature-exists'])
-      ).rejects.toThrow('Process exited with code 1')
-
-      expect(mockSpinner.fail).toHaveBeenCalledWith(
-        expect.stringContaining('既に存在します')
+      await expect(createCommand.parseAsync(['node', 'create', 'feature-exists'])).rejects.toThrow(
+        'Process exited with code 1'
       )
+
+      expect(mockSpinner.fail).toHaveBeenCalledWith(expect.stringContaining('既に存在します'))
     })
 
     it('should handle worktree creation error', async () => {
-      mockGitManager.createWorktree.mockRejectedValue(
-        new Error('Permission denied')
-      )
+      mockGitManager.createWorktree.mockRejectedValue(new Error('Permission denied'))
 
-      await expect(
-        createCommand.parseAsync(['node', 'create', 'feature-new'])
-      ).rejects.toThrow('Process exited with code 1')
+      await expect(createCommand.parseAsync(['node', 'create', 'feature-new'])).rejects.toThrow(
+        'Process exited with code 1'
+      )
 
       expect(mockSpinner.fail).toHaveBeenCalledWith('演奏者の招集に失敗しました')
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        chalk.red('エラー:'),
-        'Permission denied'
-      )
+      expect(consoleErrorSpy).toHaveBeenCalledWith(chalk.red('エラー:'), 'Permission denied')
     })
   })
 

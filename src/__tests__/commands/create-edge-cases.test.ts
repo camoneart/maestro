@@ -1,10 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { 
-  saveWorktreeMetadata, 
-  createTmuxSession, 
+import {
+  saveWorktreeMetadata,
+  createTmuxSession,
   handleClaudeMarkdown,
   parseIssueNumber,
-  fetchGitHubMetadata
+  fetchGitHubMetadata,
 } from '../../commands/create.js'
 import { execa } from 'execa'
 import fs from 'fs/promises'
@@ -34,8 +34,8 @@ describe('create command - edge cases', () => {
           author: 'testuser',
           labels: ['bug'],
           assignees: ['testuser'],
-          url: 'https://github.com/test/repo/issues/1'
-        }
+          url: 'https://github.com/test/repo/issues/1',
+        },
       })
 
       expect(fs.writeFile).toHaveBeenCalledWith(
@@ -49,7 +49,9 @@ describe('create command - edge cases', () => {
       vi.mocked(path.join).mockReturnValue('/path/to/worktree/.maestro-metadata.json')
 
       // Should not throw error
-      await expect(saveWorktreeMetadata('/path/to/worktree', 'feature/test', {})).resolves.not.toThrow()
+      await expect(
+        saveWorktreeMetadata('/path/to/worktree', 'feature/test', {})
+      ).resolves.not.toThrow()
     })
   })
 
@@ -65,15 +67,27 @@ describe('create command - edge cases', () => {
       const config = {
         claude: {
           autoStart: true,
-          initialCommands: ['echo "hello"', 'pwd']
-        }
+          initialCommands: ['echo "hello"', 'pwd'],
+        },
       }
 
       await createTmuxSession('feature/test', '/path/to/worktree', config)
 
       expect(execa).toHaveBeenCalledWith('tmux', ['has-session', '-t', 'feature-test'])
-      expect(execa).toHaveBeenCalledWith('tmux', ['new-session', '-d', '-s', 'feature-test', '-c', '/path/to/worktree'])
-      expect(execa).toHaveBeenCalledWith('tmux', ['rename-window', '-t', 'feature-test', 'feature/test'])
+      expect(execa).toHaveBeenCalledWith('tmux', [
+        'new-session',
+        '-d',
+        '-s',
+        'feature-test',
+        '-c',
+        '/path/to/worktree',
+      ])
+      expect(execa).toHaveBeenCalledWith('tmux', [
+        'rename-window',
+        '-t',
+        'feature-test',
+        'feature/test',
+      ])
     })
 
     it('should handle existing session', async () => {
@@ -90,7 +104,14 @@ describe('create command - edge cases', () => {
 
       expect(execa).toHaveBeenCalledWith('tmux', ['has-session', '-t', 'feature-test'])
       // Should not create new session
-      expect(execa).not.toHaveBeenCalledWith('tmux', ['new-session', '-d', '-s', 'feature-test', '-c', '/path/to/worktree'])
+      expect(execa).not.toHaveBeenCalledWith('tmux', [
+        'new-session',
+        '-d',
+        '-s',
+        'feature-test',
+        '-c',
+        '/path/to/worktree',
+      ])
     })
 
     it('should start Claude Code with initial commands', async () => {
@@ -104,15 +125,33 @@ describe('create command - edge cases', () => {
       const config = {
         claude: {
           autoStart: true,
-          initialCommands: ['echo "hello"', 'pwd']
-        }
+          initialCommands: ['echo "hello"', 'pwd'],
+        },
       }
 
       await createTmuxSession('feature/test', '/path/to/worktree', config)
 
-      expect(execa).toHaveBeenCalledWith('tmux', ['send-keys', '-t', 'feature-test', 'claude', 'Enter'])
-      expect(execa).toHaveBeenCalledWith('tmux', ['send-keys', '-t', 'feature-test', 'echo "hello"', 'Enter'])
-      expect(execa).toHaveBeenCalledWith('tmux', ['send-keys', '-t', 'feature-test', 'pwd', 'Enter'])
+      expect(execa).toHaveBeenCalledWith('tmux', [
+        'send-keys',
+        '-t',
+        'feature-test',
+        'claude',
+        'Enter',
+      ])
+      expect(execa).toHaveBeenCalledWith('tmux', [
+        'send-keys',
+        '-t',
+        'feature-test',
+        'echo "hello"',
+        'Enter',
+      ])
+      expect(execa).toHaveBeenCalledWith('tmux', [
+        'send-keys',
+        '-t',
+        'feature-test',
+        'pwd',
+        'Enter',
+      ])
     })
 
     it('should handle tmux session creation failure', async () => {
@@ -129,7 +168,9 @@ describe('create command - edge cases', () => {
       const config = { claude: { autoStart: false } }
 
       // Should not throw error
-      await expect(createTmuxSession('feature/test', '/path/to/worktree', config)).resolves.not.toThrow()
+      await expect(
+        createTmuxSession('feature/test', '/path/to/worktree', config)
+      ).resolves.not.toThrow()
     })
 
     it('should sanitize session name', async () => {
@@ -144,7 +185,11 @@ describe('create command - edge cases', () => {
 
       await createTmuxSession('feature/test@special#chars', '/path/to/worktree', config)
 
-      expect(execa).toHaveBeenCalledWith('tmux', ['has-session', '-t', 'feature-test-special-chars'])
+      expect(execa).toHaveBeenCalledWith('tmux', [
+        'has-session',
+        '-t',
+        'feature-test-special-chars',
+      ])
     })
   })
 
@@ -219,7 +264,7 @@ describe('create command - edge cases', () => {
       expect(result).toEqual({
         isIssue: true,
         issueNumber: '123',
-        branchName: 'issue-123'
+        branchName: 'issue-123',
       })
     })
 
@@ -229,7 +274,7 @@ describe('create command - edge cases', () => {
       expect(result).toEqual({
         isIssue: true,
         issueNumber: '123',
-        branchName: 'issue-123'
+        branchName: 'issue-123',
       })
     })
 
@@ -239,7 +284,7 @@ describe('create command - edge cases', () => {
       expect(result).toEqual({
         isIssue: true,
         issueNumber: '123',
-        branchName: 'issue-123'
+        branchName: 'issue-123',
       })
     })
 
@@ -248,7 +293,7 @@ describe('create command - edge cases', () => {
 
       expect(result).toEqual({
         isIssue: false,
-        branchName: 'feature/test'
+        branchName: 'feature/test',
       })
     })
 
@@ -257,7 +302,7 @@ describe('create command - edge cases', () => {
 
       expect(result).toEqual({
         isIssue: false,
-        branchName: ''
+        branchName: '',
       })
     })
   })
@@ -273,8 +318,8 @@ describe('create command - edge cases', () => {
           labels: [{ name: 'enhancement' }],
           assignees: [{ login: 'assignee' }],
           milestone: { title: 'v1.0' },
-          url: 'https://github.com/test/repo/pull/123'
-        })
+          url: 'https://github.com/test/repo/pull/123',
+        }),
       })
 
       const result = await fetchGitHubMetadata('123')
@@ -287,7 +332,7 @@ describe('create command - edge cases', () => {
         labels: ['enhancement'],
         assignees: ['assignee'],
         milestone: 'v1.0',
-        url: 'https://github.com/test/repo/pull/123'
+        url: 'https://github.com/test/repo/pull/123',
       })
     })
 
@@ -303,8 +348,8 @@ describe('create command - edge cases', () => {
             labels: [{ name: 'bug' }],
             assignees: [],
             milestone: null,
-            url: 'https://github.com/test/repo/issues/123'
-          })
+            url: 'https://github.com/test/repo/issues/123',
+          }),
         })
 
       const result = await fetchGitHubMetadata('123')
@@ -317,7 +362,7 @@ describe('create command - edge cases', () => {
         labels: ['bug'],
         assignees: [],
         milestone: undefined,
-        url: 'https://github.com/test/repo/issues/123'
+        url: 'https://github.com/test/repo/issues/123',
       })
     })
 
@@ -331,8 +376,8 @@ describe('create command - edge cases', () => {
           labels: null,
           assignees: null,
           milestone: null,
-          url: 'https://github.com/test/repo/issues/123'
-        })
+          url: 'https://github.com/test/repo/issues/123',
+        }),
       })
 
       const result = await fetchGitHubMetadata('123')
@@ -345,7 +390,7 @@ describe('create command - edge cases', () => {
         labels: [],
         assignees: [],
         milestone: undefined,
-        url: 'https://github.com/test/repo/issues/123'
+        url: 'https://github.com/test/repo/issues/123',
       })
     })
 

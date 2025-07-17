@@ -38,7 +38,7 @@ describe.skip('CLI Entry Point Tests', () => {
     it('should have all required commands configured', async () => {
       const { program } = await import('../cli.js')
       const commandNames = program.commands.map(cmd => cmd.name())
-      
+
       // 主要コマンドの存在確認
       expect(commandNames).toContain('create')
       expect(commandNames).toContain('list')
@@ -68,24 +68,24 @@ describe.skip('CLI Entry Point Tests', () => {
 
     it('should have correct command aliases', async () => {
       const { program } = await import('../cli.js')
-      
+
       // エイリアスの確認
       const listCommand = program.commands.find(cmd => cmd.name() === 'list')
       expect(listCommand?.aliases()).toContain('ls')
-      
+
       const deleteCommand = program.commands.find(cmd => cmd.name() === 'delete')
       expect(deleteCommand?.aliases()).toContain('rm')
-      
+
       const shellCommand = program.commands.find(cmd => cmd.name() === 'shell')
       expect(shellCommand?.aliases()).toContain('sh')
-      
+
       const execCommand = program.commands.find(cmd => cmd.name() === 'exec')
       expect(execCommand?.aliases()).toContain('e')
     })
 
     it('should configure exitOverride correctly', async () => {
       const { program } = await import('../cli.js')
-      
+
       // exitOverrideが設定されていることを確認
       // プライベートプロパティなので間接的にテスト
       expect(() => {
@@ -98,36 +98,34 @@ describe.skip('CLI Entry Point Tests', () => {
     it('should handle command parsing errors gracefully', async () => {
       // コマンドエラーハンドリングの基本テスト
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
-      
+
       try {
         const { program } = await import('../cli.js')
-        
+
         // 無効なコマンドでテスト
         await expect(async () => {
           await program.parseAsync(['node', 'maestro', 'invalid-command'])
         }).rejects.toThrow()
-        
       } catch (error) {
         // エラーが適切にキャッチされることを確認
         expect(error).toBeDefined()
       }
-      
+
       consoleSpy.mockRestore()
     })
 
     it('should handle process exit scenarios', async () => {
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
-      
+
       try {
         // CLI実行時のプロセス終了ハンドリング
         process.argv = ['node', 'maestro', '--invalid-option']
-        
+
         // CLI moduleを再インポートして実行
         await expect(async () => {
           delete require.cache[require.resolve('../cli.js')]
           await import('../cli.js')
         }).rejects.toThrow('Process exited with code 1')
-        
       } catch (error) {
         expect(error).toBeDefined()
       } finally {
@@ -139,7 +137,7 @@ describe.skip('CLI Entry Point Tests', () => {
   describe('CLI integration', () => {
     it('should handle help command', async () => {
       const { program } = await import('../cli.js')
-      
+
       // ヘルプ情報が正しく設定されているか確認
       expect(program.description()).toContain('指揮者のように')
       expect(program.description()).toContain('Claude Code')
@@ -148,14 +146,14 @@ describe.skip('CLI Entry Point Tests', () => {
 
     it('should handle version command', async () => {
       const { program } = await import('../cli.js')
-      
+
       // バージョン情報が設定されているか確認
       expect(program.version()).toBe('1.0.0')
     })
 
     it('should configure all commands with descriptions', async () => {
       const { program } = await import('../cli.js')
-      
+
       // 全てのコマンドに説明が設定されているか確認
       program.commands.forEach(cmd => {
         expect(cmd.description()).toBeTruthy()
@@ -165,7 +163,7 @@ describe.skip('CLI Entry Point Tests', () => {
 
     it('should handle unknown commands appropriately', async () => {
       const { program } = await import('../cli.js')
-      
+
       // 不明なコマンドのハンドリング
       await expect(async () => {
         await program.parseAsync(['node', 'maestro', 'non-existent-command'])
@@ -176,7 +174,7 @@ describe.skip('CLI Entry Point Tests', () => {
   describe('CLI module structure', () => {
     it('should have proper module exports', async () => {
       const cliModule = await import('../cli.js')
-      
+
       // 必要なエクスポートが存在するか確認
       expect(cliModule.program).toBeDefined()
       expect(typeof cliModule.program.parseAsync).toBe('function')
@@ -187,10 +185,10 @@ describe.skip('CLI Entry Point Tests', () => {
 
     it('should configure commands properly', async () => {
       const { program } = await import('../cli.js')
-      
+
       // コマンド設定の基本チェック
       expect(program.commands.length).toBeGreaterThan(20) // 最低限のコマンド数
-      
+
       // 各コマンドが適切に設定されているか
       program.commands.forEach(cmd => {
         expect(cmd.name()).toBeTruthy()
@@ -202,7 +200,7 @@ describe.skip('CLI Entry Point Tests', () => {
     it('should handle chalk integration', async () => {
       // chalk（色付きテキスト）の統合テスト
       const { program } = await import('../cli.js')
-      
+
       // プログラム説明にchalkが使用されているかどうかの間接テスト
       const description = program.description()
       expect(description).toContain('🎼') // 指揮者絵文字の存在確認
@@ -212,18 +210,17 @@ describe.skip('CLI Entry Point Tests', () => {
   describe('Environment handling', () => {
     it('should handle different node environments', async () => {
       const originalEnv = process.env.NODE_ENV
-      
+
       try {
         // 開発環境
         process.env.NODE_ENV = 'development'
         const { program: devProgram } = await import('../cli.js')
         expect(devProgram).toBeDefined()
-        
+
         // 本番環境
         process.env.NODE_ENV = 'production'
         const { program: prodProgram } = await import('../cli.js')
         expect(prodProgram).toBeDefined()
-        
       } finally {
         process.env.NODE_ENV = originalEnv
       }
@@ -231,16 +228,15 @@ describe.skip('CLI Entry Point Tests', () => {
 
     it('should handle process argv variations', async () => {
       const originalArgv = process.argv
-      
+
       try {
         // 異なるargv形式でのテスト
         process.argv = ['node', '/path/to/maestro']
-        
+
         await expect(async () => {
           const { program } = await import('../cli.js')
           expect(program).toBeDefined()
         }).not.toThrow()
-        
       } finally {
         process.argv = originalArgv
       }

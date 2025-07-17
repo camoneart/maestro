@@ -147,7 +147,12 @@ describe('issue command error paths', () => {
             exitCode: 0,
           } as any)
         }
-        if (cmd === 'gh' && args[0] === 'issue' && args[1] === 'edit' && args.includes('--add-assignee')) {
+        if (
+          cmd === 'gh' &&
+          args[0] === 'issue' &&
+          args[1] === 'edit' &&
+          args.includes('--add-assignee')
+        ) {
           throw new Error('User not found')
         }
         return Promise.resolve({ stdout: '', stderr: '', exitCode: 0 } as any)
@@ -187,7 +192,12 @@ describe('issue command error paths', () => {
             exitCode: 0,
           } as any)
         }
-        if (cmd === 'gh' && args[0] === 'issue' && args[1] === 'edit' && args.includes('--add-label')) {
+        if (
+          cmd === 'gh' &&
+          args[0] === 'issue' &&
+          args[1] === 'edit' &&
+          args.includes('--add-label')
+        ) {
           throw new Error('Label not found')
         }
         return Promise.resolve({ stdout: '', stderr: '', exitCode: 0 } as any)
@@ -227,7 +237,12 @@ describe('issue command error paths', () => {
             exitCode: 0,
           } as any)
         }
-        if (cmd === 'gh' && args[0] === 'issue' && args[1] === 'edit' && args.includes('--milestone')) {
+        if (
+          cmd === 'gh' &&
+          args[0] === 'issue' &&
+          args[1] === 'edit' &&
+          args.includes('--milestone')
+        ) {
           throw new Error('Milestone not found')
         }
         return Promise.resolve({ stdout: '', stderr: '', exitCode: 0 } as any)
@@ -296,7 +311,9 @@ describe('issue command error paths', () => {
         expect(error).toBeDefined()
       }
 
-      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('オープンなIssueが見つかりません'))
+      expect(consoleSpy).toHaveBeenCalledWith(
+        expect.stringContaining('オープンなIssueが見つかりません')
+      )
       consoleSpy.mockRestore()
     })
   })
@@ -389,7 +406,9 @@ describe('issue command error paths', () => {
       })
 
       mockInquirer.prompt.mockResolvedValueOnce({ action: 'create-branch' })
-      mockGitWorktreeManagerInstance.createWorktree.mockRejectedValueOnce(new Error('Worktree already exists'))
+      mockGitWorktreeManagerInstance.createWorktree.mockRejectedValueOnce(
+        new Error('Worktree already exists')
+      )
 
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
 
@@ -504,7 +523,13 @@ describe('issue command error paths', () => {
 
       await program.parseAsync(['node', 'test', 'issue', '666'])
 
-      expect(mockExeca).toHaveBeenCalledWith('gh', ['issue', 'edit', '666', '--add-assignee', 'dev1'])
+      expect(mockExeca).toHaveBeenCalledWith('gh', [
+        'issue',
+        'edit',
+        '666',
+        '--add-assignee',
+        'dev1',
+      ])
     })
 
     it('should handle label action from interactive menu', async () => {
@@ -614,7 +639,7 @@ describe('issue command error paths', () => {
         if (cmd === 'gh' && args[0] === 'repo' && args[1] === 'view') {
           return Promise.resolve(mockGhRepoView())
         }
-        throw 'String error'  // Non-Error object
+        throw 'String error' // Non-Error object
       })
 
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})

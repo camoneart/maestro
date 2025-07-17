@@ -23,7 +23,7 @@ describe('github command functions', () => {
     it('should generate branch name with number placeholder', async () => {
       const { githubCommand } = await import('../../commands/github.js')
       const generateBranchName = (githubCommand as any).generateBranchName
-      
+
       if (!generateBranchName) {
         // Function is not exported, we'll test via the command
         return
@@ -36,7 +36,7 @@ describe('github command functions', () => {
     it('should generate branch name with title placeholder', async () => {
       const { githubCommand } = await import('../../commands/github.js')
       const generateBranchName = (githubCommand as any).generateBranchName
-      
+
       if (!generateBranchName) {
         return
       }
@@ -48,24 +48,30 @@ describe('github command functions', () => {
     it('should handle special characters in title', async () => {
       const { githubCommand } = await import('../../commands/github.js')
       const generateBranchName = (githubCommand as any).generateBranchName
-      
+
       if (!generateBranchName) {
         return
       }
 
-      const result = generateBranchName('{type}-{number}-{title}', '789', 'Feature: Add @mentions & #hashtags!', 'pr')
+      const result = generateBranchName(
+        '{type}-{number}-{title}',
+        '789',
+        'Feature: Add @mentions & #hashtags!',
+        'pr'
+      )
       expect(result).toBe('pr-789-feature-add-mentions-hashtags')
     })
 
     it('should truncate long titles', async () => {
       const { githubCommand } = await import('../../commands/github.js')
       const generateBranchName = (githubCommand as any).generateBranchName
-      
+
       if (!generateBranchName) {
         return
       }
 
-      const longTitle = 'This is a very long title that should be truncated to avoid creating extremely long branch names'
+      const longTitle =
+        'This is a very long title that should be truncated to avoid creating extremely long branch names'
       const result = generateBranchName('issue-{number}-{title}', '999', longTitle, 'issue')
       expect(result.length).toBeLessThanOrEqual(60) // 'issue-999-' (10) + 50 chars max
     })
@@ -102,7 +108,7 @@ describe('github command functions', () => {
     it('should handle empty title', async () => {
       const { githubCommand } = await import('../../commands/github.js')
       const generateBranchName = (githubCommand as any).generateBranchName
-      
+
       if (!generateBranchName) {
         return
       }
@@ -114,7 +120,7 @@ describe('github command functions', () => {
     it('should handle title with only special characters', async () => {
       const { githubCommand } = await import('../../commands/github.js')
       const generateBranchName = (githubCommand as any).generateBranchName
-      
+
       if (!generateBranchName) {
         return
       }
@@ -126,7 +132,7 @@ describe('github command functions', () => {
     it('should handle Unicode characters in title', async () => {
       const { githubCommand } = await import('../../commands/github.js')
       const generateBranchName = (githubCommand as any).generateBranchName
-      
+
       if (!generateBranchName) {
         return
       }
@@ -138,7 +144,7 @@ describe('github command functions', () => {
     it('should handle template without placeholders', async () => {
       const { githubCommand } = await import('../../commands/github.js')
       const generateBranchName = (githubCommand as any).generateBranchName
-      
+
       if (!generateBranchName) {
         return
       }
@@ -150,7 +156,7 @@ describe('github command functions', () => {
     it('should handle multiple occurrences of same placeholder', async () => {
       const { githubCommand } = await import('../../commands/github.js')
       const generateBranchName = (githubCommand as any).generateBranchName
-      
+
       if (!generateBranchName) {
         return
       }
@@ -164,7 +170,7 @@ describe('github command functions', () => {
     it('should create error with correct name', async () => {
       // Import to test the error class
       await import('../../commands/github.js')
-      
+
       // Since GithubCommandError is not exported, we can't test it directly
       // But we've improved coverage by importing the module
       expect(true).toBe(true)
@@ -175,7 +181,7 @@ describe('github command functions', () => {
     it('should handle various template patterns', async () => {
       const { githubCommand } = await import('../../commands/github.js')
       const generateBranchName = (githubCommand as any).generateBranchName
-      
+
       if (!generateBranchName) {
         return
       }
@@ -197,7 +203,7 @@ describe('github command functions', () => {
     it('should handle title edge cases', async () => {
       const { githubCommand } = await import('../../commands/github.js')
       const generateBranchName = (githubCommand as any).generateBranchName
-      
+
       if (!generateBranchName) {
         return
       }

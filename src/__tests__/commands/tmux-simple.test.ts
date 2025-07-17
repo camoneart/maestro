@@ -12,11 +12,11 @@ describe('tmux command simple tests', () => {
     expect(tmuxCommand.name()).toBe('tmux')
     expect(tmuxCommand.description()).toContain('tmux/fzf')
     expect(tmuxCommand.aliases()).toContain('t')
-    
+
     // Check options
     const options = tmuxCommand.options
     const optionNames = options.map(opt => opt.long)
-    
+
     expect(optionNames).toContain('--new-window')
     expect(optionNames).toContain('--split-pane')
     expect(optionNames).toContain('--vertical')
@@ -30,21 +30,17 @@ describe('tmux command simple tests', () => {
         .replace(/[^a-zA-Z0-9_-]/g, '_')
         .replace(/_+/g, '_')
         .replace(/^_|_$/g, '')
-        .substring(0, 50)  // tmux session name limit
+        .substring(0, 50) // tmux session name limit
     }
 
-    expect(sanitizeSessionName('feature/awesome-stuff'))
-      .toBe('feature_awesome-stuff')
-    
-    expect(sanitizeSessionName('refs/heads/main'))
-      .toBe('refs_heads_main')
-    
-    expect(sanitizeSessionName('issue#123-fix-@special'))
-      .toBe('issue_123-fix-_special')
-    
-    expect(sanitizeSessionName('___multiple___underscores___'))
-      .toBe('multiple_underscores')
-    
+    expect(sanitizeSessionName('feature/awesome-stuff')).toBe('feature_awesome-stuff')
+
+    expect(sanitizeSessionName('refs/heads/main')).toBe('refs_heads_main')
+
+    expect(sanitizeSessionName('issue#123-fix-@special')).toBe('issue_123-fix-_special')
+
+    expect(sanitizeSessionName('___multiple___underscores___')).toBe('multiple_underscores')
+
     const longName = 'a'.repeat(60)
     expect(sanitizeSessionName(longName).length).toBe(50)
   })
@@ -71,7 +67,7 @@ describe('tmux command simple tests', () => {
         1: ['clear', 'ls -la'],
         2: ['clear', 'git log --oneline -n 10'],
       }
-      
+
       return commands[paneIndex] || ['clear']
     }
 
@@ -83,15 +79,15 @@ describe('tmux command simple tests', () => {
   it('should test session info formatting', () => {
     const formatSessionInfo = (session: any): string => {
       const parts = [session.name]
-      
+
       if (session.windows > 1) {
         parts.push(`(${session.windows} windows)`)
       }
-      
+
       if (session.attached) {
         parts.push('[attached]')
       }
-      
+
       if (session.created) {
         const age = Date.now() - new Date(session.created).getTime()
         const hours = Math.floor(age / (1000 * 60 * 60))
@@ -101,27 +97,31 @@ describe('tmux command simple tests', () => {
           parts.push(`${Math.floor(hours / 24)}d ago`)
         }
       }
-      
+
       return parts.join(' ')
     }
 
-    expect(formatSessionInfo({ 
-      name: 'main', 
-      windows: 3, 
-      attached: true 
-    })).toBe('main (3 windows) [attached]')
+    expect(
+      formatSessionInfo({
+        name: 'main',
+        windows: 3,
+        attached: true,
+      })
+    ).toBe('main (3 windows) [attached]')
 
-    expect(formatSessionInfo({ 
-      name: 'feature', 
-      windows: 1,
-      created: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString()
-    })).toMatch(/feature 5h ago/)
+    expect(
+      formatSessionInfo({
+        name: 'feature',
+        windows: 1,
+        created: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
+      })
+    ).toMatch(/feature 5h ago/)
   })
 
   it('should test tmux command building', () => {
     const buildTmuxCommand = (action: string, session: string, options: any = {}): string[] => {
       const baseCmd = ['tmux']
-      
+
       switch (action) {
         case 'new':
           baseCmd.push('new-session', '-d', '-s', session)
@@ -129,31 +129,45 @@ describe('tmux command simple tests', () => {
             baseCmd.push('-c', options.startDirectory)
           }
           break
-        
+
         case 'attach':
           baseCmd.push('attach-session', '-t', session)
           break
-        
+
         case 'kill':
           baseCmd.push('kill-session', '-t', session)
           break
-        
+
         case 'list':
-          baseCmd.push('list-sessions', '-F', '#{session_name}:#{session_windows}:#{session_attached}')
+          baseCmd.push(
+            'list-sessions',
+            '-F',
+            '#{session_name}:#{session_windows}:#{session_attached}'
+          )
           break
       }
-      
+
       return baseCmd
     }
 
-    expect(buildTmuxCommand('new', 'test', { startDirectory: '/path' }))
-      .toEqual(['tmux', 'new-session', '-d', '-s', 'test', '-c', '/path'])
-    
-    expect(buildTmuxCommand('attach', 'test'))
-      .toEqual(['tmux', 'attach-session', '-t', 'test'])
-    
-    expect(buildTmuxCommand('list', ''))
-      .toEqual(['tmux', 'list-sessions', '-F', '#{session_name}:#{session_windows}:#{session_attached}'])
+    expect(buildTmuxCommand('new', 'test', { startDirectory: '/path' })).toEqual([
+      'tmux',
+      'new-session',
+      '-d',
+      '-s',
+      'test',
+      '-c',
+      '/path',
+    ])
+
+    expect(buildTmuxCommand('attach', 'test')).toEqual(['tmux', 'attach-session', '-t', 'test'])
+
+    expect(buildTmuxCommand('list', '')).toEqual([
+      'tmux',
+      'list-sessions',
+      '-F',
+      '#{session_name}:#{session_windows}:#{session_attached}',
+    ])
   })
 
   it('should test fzf preview command', () => {
@@ -161,18 +175,17 @@ describe('tmux command simple tests', () => {
       return `tmux capture-pane -t ${sessionName} -p | head -20`
     }
 
-    expect(getFzfPreview('main'))
-      .toBe('tmux capture-pane -t main -p | head -20')
+    expect(getFzfPreview('main')).toBe('tmux capture-pane -t main -p | head -20')
   })
 
   it('should test window title generation', () => {
     const getWindowTitle = (index: number, purpose?: string): string => {
       const defaults = ['main', 'editor', 'server', 'git', 'logs']
-      
+
       if (purpose) {
         return purpose
       }
-      
+
       return defaults[index] || `window${index + 1}`
     }
 
@@ -215,13 +228,12 @@ bugfix:2:0`
       return `tmuxエラー: ${error.message || '不明なエラー'}`
     }
 
-    expect(getTmuxErrorMessage(new Error('no server running')))
-      .toContain('tmuxサーバーが起動していません')
-    
-    expect(getTmuxErrorMessage(new Error('session not found')))
-      .toBe('セッションが見つかりません。')
-    
-    expect(getTmuxErrorMessage(new Error('tmux: command not found')))
-      .toContain('brew install tmux')
+    expect(getTmuxErrorMessage(new Error('no server running'))).toContain(
+      'tmuxサーバーが起動していません'
+    )
+
+    expect(getTmuxErrorMessage(new Error('session not found'))).toBe('セッションが見つかりません。')
+
+    expect(getTmuxErrorMessage(new Error('tmux: command not found'))).toContain('brew install tmux')
   })
 })

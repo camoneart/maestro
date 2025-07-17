@@ -2,14 +2,14 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 // CLI import should not trigger program.parseAsync
 vi.mock('../cli.js', async () => {
-  const { Command } = await vi.importActual('commander') as any
+  const { Command } = (await vi.importActual('commander')) as any
   const program = new Command()
-  
+
   program
     .name('maestro')
     .description('🎼 maestro - 指揮者のようにClaude Codeと協奏開発')
     .version('0.1.0')
-    
+
   // Mock all the command imports to avoid loading actual command modules
   const mockCommand = (name: string, aliases: string[] = []) => {
     const cmd = new (Command as any)(name)
@@ -17,7 +17,7 @@ vi.mock('../cli.js', async () => {
     aliases.forEach(alias => cmd.alias(alias))
     return cmd
   }
-  
+
   program.addCommand(mockCommand('create', ['c']))
   program.addCommand(mockCommand('list', ['ls']))
   program.addCommand(mockCommand('delete', ['rm']))
@@ -42,7 +42,7 @@ vi.mock('../cli.js', async () => {
   program.addCommand(mockCommand('health', ['check']))
   program.addCommand(mockCommand('dashboard', ['ui']))
   program.addCommand(mockCommand('snapshot', ['snap']))
-  
+
   return { program }
 })
 
@@ -69,7 +69,7 @@ describe('CLI Unit Tests', () => {
 
     it('should have all required commands', () => {
       const commands = program.commands.map(cmd => cmd.name())
-      
+
       // 基本コマンド
       expect(commands).toContain('create')
       expect(commands).toContain('list')
@@ -77,7 +77,7 @@ describe('CLI Unit Tests', () => {
       expect(commands).toContain('shell')
       expect(commands).toContain('exec')
       expect(commands).toContain('attach')
-      
+
       // 拡張コマンド
       expect(commands).toContain('mcp')
       expect(commands).toContain('config')

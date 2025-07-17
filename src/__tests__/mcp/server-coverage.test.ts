@@ -171,7 +171,7 @@ describe('MCP Server - Coverage Enhancement', () => {
         'create_orchestra_member',
         'delete_orchestra_member',
         'list_orchestra_members',
-        'exec_in_orchestra_member'
+        'exec_in_orchestra_member',
       ]
 
       expect(validToolNames).not.toContain(invalidToolName)
@@ -179,7 +179,7 @@ describe('MCP Server - Coverage Enhancement', () => {
 
     it('should handle schema validation errors', () => {
       const invalidInput = { invalid: 'data' }
-      
+
       // This simulates what would happen in the actual server
       const isValidInput = (input: any, requiredFields: string[]) => {
         return requiredFields.every(field => field in input)
@@ -192,7 +192,7 @@ describe('MCP Server - Coverage Enhancement', () => {
     it('should handle missing arguments', () => {
       const emptyArgs = {}
       const requiredFields = ['branchName']
-      
+
       const hasRequiredFields = requiredFields.every(field => field in emptyArgs)
       expect(hasRequiredFields).toBe(false)
     })
@@ -311,7 +311,7 @@ describe('MCP Server - Coverage Enhancement', () => {
         'create_orchestra_member',
         'delete_orchestra_member',
         'list_orchestra_members',
-        'exec_in_orchestra_member'
+        'exec_in_orchestra_member',
       ]
 
       expect(toolsList).toHaveLength(4)
@@ -350,11 +350,7 @@ describe('MCP Server - Coverage Enhancement', () => {
     })
 
     it('should handle server shutdown sequence', () => {
-      const shutdownSteps = [
-        'stop_listening',
-        'cleanup_connections',
-        'dispose_resources',
-      ]
+      const shutdownSteps = ['stop_listening', 'cleanup_connections', 'dispose_resources']
 
       expect(shutdownSteps).toContain('stop_listening')
       expect(shutdownSteps).toContain('cleanup_connections')

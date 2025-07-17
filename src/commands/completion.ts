@@ -345,7 +345,9 @@ export const completionCommand = new Command('completion')
         console.error(chalk.gray('# 1. 補完ディレクトリを作成（まだない場合）:'))
         console.error(chalk.cyan('  mkdir -p ~/.config/fish/completions'))
         console.error(chalk.gray('# 2. 補完スクリプトを保存:'))
-        console.error(chalk.cyan('  maestro completion fish > ~/.config/fish/completions/maestro.fish'))
+        console.error(
+          chalk.cyan('  maestro completion fish > ~/.config/fish/completions/maestro.fish')
+        )
         console.error(chalk.gray('# 3. 新しいシェルセッションで自動的に有効になります'))
         break
 

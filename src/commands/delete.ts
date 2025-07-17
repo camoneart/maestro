@@ -26,15 +26,15 @@ export function formatDirectorySize(bytes: number): string {
 // worktree表示文字列を作成する関数
 export function createWorktreeDisplay(worktree: Worktree): string {
   let display = worktree.branch || worktree.head
-  
+
   if (worktree.locked) {
     display = `🔒 ${display}`
   }
-  
+
   if (worktree.detached) {
     display = `⚠️  ${display} (detached)`
   }
-  
+
   return display
 }
 
@@ -82,35 +82,33 @@ export function prepareWorktreeSelection(
   needsInteractiveSelection: boolean
 } {
   const orchestraMembers = worktrees.filter(wt => !wt.path.endsWith('.'))
-  
+
   if (orchestraMembers.length === 0) {
     return { filteredWorktrees: [], needsInteractiveSelection: false }
   }
-  
+
   // 現在のworktreeを削除する場合
   if (options.current) {
-    const currentWorktree = orchestraMembers.find(wt => 
-      process.cwd().startsWith(wt.path)
-    )
+    const currentWorktree = orchestraMembers.find(wt => process.cwd().startsWith(wt.path))
     if (currentWorktree) {
       return { filteredWorktrees: [currentWorktree], needsInteractiveSelection: false }
     }
   }
-  
+
   // ブランチ名が指定されている場合
   if (branchName && !options.fzf) {
-    const targetWorktree = orchestraMembers.find(wt => 
-      wt.branch === branchName || wt.branch === `refs/heads/${branchName}`
+    const targetWorktree = orchestraMembers.find(
+      wt => wt.branch === branchName || wt.branch === `refs/heads/${branchName}`
     )
     if (targetWorktree) {
       return { filteredWorktrees: [targetWorktree], needsInteractiveSelection: false }
     }
   }
-  
+
   // fzfで選択、またはインタラクティブ選択が必要
-  return { 
-    filteredWorktrees: orchestraMembers, 
-    needsInteractiveSelection: true 
+  return {
+    filteredWorktrees: orchestraMembers,
+    needsInteractiveSelection: true,
   }
 }
 
@@ -125,26 +123,26 @@ export function validateWorktreeDeletion(
 } {
   const warnings: string[] = []
   let requiresConfirmation = false
-  
+
   // ロックされているかチェック
   if (worktree.locked) {
     warnings.push(`ワークツリーがロックされています: ${worktree.path}`)
   }
-  
+
   // 削除可能かチェック
   if (worktree.prunable) {
     warnings.push(`削除可能なワークツリーです: ${worktree.path}`)
   }
-  
+
   // 強制削除フラグがない場合は確認が必要
   if (!options.force && warnings.length > 0) {
     requiresConfirmation = true
   }
-  
+
   return {
     isValid: true,
     warnings,
-    requiresConfirmation
+    requiresConfirmation,
   }
 }
 
@@ -157,10 +155,10 @@ export async function executeWorktreeDeletion(
   try {
     // ブランチ名を取得
     const branchName = worktree.branch?.replace('refs/heads/', '') || worktree.branch
-    
+
     // ワークツリーを削除
     await gitManager.deleteWorktree(branchName!, options.force)
-    
+
     return { success: true, branchName }
   } catch (error) {
     throw new DeleteCommandError(error instanceof Error ? error.message : '不明なエラー')

@@ -12,11 +12,11 @@ describe('suggest command simple tests', () => {
     expect(suggestCommand.name()).toBe('suggest')
     expect(suggestCommand.description()).toContain('Claude Code')
     expect(suggestCommand.aliases()).toContain('sg')
-    
+
     // Check options
     const options = suggestCommand.options
     const optionNames = options.map(opt => opt.long)
-    
+
     expect(optionNames).toContain('--branch')
     expect(optionNames).toContain('--commit')
     expect(optionNames).toContain('--issue')
@@ -30,7 +30,7 @@ describe('suggest command simple tests', () => {
     const buildBranchPrompt = (description: string, context: any = {}): string => {
       let prompt = '# ブランチ名の提案\n\n'
       prompt += `以下の情報に基づいて、適切なGitブランチ名を5つ提案してください。\n\n`
-      
+
       if (context.issueNumber) {
         prompt += `Issue番号: #${context.issueNumber}\n`
       }
@@ -38,12 +38,12 @@ describe('suggest command simple tests', () => {
         prompt += `PR番号: #${context.prNumber}\n`
       }
       prompt += `説明: ${description}\n\n`
-      
+
       prompt += `## ルール:\n`
       prompt += `- 小文字とハイフンのみ使用\n`
       prompt += `- 最大50文字\n`
       prompt += `- 一般的な命名規則に従う（feature/, bugfix/, hotfix/, refactor/）\n`
-      
+
       return prompt
     }
 
@@ -61,32 +61,32 @@ describe('suggest command simple tests', () => {
     const buildCommitPrompt = (context: any = {}): string => {
       let prompt = '# コミットメッセージの提案\n\n'
       prompt += `以下の変更に基づいて、適切なコミットメッセージを5つ提案してください。\n\n`
-      
+
       if (context.diff) {
         prompt += `## 変更内容:\n\`\`\`diff\n${context.diff}\n\`\`\`\n\n`
       }
-      
+
       if (context.files) {
         prompt += `## 変更ファイル:\n${context.files.join('\n')}\n\n`
       }
-      
+
       prompt += `## ルール:\n`
       prompt += `- Conventional Commits形式\n`
       prompt += `- 最大72文字（タイトル行）\n`
       prompt += `- 日本語OK\n`
-      
+
       return prompt
     }
 
-    const prompt1 = buildCommitPrompt({ 
-      diff: '+ function newFeature() {}' 
+    const prompt1 = buildCommitPrompt({
+      diff: '+ function newFeature() {}',
     })
     expect(prompt1).toContain('コミットメッセージの提案')
     expect(prompt1).toContain('```diff')
     expect(prompt1).toContain('+ function newFeature() {}')
 
-    const prompt2 = buildCommitPrompt({ 
-      files: ['src/auth.js', 'src/login.js'] 
+    const prompt2 = buildCommitPrompt({
+      files: ['src/auth.js', 'src/login.js'],
     })
     expect(prompt2).toContain('変更ファイル:')
     expect(prompt2).toContain('src/auth.js')
@@ -161,13 +161,13 @@ describe('suggest command simple tests', () => {
 
       let output = `\n${headers[type] || '提案:'}\n`
       output += '─'.repeat(40) + '\n\n'
-      
+
       if (suggestions.length === 0) {
         output += '提案がありません。\n'
       } else {
         output += suggestions.join('\n\n')
       }
-      
+
       return output
     }
 
@@ -214,25 +214,26 @@ describe('suggest command simple tests', () => {
       return `エラーが発生しました: ${error.message || '不明なエラー'}`
     }
 
-    expect(getErrorMessage(new Error('claude: command not found')))
-      .toContain('Claude Codeがインストールされていません')
-    
-    expect(getErrorMessage(new Error('gh: command not found')))
-      .toContain('GitHub CLIがインストールされていません')
-    
-    expect(getErrorMessage(new Error('Network error')))
-      .toBe('エラーが発生しました: Network error')
+    expect(getErrorMessage(new Error('claude: command not found'))).toContain(
+      'Claude Codeがインストールされていません'
+    )
+
+    expect(getErrorMessage(new Error('gh: command not found'))).toContain(
+      'GitHub CLIがインストールされていません'
+    )
+
+    expect(getErrorMessage(new Error('Network error'))).toBe('エラーが発生しました: Network error')
   })
 
   it('should test repository info gathering', () => {
     const getRepositoryInfo = (remote: string): any => {
       const match = remote.match(/github\.com[/:]([\w-]+)\/([\w-]+)/)
       if (!match) return null
-      
+
       return {
         owner: match[1],
         repo: match[2].replace(/\.git$/, ''),
-        url: `https://github.com/${match[1]}/${match[2].replace(/\.git$/, '')}`
+        url: `https://github.com/${match[1]}/${match[2].replace(/\.git$/, '')}`,
       }
     }
 
@@ -305,7 +306,9 @@ describe('suggest command simple tests', () => {
       }
 
       // Check for conventional commit format
-      const match = message.match(/^(feat|fix|docs|style|refactor|test|chore)(\([^)]+\))?\s*:\s*(.+)$/)
+      const match = message.match(
+        /^(feat|fix|docs|style|refactor|test|chore)(\([^)]+\))?\s*:\s*(.+)$/
+      )
       if (match) {
         analysis.isConventional = true
         analysis.type = match[1]
@@ -340,7 +343,7 @@ describe('suggest command simple tests', () => {
       if (name.includes('..') || name.includes('~')) return false
       if (name.includes(' ') || name.includes('\t')) return false
       if (name.includes('@{') || name.includes('\\')) return false
-      
+
       return true
     }
 
@@ -374,9 +377,7 @@ describe('suggest command simple tests', () => {
         }
       })
 
-      return scored
-        .sort((a, b) => b.score - a.score)
-        .map(item => item.text)
+      return scored.sort((a, b) => b.score - a.score).map(item => item.text)
     }
 
     const branchSuggestions = [
@@ -394,12 +395,12 @@ describe('suggest command simple tests', () => {
   it('should test file path suggestion', () => {
     const suggestFilePaths = (changedFiles: string[]): string[] => {
       const suggestions: string[] = []
-      
+
       for (const file of changedFiles) {
         const parts = file.split('/')
         const fileName = parts[parts.length - 1]
         const extension = fileName.split('.').pop()
-        
+
         if (extension === 'js' || extension === 'ts') {
           suggestions.push(`${extension} file change`)
         } else if (extension === 'md') {
@@ -408,13 +409,13 @@ describe('suggest command simple tests', () => {
           suggestions.push('configuration change')
         }
       }
-      
+
       return [...new Set(suggestions)]
     }
 
     const files = ['src/auth.js', 'README.md', 'package.json', 'src/utils.ts']
     const suggestions = suggestFilePaths(files)
-    
+
     expect(suggestions).toContain('js file change')
     expect(suggestions).toContain('ts file change')
     expect(suggestions).toContain('documentation update')
@@ -424,27 +425,28 @@ describe('suggest command simple tests', () => {
   it('should test prompt optimization', () => {
     const optimizePrompt = (prompt: string, maxLength: number): string => {
       if (prompt.length <= maxLength) return prompt
-      
+
       // Try to truncate while preserving structure
       const parts = prompt.split('\n\n')
       let result = parts[0] // Keep header
-      
+
       for (let i = 1; i < parts.length; i++) {
         const testResult = result + '\n\n' + parts[i]
         if (testResult.length > maxLength) break
         result = testResult
       }
-      
+
       if (result.length > maxLength) {
         result = result.substring(0, maxLength - 3) + '...'
       }
-      
+
       return result
     }
 
-    const longPrompt = 'Header\n\nVery long content that exceeds the maximum length limit and should be truncated'
+    const longPrompt =
+      'Header\n\nVery long content that exceeds the maximum length limit and should be truncated'
     const optimized = optimizePrompt(longPrompt, 50)
-    
+
     expect(optimized.length).toBeLessThanOrEqual(50)
     expect(optimized).toContain('Header')
   })
@@ -453,14 +455,14 @@ describe('suggest command simple tests', () => {
     const parseClaudeOutput = (output: string): string[] => {
       const lines = output.split('\n')
       const suggestions: string[] = []
-      
+
       for (const line of lines) {
         const trimmed = line.trim()
         if (trimmed.match(/^\d+\.\s/)) {
           suggestions.push(trimmed)
         }
       }
-      
+
       return suggestions
     }
 

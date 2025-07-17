@@ -47,13 +47,13 @@ vi.mock('inquirer', () => ({ default: mockInquirer }))
 vi.mock('ora', () => ({ default: mockOra }))
 vi.mock('chalk', () => ({
   default: {
-    red: vi.fn((text) => text),
-    green: vi.fn((text) => text),
-    yellow: vi.fn((text) => text),
-    cyan: vi.fn((text) => text),
-    gray: vi.fn((text) => text),
-    bold: vi.fn((text) => text),
-  }
+    red: vi.fn(text => text),
+    green: vi.fn(text => text),
+    yellow: vi.fn(text => text),
+    cyan: vi.fn(text => text),
+    gray: vi.fn(text => text),
+    bold: vi.fn(text => text),
+  },
 }))
 vi.mock('../../core/git.js', () => ({ GitWorktreeManager: mockGitWorktreeManager }))
 vi.mock('../../core/config.js', () => ({ ConfigManager: mockConfigManager }))
@@ -114,8 +114,8 @@ describe('create command coverage', () => {
         labels: [{ name: 'feature' }, { name: 'enhancement' }],
         assignees: [{ login: 'assignee1' }],
         milestone: { title: 'v1.0.0' },
-        url: 'https://github.com/test/repo/pull/123'
-      })
+        url: 'https://github.com/test/repo/pull/123',
+      }),
     })
 
     const { fetchGitHubMetadata } = await import('../../commands/create.js')
@@ -129,28 +129,30 @@ describe('create command coverage', () => {
       labels: ['feature', 'enhancement'],
       assignees: ['assignee1'],
       milestone: 'v1.0.0',
-      url: 'https://github.com/test/repo/pull/123'
+      url: 'https://github.com/test/repo/pull/123',
     })
     expect(mockExeca).toHaveBeenCalledWith('gh', [
-      'pr', 'view', '123', '--json', 'number,title,body,author,labels,assignees,milestone,url'
+      'pr',
+      'view',
+      '123',
+      '--json',
+      'number,title,body,author,labels,assignees,milestone,url',
     ])
   })
 
   it('should test fetchGitHubMetadata for Issue when PR fails', async () => {
-    mockExeca
-      .mockRejectedValueOnce(new Error('PR not found'))
-      .mockResolvedValueOnce({
-        stdout: JSON.stringify({
-          number: 456,
-          title: 'Test Issue',
-          body: 'Issue description',
-          author: { login: 'issueuser' },
-          labels: [{ name: 'bug' }],
-          assignees: [],
-          milestone: null,
-          url: 'https://github.com/test/repo/issues/456'
-        })
-      })
+    mockExeca.mockRejectedValueOnce(new Error('PR not found')).mockResolvedValueOnce({
+      stdout: JSON.stringify({
+        number: 456,
+        title: 'Test Issue',
+        body: 'Issue description',
+        author: { login: 'issueuser' },
+        labels: [{ name: 'bug' }],
+        assignees: [],
+        milestone: null,
+        url: 'https://github.com/test/repo/issues/456',
+      }),
+    })
 
     const { fetchGitHubMetadata } = await import('../../commands/create.js')
     const result = await fetchGitHubMetadata('456')
@@ -163,7 +165,7 @@ describe('create command coverage', () => {
       labels: ['bug'],
       assignees: [],
       milestone: undefined,
-      url: 'https://github.com/test/repo/issues/456'
+      url: 'https://github.com/test/repo/issues/456',
     })
   })
 
@@ -189,8 +191,8 @@ describe('create command coverage', () => {
         labels: ['bug'],
         assignees: [],
         url: 'https://github.com/test/repo/issues/1',
-        issueNumber: '1'
-      }
+        issueNumber: '1',
+      },
     }
 
     await saveWorktreeMetadata('/test/path', 'issue-1', metadata)
@@ -206,11 +208,18 @@ describe('create command coverage', () => {
       .mockResolvedValueOnce({ stdout: '' })
 
     const { createTmuxSession } = await import('../../commands/create.js')
-    
+
     await createTmuxSession('test-session', '/test/path', {})
 
     expect(mockExeca).toHaveBeenCalledWith('tmux', ['has-session', '-t', 'test-session'])
-    expect(mockExeca).toHaveBeenCalledWith('tmux', ['new-session', '-d', '-s', 'test-session', '-c', '/test/path'])
+    expect(mockExeca).toHaveBeenCalledWith('tmux', [
+      'new-session',
+      '-d',
+      '-s',
+      'test-session',
+      '-c',
+      '/test/path',
+    ])
   })
 
   it('should test createTmuxSession with existing session', async () => {
@@ -219,7 +228,7 @@ describe('create command coverage', () => {
       .mockResolvedValueOnce({ stdout: '' }) // new-window succeeds
 
     const { createTmuxSession } = await import('../../commands/create.js')
-    
+
     await createTmuxSession('existing-session', '/test/path', {})
 
     expect(mockExeca).toHaveBeenCalledWith('tmux', ['has-session', '-t', 'existing-session'])
@@ -231,13 +240,13 @@ describe('create command coverage', () => {
     mockFs.writeFile.mockResolvedValue(undefined)
 
     const { handleClaudeMarkdown } = await import('../../commands/create.js')
-    
+
     const config = {
       claude: {
         autoStart: true,
         markdownMode: 'shared' as const,
-        initialCommands: ['/model sonnet-3.5']
-      }
+        initialCommands: ['/model sonnet-3.5'],
+      },
     }
 
     await handleClaudeMarkdown('/test/path', config)

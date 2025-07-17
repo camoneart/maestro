@@ -12,11 +12,11 @@ describe('issue command simple tests', () => {
     expect(issueCommand.name()).toBe('issue')
     expect(issueCommand.description()).toContain('GitHub Issue')
     expect(issueCommand.aliases()).toContain('i')
-    
+
     // Check options
     const options = issueCommand.options
     const optionNames = options.map(opt => opt.long)
-    
+
     expect(optionNames).toContain('--create')
     expect(optionNames).toContain('--list')
     expect(optionNames).toContain('--close')
@@ -36,9 +36,9 @@ describe('issue command simple tests', () => {
   it('should test issue state formatting', () => {
     const formatIssueState = (state: string): string => {
       const states: Record<string, string> = {
-        'open': '🟢 Open',
-        'closed': '🔴 Closed',
-        'reopened': '🔄 Reopened',
+        open: '🟢 Open',
+        closed: '🔴 Closed',
+        reopened: '🔄 Reopened',
       }
       return states[state.toLowerCase()] || state
     }
@@ -70,7 +70,7 @@ describe('issue command simple tests', () => {
   it('should test issue title formatting', () => {
     const formatIssueTitle = (issue: any): string => {
       const parts = [`#${issue.number}`]
-      
+
       if (issue.labels?.includes('bug')) {
         parts.push('🐛')
       } else if (issue.labels?.includes('enhancement')) {
@@ -78,23 +78,27 @@ describe('issue command simple tests', () => {
       } else if (issue.labels?.includes('documentation')) {
         parts.push('📚')
       }
-      
+
       parts.push(issue.title)
-      
+
       return parts.join(' ')
     }
 
-    expect(formatIssueTitle({ 
-      number: 123, 
-      title: 'Fix login', 
-      labels: ['bug'] 
-    })).toBe('#123 🐛 Fix login')
+    expect(
+      formatIssueTitle({
+        number: 123,
+        title: 'Fix login',
+        labels: ['bug'],
+      })
+    ).toBe('#123 🐛 Fix login')
 
-    expect(formatIssueTitle({ 
-      number: 456, 
-      title: 'Add feature', 
-      labels: ['enhancement'] 
-    })).toBe('#456 ✨ Add feature')
+    expect(
+      formatIssueTitle({
+        number: 456,
+        title: 'Add feature',
+        labels: ['enhancement'],
+      })
+    ).toBe('#456 ✨ Add feature')
   })
 
   it('should test issue list formatting', () => {
@@ -103,7 +107,7 @@ describe('issue command simple tests', () => {
         const state = issue.state === 'open' ? '○' : '●'
         const assignee = issue.assignees?.length > 0 ? ` @${issue.assignees[0]}` : ''
         const milestone = issue.milestone ? ` [${issue.milestone}]` : ''
-        
+
         return `${state} #${issue.number} ${issue.title}${assignee}${milestone}`
       })
     }
@@ -136,7 +140,7 @@ What you expected to happen.
 
 **Actual Behavior:**
 What actually happened.`,
-        
+
         feature: `### ✨ Feature Request
 
 **Is your feature request related to a problem?**
@@ -147,13 +151,13 @@ Describe the solution you'd like.
 
 **Alternatives:**
 Any alternative solutions you've considered.`,
-        
+
         default: `### Issue
 
 **Description:**
-Describe your issue here.`
+Describe your issue here.`,
       }
-      
+
       return templates[type] || templates.default
     }
 
@@ -193,7 +197,7 @@ Describe your issue here.`
         question: '❓',
         wontfix: '🚫',
       }
-      
+
       return labels
         .map(label => {
           const emoji = labelEmojis[label] || '🏷️'
@@ -202,14 +206,11 @@ Describe your issue here.`
         .join(', ')
     }
 
-    expect(formatLabels(['bug', 'help wanted']))
-      .toBe('🐛 bug, 🆘 help wanted')
-    
-    expect(formatLabels(['enhancement']))
-      .toBe('✨ enhancement')
-    
-    expect(formatLabels(['custom-label']))
-      .toBe('🏷️ custom-label')
+    expect(formatLabels(['bug', 'help wanted'])).toBe('🐛 bug, 🆘 help wanted')
+
+    expect(formatLabels(['enhancement'])).toBe('✨ enhancement')
+
+    expect(formatLabels(['custom-label'])).toBe('🏷️ custom-label')
   })
 
   it('should test issue action messages', () => {

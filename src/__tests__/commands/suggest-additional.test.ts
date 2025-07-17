@@ -62,11 +62,13 @@ describe.skip('suggest command - additional tests', () => {
     // GitWorktreeManagerのモック
     mockGitManager = {
       isGitRepository: vi.fn().mockResolvedValue(true),
-      getCommitLogs: vi.fn().mockResolvedValue([
-        'feat: add user authentication',
-        'fix: resolve login issue',
-        'refactor: update database schema',
-      ]),
+      getCommitLogs: vi
+        .fn()
+        .mockResolvedValue([
+          'feat: add user authentication',
+          'fix: resolve login issue',
+          'refactor: update database schema',
+        ]),
       listBranches: vi.fn().mockResolvedValue(['main', 'develop', 'feature/auth']),
       listWorktrees: vi.fn().mockResolvedValue([]),
       getCurrentBranch: vi.fn().mockResolvedValue('main'),
@@ -100,7 +102,9 @@ describe.skip('suggest command - additional tests', () => {
     // fs/promisesのモック
     ;(fs as any).default.mkdtemp.mockResolvedValue('/tmp/maestro-suggest-123')
     ;(fs as any).default.writeFile.mockResolvedValue(undefined)
-    ;(fs as any).default.readFile.mockResolvedValue('1. feature/new-feature\n2. feature/add-component')
+    ;(fs as any).default.readFile.mockResolvedValue(
+      '1. feature/new-feature\n2. feature/add-component'
+    )
     ;(fs as any).default.rm.mockResolvedValue(undefined)
   })
 
@@ -114,11 +118,8 @@ describe.skip('suggest command - additional tests', () => {
             type: 'list',
             name: 'suggestionType',
             message: '何を提案しますか？',
-            choices: expect.arrayContaining([
-              '🌿 ブランチ名',
-              '📝 コミットメッセージ',
-            ])
-          })
+            choices: expect.arrayContaining(['🌿 ブランチ名', '📝 コミットメッセージ']),
+          }),
         ])
       )
     })
@@ -136,8 +137,9 @@ describe.skip('suggest command - additional tests', () => {
     })
 
     it('should handle commit message suggestions', async () => {
-      ;(inquirer as any).default.prompt
-        .mockResolvedValueOnce({ suggestionType: '📝 コミットメッセージ' })
+      ;(inquirer as any).default.prompt.mockResolvedValueOnce({
+        suggestionType: '📝 コミットメッセージ',
+      })
 
       await suggestCommand.parseAsync(['node', 'suggest'])
 
@@ -146,8 +148,12 @@ describe.skip('suggest command - additional tests', () => {
     })
 
     it('should include branch suggestions from existing branches', async () => {
-      mockGitManager.listBranches.mockResolvedValue(['main', 'develop', 'feature/auth', 'bugfix/login'])
-
+      mockGitManager.listBranches.mockResolvedValue([
+        'main',
+        'develop',
+        'feature/auth',
+        'bugfix/login',
+      ])
       ;(inquirer as any).default.prompt
         .mockResolvedValueOnce({ suggestionType: '🌿 ブランチ名' })
         .mockResolvedValueOnce({ description: 'New feature development' })
@@ -179,7 +185,6 @@ describe.skip('suggest command - additional tests', () => {
         },
       ]
       mockGitManager.listWorktrees.mockResolvedValue(mockWorktrees)
-
       ;(inquirer as any).default.prompt
         .mockResolvedValueOnce({ suggestionType: '🌿 ブランチ名' })
         .mockResolvedValueOnce({ description: 'New feature' })
@@ -200,7 +205,7 @@ describe.skip('suggest command - additional tests', () => {
           expect.objectContaining({
             name: 'description',
             message: expect.stringContaining('説明'),
-          })
+          }),
         ])
       )
     })
@@ -228,7 +233,13 @@ describe.skip('suggest command - additional tests', () => {
 
       await suggestCommand.parseAsync(['node', 'suggest', '--issue', '123'])
 
-      expect(execa).toHaveBeenCalledWith('gh', ['issue', 'view', '123', '--json', 'number,title,body'])
+      expect(execa).toHaveBeenCalledWith('gh', [
+        'issue',
+        'view',
+        '123',
+        '--json',
+        'number,title,body',
+      ])
     })
 
     it('should handle --pr option', async () => {
@@ -251,7 +262,12 @@ describe.skip('suggest command - additional tests', () => {
     })
 
     it('should handle --description option', async () => {
-      await suggestCommand.parseAsync(['node', 'suggest', '--description', 'Add authentication system'])
+      await suggestCommand.parseAsync([
+        'node',
+        'suggest',
+        '--description',
+        'Add authentication system',
+      ])
 
       // 説明が直接提供された場合はプロンプトをスキップ
       expect((fs as any).default.writeFile).toHaveBeenCalledWith(
@@ -281,23 +297,19 @@ describe.skip('suggest command - additional tests', () => {
         }
         return Promise.resolve({ stdout: '', stderr: '', exitCode: 0 })
       })
-
       ;(inquirer as any).default.prompt
         .mockResolvedValueOnce({ suggestionType: '🌿 ブランチ名' })
         .mockResolvedValueOnce({ description: 'Test feature' })
 
       await suggestCommand.parseAsync(['node', 'suggest'])
 
-      expect(mockSpinner.fail).toHaveBeenCalledWith(
-        expect.stringContaining('Claude')
-      )
+      expect(mockSpinner.fail).toHaveBeenCalledWith(expect.stringContaining('Claude'))
     })
 
     it('should parse Claude suggestions correctly', async () => {
       ;(fs as any).default.readFile.mockResolvedValue(
         '1. feature/user-auth\n2. feat/authentication\n3. feature/login-system\n4. auth/user-login\n5. feature/secure-auth'
       )
-
       ;(inquirer as any).default.prompt
         .mockResolvedValueOnce({ suggestionType: '🌿 ブランチ名' })
         .mockResolvedValueOnce({ description: 'Add user authentication' })
@@ -312,16 +324,13 @@ describe.skip('suggest command - additional tests', () => {
 
     it('should handle empty Claude output', async () => {
       ;(fs as any).default.readFile.mockResolvedValue('')
-
       ;(inquirer as any).default.prompt
         .mockResolvedValueOnce({ suggestionType: '🌿 ブランチ名' })
         .mockResolvedValueOnce({ description: 'Test feature' })
 
       await suggestCommand.parseAsync(['node', 'suggest'])
 
-      expect(mockSpinner.warn).toHaveBeenCalledWith(
-        expect.stringContaining('生成されませんでした')
-      )
+      expect(mockSpinner.warn).toHaveBeenCalledWith(expect.stringContaining('生成されませんでした'))
     })
   })
 
@@ -329,9 +338,7 @@ describe.skip('suggest command - additional tests', () => {
     it('should handle not a git repository', async () => {
       mockGitManager.isGitRepository.mockResolvedValue(false)
 
-      await expect(
-        suggestCommand.parseAsync(['node', 'suggest'])
-      ).rejects.toThrow()
+      await expect(suggestCommand.parseAsync(['node', 'suggest'])).rejects.toThrow()
     })
 
     it('should handle GitHub CLI not available for issue/PR', async () => {
@@ -344,38 +351,32 @@ describe.skip('suggest command - additional tests', () => {
 
       await suggestCommand.parseAsync(['node', 'suggest', '--issue', '123'])
 
-      expect(mockSpinner.fail).toHaveBeenCalledWith(
-        expect.stringContaining('GitHub CLI')
-      )
+      expect(mockSpinner.fail).toHaveBeenCalledWith(expect.stringContaining('GitHub CLI'))
     })
 
     it('should handle file system errors', async () => {
       ;(fs as any).default.mkdtemp.mockRejectedValue(new Error('Permission denied'))
-
       ;(inquirer as any).default.prompt
         .mockResolvedValueOnce({ suggestionType: '🌿 ブランチ名' })
         .mockResolvedValueOnce({ description: 'Test feature' })
 
       await suggestCommand.parseAsync(['node', 'suggest'])
 
-      expect(mockSpinner.fail).toHaveBeenCalledWith(
-        expect.stringContaining('エラー')
-      )
+      expect(mockSpinner.fail).toHaveBeenCalledWith(expect.stringContaining('エラー'))
     })
 
     it('should clean up temporary files on error', async () => {
       ;(execa as any).mockRejectedValue(new Error('Claude execution failed'))
-
       ;(inquirer as any).default.prompt
         .mockResolvedValueOnce({ suggestionType: '🌿 ブランチ名' })
         .mockResolvedValueOnce({ description: 'Test feature' })
 
       await suggestCommand.parseAsync(['node', 'suggest'])
 
-      expect((fs as any).default.rm).toHaveBeenCalledWith(
-        '/tmp/maestro-suggest-123',
-        { recursive: true, force: true }
-      )
+      expect((fs as any).default.rm).toHaveBeenCalledWith('/tmp/maestro-suggest-123', {
+        recursive: true,
+        force: true,
+      })
     })
   })
 
@@ -384,7 +385,6 @@ describe.skip('suggest command - additional tests', () => {
       ;(fs as any).default.readFile.mockResolvedValue(
         '1. feature/user-auth\n2. feat/authentication\n3. feature/login-system'
       )
-
       ;(inquirer as any).default.prompt
         .mockResolvedValueOnce({ suggestionType: '🌿 ブランチ名' })
         .mockResolvedValueOnce({ description: 'Add authentication' })
@@ -392,18 +392,14 @@ describe.skip('suggest command - additional tests', () => {
       await suggestCommand.parseAsync(['node', 'suggest'])
 
       // 提案がフォーマットされて表示されることを確認
-      expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining('feature/user-auth')
-      )
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('feature/user-auth'))
     })
 
     it('should filter duplicate suggestions', async () => {
       mockGitManager.listBranches.mockResolvedValue(['feature/auth', 'feature/login'])
-
       ;(fs as any).default.readFile.mockResolvedValue(
         '1. feature/auth\n2. feature/login\n3. feature/new-auth'
       )
-
       ;(inquirer as any).default.prompt
         .mockResolvedValueOnce({ suggestionType: '🌿 ブランチ名' })
         .mockResolvedValueOnce({ description: 'Authentication feature' })
@@ -411,9 +407,7 @@ describe.skip('suggest command - additional tests', () => {
       await suggestCommand.parseAsync(['node', 'suggest'])
 
       // 重複が除去されることを確認
-      expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining('feature/new-auth')
-      )
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('feature/new-auth'))
     })
   })
 })

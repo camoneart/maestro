@@ -18,7 +18,7 @@ const mockGitWorktreeManager = vi.fn(() => ({
       locked: false,
       detached: false,
       prunable: false,
-    }
+    },
   ]),
   isGitRepository: vi.fn().mockResolvedValue(true),
 }))
@@ -29,7 +29,7 @@ const mockConfigManager = vi.fn(() => ({
     development: { autoSetup: true, defaultEditor: 'code' },
     claude: { autoStart: true, markdownMode: 'shared', initialCommands: [] },
     github: { defaultBranch: 'main' },
-    tmux: { sessionName: 'maestro' }
+    tmux: { sessionName: 'maestro' },
   }),
   save: vi.fn().mockResolvedValue(undefined),
 }))
@@ -82,44 +82,44 @@ vi.mock('child_process', () => ({
   spawn: vi.fn(() => ({
     stdin: { write: vi.fn(), end: vi.fn() },
     stdout: { on: vi.fn() },
-    on: vi.fn()
-  }))
+    on: vi.fn(),
+  })),
 }))
 vi.mock('path', () => ({
   default: {
     join: vi.fn((...args) => args.join('/')),
-    resolve: vi.fn((path) => `/resolved${path}`),
+    resolve: vi.fn(path => `/resolved${path}`),
     dirname: vi.fn(() => '/test'),
     basename: vi.fn(() => 'test.js'),
     relative: vi.fn((from, to) => to),
-  }
+  },
 }))
-vi.mock('os', () => ({ 
+vi.mock('os', () => ({
   tmpdir: vi.fn(() => '/tmp'),
-  homedir: vi.fn(() => '/home/user')
+  homedir: vi.fn(() => '/home/user'),
 }))
 vi.mock('chalk', () => ({
   default: {
-    red: vi.fn((text) => text),
-    green: vi.fn((text) => text),
-    yellow: vi.fn((text) => text),
-    cyan: vi.fn((text) => text),
-    gray: vi.fn((text) => text),
-    bold: vi.fn((text) => text),
-  }
+    red: vi.fn(text => text),
+    green: vi.fn(text => text),
+    yellow: vi.fn(text => text),
+    cyan: vi.fn(text => text),
+    gray: vi.fn(text => text),
+    bold: vi.fn(text => text),
+  },
 }))
 
 vi.mock('../../core/git.js', () => ({ GitWorktreeManager: mockGitWorktreeManager }))
-vi.mock('../../core/config.js', () => ({ 
+vi.mock('../../core/config.js', () => ({
   ConfigManager: mockConfigManager,
-  Config: {}
+  Config: {},
 }))
 vi.mock('../../commands/template.js', () => ({
   getTemplateConfig: vi.fn().mockReturnValue({}),
   templateCommand: {
     alias: vi.fn().mockReturnThis(),
     description: vi.fn().mockReturnThis(),
-  }
+  },
 }))
 
 describe('Comprehensive Coverage Tests', () => {
@@ -130,7 +130,13 @@ describe('Comprehensive Coverage Tests', () => {
 
   describe('Create Command Coverage', () => {
     it('should cover create command branching logic', async () => {
-      const { parseIssueNumber, fetchGitHubMetadata, saveWorktreeMetadata, createTmuxSession, handleClaudeMarkdown } = await import('../../commands/create.js')
+      const {
+        parseIssueNumber,
+        fetchGitHubMetadata,
+        saveWorktreeMetadata,
+        createTmuxSession,
+        handleClaudeMarkdown,
+      } = await import('../../commands/create.js')
 
       // Test all parseIssueNumber branches
       expect(parseIssueNumber('#123')).toMatchObject({ isIssue: true, issueNumber: '123' })
@@ -141,15 +147,18 @@ describe('Comprehensive Coverage Tests', () => {
 
       // Test GitHub metadata with different scenarios
       mockExeca.mockResolvedValueOnce({
-        stdout: JSON.stringify({ title: 'PR', author: { login: 'user' }, labels: [{ name: 'feature' }] })
+        stdout: JSON.stringify({
+          title: 'PR',
+          author: { login: 'user' },
+          labels: [{ name: 'feature' }],
+        }),
       })
       const prResult = await fetchGitHubMetadata('123')
       expect(prResult?.type).toBe('pr')
 
-      mockExeca.mockRejectedValueOnce(new Error('PR not found'))
-        .mockResolvedValueOnce({
-          stdout: JSON.stringify({ title: 'Issue', author: { login: 'user' }, labels: [] })
-        })
+      mockExeca.mockRejectedValueOnce(new Error('PR not found')).mockResolvedValueOnce({
+        stdout: JSON.stringify({ title: 'Issue', author: { login: 'user' }, labels: [] }),
+      })
       const issueResult = await fetchGitHubMetadata('456')
       expect(issueResult?.type).toBe('issue')
 
@@ -163,14 +172,14 @@ describe('Comprehensive Coverage Tests', () => {
       expect(mockFs.writeFile).toHaveBeenCalled()
 
       // Test tmux session creation - new session
-      mockExeca.mockRejectedValueOnce(new Error('No session'))
+      mockExeca
+        .mockRejectedValueOnce(new Error('No session'))
         .mockResolvedValueOnce({ stdout: '' })
         .mockResolvedValueOnce({ stdout: '' })
       await createTmuxSession('new-session', '/test', {})
 
-      // Test tmux session creation - existing session  
-      mockExeca.mockResolvedValueOnce({ stdout: '' })
-        .mockResolvedValueOnce({ stdout: '' })
+      // Test tmux session creation - existing session
+      mockExeca.mockResolvedValueOnce({ stdout: '' }).mockResolvedValueOnce({ stdout: '' })
       await createTmuxSession('existing-session', '/test', {})
 
       // Test Claude markdown handling
@@ -178,8 +187,8 @@ describe('Comprehensive Coverage Tests', () => {
         claude: {
           autoStart: true,
           markdownMode: 'shared' as const,
-          initialCommands: []
-        }
+          initialCommands: [],
+        },
       }
       await handleClaudeMarkdown('/test', config)
     })
@@ -187,7 +196,8 @@ describe('Comprehensive Coverage Tests', () => {
 
   describe('Delete Command Coverage', () => {
     it('should cover delete command logic paths', async () => {
-      const { formatDirectorySize, createWorktreeDisplay, getDirectorySize, deleteRemoteBranch } = await import('../../commands/delete.js')
+      const { formatDirectorySize, createWorktreeDisplay, getDirectorySize, deleteRemoteBranch } =
+        await import('../../commands/delete.js')
 
       // Test all size formatting branches
       expect(formatDirectorySize(0)).toBe('0 B')
@@ -197,17 +207,38 @@ describe('Comprehensive Coverage Tests', () => {
       expect(formatDirectorySize(1073741824)).toBe('1.0 GB')
 
       // Test worktree display variations
-      expect(createWorktreeDisplay({
-        path: '/test', branch: 'main', head: 'abc', locked: false, detached: false, prunable: false
-      })).toBe('main')
+      expect(
+        createWorktreeDisplay({
+          path: '/test',
+          branch: 'main',
+          head: 'abc',
+          locked: false,
+          detached: false,
+          prunable: false,
+        })
+      ).toBe('main')
 
-      expect(createWorktreeDisplay({
-        path: '/test', branch: 'locked', head: 'def', locked: true, detached: false, prunable: false
-      })).toBe('🔒 locked')
+      expect(
+        createWorktreeDisplay({
+          path: '/test',
+          branch: 'locked',
+          head: 'def',
+          locked: true,
+          detached: false,
+          prunable: false,
+        })
+      ).toBe('🔒 locked')
 
-      expect(createWorktreeDisplay({
-        path: '/test', branch: '', head: 'ghi', locked: false, detached: true, prunable: false
-      })).toBe('⚠️  ghi (detached)')
+      expect(
+        createWorktreeDisplay({
+          path: '/test',
+          branch: '',
+          head: 'ghi',
+          locked: false,
+          detached: true,
+          prunable: false,
+        })
+      ).toBe('⚠️  ghi (detached)')
 
       // Test directory size (skip due to mocking complexity)
       // mockExeca.mockResolvedValueOnce({ stdout: '1.5M\t/test' })
@@ -225,7 +256,9 @@ describe('Comprehensive Coverage Tests', () => {
 
   describe('Suggest Command Coverage', () => {
     it('should cover suggest command functionality', async () => {
-      const { filterDuplicateSuggestions, formatSuggestions, parseClaudeResponse } = await import('../../commands/suggest.js')
+      const { filterDuplicateSuggestions, formatSuggestions, parseClaudeResponse } = await import(
+        '../../commands/suggest.js'
+      )
 
       // Test filtering with various inputs
       expect(filterDuplicateSuggestions([])).toEqual([])
@@ -240,7 +273,11 @@ describe('Comprehensive Coverage Tests', () => {
       // Test Claude response parsing with various formats
       expect(parseClaudeResponse('')).toEqual([])
       expect(parseClaudeResponse('No numbered items')).toEqual([])
-      expect(parseClaudeResponse('1. first\n2. second\n3. third')).toEqual(['first', 'second', 'third'])
+      expect(parseClaudeResponse('1. first\n2. second\n3. third')).toEqual([
+        'first',
+        'second',
+        'third',
+      ])
       expect(parseClaudeResponse('1. \n2. valid\n3. ')).toEqual(['', 'valid', ''])
       expect(parseClaudeResponse('1.   spaced   \n2.  trimmed  ')).toEqual(['spaced', 'trimmed'])
       expect(parseClaudeResponse('10. tenth\n100. hundredth')).toEqual(['tenth', 'hundredth'])
@@ -259,18 +296,22 @@ describe('Comprehensive Coverage Tests', () => {
         return { isValid: errors.length === 0, errors }
       }
 
-      expect(validatePR({ number: 123, title: 'Test', state: 'open', draft: false }))
-        .toEqual({ isValid: true, errors: [] })
+      expect(validatePR({ number: 123, title: 'Test', state: 'open', draft: false })).toEqual({
+        isValid: true,
+        errors: [],
+      })
       expect(validatePR({})).toEqual({ isValid: false, errors: ['No number', 'No title'] })
-      expect(validatePR({ number: 123, title: 'Test', state: 'closed' }))
-        .toEqual({ isValid: false, errors: ['Closed'] })
+      expect(validatePR({ number: 123, title: 'Test', state: 'closed' })).toEqual({
+        isValid: false,
+        errors: ['Closed'],
+      })
 
       // Test review message formatting
       const formatReview = (type: string, body?: string) => {
         const templates = {
           approve: 'LGTM ✅',
           request_changes: 'Changes requested ⚠️',
-          comment: body || 'Comment 💬'
+          comment: body || 'Comment 💬',
         }
         return templates[type as keyof typeof templates] || 'Unknown'
       }
@@ -283,21 +324,27 @@ describe('Comprehensive Coverage Tests', () => {
 
       // Test auto-merge logic
       const canAutoMerge = (pr: any, checks: any[]) => {
-        return pr.state === 'open' && 
-               !pr.draft && 
-               pr.mergeable && 
-               checks.every(c => c.status === 'success')
+        return (
+          pr.state === 'open' &&
+          !pr.draft &&
+          pr.mergeable &&
+          checks.every(c => c.status === 'success')
+        )
       }
 
-      expect(canAutoMerge(
-        { state: 'open', draft: false, mergeable: true },
-        [{ status: 'success' }, { status: 'success' }]
-      )).toBe(true)
+      expect(
+        canAutoMerge({ state: 'open', draft: false, mergeable: true }, [
+          { status: 'success' },
+          { status: 'success' },
+        ])
+      ).toBe(true)
 
-      expect(canAutoMerge(
-        { state: 'open', draft: false, mergeable: true },
-        [{ status: 'success' }, { status: 'failure' }]
-      )).toBe(false)
+      expect(
+        canAutoMerge({ state: 'open', draft: false, mergeable: true }, [
+          { status: 'success' },
+          { status: 'failure' },
+        ])
+      ).toBe(false)
     })
   })
 
@@ -311,7 +358,7 @@ describe('Comprehensive Coverage Tests', () => {
         labels: data.labels?.map((l: any) => l.name) || [],
         assignees: data.assignees?.map((a: any) => a.login) || [],
         author: data.author?.login || 'unknown',
-        url: data.html_url
+        url: data.html_url,
       })
 
       const issueData = {
@@ -321,7 +368,7 @@ describe('Comprehensive Coverage Tests', () => {
         labels: [{ name: 'bug' }, { name: 'urgent' }],
         assignees: [{ login: 'dev1' }],
         author: { login: 'reporter' },
-        html_url: 'https://github.com/test/repo/issues/1'
+        html_url: 'https://github.com/test/repo/issues/1',
       }
 
       const processed = processIssue(issueData)
@@ -343,7 +390,9 @@ describe('Comprehensive Coverage Tests', () => {
     it('should cover tmux command functionality', async () => {
       // Test session parsing
       const parseSessions = (output: string) => {
-        return output.trim().split('\n')
+        return output
+          .trim()
+          .split('\n')
           .filter(line => line.includes(':'))
           .map(line => {
             const match = line.match(/^([^:]+):/)
@@ -352,14 +401,15 @@ describe('Comprehensive Coverage Tests', () => {
           .filter(Boolean)
       }
 
-      expect(parseSessions('main: 1 windows\nfeature: 2 windows'))
-        .toEqual(['main', 'feature'])
+      expect(parseSessions('main: 1 windows\nfeature: 2 windows')).toEqual(['main', 'feature'])
       expect(parseSessions('')).toEqual([])
       expect(parseSessions('no sessions')).toEqual([])
 
-      // Test window parsing  
+      // Test window parsing
       const parseWindows = (output: string) => {
-        return output.trim().split('\n')
+        return output
+          .trim()
+          .split('\n')
           .map(line => {
             const match = line.match(/^\s*(\d+):\s*(.+)/)
             return match ? { id: match[1], name: match[2] } : null
@@ -367,8 +417,10 @@ describe('Comprehensive Coverage Tests', () => {
           .filter(Boolean)
       }
 
-      expect(parseWindows('  0: zsh\n  1: vim'))
-        .toEqual([{ id: '0', name: 'zsh' }, { id: '1', name: 'vim' }])
+      expect(parseWindows('  0: zsh\n  1: vim')).toEqual([
+        { id: '0', name: 'zsh' },
+        { id: '1', name: 'vim' },
+      ])
     })
   })
 
@@ -379,14 +431,14 @@ describe('Comprehensive Coverage Tests', () => {
         uri: resource.uri,
         name: resource.name,
         description: resource.description || '',
-        mimeType: resource.mimeType || 'text/plain'
+        mimeType: resource.mimeType || 'text/plain',
       })
 
       const resource = {
         uri: 'file://test.js',
         name: 'Test File',
         description: 'A test file',
-        mimeType: 'application/javascript'
+        mimeType: 'application/javascript',
       }
 
       const processed = processResource(resource)
@@ -412,7 +464,10 @@ describe('Comprehensive Coverage Tests', () => {
       }
 
       expect(executeTool('list-worktrees', {})).toEqual({ worktrees: ['main', 'feature'] })
-      expect(executeTool('create-worktree', { branch: 'test' })).toEqual({ success: true, branch: 'test' })
+      expect(executeTool('create-worktree', { branch: 'test' })).toEqual({
+        success: true,
+        branch: 'test',
+      })
       expect(executeTool('unknown', {})).toEqual({ error: 'Unknown tool' })
     })
   })
@@ -422,7 +477,7 @@ describe('Comprehensive Coverage Tests', () => {
       // Test error classification
       const classifyError = (error: any) => {
         const message = error.message || ''
-        
+
         if (message.includes('not found')) return 'NOT_FOUND'
         if (message.includes('permission')) return 'PERMISSION'
         if (message.includes('network')) return 'NETWORK'
@@ -439,7 +494,7 @@ describe('Comprehensive Coverage Tests', () => {
       // Test error recovery
       const recoverFromError = (error: any, context: string) => {
         const errorType = classifyError(error)
-        
+
         switch (errorType) {
           case 'NOT_FOUND':
             return { retry: false, message: `${context}: Resource not found` }
@@ -454,10 +509,14 @@ describe('Comprehensive Coverage Tests', () => {
         }
       }
 
-      expect(recoverFromError(new Error('not found'), 'Test'))
-        .toEqual({ retry: false, message: 'Test: Resource not found' })
-      expect(recoverFromError(new Error('network error'), 'Test'))
-        .toEqual({ retry: true, message: 'Test: Network error, retry possible' })
+      expect(recoverFromError(new Error('not found'), 'Test')).toEqual({
+        retry: false,
+        message: 'Test: Resource not found',
+      })
+      expect(recoverFromError(new Error('network error'), 'Test')).toEqual({
+        retry: true,
+        message: 'Test: Network error, retry possible',
+      })
     })
   })
 
@@ -483,10 +542,7 @@ describe('Comprehensive Coverage Tests', () => {
 
       // Test path operations
       const sanitizePath = (path: string) => {
-        return path
-          .replace(/\\/g, '/')
-          .replace(/\/+/g, '/')
-          .replace(/\/$/, '') || '/'
+        return path.replace(/\\/g, '/').replace(/\/+/g, '/').replace(/\/$/, '') || '/'
       }
 
       expect(sanitizePath('path\\to\\file')).toBe('path/to/file')
@@ -497,7 +553,7 @@ describe('Comprehensive Coverage Tests', () => {
       // Test configuration merging
       const mergeConfig = (base: any, override: any) => {
         const result = { ...base }
-        
+
         for (const [key, value] of Object.entries(override)) {
           if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
             result[key] = mergeConfig(result[key] || {}, value)
@@ -505,14 +561,14 @@ describe('Comprehensive Coverage Tests', () => {
             result[key] = value
           }
         }
-        
+
         return result
       }
 
       const baseConfig = { a: 1, b: { c: 2, d: 3 } }
       const overrideConfig = { b: { c: 4 }, e: 5 }
       const merged = mergeConfig(baseConfig, overrideConfig)
-      
+
       expect(merged).toEqual({ a: 1, b: { c: 4, d: 3 }, e: 5 })
     })
   })

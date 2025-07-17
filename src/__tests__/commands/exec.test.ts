@@ -154,11 +154,7 @@ describe('exec command', () => {
 
       await execCommand.parseAsync(['node', 'exec', 'feature-1', 'npm', 'run', 'test'])
 
-      expect(execa).toHaveBeenCalledWith(
-        'sh',
-        ['-c', 'npm run test'],
-        expect.any(Object)
-      )
+      expect(execa).toHaveBeenCalledWith('sh', ['-c', 'npm run test'], expect.any(Object))
     })
   })
 
@@ -262,24 +258,20 @@ describe('exec command', () => {
         },
       ]
       mockGitManager.listWorktrees.mockResolvedValue(mockWorktrees)
-      
+
       const execError = Object.assign(new Error('Command failed'), {
         exitCode: 1,
         stderr: 'Error in feature-1',
       })
-      ;(execa as Mock)
-        .mockRejectedValueOnce(execError)
-        .mockResolvedValueOnce({
-          stdout: 'Success in feature-2',
-          stderr: '',
-        })
+      ;(execa as Mock).mockRejectedValueOnce(execError).mockResolvedValueOnce({
+        stdout: 'Success in feature-2',
+        stderr: '',
+      })
 
       await execCommand.parseAsync(['node', 'exec', 'dummy', 'test-command', '--all'])
 
       expect(execa).toHaveBeenCalledTimes(2)
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        chalk.red('  エラー (exit code: 1)')
-      )
+      expect(consoleErrorSpy).toHaveBeenCalledWith(chalk.red('  エラー (exit code: 1)'))
       expect(consoleLogSpy).toHaveBeenCalledWith('Success in feature-2')
     })
   })

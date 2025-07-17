@@ -62,32 +62,25 @@ describe('review command coverage', () => {
   it('should test review state determination', () => {
     const determineReviewState = (reviews: any[]): string => {
       if (reviews.length === 0) return 'PENDING'
-      
+
       const hasChangesRequested = reviews.some(r => r.state === 'CHANGES_REQUESTED')
       if (hasChangesRequested) return 'CHANGES_REQUESTED'
-      
+
       const allApproved = reviews.every(r => r.state === 'APPROVED')
       if (allApproved) return 'APPROVED'
-      
+
       return 'MIXED'
     }
 
     expect(determineReviewState([])).toBe('PENDING')
-    
-    expect(determineReviewState([
-      { state: 'APPROVED' },
-      { state: 'APPROVED' },
-    ])).toBe('APPROVED')
-    
-    expect(determineReviewState([
-      { state: 'APPROVED' },
-      { state: 'CHANGES_REQUESTED' },
-    ])).toBe('CHANGES_REQUESTED')
-    
-    expect(determineReviewState([
-      { state: 'APPROVED' },
-      { state: 'COMMENTED' },
-    ])).toBe('MIXED')
+
+    expect(determineReviewState([{ state: 'APPROVED' }, { state: 'APPROVED' }])).toBe('APPROVED')
+
+    expect(determineReviewState([{ state: 'APPROVED' }, { state: 'CHANGES_REQUESTED' }])).toBe(
+      'CHANGES_REQUESTED'
+    )
+
+    expect(determineReviewState([{ state: 'APPROVED' }, { state: 'COMMENTED' }])).toBe('MIXED')
   })
 
   it('should test review comment formatting', () => {
@@ -97,61 +90,49 @@ describe('review command coverage', () => {
         request_changes: '❌ Changes requested',
         comment: '💬 Comment',
       }
-      
+
       const prefix = prefixes[type] || '📝'
       return `${prefix}: ${comment}`
     }
 
-    expect(formatReviewComment('approve', 'Great work!'))
-      .toBe('✅ LGTM: Great work!')
-    
-    expect(formatReviewComment('request_changes', 'Please fix the tests'))
-      .toBe('❌ Changes requested: Please fix the tests')
-    
-    expect(formatReviewComment('comment', 'Consider refactoring'))
-      .toBe('💬 Comment: Consider refactoring')
-    
-    expect(formatReviewComment('unknown', 'Some text'))
-      .toBe('📝: Some text')
+    expect(formatReviewComment('approve', 'Great work!')).toBe('✅ LGTM: Great work!')
+
+    expect(formatReviewComment('request_changes', 'Please fix the tests')).toBe(
+      '❌ Changes requested: Please fix the tests'
+    )
+
+    expect(formatReviewComment('comment', 'Consider refactoring')).toBe(
+      '💬 Comment: Consider refactoring'
+    )
+
+    expect(formatReviewComment('unknown', 'Some text')).toBe('📝: Some text')
   })
 
   it('should test check status aggregation', () => {
     const aggregateCheckStatus = (checks: any[]): string => {
       if (checks.length === 0) return 'NO_CHECKS'
-      
+
       const failed = checks.filter(c => c.status === 'FAILURE' || c.status === 'ERROR')
       if (failed.length > 0) return 'FAILED'
-      
+
       const pending = checks.filter(c => c.status === 'PENDING' || c.status === 'IN_PROGRESS')
       if (pending.length > 0) return 'PENDING'
-      
+
       const allSuccess = checks.every(c => c.status === 'SUCCESS')
       if (allSuccess) return 'SUCCESS'
-      
+
       return 'MIXED'
     }
 
     expect(aggregateCheckStatus([])).toBe('NO_CHECKS')
-    
-    expect(aggregateCheckStatus([
-      { status: 'SUCCESS' },
-      { status: 'SUCCESS' },
-    ])).toBe('SUCCESS')
-    
-    expect(aggregateCheckStatus([
-      { status: 'SUCCESS' },
-      { status: 'FAILURE' },
-    ])).toBe('FAILED')
-    
-    expect(aggregateCheckStatus([
-      { status: 'SUCCESS' },
-      { status: 'PENDING' },
-    ])).toBe('PENDING')
-    
-    expect(aggregateCheckStatus([
-      { status: 'SUCCESS' },
-      { status: 'SKIPPED' },
-    ])).toBe('MIXED')
+
+    expect(aggregateCheckStatus([{ status: 'SUCCESS' }, { status: 'SUCCESS' }])).toBe('SUCCESS')
+
+    expect(aggregateCheckStatus([{ status: 'SUCCESS' }, { status: 'FAILURE' }])).toBe('FAILED')
+
+    expect(aggregateCheckStatus([{ status: 'SUCCESS' }, { status: 'PENDING' }])).toBe('PENDING')
+
+    expect(aggregateCheckStatus([{ status: 'SUCCESS' }, { status: 'SKIPPED' }])).toBe('MIXED')
   })
 
   it('should test review template generation', () => {
@@ -166,7 +147,7 @@ Great work! The changes look good to me.
 
 ### Additional comments:
 - None`,
-        
+
         request_changes: `## Changes Requested ❌
 
 Please address the following before merging:
@@ -177,7 +158,7 @@ Please address the following before merging:
 
 ### Suggestions:
 - `,
-        
+
         comment: `## Review Comments 💬
 
 I've reviewed the changes and have some thoughts:
@@ -188,22 +169,22 @@ I've reviewed the changes and have some thoughts:
 ### Questions:
 - `,
       }
-      
+
       return templates[type] || 'No template available'
     }
 
     const approveTemplate = generateReviewTemplate('approve')
     expect(approveTemplate).toContain('Approved ✅')
     expect(approveTemplate).toContain('Great work!')
-    
+
     const changesTemplate = generateReviewTemplate('request_changes')
     expect(changesTemplate).toContain('Changes Requested ❌')
     expect(changesTemplate).toContain('Required changes:')
-    
+
     const commentTemplate = generateReviewTemplate('comment')
     expect(commentTemplate).toContain('Review Comments 💬')
     expect(commentTemplate).toContain('Questions:')
-    
+
     expect(generateReviewTemplate('unknown')).toBe('No template available')
   })
 })

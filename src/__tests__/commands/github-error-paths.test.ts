@@ -131,7 +131,7 @@ describe('github command error paths', () => {
 
       // コメントを追加しようとするが、PR/Issueが見つからない
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
-      
+
       try {
         await program.parseAsync(['node', 'test', 'github', 'comment', '999', '-m', 'Test comment'])
       } catch (error) {
@@ -479,7 +479,7 @@ describe('github command error paths', () => {
         if (cmd === 'gh' && args[0] === 'auth' && args[1] === 'status') {
           return Promise.resolve(mockGhAuthStatus())
         }
-        throw 'String error'  // Non-Error object
+        throw 'String error' // Non-Error object
       })
 
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})

@@ -160,7 +160,6 @@ describe.skip('delete command - additional tests', () => {
         },
       ]
       mockGitManager.listWorktrees.mockResolvedValue(mockWorktrees)
-      
       ;(execa as any).mockImplementation((cmd: string, args: string[]) => {
         if (cmd === 'git' && args.includes('branch')) {
           return Promise.resolve({ stdout: '  origin/feature-1\n  origin/main\n' })
@@ -189,7 +188,6 @@ describe.skip('delete command - additional tests', () => {
         },
       ]
       mockGitManager.listWorktrees.mockResolvedValue(mockWorktrees)
-      
       ;(execa as any).mockImplementation((cmd: string, args: string[]) => {
         if (cmd === 'git' && args.includes('branch')) {
           return Promise.resolve({ stdout: '  origin/main\n' }) // feature-1はリモートに無い
@@ -199,9 +197,7 @@ describe.skip('delete command - additional tests', () => {
 
       await deleteCommand.parseAsync(['node', 'delete', 'feature-1', '--remove-remote'])
 
-      expect(mockSpinner.warn).toHaveBeenCalledWith(
-        expect.stringContaining('リモートブランチ')
-      )
+      expect(mockSpinner.warn).toHaveBeenCalledWith(expect.stringContaining('リモートブランチ'))
     })
   })
 
@@ -232,9 +228,11 @@ describe.skip('delete command - additional tests', () => {
       // fzfプロセスのモック
       const mockSpawn = vi.fn().mockImplementation(() => ({
         stdin: { write: vi.fn(), end: vi.fn() },
-        stdout: { on: vi.fn((event, cb) => {
-          if (event === 'data') cb('feature-1\n')
-        })},
+        stdout: {
+          on: vi.fn((event, cb) => {
+            if (event === 'data') cb('feature-1\n')
+          }),
+        },
         stderr: { on: vi.fn() },
         on: vi.fn((event, cb) => {
           if (event === 'close') cb(0)
@@ -253,17 +251,13 @@ describe.skip('delete command - additional tests', () => {
     it('should handle not a git repository', async () => {
       mockGitManager.isGitRepository.mockResolvedValue(false)
 
-      await expect(
-        deleteCommand.parseAsync(['node', 'delete', 'test-branch'])
-      ).rejects.toThrow()
+      await expect(deleteCommand.parseAsync(['node', 'delete', 'test-branch'])).rejects.toThrow()
     })
 
     it('should handle no worktrees available', async () => {
       mockGitManager.listWorktrees.mockResolvedValue([])
 
-      await expect(
-        deleteCommand.parseAsync(['node', 'delete', 'non-existent'])
-      ).rejects.toThrow()
+      await expect(deleteCommand.parseAsync(['node', 'delete', 'non-existent'])).rejects.toThrow()
     })
 
     it('should handle worktree not found', async () => {
@@ -280,9 +274,7 @@ describe.skip('delete command - additional tests', () => {
       ]
       mockGitManager.listWorktrees.mockResolvedValue(mockWorktrees)
 
-      await expect(
-        deleteCommand.parseAsync(['node', 'delete', 'non-existent'])
-      ).rejects.toThrow()
+      await expect(deleteCommand.parseAsync(['node', 'delete', 'non-existent'])).rejects.toThrow()
     })
 
     it('should handle delete cancellation', async () => {
@@ -351,9 +343,7 @@ describe.skip('delete command - additional tests', () => {
       await deleteCommand.parseAsync(['node', 'delete', 'feature-1'])
 
       // ロック警告が表示されることを確認
-      expect(mockSpinner.warn).toHaveBeenCalledWith(
-        expect.stringContaining('ロック')
-      )
+      expect(mockSpinner.warn).toHaveBeenCalledWith(expect.stringContaining('ロック'))
     })
   })
 

@@ -59,7 +59,9 @@ describe('Delete Command - Enhanced Coverage', () => {
 
       const hasChanges = await hasUncommittedChanges('/path/to/worktree')
       expect(hasChanges).toBe(true)
-      expect(mockExeca).toHaveBeenCalledWith('git', ['status', '--porcelain'], { cwd: '/path/to/worktree' })
+      expect(mockExeca).toHaveBeenCalledWith('git', ['status', '--porcelain'], {
+        cwd: '/path/to/worktree',
+      })
     })
 
     it('should handle clean worktree', async () => {
@@ -97,7 +99,10 @@ describe('Delete Command - Enhanced Coverage', () => {
 
   describe('Branch safety checks', () => {
     it('should identify protected branches', () => {
-      function isProtectedBranch(branchName: string, protectedBranches: string[] = ['main', 'master', 'develop']): boolean {
+      function isProtectedBranch(
+        branchName: string,
+        protectedBranches: string[] = ['main', 'master', 'develop']
+      ): boolean {
         return protectedBranches.includes(branchName)
       }
 
@@ -115,7 +120,11 @@ describe('Delete Command - Enhanced Coverage', () => {
       async function isActiveBranch(branchName: string): Promise<boolean> {
         try {
           const { stdout } = await execa('git', ['branch'])
-          const activeBranch = stdout.split('\n').find(line => line.startsWith('*'))?.replace('*', '').trim()
+          const activeBranch = stdout
+            .split('\n')
+            .find(line => line.startsWith('*'))
+            ?.replace('*', '')
+            .trim()
           return activeBranch === branchName
         } catch {
           return false
@@ -135,7 +144,8 @@ describe('Delete Command - Enhanced Coverage', () => {
       async function getMergedBranches(): Promise<string[]> {
         try {
           const { stdout } = await execa('git', ['branch', '--merged'])
-          return stdout.split('\n')
+          return stdout
+            .split('\n')
             .map(branch => branch.replace(/^\*?\s+/, '').trim())
             .filter(branch => branch && !branch.startsWith('*'))
         } catch {
@@ -157,8 +167,8 @@ describe('Delete Command - Enhanced Coverage', () => {
         github: {
           type: 'issue',
           title: 'Test issue',
-          url: 'https://github.com/test/repo/issues/123'
-        }
+          url: 'https://github.com/test/repo/issues/123',
+        },
       }
 
       mockPath.join.mockReturnValue('/path/to/worktree/.maestro-metadata.json')
@@ -224,12 +234,12 @@ describe('Delete Command - Enhanced Coverage', () => {
 
       async function cleanupTmuxSession(branchName: string): Promise<void> {
         const sessionName = branchName.replace(/[^a-zA-Z0-9_-]/g, '-')
-        
+
         try {
           // セッションの存在確認
           const { stdout } = await execa('tmux', ['list-sessions', '-F', '#{session_name}'])
           const sessions = stdout.split('\n').filter(s => s.trim())
-          
+
           if (sessions.includes(sessionName)) {
             await execa('tmux', ['kill-session', '-t', sessionName])
             console.log(`tmuxセッション '${sessionName}' を終了しました`)
@@ -240,7 +250,7 @@ describe('Delete Command - Enhanced Coverage', () => {
       }
 
       await cleanupTmuxSession('feature/test')
-      
+
       expect(mockExeca).toHaveBeenCalledWith('tmux', ['list-sessions', '-F', '#{session_name}'])
       expect(mockExeca).toHaveBeenCalledWith('tmux', ['kill-session', '-t', 'feature-test'])
     })
@@ -250,11 +260,11 @@ describe('Delete Command - Enhanced Coverage', () => {
 
       async function cleanupTmuxSession(branchName: string): Promise<void> {
         const sessionName = branchName.replace(/[^a-zA-Z0-9_-]/g, '-')
-        
+
         try {
           const { stdout } = await execa('tmux', ['list-sessions', '-F', '#{session_name}'])
           const sessions = stdout.split('\n').filter(s => s.trim())
-          
+
           if (sessions.includes(sessionName)) {
             await execa('tmux', ['kill-session', '-t', sessionName])
           }
@@ -264,7 +274,7 @@ describe('Delete Command - Enhanced Coverage', () => {
       }
 
       await cleanupTmuxSession('non-existent')
-      
+
       expect(mockExeca).toHaveBeenCalledWith('tmux', ['list-sessions', '-F', '#{session_name}'])
       expect(mockExeca).toHaveBeenCalledTimes(1)
     })
@@ -295,11 +305,11 @@ describe('Delete Command - Enhanced Coverage', () => {
           // 未コミット変更をチェック
           const { stdout } = await execa('git', ['status', '--porcelain'], { cwd: worktreePath })
           const hasChanges = stdout.trim().length > 0
-          
+
           if (hasChanges) {
             console.warn('未コミットの変更があります。強制削除します。')
           }
-          
+
           await execa('git', ['worktree', 'remove', '--force', worktreePath])
           return true
         } catch {
@@ -309,7 +319,12 @@ describe('Delete Command - Enhanced Coverage', () => {
 
       const success = await forceDeleteWorktree('/path/to/worktree')
       expect(success).toBe(true)
-      expect(mockExeca).toHaveBeenCalledWith('git', ['worktree', 'remove', '--force', '/path/to/worktree'])
+      expect(mockExeca).toHaveBeenCalledWith('git', [
+        'worktree',
+        'remove',
+        '--force',
+        '/path/to/worktree',
+      ])
     })
 
     it('should handle force deletion failure', async () => {
@@ -388,7 +403,10 @@ describe('Delete Command - Enhanced Coverage', () => {
     it('should delete local branch', async () => {
       mockExeca.mockResolvedValue({ stdout: 'Deleted branch feature-test' })
 
-      async function deleteLocalBranch(branchName: string, force: boolean = false): Promise<boolean> {
+      async function deleteLocalBranch(
+        branchName: string,
+        force: boolean = false
+      ): Promise<boolean> {
         try {
           const deleteFlag = force ? '-D' : '-d'
           await execa('git', ['branch', deleteFlag, branchName])
@@ -406,7 +424,10 @@ describe('Delete Command - Enhanced Coverage', () => {
     it('should force delete unmerged branch', async () => {
       mockExeca.mockResolvedValue({ stdout: 'Deleted branch feature-test' })
 
-      async function deleteLocalBranch(branchName: string, force: boolean = false): Promise<boolean> {
+      async function deleteLocalBranch(
+        branchName: string,
+        force: boolean = false
+      ): Promise<boolean> {
         try {
           const deleteFlag = force ? '-D' : '-d'
           await execa('git', ['branch', deleteFlag, branchName])
@@ -424,7 +445,10 @@ describe('Delete Command - Enhanced Coverage', () => {
     it('should handle branch deletion failure', async () => {
       mockExeca.mockRejectedValue(new Error('Branch not found'))
 
-      async function deleteLocalBranch(branchName: string, force: boolean = false): Promise<boolean> {
+      async function deleteLocalBranch(
+        branchName: string,
+        force: boolean = false
+      ): Promise<boolean> {
         try {
           const deleteFlag = force ? '-D' : '-d'
           await execa('git', ['branch', deleteFlag, branchName])
@@ -494,7 +518,11 @@ describe('Delete Command - Enhanced Coverage', () => {
     it('should execute beforeDelete hook', async () => {
       mockExeca.mockResolvedValue({ stdout: 'Hook executed' })
 
-      async function executeBeforeDeleteHook(hook: string, branchName: string, worktreePath: string): Promise<boolean> {
+      async function executeBeforeDeleteHook(
+        hook: string,
+        branchName: string,
+        worktreePath: string
+      ): Promise<boolean> {
         try {
           await execa('sh', ['-c', hook], {
             cwd: worktreePath,
@@ -510,7 +538,11 @@ describe('Delete Command - Enhanced Coverage', () => {
         }
       }
 
-      const success = await executeBeforeDeleteHook('echo "Cleaning up"', 'feature-test', '/path/to/worktree')
+      const success = await executeBeforeDeleteHook(
+        'echo "Cleaning up"',
+        'feature-test',
+        '/path/to/worktree'
+      )
       expect(success).toBe(true)
       expect(mockExeca).toHaveBeenCalledWith('sh', ['-c', 'echo "Cleaning up"'], {
         cwd: '/path/to/worktree',
@@ -524,7 +556,11 @@ describe('Delete Command - Enhanced Coverage', () => {
     it('should handle hook execution failure', async () => {
       mockExeca.mockRejectedValue(new Error('Hook failed'))
 
-      async function executeBeforeDeleteHook(hook: string, branchName: string, worktreePath: string): Promise<boolean> {
+      async function executeBeforeDeleteHook(
+        hook: string,
+        branchName: string,
+        worktreePath: string
+      ): Promise<boolean> {
         try {
           await execa('sh', ['-c', hook], {
             cwd: worktreePath,

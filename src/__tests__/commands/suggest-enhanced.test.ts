@@ -27,7 +27,7 @@ describe('Suggest Command - Enhanced Coverage', () => {
         // Git branch naming rules
         const invalidChars = /[~^:\s\[\]?*\\]/
         const invalidPatterns = /^[.-]|[.-]$|\.\.|\/$|@\{/
-        
+
         return !invalidChars.test(name) && !invalidPatterns.test(name) && name.length > 0
       }
 
@@ -134,15 +134,21 @@ docs: update API documentation
         try {
           const { stdout } = await execa('git', ['log', '--pretty=format:%s', '-n', '10'])
           const commits = stdout.split('\n').filter(line => line.trim())
-          
+
           return commits
             .map(commit => {
               const match = commit.match(/^(feat|fix|docs|chore|style|refactor|test):\s*(.+)/)
               if (match) {
                 const [, type, description] = match
-                return `${type}/${description.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')}`
+                return `${type}/${description
+                  .toLowerCase()
+                  .replace(/[^a-z0-9]+/g, '-')
+                  .replace(/^-+|-+$/g, '')}`
               }
-              return commit.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
+              return commit
+                .toLowerCase()
+                .replace(/[^a-z0-9]+/g, '-')
+                .replace(/^-+|-+$/g, '')
             })
             .slice(0, limit)
         } catch {
@@ -154,7 +160,7 @@ docs: update API documentation
       expect(suggestions).toEqual([
         'feat/add-user-authentication',
         'fix/resolve-login-issues',
-        'docs/update-api-documentation'
+        'docs/update-api-documentation',
       ])
     })
 
@@ -172,9 +178,9 @@ tests/auth.test.ts
         try {
           const { stdout } = await execa('git', ['diff', '--name-only', 'HEAD~5..HEAD'])
           const files = stdout.split('\n').filter(line => line.trim())
-          
+
           const suggestions = new Set<string>()
-          
+
           for (const file of files) {
             // Extract directory-based suggestions
             const parts = file.split('/')
@@ -184,14 +190,14 @@ tests/auth.test.ts
                 suggestions.add(`feature/${dir}`)
               }
             }
-            
+
             // Extract feature-based suggestions
             if (file.includes('auth')) suggestions.add('feature/authentication')
             if (file.includes('api')) suggestions.add('feature/api')
             if (file.includes('test')) suggestions.add('test/coverage')
             if (file.includes('doc')) suggestions.add('docs/update')
           }
-          
+
           return Array.from(suggestions).slice(0, 5)
         } catch {
           return []
@@ -205,25 +211,37 @@ tests/auth.test.ts
     })
 
     it('should suggest branches based on current context', () => {
-      function suggestContextualBranches(currentBranch: string, uncommittedFiles: string[]): string[] {
+      function suggestContextualBranches(
+        currentBranch: string,
+        uncommittedFiles: string[]
+      ): string[] {
         const suggestions: string[] = []
-        
+
         // Based on current branch
         if (currentBranch === 'main' || currentBranch === 'master') {
           suggestions.push('feature/new-feature', 'bugfix/fix-issue')
         } else if (currentBranch.startsWith('feature/')) {
-          suggestions.push(`${currentBranch}-enhancement`, `test/${currentBranch.replace('feature/', '')}`)
+          suggestions.push(
+            `${currentBranch}-enhancement`,
+            `test/${currentBranch.replace('feature/', '')}`
+          )
         }
-        
+
         // Based on uncommitted files
-        const hasTests = uncommittedFiles.some(file => file.includes('test') || file.includes('spec'))
-        const hasDocs = uncommittedFiles.some(file => file.includes('doc') || file.includes('readme'))
-        const hasStyles = uncommittedFiles.some(file => file.includes('.css') || file.includes('.scss'))
-        
+        const hasTests = uncommittedFiles.some(
+          file => file.includes('test') || file.includes('spec')
+        )
+        const hasDocs = uncommittedFiles.some(
+          file => file.includes('doc') || file.includes('readme')
+        )
+        const hasStyles = uncommittedFiles.some(
+          file => file.includes('.css') || file.includes('.scss')
+        )
+
         if (hasTests) suggestions.push('test/add-coverage')
         if (hasDocs) suggestions.push('docs/update')
         if (hasStyles) suggestions.push('style/ui-improvements')
-        
+
         return suggestions.slice(0, 5)
       }
 
@@ -239,20 +257,29 @@ tests/auth.test.ts
       const mockIssues = [
         { number: 123, title: 'Add user authentication', labels: [{ name: 'enhancement' }] },
         { number: 124, title: 'Fix login bug', labels: [{ name: 'bug' }] },
-        { number: 125, title: 'Update documentation', labels: [{ name: 'documentation' }] }
+        { number: 125, title: 'Update documentation', labels: [{ name: 'documentation' }] },
       ]
 
       mockExeca.mockResolvedValue({ stdout: JSON.stringify(mockIssues) })
 
-      async function fetchGitHubIssues(limit: number = 10): Promise<Array<{ number: number; title: string; labels: string[] }>> {
+      async function fetchGitHubIssues(
+        limit: number = 10
+      ): Promise<Array<{ number: number; title: string; labels: string[] }>> {
         try {
-          const { stdout } = await execa('gh', ['issue', 'list', '--json', 'number,title,labels', '--limit', limit.toString()])
+          const { stdout } = await execa('gh', [
+            'issue',
+            'list',
+            '--json',
+            'number,title,labels',
+            '--limit',
+            limit.toString(),
+          ])
           const issues = JSON.parse(stdout)
-          
+
           return issues.map((issue: any) => ({
             number: issue.number,
             title: issue.title,
-            labels: issue.labels?.map((l: any) => l.name) || []
+            labels: issue.labels?.map((l: any) => l.name) || [],
           }))
         } catch {
           return []
@@ -269,9 +296,18 @@ tests/auth.test.ts
     it('should handle GitHub CLI not available', async () => {
       mockExeca.mockRejectedValue(new Error('gh: command not found'))
 
-      async function fetchGitHubIssues(limit: number = 10): Promise<Array<{ number: number; title: string; labels: string[] }>> {
+      async function fetchGitHubIssues(
+        limit: number = 10
+      ): Promise<Array<{ number: number; title: string; labels: string[] }>> {
         try {
-          const { stdout } = await execa('gh', ['issue', 'list', '--json', 'number,title,labels', '--limit', limit.toString()])
+          const { stdout } = await execa('gh', [
+            'issue',
+            'list',
+            '--json',
+            'number,title,labels',
+            '--limit',
+            limit.toString(),
+          ])
           return JSON.parse(stdout)
         } catch {
           return []
@@ -283,31 +319,39 @@ tests/auth.test.ts
     })
 
     it('should convert issues to branch suggestions', () => {
-      function issueToBranchName(issue: { number: number; title: string; labels: string[] }): string {
+      function issueToBranchName(issue: {
+        number: number
+        title: string
+        labels: string[]
+      }): string {
         const sanitizedTitle = issue.title
           .toLowerCase()
           .replace(/[^a-z0-9]+/g, '-')
           .replace(/^-+|-+$/g, '')
           .substring(0, 30)
-        
-        const prefix = issue.labels.includes('bug') ? 'bugfix' :
-                     issue.labels.includes('enhancement') ? 'feature' :
-                     issue.labels.includes('documentation') ? 'docs' : 'issue'
-        
+
+        const prefix = issue.labels.includes('bug')
+          ? 'bugfix'
+          : issue.labels.includes('enhancement')
+            ? 'feature'
+            : issue.labels.includes('documentation')
+              ? 'docs'
+              : 'issue'
+
         return `${prefix}-${issue.number}-${sanitizedTitle}`
       }
 
       const issues = [
         { number: 123, title: 'Add User Authentication', labels: ['enhancement'] },
         { number: 124, title: 'Fix Login Bug', labels: ['bug'] },
-        { number: 125, title: 'Update API Documentation', labels: ['documentation'] }
+        { number: 125, title: 'Update API Documentation', labels: ['documentation'] },
       ]
 
       const branches = issues.map(issueToBranchName)
       expect(branches).toEqual([
         'feature-123-add-user-authentication',
         'bugfix-124-fix-login-bug',
-        'docs-125-update-api-documentation'
+        'docs-125-update-api-documentation',
       ])
     })
   })
@@ -316,7 +360,7 @@ tests/auth.test.ts
     it('should suggest branches based on project templates', () => {
       function suggestFromTemplates(templates: string[], context: string): string[] {
         const suggestions: string[] = []
-        
+
         for (const template of templates) {
           switch (template) {
             case 'feature':
@@ -333,13 +377,13 @@ tests/auth.test.ts
               break
           }
         }
-        
+
         return suggestions.slice(0, 8)
       }
 
       const templates = ['feature', 'bugfix', 'docs']
       const suggestions = suggestFromTemplates(templates, 'auth')
-      
+
       expect(suggestions).toContain('feature/auth')
       expect(suggestions).toContain('bugfix/auth')
       expect(suggestions).toContain('docs/auth')
@@ -350,7 +394,7 @@ tests/auth.test.ts
         if (templates.length === 0) {
           return [`feature/${context}`, `fix/${context}`, `docs/${context}`]
         }
-        
+
         return templates.map(template => `${template}/${context}`)
       }
 
@@ -363,11 +407,9 @@ tests/auth.test.ts
     it('should filter suggestions by keyword', () => {
       function filterSuggestions(suggestions: string[], keyword: string): string[] {
         if (!keyword.trim()) return suggestions
-        
+
         const lowerKeyword = keyword.toLowerCase()
-        return suggestions.filter(suggestion => 
-          suggestion.toLowerCase().includes(lowerKeyword)
-        )
+        return suggestions.filter(suggestion => suggestion.toLowerCase().includes(lowerKeyword))
       }
 
       const suggestions = [
@@ -375,7 +417,7 @@ tests/auth.test.ts
         'feature/user-management',
         'bugfix/auth-error',
         'docs/authentication',
-        'test/auth-validation'
+        'test/auth-validation',
       ]
 
       const filtered = filterSuggestions(suggestions, 'auth')
@@ -383,20 +425,20 @@ tests/auth.test.ts
         'feature/auth',
         'bugfix/auth-error',
         'docs/authentication',
-        'test/auth-validation'
+        'test/auth-validation',
       ])
     })
 
     it('should rank suggestions by relevance', () => {
       function rankSuggestions(suggestions: string[], keyword: string): string[] {
         if (!keyword.trim()) return suggestions
-        
+
         const lowerKeyword = keyword.toLowerCase()
-        
+
         return suggestions
           .map(suggestion => ({
             name: suggestion,
-            score: calculateRelevanceScore(suggestion, lowerKeyword)
+            score: calculateRelevanceScore(suggestion, lowerKeyword),
           }))
           .sort((a, b) => b.score - a.score)
           .map(item => item.name)
@@ -405,21 +447,16 @@ tests/auth.test.ts
       function calculateRelevanceScore(suggestion: string, keyword: string): number {
         const lower = suggestion.toLowerCase()
         let score = 0
-        
+
         if (lower.startsWith(keyword)) score += 10
         if (lower.includes(`/${keyword}`)) score += 8
         if (lower.includes(`-${keyword}`)) score += 6
         if (lower.includes(keyword)) score += 4
-        
+
         return score
       }
 
-      const suggestions = [
-        'docs/auth-guide',
-        'auth/feature',
-        'feature/auth',
-        'test/user-auth'
-      ]
+      const suggestions = ['docs/auth-guide', 'auth/feature', 'feature/auth', 'test/user-auth']
 
       const ranked = rankSuggestions(suggestions, 'auth')
       expect(ranked[0]).toBe('auth/feature') // starts with 'auth'
@@ -435,14 +472,14 @@ tests/auth.test.ts
       async function createTempSuggestionFile(suggestions: string[]): Promise<string> {
         const tempFile = path.join('/tmp', `maestro-suggestions-${Date.now()}.txt`)
         const content = suggestions.join('\n')
-        
+
         await fs.writeFile(tempFile, content)
         return tempFile
       }
 
       const suggestions = ['feature/auth', 'bugfix/login']
       const tempFile = await createTempSuggestionFile(suggestions)
-      
+
       expect(tempFile).toBe('/tmp/maestro-suggestions-123.txt')
       expect(mockFs.writeFile).toHaveBeenCalledWith(
         '/tmp/maestro-suggestions-123.txt',
@@ -487,7 +524,7 @@ tests/auth.test.ts
       async function launchFzfSelection(suggestions: string[]): Promise<string | null> {
         try {
           const { stdout } = await execa('fzf', ['--prompt', 'Select branch: '], {
-            input: suggestions.join('\n')
+            input: suggestions.join('\n'),
           })
           return stdout.trim()
         } catch {
@@ -498,7 +535,7 @@ tests/auth.test.ts
       const selected = await launchFzfSelection(['feature/auth', 'bugfix/login'])
       expect(selected).toBe('feature/auth')
       expect(mockExeca).toHaveBeenCalledWith('fzf', ['--prompt', 'Select branch: '], {
-        input: 'feature/auth\nbugfix/login'
+        input: 'feature/auth\nbugfix/login',
       })
     })
 
@@ -508,7 +545,7 @@ tests/auth.test.ts
       async function launchFzfSelection(suggestions: string[]): Promise<string | null> {
         try {
           const { stdout } = await execa('fzf', ['--prompt', 'Select branch: '], {
-            input: suggestions.join('\n')
+            input: suggestions.join('\n'),
           })
           return stdout.trim()
         } catch {
@@ -526,7 +563,7 @@ tests/auth.test.ts
       async function launchFzfSelection(suggestions: string[]): Promise<string | null> {
         try {
           const { stdout } = await execa('fzf', ['--prompt', 'Select branch: '], {
-            input: suggestions.join('\n')
+            input: suggestions.join('\n'),
           })
           return stdout.trim()
         } catch (error: any) {
@@ -544,18 +581,21 @@ tests/auth.test.ts
 
   describe('Review mode utilities', () => {
     it('should display suggestions in review mode', () => {
-      function displaySuggestionsReview(suggestions: string[], context: Record<string, any>): string {
+      function displaySuggestionsReview(
+        suggestions: string[],
+        context: Record<string, any>
+      ): string {
         let output = 'Branch Suggestions:\n\n'
-        
+
         suggestions.forEach((suggestion, index) => {
           output += `${index + 1}. ${suggestion}\n`
         })
-        
+
         output += '\nContext:\n'
         output += `- Current branch: ${context.currentBranch || 'unknown'}\n`
         output += `- Uncommitted files: ${context.uncommittedFiles?.length || 0}\n`
         output += `- Recent commits: ${context.recentCommits?.length || 0}\n`
-        
+
         return output
       }
 
@@ -563,7 +603,7 @@ tests/auth.test.ts
       const context = {
         currentBranch: 'main',
         uncommittedFiles: ['src/auth.ts'],
-        recentCommits: ['feat: add login', 'fix: auth bug']
+        recentCommits: ['feat: add login', 'fix: auth bug'],
       }
 
       const review = displaySuggestionsReview(suggestions, context)
@@ -574,9 +614,12 @@ tests/auth.test.ts
     })
 
     it('should handle empty context in review mode', () => {
-      function displaySuggestionsReview(suggestions: string[], context: Record<string, any>): string {
+      function displaySuggestionsReview(
+        suggestions: string[],
+        context: Record<string, any>
+      ): string {
         let output = 'Branch Suggestions:\n\n'
-        
+
         if (suggestions.length === 0) {
           output += 'No suggestions available.\n'
         } else {
@@ -584,7 +627,7 @@ tests/auth.test.ts
             output += `${index + 1}. ${suggestion}\n`
           })
         }
-        
+
         return output
       }
 

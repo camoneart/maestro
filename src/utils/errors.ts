@@ -137,11 +137,7 @@ export class ErrorFactory {
     )
   }
 
-  static externalToolNotFound(
-    tool: string,
-    installCommand?: string,
-    url?: string
-  ): MaestroError {
+  static externalToolNotFound(tool: string, installCommand?: string, url?: string): MaestroError {
     const suggestions: SolutionSuggestion[] = []
 
     if (installCommand) {

@@ -30,7 +30,7 @@ describe('Create Command - Enhanced Coverage', () => {
       branchName: string
     } {
       const issueMatch = input.match(/^#?(\d+)$/) || input.match(/^issue-(\d+)$/i)
-      
+
       if (issueMatch) {
         const issueNumber = issueMatch[1]
         return {
@@ -39,7 +39,7 @@ describe('Create Command - Enhanced Coverage', () => {
           branchName: `issue-${issueNumber}`,
         }
       }
-      
+
       return {
         isIssue: false,
         branchName: input,
@@ -96,7 +96,7 @@ describe('Create Command - Enhanced Coverage', () => {
         labels: [{ name: 'bug' }, { name: 'enhancement' }],
         assignees: [{ login: 'assignee1' }],
         milestone: { title: 'v1.0' },
-        url: 'https://github.com/test/repo/pull/123'
+        url: 'https://github.com/test/repo/pull/123',
       }
 
       mockExeca.mockResolvedValueOnce({ stdout: JSON.stringify(mockPrData) })
@@ -106,8 +106,11 @@ describe('Create Command - Enhanced Coverage', () => {
         try {
           try {
             const { stdout } = await execa('gh', [
-              'pr', 'view', issueNumber, '--json',
-              'number,title,body,author,labels,assignees,milestone,url'
+              'pr',
+              'view',
+              issueNumber,
+              '--json',
+              'number,title,body,author,labels,assignees,milestone,url',
             ])
             const pr = JSON.parse(stdout)
             return {
@@ -137,7 +140,7 @@ describe('Create Command - Enhanced Coverage', () => {
         labels: ['bug', 'enhancement'],
         assignees: ['assignee1'],
         milestone: 'v1.0',
-        url: 'https://github.com/test/repo/pull/123'
+        url: 'https://github.com/test/repo/pull/123',
       })
     })
 
@@ -147,8 +150,22 @@ describe('Create Command - Enhanced Coverage', () => {
       async function fetchGitHubMetadata(issueNumber: string) {
         try {
           try {
-            await execa('gh', ['pr', 'view', issueNumber, '--json', 'number,title,body,author,labels,assignees,milestone,url'])
-            return { type: 'pr' as const, title: '', body: '', author: '', labels: [], assignees: [], url: '' }
+            await execa('gh', [
+              'pr',
+              'view',
+              issueNumber,
+              '--json',
+              'number,title,body,author,labels,assignees,milestone,url',
+            ])
+            return {
+              type: 'pr' as const,
+              title: '',
+              body: '',
+              author: '',
+              labels: [],
+              assignees: [],
+              url: '',
+            }
           } catch {
             throw new Error('Failed')
           }
@@ -171,7 +188,13 @@ describe('Create Command - Enhanced Coverage', () => {
 
       async function fetchGitHubMetadata(issueNumber: string) {
         try {
-          const { stdout } = await execa('gh', ['pr', 'view', issueNumber, '--json', 'number,title,body,author,labels,assignees,milestone,url'])
+          const { stdout } = await execa('gh', [
+            'pr',
+            'view',
+            issueNumber,
+            '--json',
+            'number,title,body,author,labels,assignees,milestone,url',
+          ])
           const pr = JSON.parse(stdout)
           return {
             type: 'pr' as const,
@@ -197,7 +220,7 @@ describe('Create Command - Enhanced Coverage', () => {
         labels: [],
         assignees: [],
         milestone: undefined,
-        url: undefined
+        url: undefined,
       })
     })
   })
@@ -215,7 +238,7 @@ describe('Create Command - Enhanced Coverage', () => {
           worktreePath,
           ...metadata,
         }
-        
+
         try {
           await fs.writeFile(metadataPath, JSON.stringify(metadataContent, null, 2))
         } catch {
@@ -223,7 +246,9 @@ describe('Create Command - Enhanced Coverage', () => {
         }
       }
 
-      await expect(saveWorktreeMetadata('/path/to/worktree', 'test-branch', { template: 'feature' })).resolves.toBeUndefined()
+      await expect(
+        saveWorktreeMetadata('/path/to/worktree', 'test-branch', { template: 'feature' })
+      ).resolves.toBeUndefined()
       expect(mockFs.writeFile).toHaveBeenCalledWith(
         '/path/to/worktree/.maestro-metadata.json',
         expect.stringContaining('test-branch')
@@ -242,7 +267,7 @@ describe('Create Command - Enhanced Coverage', () => {
           worktreePath,
           ...metadata,
         }
-        
+
         try {
           await fs.writeFile(metadataPath, JSON.stringify(metadataContent, null, 2))
         } catch {
@@ -250,7 +275,9 @@ describe('Create Command - Enhanced Coverage', () => {
         }
       }
 
-      await expect(saveWorktreeMetadata('/path/to/worktree', 'test-branch', {})).resolves.toBeUndefined()
+      await expect(
+        saveWorktreeMetadata('/path/to/worktree', 'test-branch', {})
+      ).resolves.toBeUndefined()
     })
   })
 
@@ -263,7 +290,7 @@ describe('Create Command - Enhanced Coverage', () => {
 
       async function createTmuxSession(branchName: string, worktreePath: string, config: any) {
         const sessionName = branchName.replace(/[^a-zA-Z0-9_-]/g, '-')
-        
+
         try {
           try {
             await execa('tmux', ['has-session', '-t', sessionName])
@@ -272,10 +299,10 @@ describe('Create Command - Enhanced Coverage', () => {
           } catch {
             // セッションが存在しない場合は作成
           }
-          
+
           await execa('tmux', ['new-session', '-d', '-s', sessionName, '-c', worktreePath])
           await execa('tmux', ['rename-window', '-t', sessionName, branchName])
-          
+
           console.log(`✨ tmuxセッション '${sessionName}' を開始しました`)
         } catch (error) {
           console.error(`tmuxセッションの作成に失敗しました: ${error}`)
@@ -283,10 +310,22 @@ describe('Create Command - Enhanced Coverage', () => {
       }
 
       await createTmuxSession('feature/test', '/path/to/worktree', {})
-      
+
       expect(mockExeca).toHaveBeenCalledWith('tmux', ['has-session', '-t', 'feature-test'])
-      expect(mockExeca).toHaveBeenCalledWith('tmux', ['new-session', '-d', '-s', 'feature-test', '-c', '/path/to/worktree'])
-      expect(mockExeca).toHaveBeenCalledWith('tmux', ['rename-window', '-t', 'feature-test', 'feature/test'])
+      expect(mockExeca).toHaveBeenCalledWith('tmux', [
+        'new-session',
+        '-d',
+        '-s',
+        'feature-test',
+        '-c',
+        '/path/to/worktree',
+      ])
+      expect(mockExeca).toHaveBeenCalledWith('tmux', [
+        'rename-window',
+        '-t',
+        'feature-test',
+        'feature/test',
+      ])
     })
 
     it('should handle existing tmux session', async () => {
@@ -294,7 +333,7 @@ describe('Create Command - Enhanced Coverage', () => {
 
       async function createTmuxSession(branchName: string, worktreePath: string, config: any) {
         const sessionName = branchName.replace(/[^a-zA-Z0-9_-]/g, '-')
-        
+
         try {
           await execa('tmux', ['has-session', '-t', sessionName])
           console.log(`tmuxセッション '${sessionName}' は既に存在します`)
@@ -305,7 +344,7 @@ describe('Create Command - Enhanced Coverage', () => {
       }
 
       await createTmuxSession('test-branch', '/path/to/worktree', {})
-      
+
       expect(mockExeca).toHaveBeenCalledWith('tmux', ['has-session', '-t', 'test-branch'])
       expect(mockExeca).toHaveBeenCalledTimes(1)
     })
@@ -320,7 +359,7 @@ describe('Create Command - Enhanced Coverage', () => {
 
       async function createTmuxSession(branchName: string, worktreePath: string, config: any) {
         const sessionName = branchName.replace(/[^a-zA-Z0-9_-]/g, '-')
-        
+
         try {
           try {
             await execa('tmux', ['has-session', '-t', sessionName])
@@ -328,13 +367,13 @@ describe('Create Command - Enhanced Coverage', () => {
           } catch {
             // セッション作成
           }
-          
+
           await execa('tmux', ['new-session', '-d', '-s', sessionName, '-c', worktreePath])
           await execa('tmux', ['rename-window', '-t', sessionName, branchName])
-          
+
           if (config.claude?.autoStart) {
             await execa('tmux', ['send-keys', '-t', sessionName, 'claude', 'Enter'])
-            
+
             if (config.claude?.initialCommands) {
               for (const cmd of config.claude.initialCommands) {
                 await execa('tmux', ['send-keys', '-t', sessionName, cmd, 'Enter'])
@@ -349,12 +388,18 @@ describe('Create Command - Enhanced Coverage', () => {
       await createTmuxSession('test', '/path', {
         claude: {
           autoStart: true,
-          initialCommands: ['echo "hello"']
-        }
+          initialCommands: ['echo "hello"'],
+        },
       })
-      
+
       expect(mockExeca).toHaveBeenCalledWith('tmux', ['send-keys', '-t', 'test', 'claude', 'Enter'])
-      expect(mockExeca).toHaveBeenCalledWith('tmux', ['send-keys', '-t', 'test', 'echo "hello"', 'Enter'])
+      expect(mockExeca).toHaveBeenCalledWith('tmux', [
+        'send-keys',
+        '-t',
+        'test',
+        'echo "hello"',
+        'Enter',
+      ])
     })
   })
 
@@ -363,7 +408,7 @@ describe('Create Command - Enhanced Coverage', () => {
       mockPath.join
         .mockReturnValueOnce('/root/CLAUDE.md')
         .mockReturnValueOnce('/worktree/CLAUDE.md')
-      
+
       mockFs.access.mockResolvedValue(undefined)
       mockFs.symlink.mockResolvedValue(undefined)
       mockPath.relative.mockReturnValue('../CLAUDE.md')
@@ -372,10 +417,15 @@ describe('Create Command - Enhanced Coverage', () => {
         const claudeMode = config.claude?.markdownMode || 'shared'
         const rootClaudePath = path.join(process.cwd(), 'CLAUDE.md')
         const worktreeClaudePath = path.join(worktreePath, 'CLAUDE.md')
-        
+
         try {
           if (claudeMode === 'shared') {
-            if (await fs.access(rootClaudePath).then(() => true).catch(() => false)) {
+            if (
+              await fs
+                .access(rootClaudePath)
+                .then(() => true)
+                .catch(() => false)
+            ) {
               await fs.symlink(path.relative(worktreePath, rootClaudePath), worktreeClaudePath)
               console.log('✨ CLAUDE.md を共有モードで設定しました')
             }
@@ -386,7 +436,7 @@ describe('Create Command - Enhanced Coverage', () => {
       }
 
       await handleClaudeMarkdown('/worktree', { claude: { markdownMode: 'shared' } })
-      
+
       expect(mockFs.symlink).toHaveBeenCalledWith('../CLAUDE.md', '/worktree/CLAUDE.md')
     })
 
@@ -398,7 +448,7 @@ describe('Create Command - Enhanced Coverage', () => {
 
       async function handleClaudeMarkdown(worktreePath: string, config: any) {
         const claudeMode = config.claude?.markdownMode || 'shared'
-        
+
         try {
           if (claudeMode === 'split') {
             const worktreeClaudePath = path.join(worktreePath, 'CLAUDE.md')
@@ -422,7 +472,7 @@ Add specific instructions for this worktree here.
       }
 
       await handleClaudeMarkdown('/worktree', { claude: { markdownMode: 'split' } })
-      
+
       expect(mockFs.writeFile).toHaveBeenCalledWith(
         '/worktree/CLAUDE.md',
         expect.stringContaining('worktree - Claude Code Instructions')
@@ -436,7 +486,12 @@ Add specific instructions for this worktree here.
       async function handleClaudeMarkdown(worktreePath: string, config: any) {
         try {
           const rootClaudePath = path.join(process.cwd(), 'CLAUDE.md')
-          if (await fs.access(rootClaudePath).then(() => true).catch(() => false)) {
+          if (
+            await fs
+              .access(rootClaudePath)
+              .then(() => true)
+              .catch(() => false)
+          ) {
             // symlink処理
           }
         } catch (error) {
@@ -444,7 +499,9 @@ Add specific instructions for this worktree here.
         }
       }
 
-      await expect(handleClaudeMarkdown('/worktree', { claude: { markdownMode: 'shared' } })).resolves.toBeUndefined()
+      await expect(
+        handleClaudeMarkdown('/worktree', { claude: { markdownMode: 'shared' } })
+      ).resolves.toBeUndefined()
     })
   })
 
@@ -458,9 +515,13 @@ Add specific instructions for this worktree here.
           .substring(0, 30)
       }
 
-      expect(sanitizeTitle('Fix: Bug in User Authentication')).toBe('fix-bug-in-user-authentication')
+      expect(sanitizeTitle('Fix: Bug in User Authentication')).toBe(
+        'fix-bug-in-user-authentication'
+      )
       expect(sanitizeTitle('Feature/Add New Dashboard UI')).toBe('feature-add-new-dashboard-ui')
-      expect(sanitizeTitle('Update documentation for API v2.0')).toBe('update-documentation-for-api-v')
+      expect(sanitizeTitle('Update documentation for API v2.0')).toBe(
+        'update-documentation-for-api-v'
+      )
       expect(sanitizeTitle('')).toBe('')
       expect(sanitizeTitle('   Special!@#$%Characters   ')).toBe('special-characters')
     })
@@ -474,7 +535,8 @@ Add specific instructions for this worktree here.
           .substring(0, 30)
       }
 
-      const longTitle = 'This is a very long title that exceeds the maximum length allowed for branch names'
+      const longTitle =
+        'This is a very long title that exceeds the maximum length allowed for branch names'
       const result = sanitizeTitle(longTitle)
       expect(result).toBe('this-is-a-very-long-title-that')
       expect(result.length).toBe(30)
@@ -483,9 +545,7 @@ Add specific instructions for this worktree here.
 
   describe('Environment setup utilities', () => {
     it('should copy sync files successfully', async () => {
-      mockPath.join
-        .mockReturnValueOnce('/root/.env')
-        .mockReturnValueOnce('/worktree/.env')
+      mockPath.join.mockReturnValueOnce('/root/.env').mockReturnValueOnce('/worktree/.env')
       mockFs.copyFile.mockResolvedValue(undefined)
 
       async function copySyncFiles(worktreePath: string, syncFiles: string[]) {
@@ -502,7 +562,7 @@ Add specific instructions for this worktree here.
       }
 
       await copySyncFiles('/worktree', ['.env', '.env.local'])
-      
+
       expect(mockFs.copyFile).toHaveBeenCalledWith('/root/.env', '/worktree/.env')
     })
 

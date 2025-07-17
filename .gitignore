@@ -101,3 +101,6 @@ _features/
 
 # article
 _articles/
+
+# Public assets (keep in git but exclude from npm)
+# public/

@@ -449,7 +449,12 @@ export const snapshotCommand = new Command('snapshot')
             const snapshot = snapshots.find(s => s.id.startsWith(options.delete!))
 
             if (snapshot) {
-              const fullPath = path.join(process.cwd(), '.maestro', 'snapshots', `${snapshot.id}.json`)
+              const fullPath = path.join(
+                process.cwd(),
+                '.maestro',
+                'snapshots',
+                `${snapshot.id}.json`
+              )
               await fs.unlink(fullPath)
               console.log(chalk.green(`✨ スナップショット '${snapshot.id}' を削除しました`))
             } else {

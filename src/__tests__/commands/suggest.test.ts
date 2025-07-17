@@ -13,8 +13,8 @@ vi.mock('ora', () => ({
   default: vi.fn(() => ({
     start: vi.fn(() => ({ stop: vi.fn() })),
     succeed: vi.fn(),
-    fail: vi.fn()
-  }))
+    fail: vi.fn(),
+  })),
 }))
 
 describe.skip('suggest command', () => {
@@ -31,7 +31,7 @@ describe.skip('suggest command', () => {
     vi.clearAllMocks()
     consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
     consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
-    
+
     // GitWorktreeManagerのモック
     mockGitManager = {
       isGitRepository: vi.fn().mockResolvedValue(true),
@@ -53,7 +53,7 @@ describe.skip('suggest command', () => {
       // execa mock for Claude check
       const { execa } = await import('execa')
       ;(execa as any).mockRejectedValue(new Error('which: claude: not found'))
-      
+
       await suggestCommand.parseAsync(['node', 'suggest'])
 
       expect(consoleErrorSpy).toHaveBeenCalledWith(
@@ -64,7 +64,7 @@ describe.skip('suggest command', () => {
     it('should handle --branch option', async () => {
       const { execa } = await import('execa')
       ;(execa as any).mockRejectedValue(new Error('which: claude: not found'))
-      
+
       await suggestCommand.parseAsync(['node', 'suggest', '--branch'])
 
       expect(consoleErrorSpy).toHaveBeenCalledWith(
@@ -75,7 +75,7 @@ describe.skip('suggest command', () => {
     it('should handle --description option', async () => {
       const { execa } = await import('execa')
       ;(execa as any).mockRejectedValue(new Error('which: claude: not found'))
-      
+
       await suggestCommand.parseAsync(['node', 'suggest', '--description', 'test feature'])
 
       expect(consoleErrorSpy).toHaveBeenCalledWith(
@@ -96,7 +96,7 @@ describe.skip('suggest command', () => {
     it('should handle commit option', async () => {
       const { execa } = await import('execa')
       ;(execa as any).mockRejectedValue(new Error('which: claude: not found'))
-      
+
       await suggestCommand.parseAsync(['node', 'suggest', '--commit'])
 
       expect(consoleErrorSpy).toHaveBeenCalledWith(
@@ -108,14 +108,14 @@ describe.skip('suggest command', () => {
   describe('error handling', () => {
     it('should handle not a git repository', async () => {
       mockGitManager.isGitRepository.mockResolvedValue(false)
-      
+
       vi.spyOn(process, 'exit').mockImplementation((code?: string | number | null) => {
         throw new Error(`Process exited with code ${code}`)
       })
 
-      await expect(
-        suggestCommand.parseAsync(['node', 'suggest'])
-      ).rejects.toThrow('Process exited with code 1')
+      await expect(suggestCommand.parseAsync(['node', 'suggest'])).rejects.toThrow(
+        'Process exited with code 1'
+      )
 
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         chalk.red('エラー: このディレクトリはGitリポジトリではありません')

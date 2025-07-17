@@ -33,7 +33,9 @@ describe('completion command', () => {
     it('should generate fish completion script', async () => {
       await completionCommand.parseAsync(['node', 'completion', 'fish'])
 
-      expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('# maestro fish completion'))
+      expect(consoleLogSpy).toHaveBeenCalledWith(
+        expect.stringContaining('# maestro fish completion')
+      )
       expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('complete -c maestro'))
     })
   })

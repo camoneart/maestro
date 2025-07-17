@@ -21,18 +21,20 @@ describe('Batch Command - Functions Coverage', () => {
   describe('Batch execution utilities', () => {
     it('should validate batch configuration format', () => {
       function isValidBatchConfig(config: any): boolean {
-        return config !== null && 
-               config !== undefined &&
-               typeof config === 'object' &&
-               Array.isArray(config.operations) &&
-               config.operations.length > 0
+        return (
+          config !== null &&
+          config !== undefined &&
+          typeof config === 'object' &&
+          Array.isArray(config.operations) &&
+          config.operations.length > 0
+        )
       }
 
       const validConfig = {
         operations: [
           { type: 'create', branchName: 'feature-1' },
-          { type: 'create', branchName: 'feature-2' }
-        ]
+          { type: 'create', branchName: 'feature-2' },
+        ],
       }
 
       const invalidConfig1 = null
@@ -47,10 +49,13 @@ describe('Batch Command - Functions Coverage', () => {
 
     it('should generate batch operation summaries', () => {
       function generateOperationSummary(operations: any[]): string {
-        const counts = operations.reduce((acc, op) => {
-          acc[op.type] = (acc[op.type] || 0) + 1
-          return acc
-        }, {} as Record<string, number>)
+        const counts = operations.reduce(
+          (acc, op) => {
+            acc[op.type] = (acc[op.type] || 0) + 1
+            return acc
+          },
+          {} as Record<string, number>
+        )
 
         return Object.entries(counts)
           .map(([type, count]) => `${type}: ${count}`)
@@ -61,7 +66,7 @@ describe('Batch Command - Functions Coverage', () => {
         { type: 'create', branchName: 'feature-1' },
         { type: 'create', branchName: 'feature-2' },
         { type: 'delete', branchName: 'old-feature' },
-        { type: 'create', branchName: 'feature-3' }
+        { type: 'create', branchName: 'feature-3' },
       ]
 
       const summary = generateOperationSummary(operations)
@@ -83,11 +88,14 @@ describe('Batch Command - Functions Coverage', () => {
     })
 
     it('should handle batch progress tracking', () => {
-      function calculateProgress(completed: number, total: number): { percentage: number; status: string } {
+      function calculateProgress(
+        completed: number,
+        total: number
+      ): { percentage: number; status: string } {
         const percentage = Math.round((completed / total) * 100)
-        const status = percentage === 100 ? 'completed' : 
-                      percentage >= 50 ? 'in-progress' : 'starting'
-        
+        const status =
+          percentage === 100 ? 'completed' : percentage >= 50 ? 'in-progress' : 'starting'
+
         return { percentage, status }
       }
 
@@ -116,7 +124,7 @@ describe('Batch Command - Functions Coverage', () => {
         { success: true },
         { success: false, error: 'Branch already exists' },
         { success: true },
-        { success: false, error: 'Permission denied' }
+        { success: false, error: 'Permission denied' },
       ]
 
       const summary = handleBatchFailure(results)
@@ -138,29 +146,31 @@ describe('Batch Command - Functions Coverage', () => {
 
     it('should generate rollback operations', () => {
       function generateRollbackOperations(completedOps: any[]): any[] {
-        return completedOps.map(op => {
-          switch (op.type) {
-            case 'create':
-              return { type: 'delete', branchName: op.branchName }
-            case 'delete':
-              return { type: 'create', branchName: op.branchName, restore: true }
-            default:
-              return null
-          }
-        }).filter(Boolean)
+        return completedOps
+          .map(op => {
+            switch (op.type) {
+              case 'create':
+                return { type: 'delete', branchName: op.branchName }
+              case 'delete':
+                return { type: 'create', branchName: op.branchName, restore: true }
+              default:
+                return null
+            }
+          })
+          .filter(Boolean)
       }
 
       const completedOps = [
         { type: 'create', branchName: 'feature-1' },
         { type: 'create', branchName: 'feature-2' },
-        { type: 'delete', branchName: 'old-feature' }
+        { type: 'delete', branchName: 'old-feature' },
       ]
 
       const rollbackOps = generateRollbackOperations(completedOps)
       expect(rollbackOps).toEqual([
         { type: 'delete', branchName: 'feature-1' },
         { type: 'delete', branchName: 'feature-2' },
-        { type: 'create', branchName: 'old-feature', restore: true }
+        { type: 'create', branchName: 'old-feature', restore: true },
       ])
     })
   })
@@ -176,13 +186,11 @@ describe('Batch Command - Functions Coverage', () => {
 
       const config = {
         name: 'test-batch',
-        operations: [
-          { type: 'create', branchName: 'feature-1' }
-        ]
+        operations: [{ type: 'create', branchName: 'feature-1' }],
       }
 
       await saveBatchConfig(config, 'batch-config.json')
-      
+
       expect(mockFs.writeFile).toHaveBeenCalledWith(
         'batch-config.json',
         JSON.stringify(config, null, 2)
@@ -192,7 +200,7 @@ describe('Batch Command - Functions Coverage', () => {
     it('should load batch configurations', async () => {
       const mockConfig = {
         name: 'test-batch',
-        operations: [{ type: 'create', branchName: 'feature-1' }]
+        operations: [{ type: 'create', branchName: 'feature-1' }],
       }
 
       mockFs.readFile.mockResolvedValue(JSON.stringify(mockConfig))
@@ -234,12 +242,12 @@ describe('Batch Command - Functions Coverage', () => {
           'feature-set': (params: any) => [
             { type: 'create', branchName: `feature/${params.name}-ui` },
             { type: 'create', branchName: `feature/${params.name}-api` },
-            { type: 'create', branchName: `test/${params.name}` }
+            { type: 'create', branchName: `test/${params.name}` },
           ],
           'bugfix-set': (params: any) => [
             { type: 'create', branchName: `bugfix/${params.issue}` },
-            { type: 'create', branchName: `test/fix-${params.issue}` }
-          ]
+            { type: 'create', branchName: `test/fix-${params.issue}` },
+          ],
         }
 
         const templateFn = templates[template as keyof typeof templates]
@@ -250,22 +258,25 @@ describe('Batch Command - Functions Coverage', () => {
       expect(featureOps).toEqual([
         { type: 'create', branchName: 'feature/auth-ui' },
         { type: 'create', branchName: 'feature/auth-api' },
-        { type: 'create', branchName: 'test/auth' }
+        { type: 'create', branchName: 'test/auth' },
       ])
 
       const bugfixOps = expandBatchTemplate('bugfix-set', { issue: '123' })
       expect(bugfixOps).toEqual([
         { type: 'create', branchName: 'bugfix/123' },
-        { type: 'create', branchName: 'test/fix-123' }
+        { type: 'create', branchName: 'test/fix-123' },
       ])
     })
 
     it('should validate template parameters', () => {
-      function validateTemplateParams(template: string, params: Record<string, any>): { valid: boolean; errors: string[] } {
+      function validateTemplateParams(
+        template: string,
+        params: Record<string, any>
+      ): { valid: boolean; errors: string[] } {
         const requirements = {
           'feature-set': ['name'],
           'bugfix-set': ['issue'],
-          'release-set': ['version', 'branch']
+          'release-set': ['version', 'branch'],
         }
 
         const required = requirements[template as keyof typeof requirements] || []
@@ -280,21 +291,24 @@ describe('Batch Command - Functions Coverage', () => {
         return { valid: errors.length === 0, errors }
       }
 
-      expect(validateTemplateParams('feature-set', { name: 'auth' })).toEqual({ valid: true, errors: [] })
-      expect(validateTemplateParams('feature-set', {})).toEqual({ 
-        valid: false, 
-        errors: ['Missing required parameter: name'] 
+      expect(validateTemplateParams('feature-set', { name: 'auth' })).toEqual({
+        valid: true,
+        errors: [],
       })
-      expect(validateTemplateParams('release-set', { version: '1.0' })).toEqual({ 
-        valid: false, 
-        errors: ['Missing required parameter: branch'] 
+      expect(validateTemplateParams('feature-set', {})).toEqual({
+        valid: false,
+        errors: ['Missing required parameter: name'],
+      })
+      expect(validateTemplateParams('release-set', { version: '1.0' })).toEqual({
+        valid: false,
+        errors: ['Missing required parameter: branch'],
       })
     })
   })
 
   describe('Dry run mode', () => {
     it('should simulate batch operations without execution', () => {
-      function simulateBatchExecution(operations: any[]): { 
+      function simulateBatchExecution(operations: any[]): {
         simulated: any[]
         estimatedTime: number
         warnings: string[]
@@ -302,11 +316,11 @@ describe('Batch Command - Functions Coverage', () => {
         const simulated = operations.map(op => ({
           ...op,
           estimatedDuration: op.type === 'create' ? 2000 : 1000,
-          result: 'would-succeed'
+          result: 'would-succeed',
         }))
 
         const estimatedTime = simulated.reduce((total, op) => total + op.estimatedDuration, 0)
-        
+
         const warnings = operations
           .filter(op => op.branchName && op.branchName.length > 50)
           .map(op => `Branch name too long: ${op.branchName}`)
@@ -316,7 +330,7 @@ describe('Batch Command - Functions Coverage', () => {
 
       const operations = [
         { type: 'create', branchName: 'feature-1' },
-        { type: 'delete', branchName: 'old-feature' }
+        { type: 'delete', branchName: 'old-feature' },
       ]
 
       const simulation = simulateBatchExecution(operations)
@@ -329,29 +343,29 @@ describe('Batch Command - Functions Coverage', () => {
       function detectBatchConflicts(operations: any[]): string[] {
         const conflicts: string[] = []
         const branchNames = new Set<string>()
-        
+
         for (const op of operations) {
           if (op.type === 'create' && branchNames.has(op.branchName)) {
             conflicts.push(`Duplicate create operation for branch: ${op.branchName}`)
           }
-          
+
           if (op.type === 'delete' && op.branchName && !branchNames.has(op.branchName)) {
             // This would be detected in actual execution, but we can warn in dry run
             conflicts.push(`Delete operation for potentially non-existent branch: ${op.branchName}`)
           }
-          
+
           if (op.branchName) {
             branchNames.add(op.branchName)
           }
         }
-        
+
         return conflicts
       }
 
       const conflictingOps = [
         { type: 'create', branchName: 'feature-1' },
         { type: 'create', branchName: 'feature-1' }, // duplicate
-        { type: 'delete', branchName: 'non-existent' }
+        { type: 'delete', branchName: 'non-existent' },
       ]
 
       const conflicts = detectBatchConflicts(conflictingOps)

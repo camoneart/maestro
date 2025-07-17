@@ -32,7 +32,7 @@ describe('delete command functions', () => {
         head: 'abc123',
         detached: false,
         prunable: false,
-        locked: false
+        locked: false,
       }
       expect(createWorktreeDisplay(worktree)).toBe('feature-branch')
     })
@@ -44,7 +44,7 @@ describe('delete command functions', () => {
         head: 'abc123',
         detached: false,
         prunable: false,
-        locked: true
+        locked: true,
       }
       expect(createWorktreeDisplay(worktree)).toBe('🔒 feature-branch')
     })
@@ -56,7 +56,7 @@ describe('delete command functions', () => {
         head: 'abc123',
         detached: true,
         prunable: false,
-        locked: false
+        locked: false,
       }
       expect(createWorktreeDisplay(worktree)).toBe('⚠️  abc123 (detached)')
     })
@@ -68,7 +68,7 @@ describe('delete command functions', () => {
         head: 'abc123',
         detached: true,
         prunable: false,
-        locked: true
+        locked: true,
       }
       // Implementation applies locked first, then detached
       expect(createWorktreeDisplay(worktree)).toBe('⚠️  🔒 abc123 (detached)')
@@ -81,7 +81,7 @@ describe('delete command functions', () => {
         head: 'def456',
         detached: false,
         prunable: false,
-        locked: false
+        locked: false,
       }
       expect(createWorktreeDisplay(worktree)).toBe('def456')
     })
@@ -93,7 +93,7 @@ describe('delete command functions', () => {
         head: 'abc123',
         detached: false,
         prunable: false,
-        locked: false
+        locked: false,
       }
       expect(createWorktreeDisplay(worktree)).toBe('🚀feature/unicode-test')
     })
@@ -106,7 +106,7 @@ describe('delete command functions', () => {
         head: 'abc123',
         detached: false,
         prunable: false,
-        locked: false
+        locked: false,
       }
       expect(createWorktreeDisplay(worktree)).toBe(longBranch)
     })
@@ -118,7 +118,7 @@ describe('delete command functions', () => {
         head: 'abc123',
         detached: false,
         prunable: false,
-        locked: false
+        locked: false,
       }
       expect(createWorktreeDisplay(worktree)).toBe('feature/fix-$pecial-char$')
     })
@@ -132,7 +132,7 @@ describe('delete command functions', () => {
         head: '',
         detached: false,
         prunable: false,
-        locked: false
+        locked: false,
       }
       // Should fall back to head even if empty
       expect(createWorktreeDisplay(worktree)).toBe('')

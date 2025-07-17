@@ -11,22 +11,24 @@ describe('GitWorktreeManager - coverage tests', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
-    
+
     mockGit = {
       status: vi.fn().mockResolvedValue({ current: 'main' }),
       raw: vi.fn().mockResolvedValue(''),
       branchLocal: vi.fn().mockResolvedValue({ all: ['main', 'feature/test'] }),
-      branch: vi.fn().mockResolvedValue({ all: ['remotes/origin/main', 'remotes/origin/feature/test'] }),
+      branch: vi
+        .fn()
+        .mockResolvedValue({ all: ['remotes/origin/main', 'remotes/origin/feature/test'] }),
       fetch: vi.fn().mockResolvedValue(undefined),
-      log: vi.fn().mockResolvedValue({ 
-        latest: { 
-          date: '2023-01-01', 
-          message: 'test commit', 
-          hash: 'abc123456789' 
-        } 
-      })
+      log: vi.fn().mockResolvedValue({
+        latest: {
+          date: '2023-01-01',
+          message: 'test commit',
+          hash: 'abc123456789',
+        },
+      }),
     }
-    
+
     vi.mocked(simpleGit).mockReturnValue(mockGit as any)
     gitManager = new GitWorktreeManager()
   })
@@ -36,8 +38,12 @@ describe('GitWorktreeManager - coverage tests', () => {
       const result = await gitManager.createWorktree('feature/test', 'main')
 
       expect(mockGit.raw).toHaveBeenCalledWith([
-        'worktree', 'add', '-b', 'feature/test', 
-        expect.stringContaining('feature/test'), 'main'
+        'worktree',
+        'add',
+        '-b',
+        'feature/test',
+        expect.stringContaining('feature/test'),
+        'main',
       ])
       expect(result).toContain('feature/test')
     })
@@ -47,8 +53,12 @@ describe('GitWorktreeManager - coverage tests', () => {
 
       expect(mockGit.status).toHaveBeenCalled()
       expect(mockGit.raw).toHaveBeenCalledWith([
-        'worktree', 'add', '-b', 'feature/test', 
-        expect.stringContaining('feature/test'), 'main'
+        'worktree',
+        'add',
+        '-b',
+        'feature/test',
+        expect.stringContaining('feature/test'),
+        'main',
       ])
     })
 
@@ -58,8 +68,12 @@ describe('GitWorktreeManager - coverage tests', () => {
       await gitManager.createWorktree('feature/test')
 
       expect(mockGit.raw).toHaveBeenCalledWith([
-        'worktree', 'add', '-b', 'feature/test', 
-        expect.stringContaining('feature/test'), 'main'
+        'worktree',
+        'add',
+        '-b',
+        'feature/test',
+        expect.stringContaining('feature/test'),
+        'main',
       ])
     })
   })
@@ -69,8 +83,10 @@ describe('GitWorktreeManager - coverage tests', () => {
       const result = await gitManager.attachWorktree('feature/existing')
 
       expect(mockGit.raw).toHaveBeenCalledWith([
-        'worktree', 'add', 
-        expect.stringContaining('feature-existing'), 'feature/existing'
+        'worktree',
+        'add',
+        expect.stringContaining('feature-existing'),
+        'feature/existing',
       ])
       expect(result).toContain('feature-existing')
     })
@@ -79,8 +95,10 @@ describe('GitWorktreeManager - coverage tests', () => {
       const result = await gitManager.attachWorktree('feature/test/sub')
 
       expect(mockGit.raw).toHaveBeenCalledWith([
-        'worktree', 'add', 
-        expect.stringContaining('feature-test-sub'), 'feature/test/sub'
+        'worktree',
+        'add',
+        expect.stringContaining('feature-test-sub'),
+        'feature/test/sub',
       ])
       expect(result).toContain('feature-test-sub')
     })
@@ -88,20 +106,22 @@ describe('GitWorktreeManager - coverage tests', () => {
 
   describe('listWorktrees', () => {
     it('should parse worktree list output', async () => {
-      mockGit.raw.mockResolvedValue([
-        'worktree /path/to/main',
-        'HEAD abc123',
-        'branch refs/heads/main',
-        '',
-        'worktree /path/to/feature',
-        'HEAD def456',
-        'branch refs/heads/feature/test',
-        'locked work in progress',
-        '',
-        'worktree /path/to/detached',
-        'HEAD ghi789',
-        'detached'
-      ].join('\n'))
+      mockGit.raw.mockResolvedValue(
+        [
+          'worktree /path/to/main',
+          'HEAD abc123',
+          'branch refs/heads/main',
+          '',
+          'worktree /path/to/feature',
+          'HEAD def456',
+          'branch refs/heads/feature/test',
+          'locked work in progress',
+          '',
+          'worktree /path/to/detached',
+          'HEAD ghi789',
+          'detached',
+        ].join('\n')
+      )
 
       const result = await gitManager.listWorktrees()
 
@@ -112,51 +132,55 @@ describe('GitWorktreeManager - coverage tests', () => {
         branch: 'refs/heads/main',
         locked: false,
         detached: false,
-        prunable: false
+        prunable: false,
       })
       expect(result[1]).toMatchObject({
         path: '/path/to/feature',
         head: 'def456',
         branch: 'refs/heads/feature/test',
         locked: true,
-        reason: 'work in progress'
+        reason: 'work in progress',
       })
       expect(result[2]).toMatchObject({
         path: '/path/to/detached',
         head: 'ghi789',
-        detached: true
+        detached: true,
       })
     })
 
     it('should handle prunable worktrees', async () => {
-      mockGit.raw.mockResolvedValue([
-        'worktree /path/to/prunable',
-        'HEAD abc123',
-        'branch refs/heads/old-branch',
-        'prunable'
-      ].join('\n'))
+      mockGit.raw.mockResolvedValue(
+        [
+          'worktree /path/to/prunable',
+          'HEAD abc123',
+          'branch refs/heads/old-branch',
+          'prunable',
+        ].join('\n')
+      )
 
       const result = await gitManager.listWorktrees()
 
       expect(result[0]).toMatchObject({
         path: '/path/to/prunable',
-        prunable: true
+        prunable: true,
       })
     })
 
     it('should handle locked worktree without reason', async () => {
-      mockGit.raw.mockResolvedValue([
-        'worktree /path/to/locked',
-        'HEAD abc123',
-        'branch refs/heads/locked-branch',
-        'locked'
-      ].join('\n'))
+      mockGit.raw.mockResolvedValue(
+        [
+          'worktree /path/to/locked',
+          'HEAD abc123',
+          'branch refs/heads/locked-branch',
+          'locked',
+        ].join('\n')
+      )
 
       const result = await gitManager.listWorktrees()
 
       expect(result[0]).toMatchObject({
         path: '/path/to/locked',
-        locked: true
+        locked: true,
       })
       expect(result[0].reason).toBeUndefined()
     })
@@ -172,7 +196,7 @@ describe('GitWorktreeManager - coverage tests', () => {
 
   describe('deleteWorktree', () => {
     beforeEach(() => {
-      mockGit.raw.mockImplementation(async (args) => {
+      mockGit.raw.mockImplementation(async args => {
         if (args[0] === 'worktree' && args[1] === 'list') {
           return [
             'worktree /path/to/main',
@@ -181,7 +205,7 @@ describe('GitWorktreeManager - coverage tests', () => {
             '',
             'worktree /path/to/feature',
             'HEAD def456',
-            'branch refs/heads/feature/test'
+            'branch refs/heads/feature/test',
           ].join('\n')
         }
         return ''
@@ -191,16 +215,17 @@ describe('GitWorktreeManager - coverage tests', () => {
     it('should delete worktree by branch name', async () => {
       await gitManager.deleteWorktree('feature/test')
 
-      expect(mockGit.raw).toHaveBeenCalledWith([
-        'worktree', 'remove', '/path/to/feature'
-      ])
+      expect(mockGit.raw).toHaveBeenCalledWith(['worktree', 'remove', '/path/to/feature'])
     })
 
     it('should delete worktree with force flag', async () => {
       await gitManager.deleteWorktree('feature/test', true)
 
       expect(mockGit.raw).toHaveBeenCalledWith([
-        'worktree', 'remove', '--force', '/path/to/feature'
+        'worktree',
+        'remove',
+        '--force',
+        '/path/to/feature',
       ])
     })
 
@@ -211,12 +236,12 @@ describe('GitWorktreeManager - coverage tests', () => {
     })
 
     it('should handle branch with refs/heads/ prefix', async () => {
-      mockGit.raw.mockImplementation(async (args) => {
+      mockGit.raw.mockImplementation(async args => {
         if (args[0] === 'worktree' && args[1] === 'list') {
           return [
             'worktree /path/to/feature',
             'HEAD def456',
-            'branch refs/heads/feature/test'
+            'branch refs/heads/feature/test',
           ].join('\n')
         }
         return ''
@@ -224,9 +249,7 @@ describe('GitWorktreeManager - coverage tests', () => {
 
       await gitManager.deleteWorktree('feature/test')
 
-      expect(mockGit.raw).toHaveBeenCalledWith([
-        'worktree', 'remove', '/path/to/feature'
-      ])
+      expect(mockGit.raw).toHaveBeenCalledWith(['worktree', 'remove', '/path/to/feature'])
     })
   })
 
@@ -267,27 +290,27 @@ describe('GitWorktreeManager - coverage tests', () => {
 
   describe('getAllBranches', () => {
     it('should return local and remote branches', async () => {
-      mockGit.branchLocal.mockResolvedValue({ 
-        all: ['main', 'feature/test'] 
+      mockGit.branchLocal.mockResolvedValue({
+        all: ['main', 'feature/test'],
       })
-      mockGit.branch.mockResolvedValue({ 
-        all: ['remotes/origin/main', 'remotes/origin/feature/test'] 
+      mockGit.branch.mockResolvedValue({
+        all: ['remotes/origin/main', 'remotes/origin/feature/test'],
       })
 
       const result = await gitManager.getAllBranches()
 
       expect(result).toEqual({
         local: ['main', 'feature/test'],
-        remote: ['origin/main', 'origin/feature/test']
+        remote: ['origin/main', 'origin/feature/test'],
       })
     })
 
     it('should filter out remotes from local branches', async () => {
-      mockGit.branchLocal.mockResolvedValue({ 
-        all: ['main', 'feature/test', 'remotes/origin/main'] 
+      mockGit.branchLocal.mockResolvedValue({
+        all: ['main', 'feature/test', 'remotes/origin/main'],
       })
-      mockGit.branch.mockResolvedValue({ 
-        all: ['remotes/origin/main'] 
+      mockGit.branch.mockResolvedValue({
+        all: ['remotes/origin/main'],
       })
 
       const result = await gitManager.getAllBranches()
@@ -311,8 +334,8 @@ describe('GitWorktreeManager - coverage tests', () => {
         latest: {
           date: '2023-01-01',
           message: 'test commit',
-          hash: 'abc123456789'
-        }
+          hash: 'abc123456789',
+        },
       })
 
       const result = await gitManager.getLastCommit('/path/to/worktree')
@@ -320,7 +343,7 @@ describe('GitWorktreeManager - coverage tests', () => {
       expect(result).toEqual({
         date: '2023-01-01',
         message: 'test commit',
-        hash: 'abc1234'
+        hash: 'abc1234',
       })
     })
 

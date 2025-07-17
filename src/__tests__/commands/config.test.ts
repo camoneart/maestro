@@ -66,9 +66,7 @@ describe('config command', () => {
         },
       ])
       expect(mockConfigManager.createProjectConfig).toHaveBeenCalled()
-      expect(consoleLogSpy).toHaveBeenCalledWith(
-        chalk.green('✅ .maestro.json を作成しました')
-      )
+      expect(consoleLogSpy).toHaveBeenCalledWith(chalk.green('✅ .maestro.json を作成しました'))
     })
 
     it('should cancel when user declines', async () => {
@@ -82,9 +80,7 @@ describe('config command', () => {
 
     it('should handle creation error', async () => {
       ;(inquirer.prompt as Mock).mockResolvedValue({ createConfig: true })
-      mockConfigManager.createProjectConfig.mockRejectedValue(
-        new Error('Permission denied')
-      )
+      mockConfigManager.createProjectConfig.mockRejectedValue(new Error('Permission denied'))
 
       await configCommand.parseAsync(['node', 'config', 'init'])
 
@@ -105,9 +101,7 @@ describe('config command', () => {
 
       await configCommand.parseAsync(['node', 'config', 'show'])
 
-      expect(consoleLogSpy).toHaveBeenCalledWith(
-        chalk.bold('\n🎼 maestro 設定:\n')
-      )
+      expect(consoleLogSpy).toHaveBeenCalledWith(chalk.bold('\n🎼 maestro 設定:\n'))
       expect(consoleLogSpy).toHaveBeenCalledWith(JSON.stringify(mockConfig, null, 2))
     })
 
@@ -130,16 +124,10 @@ describe('config command', () => {
 
       await configCommand.parseAsync(['node', 'config', 'path'])
 
-      expect(consoleLogSpy).toHaveBeenCalledWith(
-        chalk.bold('設定ファイルのパス:\n')
-      )
+      expect(consoleLogSpy).toHaveBeenCalledWith(chalk.bold('設定ファイルのパス:\n'))
       expect(consoleLogSpy).toHaveBeenCalledWith(chalk.green('グローバル設定:'))
-      expect(consoleLogSpy).toHaveBeenCalledWith(
-        `  ${mockConfigManager.getConfigPath()}`
-      )
-      expect(consoleLogSpy).toHaveBeenCalledWith(
-        chalk.green('\nプロジェクト設定 (優先度順):')
-      )
+      expect(consoleLogSpy).toHaveBeenCalledWith(`  ${mockConfigManager.getConfigPath()}`)
+      expect(consoleLogSpy).toHaveBeenCalledWith(chalk.green('\nプロジェクト設定 (優先度順):'))
 
       // ファイルの存在確認
       expect(fs.access).toHaveBeenCalledWith(path.join(process.cwd(), '.maestro.json'))
@@ -162,11 +150,11 @@ describe('config command', () => {
 
       const logCalls = consoleLogSpy.mock.calls.map(call => call[0])
       const configFiles = ['.maestro.json', '.maestrorc.json', 'maestro.config.json']
-      
+
       configFiles.forEach(file => {
-        expect(logCalls.some(log => 
-          typeof log === 'string' && log.includes('✅') && log.includes(file)
-        )).toBe(true)
+        expect(
+          logCalls.some(log => typeof log === 'string' && log.includes('✅') && log.includes(file))
+        ).toBe(true)
       })
     })
   })
@@ -179,9 +167,7 @@ describe('config command', () => {
       expect(consoleLogSpy).toHaveBeenCalledWith(
         '  maestro config init   # プロジェクト設定ファイルを作成'
       )
-      expect(consoleLogSpy).toHaveBeenCalledWith(
-        '  maestro config show   # 現在の設定を表示'
-      )
+      expect(consoleLogSpy).toHaveBeenCalledWith('  maestro config show   # 現在の設定を表示')
       expect(consoleLogSpy).toHaveBeenCalledWith(
         '  maestro config path   # 設定ファイルのパスを表示'
       )
@@ -196,15 +182,11 @@ describe('config command', () => {
 
   describe('error handling', () => {
     it('should handle loadProjectConfig error gracefully', async () => {
-      mockConfigManager.loadProjectConfig.mockRejectedValue(
-        new Error('Config load error')
-      )
+      mockConfigManager.loadProjectConfig.mockRejectedValue(new Error('Config load error'))
 
       // loadProjectConfigのエラーは内部で処理されるため、
       // コマンド自体はエラーを投げない
-      await expect(
-        configCommand.parseAsync(['node', 'config', 'show'])
-      ).rejects.toThrow()
+      await expect(configCommand.parseAsync(['node', 'config', 'show'])).rejects.toThrow()
     })
   })
 

@@ -44,7 +44,8 @@ describe('MCP server unit tests', () => {
       if (!message || typeof message !== 'object') return false
       if (!message.jsonrpc || message.jsonrpc !== '2.0') return false
       if (!message.method || typeof message.method !== 'string') return false
-      if ('id' in message && typeof message.id !== 'string' && typeof message.id !== 'number') return false
+      if ('id' in message && typeof message.id !== 'string' && typeof message.id !== 'number')
+        return false
       return true
     }
 
@@ -122,7 +123,7 @@ describe('MCP server unit tests', () => {
 
   it('should test notification handling', () => {
     const notifications: any[] = []
-    
+
     const sendNotification = (method: string, params?: any) => {
       const notification = {
         jsonrpc: '2.0',
@@ -151,10 +152,10 @@ describe('MCP server unit tests', () => {
     const parseResourceUri = (uri: string) => {
       const match = uri.match(/^(\w+):\/\/(.+)$/)
       if (!match) throw new Error('Invalid URI format')
-      
+
       const [, protocol, path] = match
       const parts = path.split('/')
-      
+
       return {
         protocol,
         resource: parts[0],

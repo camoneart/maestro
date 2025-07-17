@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { 
-  formatDirectorySize, 
-  createWorktreeDisplay, 
-  getDirectorySize, 
-  deleteRemoteBranch 
+import {
+  formatDirectorySize,
+  createWorktreeDisplay,
+  getDirectorySize,
+  deleteRemoteBranch,
 } from '../../commands/delete.js'
 import { execa } from 'execa'
 import { Worktree } from '../../types/index.js'
@@ -52,7 +52,7 @@ describe('delete command - edge cases', () => {
         head: 'abc123',
         locked: false,
         detached: false,
-        prunable: false
+        prunable: false,
       }
 
       const result = createWorktreeDisplay(worktree)
@@ -67,7 +67,7 @@ describe('delete command - edge cases', () => {
         head: 'abc123',
         locked: true,
         detached: false,
-        prunable: false
+        prunable: false,
       }
 
       const result = createWorktreeDisplay(worktree)
@@ -82,7 +82,7 @@ describe('delete command - edge cases', () => {
         head: 'abc123',
         locked: false,
         detached: true,
-        prunable: false
+        prunable: false,
       }
 
       const result = createWorktreeDisplay(worktree)
@@ -97,7 +97,7 @@ describe('delete command - edge cases', () => {
         head: 'abc123',
         locked: true,
         detached: true,
-        prunable: false
+        prunable: false,
       }
 
       const result = createWorktreeDisplay(worktree)
@@ -112,7 +112,7 @@ describe('delete command - edge cases', () => {
         head: 'abc123',
         locked: false,
         detached: false,
-        prunable: false
+        prunable: false,
       }
 
       const result = createWorktreeDisplay(worktree)
@@ -127,7 +127,7 @@ describe('delete command - edge cases', () => {
         head: 'abc123',
         locked: false,
         detached: false,
-        prunable: false
+        prunable: false,
       }
 
       const result = createWorktreeDisplay(worktree)
@@ -139,7 +139,7 @@ describe('delete command - edge cases', () => {
   describe('getDirectorySize', () => {
     it('should return directory size', async () => {
       vi.mocked(execa).mockResolvedValue({
-        stdout: '1.5M\t/path/to/dir'
+        stdout: '1.5M\t/path/to/dir',
       })
 
       const result = await getDirectorySize('/path/to/dir')
@@ -158,7 +158,7 @@ describe('delete command - edge cases', () => {
 
     it('should handle empty output', async () => {
       vi.mocked(execa).mockResolvedValue({
-        stdout: ''
+        stdout: '',
       })
 
       const result = await getDirectorySize('/path/to/dir')
@@ -168,7 +168,7 @@ describe('delete command - edge cases', () => {
 
     it('should handle malformed output', async () => {
       vi.mocked(execa).mockResolvedValue({
-        stdout: 'malformed output'
+        stdout: 'malformed output',
       })
 
       const result = await getDirectorySize('/path/to/dir')
@@ -183,7 +183,12 @@ describe('delete command - edge cases', () => {
         if (cmd === 'git' && args?.[0] === 'branch' && args?.[1] === '-r') {
           return { stdout: 'origin/main\norigin/feature/test\norigin/develop' }
         }
-        if (cmd === 'git' && args?.[0] === 'push' && args?.[1] === 'origin' && args?.[2] === '--delete') {
+        if (
+          cmd === 'git' &&
+          args?.[0] === 'push' &&
+          args?.[1] === 'origin' &&
+          args?.[2] === '--delete'
+        ) {
           return { stdout: 'deleted' }
         }
         return { stdout: '' }
@@ -206,7 +211,12 @@ describe('delete command - edge cases', () => {
       await deleteRemoteBranch('feature/nonexistent')
 
       expect(execa).toHaveBeenCalledWith('git', ['branch', '-r'])
-      expect(execa).not.toHaveBeenCalledWith('git', ['push', 'origin', '--delete', 'feature/nonexistent'])
+      expect(execa).not.toHaveBeenCalledWith('git', [
+        'push',
+        'origin',
+        '--delete',
+        'feature/nonexistent',
+      ])
     })
 
     it('should handle git branch list failure', async () => {
@@ -225,7 +235,12 @@ describe('delete command - edge cases', () => {
         if (cmd === 'git' && args?.[0] === 'branch' && args?.[1] === '-r') {
           return { stdout: 'origin/feature/test' }
         }
-        if (cmd === 'git' && args?.[0] === 'push' && args?.[1] === 'origin' && args?.[2] === '--delete') {
+        if (
+          cmd === 'git' &&
+          args?.[0] === 'push' &&
+          args?.[1] === 'origin' &&
+          args?.[2] === '--delete'
+        ) {
           throw new Error('push delete failed')
         }
         return { stdout: '' }
@@ -239,7 +254,12 @@ describe('delete command - edge cases', () => {
         if (cmd === 'git' && args?.[0] === 'branch' && args?.[1] === '-r') {
           return { stdout: 'origin/main\norigin/feature/test' }
         }
-        if (cmd === 'git' && args?.[0] === 'push' && args?.[1] === 'origin' && args?.[2] === '--delete') {
+        if (
+          cmd === 'git' &&
+          args?.[0] === 'push' &&
+          args?.[1] === 'origin' &&
+          args?.[2] === '--delete'
+        ) {
           throw new Error('remote: error: refusing to delete protected branch')
         }
         return { stdout: '' }
@@ -253,7 +273,12 @@ describe('delete command - edge cases', () => {
         if (cmd === 'git' && args?.[0] === 'branch' && args?.[1] === '-r') {
           return { stdout: 'origin/feature/test' }
         }
-        if (cmd === 'git' && args?.[0] === 'push' && args?.[1] === 'origin' && args?.[2] === '--delete') {
+        if (
+          cmd === 'git' &&
+          args?.[0] === 'push' &&
+          args?.[1] === 'origin' &&
+          args?.[2] === '--delete'
+        ) {
           throw new Error('Authentication failed')
         }
         return { stdout: '' }
@@ -267,7 +292,12 @@ describe('delete command - edge cases', () => {
         if (cmd === 'git' && args?.[0] === 'branch' && args?.[1] === '-r') {
           return { stdout: 'origin/feature/test' }
         }
-        if (cmd === 'git' && args?.[0] === 'push' && args?.[1] === 'origin' && args?.[2] === '--delete') {
+        if (
+          cmd === 'git' &&
+          args?.[0] === 'push' &&
+          args?.[1] === 'origin' &&
+          args?.[2] === '--delete'
+        ) {
           throw new Error('Network error')
         }
         return { stdout: '' }

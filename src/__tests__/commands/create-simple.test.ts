@@ -11,11 +11,11 @@ describe('create command simple tests', () => {
     expect(createCommand).toBeInstanceOf(Command)
     expect(createCommand.name()).toBe('create')
     expect(createCommand.description()).toContain('新しい演奏者')
-    
+
     // Check options
     const options = createCommand.options
     const optionNames = options.map(opt => opt.long)
-    
+
     expect(optionNames).toContain('--base')
     expect(optionNames).toContain('--template')
     expect(optionNames).toContain('--open')
@@ -36,19 +36,19 @@ describe('create command simple tests', () => {
     // Test environment setup functions
     const setupEnvironment = (options: any) => {
       const env: any = {}
-      
+
       if (options.open) {
         env.OPEN_EDITOR = true
       }
-      
+
       if (options.setup) {
         env.RUN_SETUP = true
       }
-      
+
       if (options.claude) {
         env.CLAUDE_ENABLED = true
       }
-      
+
       return env
     }
 
@@ -70,18 +70,15 @@ describe('create command simple tests', () => {
         .replace(/[^a-zA-Z0-9_-]/g, '-')
         .replace(/-+/g, '-')
         .replace(/^-|-$/g, '')
-      
+
       return `${basePath}/${sanitized}`
     }
 
-    expect(generateWorktreePath('/worktrees', 'feature/test'))
-      .toBe('/worktrees/feature-test')
-    
-    expect(generateWorktreePath('/worktrees', 'issue#123'))
-      .toBe('/worktrees/issue-123')
-    
-    expect(generateWorktreePath('/custom', 'refs/heads/main'))
-      .toBe('/custom/refs-heads-main')
+    expect(generateWorktreePath('/worktrees', 'feature/test')).toBe('/worktrees/feature-test')
+
+    expect(generateWorktreePath('/worktrees', 'issue#123')).toBe('/worktrees/issue-123')
+
+    expect(generateWorktreePath('/custom', 'refs/heads/main')).toBe('/custom/refs-heads-main')
   })
 
   it('should test PR title generation', () => {
@@ -89,24 +86,19 @@ describe('create command simple tests', () => {
       if (issueNumber) {
         return `[#${issueNumber}] ${branchName.replace(/^issue-\d+/, '').trim()}`
       }
-      
+
       // Convert branch name to title case
       const words = branchName.split(/[-_]/)
-      const title = words
-        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-        .join(' ')
-      
+      const title = words.map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')
+
       return title
     }
 
-    expect(generatePRTitle('feature-awesome', '123'))
-      .toBe('[#123] feature-awesome')
-    
-    expect(generatePRTitle('issue-456'))
-      .toBe('Issue 456')
-    
-    expect(generatePRTitle('add-user-auth'))
-      .toBe('Add User Auth')
+    expect(generatePRTitle('feature-awesome', '123')).toBe('[#123] feature-awesome')
+
+    expect(generatePRTitle('issue-456')).toBe('Issue 456')
+
+    expect(generatePRTitle('add-user-auth')).toBe('Add User Auth')
   })
 
   it('should test hook command parsing', () => {
@@ -134,7 +126,7 @@ describe('create command simple tests', () => {
   it('should test editor detection', () => {
     const detectEditor = (): string => {
       const editors = ['code', 'cursor', 'vim', 'nvim', 'emacs', 'sublime', 'atom']
-      
+
       // In real implementation, would check which is available
       // For test, just return first available
       return editors[0]
@@ -210,19 +202,19 @@ This is a git worktree for parallel development.
     // Test the branch name processing logic from action function
     const processBranchName = (input: string, config: any): string => {
       let branchName = input
-      
+
       // Apply prefix if configured
       if (config.worktrees?.branchPrefix && !branchName.startsWith(config.worktrees.branchPrefix)) {
         branchName = config.worktrees.branchPrefix + branchName
       }
-      
+
       return branchName
     }
 
     const config1 = { worktrees: { branchPrefix: 'feature/' } }
     expect(processBranchName('test', config1)).toBe('feature/test')
     expect(processBranchName('feature/test', config1)).toBe('feature/test')
-    
+
     const config2 = { worktrees: {} }
     expect(processBranchName('test', config2)).toBe('test')
   })
@@ -239,7 +231,8 @@ This is a git worktree for parallel development.
         development: {
           ...baseConfig.development,
           autoSetup: templateConfig.autoSetup ?? baseConfig.development?.autoSetup ?? true,
-          syncFiles: templateConfig.syncFiles || baseConfig.development?.syncFiles || ['.env', '.env.local'],
+          syncFiles: templateConfig.syncFiles ||
+            baseConfig.development?.syncFiles || ['.env', '.env.local'],
           defaultEditor: templateConfig.editor || baseConfig.development?.defaultEditor || 'cursor',
         },
         hooks: templateConfig.hooks || baseConfig.hooks,
@@ -249,14 +242,14 @@ This is a git worktree for parallel development.
     const baseConfig = {
       worktrees: { branchPrefix: 'old/' },
       development: { autoSetup: false, defaultEditor: 'vim' },
-      hooks: ['npm install']
+      hooks: ['npm install'],
     }
-    
+
     const templateConfig = {
       branchPrefix: 'new/',
       autoSetup: true,
       editor: 'code',
-      hooks: ['yarn install']
+      hooks: ['yarn install'],
     }
 
     const merged = mergeTemplateConfig(baseConfig, templateConfig)
@@ -274,23 +267,21 @@ This is a git worktree for parallel development.
         .replace(/[^a-z0-9]+/g, '-')
         .replace(/^-+|-+$/g, '')
         .substring(0, 30)
-      
+
       return `${metadata.type}-${issueNumber}-${sanitizedTitle}`
     }
 
     const metadata1 = {
       type: 'issue',
-      title: 'Fix User Authentication Bug!'
+      title: 'Fix User Authentication Bug!',
     }
-    expect(generateGitHubBranchName(metadata1, '123'))
-      .toBe('issue-123-fix-user-authentication-bug')
-    
+    expect(generateGitHubBranchName(metadata1, '123')).toBe('issue-123-fix-user-authentication-bug')
+
     const metadata2 = {
       type: 'pr',
-      title: 'Add New Feature: User Profile Management System'
+      title: 'Add New Feature: User Profile Management System',
     }
-    expect(generateGitHubBranchName(metadata2, '456'))
-      .toBe('pr-456-add-new-feature-user-profile-m')
+    expect(generateGitHubBranchName(metadata2, '456')).toBe('pr-456-add-new-feature-user-profile-m')
   })
 
   it('should test worktree path resolution', () => {
@@ -302,7 +293,7 @@ This is a git worktree for parallel development.
 
     const config1 = { worktrees: { root: '/custom/path' } }
     expect(resolveWorktreePath('feature-test', config1)).toBe('/custom/path/feature-test')
-    
+
     const config2 = { worktrees: {} }
     expect(resolveWorktreePath('feature-test', config2)).toBe('../worktrees/feature-test')
   })
@@ -321,10 +312,10 @@ This is a git worktree for parallel development.
 
     const error1 = { message: 'fatal: not a git repository' }
     expect(handleGitError(error1)).toBe('このディレクトリはGitリポジトリではありません')
-    
+
     const error2 = { message: 'fatal: already exists' }
     expect(handleGitError(error2)).toBe('ブランチまたはworktreeが既に存在します')
-    
+
     const error3 = { message: 'some other error' }
     expect(handleGitError(error3)).toBe('Git操作でエラーが発生しました')
   })
@@ -333,7 +324,7 @@ This is a git worktree for parallel development.
     // Test template option processing from action function
     const processTemplateOptions = (options: any, templateConfig: any): any => {
       const processed = { ...options }
-      
+
       if (templateConfig.autoSetup !== undefined) {
         processed.setup = templateConfig.autoSetup
       }
@@ -346,7 +337,7 @@ This is a git worktree for parallel development.
       if (templateConfig.claude) {
         processed.claude = true
       }
-      
+
       return processed
     }
 
@@ -355,7 +346,7 @@ This is a git worktree for parallel development.
       autoSetup: true,
       editor: 'code',
       tmux: true,
-      claude: true
+      claude: true,
     }
 
     const processed = processTemplateOptions(options, templateConfig)
@@ -398,7 +389,7 @@ This is a git worktree for parallel development.
       labels: ['bug', 'enhancement'],
       assignees: ['dev1', 'dev2'],
       milestone: 'v1.0',
-      url: 'https://github.com/test/repo/issues/123'
+      url: 'https://github.com/test/repo/issues/123',
     }
 
     expect(mockGitHubData.type).toBe('issue')
@@ -421,7 +412,7 @@ This is a git worktree for parallel development.
       if (github) {
         metadata.github = {
           ...github,
-          issueNumber: github.type === 'issue' ? github.url.split('/').pop() : undefined
+          issueNumber: github.type === 'issue' ? github.url.split('/').pop() : undefined,
         }
       }
 
@@ -436,7 +427,7 @@ This is a git worktree for parallel development.
     const githubData = {
       type: 'issue',
       title: 'Test Issue',
-      url: 'https://github.com/test/repo/issues/123'
+      url: 'https://github.com/test/repo/issues/123',
     }
     const metadata2 = createWorktreeMetadata('issue-123', '/path/to/worktree', githubData)
     expect(metadata2.github.type).toBe('issue')
@@ -448,13 +439,13 @@ This is a git worktree for parallel development.
     const validateConfig = (config: any): boolean => {
       // Check required fields
       if (!config || typeof config !== 'object') return false
-      
+
       // Check worktrees configuration
       if (config.worktrees && typeof config.worktrees !== 'object') return false
-      
+
       // Check development configuration
       if (config.development && typeof config.development !== 'object') return false
-      
+
       return true
     }
 
@@ -479,7 +470,9 @@ This is a git worktree for parallel development.
     expect(sanitizeBranchName('Fix User Authentication Bug!')).toBe('fix-user-authentication-bug')
     expect(sanitizeBranchName('Add New Feature: User Profile')).toBe('add-new-feature-user-profile')
     expect(sanitizeBranchName('Update README.md file')).toBe('update-readme-md-file')
-    expect(sanitizeBranchName('Very Long Title That Should Be Truncated To 30 Characters')).toBe('very-long-title-that-should-be')
+    expect(sanitizeBranchName('Very Long Title That Should Be Truncated To 30 Characters')).toBe(
+      'very-long-title-that-should-be'
+    )
     expect(sanitizeBranchName('---Multiple---Dashes---')).toBe('multiple-dashes')
   })
 })

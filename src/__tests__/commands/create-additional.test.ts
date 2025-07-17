@@ -80,7 +80,7 @@ describe.skip('create command - integration tests', () => {
     mockConfigManager = {
       loadProjectConfig: vi.fn().mockResolvedValue(undefined),
       getAll: vi.fn().mockReturnValue({
-        worktrees: { 
+        worktrees: {
           path: '.git/orchestrations',
           branchPrefix: '',
         },
@@ -134,90 +134,66 @@ describe.skip('create command - integration tests', () => {
   describe('Issue number parsing', () => {
     it('should parse issue number format (#123)', async () => {
       await createCommand.parseAsync(['node', 'create', '#123'])
-      
-      expect(mockGitManager.createWorktree).toHaveBeenCalledWith(
-        'issue-123',
-        undefined
-      )
+
+      expect(mockGitManager.createWorktree).toHaveBeenCalledWith('issue-123', undefined)
     })
 
     it('should parse issue number format (123)', async () => {
       await createCommand.parseAsync(['node', 'create', '123'])
-      
-      expect(mockGitManager.createWorktree).toHaveBeenCalledWith(
-        'issue-123',
-        undefined
-      )
+
+      expect(mockGitManager.createWorktree).toHaveBeenCalledWith('issue-123', undefined)
     })
 
     it('should parse issue-prefixed format (issue-123)', async () => {
       await createCommand.parseAsync(['node', 'create', 'issue-123'])
-      
-      expect(mockGitManager.createWorktree).toHaveBeenCalledWith(
-        'issue-123',
-        undefined
-      )
+
+      expect(mockGitManager.createWorktree).toHaveBeenCalledWith('issue-123', undefined)
     })
 
     it('should handle regular branch names', async () => {
       await createCommand.parseAsync(['node', 'create', 'feature-branch'])
-      
-      expect(mockGitManager.createWorktree).toHaveBeenCalledWith(
-        'feature-branch',
-        undefined
-      )
+
+      expect(mockGitManager.createWorktree).toHaveBeenCalledWith('feature-branch', undefined)
     })
   })
 
   describe('GitHub integration', () => {
     it('should handle GitHub API unavailable gracefully', async () => {
       ;(execa as any).mockRejectedValueOnce(new Error('gh command not found'))
-      
+
       await createCommand.parseAsync(['node', 'create', '#123'])
-      
+
       // 基本的なworktree作成は継続される
-      expect(mockGitManager.createWorktree).toHaveBeenCalledWith(
-        'issue-123',
-        undefined
-      )
+      expect(mockGitManager.createWorktree).toHaveBeenCalledWith('issue-123', undefined)
     })
   })
 
   describe('Options handling', () => {
     it('should handle --base option', async () => {
       await createCommand.parseAsync(['node', 'create', 'test-branch', '--base', 'develop'])
-      
-      expect(mockGitManager.createWorktree).toHaveBeenCalledWith(
-        'test-branch',
-        'develop'
-      )
+
+      expect(mockGitManager.createWorktree).toHaveBeenCalledWith('test-branch', 'develop')
     })
 
     it('should handle --setup option', async () => {
       await createCommand.parseAsync(['node', 'create', 'test-branch', '--setup'])
-      
-      expect(mockGitManager.createWorktree).toHaveBeenCalledWith(
-        'test-branch',
-        undefined
-      )
+
+      expect(mockGitManager.createWorktree).toHaveBeenCalledWith('test-branch', undefined)
       // セットアップ関連の処理が実行される
       expect(execa).toHaveBeenCalled()
     })
 
     it('should handle --open option', async () => {
       await createCommand.parseAsync(['node', 'create', 'test-branch', '--open'])
-      
-      expect(mockGitManager.createWorktree).toHaveBeenCalledWith(
-        'test-branch',
-        undefined
-      )
+
+      expect(mockGitManager.createWorktree).toHaveBeenCalledWith('test-branch', undefined)
     })
   })
 
   describe('Claude Code integration', () => {
     it('should handle CLAUDE.md in shared mode', async () => {
       await createCommand.parseAsync(['node', 'create', 'test-branch'])
-      
+
       expect(mockGitManager.createWorktree).toHaveBeenCalled()
       // CLAUDE.mdのシンボリックリンク作成
       expect((fs as any).default.symlink).toHaveBeenCalled()
@@ -225,9 +201,9 @@ describe.skip('create command - integration tests', () => {
 
     it('should handle CLAUDE.md when file does not exist', async () => {
       ;(fs as any).default.access.mockRejectedValueOnce(new Error('ENOENT'))
-      
+
       await createCommand.parseAsync(['node', 'create', 'test-branch'])
-      
+
       expect(mockGitManager.createWorktree).toHaveBeenCalled()
       // エラーをキャッチしてスキップ
     })
@@ -236,19 +212,17 @@ describe.skip('create command - integration tests', () => {
   describe('Error handling', () => {
     it('should handle not a git repository', async () => {
       mockGitManager.isGitRepository.mockResolvedValue(false)
-      
+
       await createCommand.parseAsync(['node', 'create', 'test-branch'])
-      
-      expect(mockSpinner.fail).toHaveBeenCalledWith(
-        expect.stringContaining('Gitリポジトリ')
-      )
+
+      expect(mockSpinner.fail).toHaveBeenCalledWith(expect.stringContaining('Gitリポジトリ'))
     })
 
     it('should handle worktree creation failure', async () => {
       mockGitManager.createWorktree.mockRejectedValueOnce(new Error('Branch already exists'))
-      
+
       await createCommand.parseAsync(['node', 'create', 'existing-branch'])
-      
+
       expect(mockSpinner.fail).toHaveBeenCalledWith(
         expect.stringContaining('Branch already exists')
       )
@@ -256,9 +230,9 @@ describe.skip('create command - integration tests', () => {
 
     it('should handle configuration loading errors', async () => {
       mockConfigManager.loadProjectConfig.mockRejectedValueOnce(new Error('Config error'))
-      
+
       await createCommand.parseAsync(['node', 'create', 'test-branch'])
-      
+
       // エラーが発生してもデフォルト設定で継続
       expect(mockGitManager.createWorktree).toHaveBeenCalled()
     })
@@ -269,14 +243,14 @@ describe.skip('create command - integration tests', () => {
       mockConfigManager.getAll.mockReturnValue({
         ...mockConfigManager.getAll(),
         templates: {
-          'react': {
-            files: ['package.json', 'src/index.tsx']
-          }
-        }
+          react: {
+            files: ['package.json', 'src/index.tsx'],
+          },
+        },
       })
-      
+
       await createCommand.parseAsync(['node', 'create', 'test-branch', '--template', 'react'])
-      
+
       expect(mockGitManager.createWorktree).toHaveBeenCalled()
     })
   })
@@ -284,7 +258,7 @@ describe.skip('create command - integration tests', () => {
   describe('tmux integration', () => {
     it('should handle tmux session creation', async () => {
       await createCommand.parseAsync(['node', 'create', 'test-branch', '--tmux'])
-      
+
       expect(mockGitManager.createWorktree).toHaveBeenCalled()
       // tmux関連のコマンドが実行される
       expect(execa).toHaveBeenCalledWith(
@@ -301,9 +275,9 @@ describe.skip('create command - integration tests', () => {
         }
         return Promise.resolve({ stdout: '', stderr: '', exitCode: 0 })
       })
-      
+
       await createCommand.parseAsync(['node', 'create', 'test-branch', '--tmux'])
-      
+
       // tmuxエラーでも基本的なworktree作成は継続
       expect(mockGitManager.createWorktree).toHaveBeenCalled()
     })

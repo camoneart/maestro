@@ -29,27 +29,30 @@ describe('Watch Command - Functions Coverage', () => {
         modified: string[]
         deleted: string[]
       } {
-        return changes.reduce((acc, change) => {
-          switch (change.type) {
-            case 'add':
-              acc.added.push(change.path)
-              break
-            case 'change':
-              acc.modified.push(change.path)
-              break
-            case 'unlink':
-              acc.deleted.push(change.path)
-              break
-          }
-          return acc
-        }, { added: [] as string[], modified: [] as string[], deleted: [] as string[] })
+        return changes.reduce(
+          (acc, change) => {
+            switch (change.type) {
+              case 'add':
+                acc.added.push(change.path)
+                break
+              case 'change':
+                acc.modified.push(change.path)
+                break
+              case 'unlink':
+                acc.deleted.push(change.path)
+                break
+            }
+            return acc
+          },
+          { added: [] as string[], modified: [] as string[], deleted: [] as string[] }
+        )
       }
 
       const changes = [
         { type: 'add', path: 'src/new-file.ts' },
         { type: 'change', path: 'src/existing-file.ts' },
         { type: 'unlink', path: 'src/old-file.ts' },
-        { type: 'add', path: 'docs/readme.md' }
+        { type: 'add', path: 'docs/readme.md' },
       ]
 
       const categorized = categorizeFileChanges(changes)
@@ -87,7 +90,7 @@ describe('Watch Command - Functions Coverage', () => {
           '.ts': 7,
           '.js': 6,
           '.md': 4,
-          '.txt': 2
+          '.txt': 2,
         }
 
         for (const [pattern, priority] of Object.entries(priorities)) {
@@ -131,20 +134,24 @@ describe('Watch Command - Functions Coverage', () => {
         { path: 'src/unique.ts', worktree: 'feature-1' },
         { path: 'package.json', worktree: 'feature-1' },
         { path: 'package.json', worktree: 'feature-2' },
-        { path: 'package.json', worktree: 'feature-3' }
+        { path: 'package.json', worktree: 'feature-3' },
       ]
 
       const conflicts = detectFileConflicts(changes)
       expect(conflicts).toEqual([
         { path: 'src/shared.ts', conflictingWorktrees: ['feature-1', 'feature-2'] },
-        { path: 'package.json', conflictingWorktrees: ['feature-1', 'feature-2', 'feature-3'] }
+        { path: 'package.json', conflictingWorktrees: ['feature-1', 'feature-2', 'feature-3'] },
       ])
     })
   })
 
   describe('Sync strategy utilities', () => {
     it('should determine optimal sync direction', () => {
-      function determineSyncDirection(sourceTime: number, targetTime: number, strategy: string): 'source-to-target' | 'target-to-source' | 'merge' | 'skip' {
+      function determineSyncDirection(
+        sourceTime: number,
+        targetTime: number,
+        strategy: string
+      ): 'source-to-target' | 'target-to-source' | 'merge' | 'skip' {
         switch (strategy) {
           case 'newer-wins':
             return sourceTime > targetTime ? 'source-to-target' : 'target-to-source'
@@ -193,15 +200,18 @@ describe('Watch Command - Functions Coverage', () => {
         operation: 'copy' | 'delete' | 'merge'
       }
 
-      function manageSyncQueue(tasks: SyncTask[], maxConcurrent: number = 3): {
+      function manageSyncQueue(
+        tasks: SyncTask[],
+        maxConcurrent: number = 3
+      ): {
         executing: SyncTask[]
         queued: SyncTask[]
       } {
         const sortedTasks = [...tasks].sort((a, b) => b.priority - a.priority)
-        
+
         return {
           executing: sortedTasks.slice(0, maxConcurrent),
-          queued: sortedTasks.slice(maxConcurrent)
+          queued: sortedTasks.slice(maxConcurrent),
         }
       }
 
@@ -210,11 +220,11 @@ describe('Watch Command - Functions Coverage', () => {
         { id: '2', priority: 10, filePath: '.env', operation: 'copy' },
         { id: '3', priority: 3, filePath: 'docs/readme.md', operation: 'copy' },
         { id: '4', priority: 8, filePath: 'package.json', operation: 'copy' },
-        { id: '5', priority: 1, filePath: 'temp.txt', operation: 'delete' }
+        { id: '5', priority: 1, filePath: 'temp.txt', operation: 'delete' },
       ]
 
       const queue = manageSyncQueue(tasks, 3)
-      
+
       expect(queue.executing).toHaveLength(3)
       expect(queue.executing[0].id).toBe('2') // highest priority
       expect(queue.executing[1].id).toBe('4') // second highest
@@ -245,10 +255,10 @@ describe('Watch Command - Functions Coverage', () => {
         return Math.min(baseDelay * Math.pow(2, attempt - 1), 10000)
       }
 
-      expect(calculateRetryDelay(1, 1000)).toBe(1000)  // 1 second
-      expect(calculateRetryDelay(2, 1000)).toBe(2000)  // 2 seconds
-      expect(calculateRetryDelay(3, 1000)).toBe(4000)  // 4 seconds
-      expect(calculateRetryDelay(4, 1000)).toBe(8000)  // 8 seconds
+      expect(calculateRetryDelay(1, 1000)).toBe(1000) // 1 second
+      expect(calculateRetryDelay(2, 1000)).toBe(2000) // 2 seconds
+      expect(calculateRetryDelay(3, 1000)).toBe(4000) // 4 seconds
+      expect(calculateRetryDelay(4, 1000)).toBe(8000) // 8 seconds
       expect(calculateRetryDelay(5, 1000)).toBe(10000) // capped at 10 seconds
     })
 
@@ -280,7 +290,7 @@ describe('Watch Command - Functions Coverage', () => {
       const failedSyncs = [
         { path: 'src/app.ts', error: 'File not found' },
         { path: 'secret.key', error: 'Permission denied' },
-        { path: 'data.json', error: 'Disk full' }
+        { path: 'data.json', error: 'Disk full' },
       ]
 
       const recovery = createRecoveryPlan(failedSyncs)
@@ -320,7 +330,7 @@ describe('Watch Command - Functions Coverage', () => {
         'docs/?*.md',
         '',
         'invalid pattern with spaces',
-        'valid-pattern'
+        'valid-pattern',
       ]
 
       const result = validateWatchPatterns(patterns)
@@ -329,7 +339,9 @@ describe('Watch Command - Functions Coverage', () => {
     })
 
     it('should merge watch configurations', () => {
-      function mergeWatchConfigs(configs: Array<{ patterns: string[]; ignored: string[]; options: any }>): {
+      function mergeWatchConfigs(
+        configs: Array<{ patterns: string[]; ignored: string[]; options: any }>
+      ): {
         patterns: string[]
         ignored: string[]
         options: any
@@ -347,14 +359,14 @@ describe('Watch Command - Functions Coverage', () => {
         return {
           patterns: Array.from(patterns),
           ignored: Array.from(ignored),
-          options: mergedOptions
+          options: mergedOptions,
         }
       }
 
       const configs = [
         { patterns: ['src/**/*.ts'], ignored: ['node_modules'], options: { persistent: true } },
         { patterns: ['*.json'], ignored: ['.git'], options: { ignoreInitial: false } },
-        { patterns: ['docs/**'], ignored: ['node_modules'], options: { persistent: false } }
+        { patterns: ['docs/**'], ignored: ['node_modules'], options: { persistent: false } },
       ]
 
       const merged = mergeWatchConfigs(configs)
@@ -387,14 +399,14 @@ describe('Watch Command - Functions Coverage', () => {
           totalFiles,
           avgTimePerFile: totalFiles > 0 ? totalTime / totalFiles : 0,
           errorRate: totalFiles > 0 ? (totalErrors / totalFiles) * 100 : 0,
-          throughput: totalTime > 0 ? totalFiles / (totalTime / 1000) : 0 // files per second
+          throughput: totalTime > 0 ? totalFiles / (totalTime / 1000) : 0, // files per second
         }
       }
 
       const metrics: SyncMetrics[] = [
         { filesProcessed: 10, totalTime: 1000, errors: 1, avgFileSize: 1024 },
         { filesProcessed: 5, totalTime: 500, errors: 0, avgFileSize: 2048 },
-        { filesProcessed: 8, totalTime: 800, errors: 2, avgFileSize: 512 }
+        { filesProcessed: 8, totalTime: 800, errors: 2, avgFileSize: 512 },
       ]
 
       const stats = calculateSyncStats(metrics)

@@ -226,7 +226,7 @@ export async function applyTemplateConfig(
   baseConfig: Config
 ): Promise<{ config: Config; updatedOptions: CreateOptions & { template?: string } }> {
   const templateConfig = await getTemplateConfig(templateName)
-  
+
   if (!templateConfig) {
     return { config: baseConfig, updatedOptions: options }
   }
@@ -259,20 +259,26 @@ export async function applyTemplateConfig(
 }
 
 // ブランチ名の解析と処理を行う純粋関数
-export function processBranchName(branchName: string, config: Config): {
+export function processBranchName(
+  branchName: string,
+  config: Config
+): {
   isIssue: boolean
   issueNumber: string | null
   finalBranchName: string
 } {
   const { isIssue, issueNumber, branchName: parsedBranchName } = parseIssueNumber(branchName)
-  
+
   let finalBranchName = parsedBranchName
-  
+
   // ブランチ名にプレフィックスを追加
-  if (config.worktrees?.branchPrefix && !finalBranchName.startsWith(config.worktrees.branchPrefix)) {
+  if (
+    config.worktrees?.branchPrefix &&
+    !finalBranchName.startsWith(config.worktrees.branchPrefix)
+  ) {
     finalBranchName = config.worktrees.branchPrefix + finalBranchName
   }
-  
+
   return { isIssue, issueNumber: issueNumber || null, finalBranchName }
 }
 
@@ -282,7 +288,7 @@ export async function fetchAndDisplayGithubMetadata(
   initialBranchName: string
 ): Promise<{ githubMetadata: GithubMetadata | null; enhancedBranchName: string }> {
   const githubMetadata = await fetchGitHubMetadata(issueNumber)
-  
+
   if (!githubMetadata) {
     return { githubMetadata: null, enhancedBranchName: initialBranchName }
   }
@@ -294,7 +300,7 @@ export async function fetchAndDisplayGithubMetadata(
     .replace(/^-+|-+$/g, '')
     .substring(0, 30)
   const enhancedBranchName = `${githubMetadata.type}-${issueNumber}-${sanitizedTitle}`
-  
+
   return { githubMetadata, enhancedBranchName }
 }
 
@@ -305,7 +311,7 @@ export async function executeCreateCommand(
 ): Promise<void> {
   const manager = new GitWorktreeManager()
   const configManager = new ConfigManager()
-  
+
   // Git リポジトリの確認
   if (!(await manager.isGitRepository())) {
     console.error(chalk.red('エラー: このディレクトリはGitリポジトリではありません'))
@@ -315,7 +321,7 @@ export async function executeCreateCommand(
   // 設定の読み込み
   await configManager.loadProjectConfig()
   let config = configManager.getAll()
-  
+
   // テンプレート設定の適用
   if (options.template) {
     const { config: updatedConfig, updatedOptions } = await applyTemplateConfig(
@@ -340,17 +346,21 @@ export async function executeCreateCommand(
     enhancedBranchName = result.enhancedBranchName
 
     if (githubMetadata) {
-      console.log(chalk.cyan(`\n📋 ${githubMetadata.type === 'pr' ? 'PR' : 'Issue'} #${issueNumber}: ${githubMetadata.title}`))
+      console.log(
+        chalk.cyan(
+          `\n📋 ${githubMetadata.type === 'pr' ? 'PR' : 'Issue'} #${issueNumber}: ${githubMetadata.title}`
+        )
+      )
       console.log(chalk.gray(`👤 ${githubMetadata.author}`))
-      
+
       if (githubMetadata.labels.length > 0) {
         console.log(chalk.gray(`🏷️  ${githubMetadata.labels.join(', ')}`))
       }
-      
+
       if (githubMetadata.assignees.length > 0) {
         console.log(chalk.gray(`👥 ${githubMetadata.assignees.join(', ')}`))
       }
-      
+
       console.log(chalk.gray(`🔗 ${githubMetadata.url}`))
       console.log()
     }
@@ -362,7 +372,7 @@ export async function executeCreateCommand(
     enhancedBranchName,
     githubMetadata
   )
-  
+
   if (shouldConfirm) {
     const confirmed = await confirmWorktreeCreation(enhancedBranchName, githubMetadata)
     if (!confirmed) {
@@ -408,7 +418,7 @@ export async function confirmWorktreeCreation(
       default: true,
     },
   ])
-  
+
   return confirmed
 }
 
@@ -422,14 +432,16 @@ export async function createWorktreeWithProgress(
   issueNumber: string | null
 ): Promise<void> {
   const spinner = ora('新しい演奏者を招集中...').start()
-  
+
   try {
     // Worktreeの作成
     const worktreePath = await manager.createWorktree(branchName, options.base)
-    
+
     // メタデータの保存
     await saveWorktreeMetadata(worktreePath, branchName, {
-      github: githubMetadata ? { ...githubMetadata, issueNumber: issueNumber || undefined } : undefined,
+      github: githubMetadata
+        ? { ...githubMetadata, issueNumber: issueNumber || undefined }
+        : undefined,
       template: options.template,
     })
 
@@ -437,7 +449,6 @@ export async function createWorktreeWithProgress(
 
     // 後処理の実行
     await executePostCreationTasks(worktreePath, branchName, options, config)
-    
   } catch (error) {
     spinner.fail(chalk.red(`演奏者の招集に失敗しました: ${error}`))
     throw error
@@ -485,17 +496,17 @@ export async function executePostCreationTasks(
 // 環境セットアップ
 export async function setupEnvironment(worktreePath: string, config: Config): Promise<void> {
   const spinner = ora('環境をセットアップ中...').start()
-  
+
   try {
     // 依存関係のインストール
     const packageManager = 'npm' // Default to npm for now
     await execa(packageManager, ['install'], { cwd: worktreePath })
-    
+
     // 設定ファイルの同期
     if (config.development?.syncFiles) {
       await syncConfigFiles(worktreePath, config.development.syncFiles)
     }
-    
+
     spinner.succeed(chalk.green('✨ 環境セットアップが完了しました'))
   } catch (error) {
     spinner.fail(chalk.red(`環境セットアップに失敗しました: ${error}`))
@@ -505,11 +516,11 @@ export async function setupEnvironment(worktreePath: string, config: Config): Pr
 // 設定ファイルの同期
 export async function syncConfigFiles(worktreePath: string, syncFiles: string[]): Promise<void> {
   const rootPath = process.cwd()
-  
+
   for (const file of syncFiles) {
     const sourcePath = path.join(rootPath, file)
     const destPath = path.join(worktreePath, file)
-    
+
     try {
       await fs.copyFile(sourcePath, destPath)
     } catch {
@@ -521,7 +532,7 @@ export async function syncConfigFiles(worktreePath: string, syncFiles: string[])
 // エディタで開く
 export async function openInEditor(worktreePath: string, config: Config): Promise<void> {
   const editor = config.development?.defaultEditor || 'cursor'
-  
+
   try {
     await execa(editor, [worktreePath], { detached: true })
     console.log(chalk.green(`✨ ${editor}で開きました`))
@@ -533,12 +544,16 @@ export async function openInEditor(worktreePath: string, config: Config): Promis
 // Draft PR作成
 export async function createDraftPR(branchName: string, worktreePath: string): Promise<void> {
   const spinner = ora('Draft PRを作成中...').start()
-  
+
   try {
-    await execa('gh', ['pr', 'create', '--draft', '--title', `WIP: ${branchName}`, '--body', 'Work in progress'], {
-      cwd: worktreePath,
-    })
-    
+    await execa(
+      'gh',
+      ['pr', 'create', '--draft', '--title', `WIP: ${branchName}`, '--body', 'Work in progress'],
+      {
+        cwd: worktreePath,
+      }
+    )
+
     spinner.succeed(chalk.green('✨ Draft PRを作成しました'))
   } catch (error) {
     spinner.fail(chalk.red(`Draft PRの作成に失敗しました: ${error}`))

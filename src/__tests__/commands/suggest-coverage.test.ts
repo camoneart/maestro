@@ -49,13 +49,13 @@ vi.mock('path', () => ({ default: mockPath }))
 vi.mock('os', () => ({ tmpdir: mockTmpdir }))
 vi.mock('chalk', () => ({
   default: {
-    red: vi.fn((text) => text),
-    green: vi.fn((text) => text),
-    yellow: vi.fn((text) => text),
-    cyan: vi.fn((text) => text),
-    gray: vi.fn((text) => text),
-    bold: vi.fn((text) => text),
-  }
+    red: vi.fn(text => text),
+    green: vi.fn(text => text),
+    yellow: vi.fn(text => text),
+    cyan: vi.fn(text => text),
+    gray: vi.fn(text => text),
+    bold: vi.fn(text => text),
+  },
 }))
 vi.mock('../../core/git.js', () => ({ GitWorktreeManager: mockGitWorktreeManager }))
 
@@ -125,11 +125,7 @@ Not a suggestion
 3. third-suggestion`
 
     const result2 = parseClaudeResponse(response2)
-    expect(result2).toEqual([
-      'first-suggestion',
-      'second-suggestion',
-      'third-suggestion',
-    ])
+    expect(result2).toEqual(['first-suggestion', 'second-suggestion', 'third-suggestion'])
   })
 
   it('should test buildPrompt function', () => {
@@ -140,21 +136,25 @@ Not a suggestion
         pr: `Suggest PR title and description for: ${context.branch}`,
         issue: `Suggest issue title and description for: ${context.description}`,
       }
-      
+
       return prompts[type] || 'Suggest based on context'
     }
 
-    expect(buildPrompt('branch', { description: 'user login feature' }))
-      .toBe('Suggest 5 branch names based on: user login feature')
+    expect(buildPrompt('branch', { description: 'user login feature' })).toBe(
+      'Suggest 5 branch names based on: user login feature'
+    )
 
-    expect(buildPrompt('commit', { diff: 'diff content here' }))
-      .toBe('Suggest 5 commit messages for:\ndiff content here')
+    expect(buildPrompt('commit', { diff: 'diff content here' })).toBe(
+      'Suggest 5 commit messages for:\ndiff content here'
+    )
 
-    expect(buildPrompt('pr', { branch: 'feature-auth' }))
-      .toBe('Suggest PR title and description for: feature-auth')
+    expect(buildPrompt('pr', { branch: 'feature-auth' })).toBe(
+      'Suggest PR title and description for: feature-auth'
+    )
 
-    expect(buildPrompt('issue', { description: 'bug in login' }))
-      .toBe('Suggest issue title and description for: bug in login')
+    expect(buildPrompt('issue', { description: 'bug in login' })).toBe(
+      'Suggest issue title and description for: bug in login'
+    )
 
     // Test fallback
     expect(buildPrompt('unknown', {})).toBe('Suggest based on context')
@@ -169,19 +169,19 @@ Not a suggestion
 
     const generateContextFromGit = async () => {
       const context: any = {}
-      
+
       try {
         context.currentBranch = await mockGitCommands.getCurrentBranch()
       } catch {}
-      
+
       try {
         context.recentCommits = await mockGitCommands.getCommitLogs(5)
       } catch {}
-      
+
       try {
         context.stagedDiff = await mockGitCommands.getDiff('--staged')
       } catch {}
-      
+
       return context
     }
 

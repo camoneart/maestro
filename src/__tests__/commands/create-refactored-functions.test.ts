@@ -81,7 +81,7 @@ describe('create command refactored functions', () => {
   describe('executeCreateCommand', () => {
     it('should execute create command successfully', async () => {
       const options = { base: 'main', setup: true }
-      
+
       await executeCreateCommand('test-branch', options)
 
       expect(mockGitManager.isGitRepository).toHaveBeenCalled()
@@ -97,14 +97,16 @@ describe('create command refactored functions', () => {
       })
 
       await expect(executeCreateCommand('test-branch', {})).rejects.toThrow('process.exit called')
-      
-      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Gitリポジトリではありません'))
+
+      expect(consoleSpy).toHaveBeenCalledWith(
+        expect.stringContaining('Gitリポジトリではありません')
+      )
       expect(processSpy).toHaveBeenCalledWith(1)
     })
 
     it('should handle template options', async () => {
       const options = { template: 'feature' }
-      
+
       await executeCreateCommand('test-branch', options)
 
       expect(mockConfigManager.getAll).toHaveBeenCalled()
@@ -120,8 +122,8 @@ describe('create command refactored functions', () => {
               author: { login: 'testuser' },
               labels: [{ name: 'bug' }],
               assignees: [{ name: 'assignee1' }],
-              url: 'https://github.com/test/repo/issues/123'
-            })
+              url: 'https://github.com/test/repo/issues/123',
+            }),
           })
         }
         return Promise.resolve({ stdout: '', stderr: '', exitCode: 0 })
@@ -135,11 +137,7 @@ describe('create command refactored functions', () => {
 
   describe('shouldPromptForConfirmation', () => {
     it('should return false when yes option is true', async () => {
-      const result = await shouldPromptForConfirmation(
-        { yes: true },
-        'test-branch',
-        null
-      )
+      const result = await shouldPromptForConfirmation({ yes: true }, 'test-branch', null)
 
       expect(result).toBe(false)
     })
@@ -152,7 +150,7 @@ describe('create command refactored functions', () => {
         author: 'testuser',
         labels: ['bug'],
         assignees: [],
-        url: 'https://github.com/test/repo/issues/123'
+        url: 'https://github.com/test/repo/issues/123',
       }
 
       const result = await shouldPromptForConfirmation(
@@ -165,11 +163,7 @@ describe('create command refactored functions', () => {
     })
 
     it('should return true for issue branches without yes option', async () => {
-      const result = await shouldPromptForConfirmation(
-        {},
-        'issue-123-test',
-        null
-      )
+      const result = await shouldPromptForConfirmation({}, 'issue-123-test', null)
 
       expect(result).toBe(true)
     })
@@ -186,7 +180,7 @@ describe('create command refactored functions', () => {
           type: 'confirm',
           name: 'confirmed',
           message: expect.stringContaining('test-branch'),
-        })
+        }),
       ])
       expect(result).toBe(true)
     })
@@ -199,7 +193,7 @@ describe('create command refactored functions', () => {
         author: 'testuser',
         labels: ['bug'],
         assignees: [],
-        url: 'https://github.com/test/repo/issues/123'
+        url: 'https://github.com/test/repo/issues/123',
       }
       ;(inquirer as any).prompt.mockResolvedValue({ confirmed: false })
 
@@ -208,7 +202,7 @@ describe('create command refactored functions', () => {
       expect(inquirer.prompt).toHaveBeenCalledWith([
         expect.objectContaining({
           message: expect.stringContaining('Test Issue'),
-        })
+        }),
       ])
       expect(result).toBe(false)
     })
@@ -219,7 +213,7 @@ describe('create command refactored functions', () => {
       const config = {
         development: { autoSetup: true },
         tmux: { enabled: true },
-        claude: { autoStart: true }
+        claude: { autoStart: true },
       }
 
       await createWorktreeWithProgress(
@@ -233,22 +227,21 @@ describe('create command refactored functions', () => {
 
       expect(mockSpinner.start).toHaveBeenCalled()
       expect(mockGitManager.createWorktree).toHaveBeenCalledWith('test-branch', undefined)
-      expect(mockSpinner.succeed).toHaveBeenCalledWith(expect.stringContaining('演奏者を作り出しました'))
+      expect(mockSpinner.succeed).toHaveBeenCalledWith(
+        expect.stringContaining('演奏者を作り出しました')
+      )
     })
 
     it('should handle worktree creation failure', async () => {
       mockGitManager.createWorktree.mockRejectedValue(new Error('Creation failed'))
 
-      await expect(createWorktreeWithProgress(
-        mockGitManager,
-        'test-branch',
-        {},
-        {},
-        null,
-        null
-      )).rejects.toThrow('Creation failed')
+      await expect(
+        createWorktreeWithProgress(mockGitManager, 'test-branch', {}, {}, null, null)
+      ).rejects.toThrow('Creation failed')
 
-      expect(mockSpinner.fail).toHaveBeenCalledWith(expect.stringContaining('演奏者の作成に失敗しました'))
+      expect(mockSpinner.fail).toHaveBeenCalledWith(
+        expect.stringContaining('演奏者の作成に失敗しました')
+      )
     })
   })
 
@@ -257,7 +250,7 @@ describe('create command refactored functions', () => {
       const config = {
         development: { autoSetup: true },
         tmux: { enabled: true },
-        claude: { autoStart: true }
+        claude: { autoStart: true },
       }
       const options = { setup: true, open: true, tmux: true, claude: true, draftPr: true }
 
@@ -271,7 +264,7 @@ describe('create command refactored functions', () => {
       const config = {
         development: { autoSetup: false },
         tmux: { enabled: false },
-        claude: { autoStart: false }
+        claude: { autoStart: false },
       }
       const options = {}
 
@@ -298,7 +291,9 @@ describe('create command refactored functions', () => {
 
       await setupEnvironment('/path/to/worktree', {})
 
-      expect(mockSpinner.fail).toHaveBeenCalledWith(expect.stringContaining('環境セットアップに失敗しました'))
+      expect(mockSpinner.fail).toHaveBeenCalledWith(
+        expect.stringContaining('環境セットアップに失敗しました')
+      )
     })
   })
 
@@ -334,7 +329,9 @@ describe('create command refactored functions', () => {
 
       await openInEditor('/path/to/worktree', {})
 
-      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('エディタの起動に失敗しました'))
+      expect(consoleSpy).toHaveBeenCalledWith(
+        expect.stringContaining('エディタの起動に失敗しました')
+      )
     })
   })
 
@@ -343,9 +340,11 @@ describe('create command refactored functions', () => {
       await createDraftPR('test-branch', '/path/to/worktree')
 
       expect(mockSpinner.start).toHaveBeenCalled()
-      expect(execa).toHaveBeenCalledWith('gh', [
-        'pr', 'create', '--draft', '--title', 'WIP: test-branch', '--body', 'Work in progress'
-      ], { cwd: '/path/to/worktree' })
+      expect(execa).toHaveBeenCalledWith(
+        'gh',
+        ['pr', 'create', '--draft', '--title', 'WIP: test-branch', '--body', 'Work in progress'],
+        { cwd: '/path/to/worktree' }
+      )
       expect(mockSpinner.succeed).toHaveBeenCalled()
     })
 
@@ -354,7 +353,9 @@ describe('create command refactored functions', () => {
 
       await createDraftPR('test-branch', '/path/to/worktree')
 
-      expect(mockSpinner.fail).toHaveBeenCalledWith(expect.stringContaining('Draft PRの作成に失敗しました'))
+      expect(mockSpinner.fail).toHaveBeenCalledWith(
+        expect.stringContaining('Draft PRの作成に失敗しました')
+      )
     })
   })
 })

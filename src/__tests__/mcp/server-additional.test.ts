@@ -63,16 +63,16 @@ describe('MCP Server - Implementation Tests', () => {
 
     it('should handle server initialization', async () => {
       const { Server } = await import('@modelcontextprotocol/sdk/server/index.js')
-      
+
       // Serverが正しいパラメータで作成されることを確認
       expect(Server).toBeDefined()
-      
+
       // サーバー作成時のパラメータをテスト
       const serverInstance = new (Server as any)(
         { name: 'maestro', version: '0.1.0' },
         { capabilities: { tools: {} } }
       )
-      
+
       expect(serverInstance.serverInfo.name).toBe('maestro')
       expect(serverInstance.serverInfo.version).toBe('0.1.0')
       expect(serverInstance.serverOptions.capabilities.tools).toBeDefined()
@@ -80,9 +80,9 @@ describe('MCP Server - Implementation Tests', () => {
 
     it('should configure StdioServerTransport', async () => {
       const { StdioServerTransport } = await import('@modelcontextprotocol/sdk/server/stdio.js')
-      
+
       expect(StdioServerTransport).toBeDefined()
-      
+
       const transport = new (StdioServerTransport as any)()
       expect(transport).toBeDefined()
     })
@@ -92,16 +92,16 @@ describe('MCP Server - Implementation Tests', () => {
     it('should define CreateWorktreeArgsSchema', async () => {
       // Zodスキーマの基本テスト
       const { z } = await import('zod')
-      
+
       const CreateWorktreeArgsSchema = z.object({
         branchName: z.string().describe('作成するブランチ名'),
         baseBranch: z.string().optional().describe('ベースブランチ（省略時は現在のブランチ）'),
       })
-      
+
       // 有効なデータのテスト
       const validData = { branchName: 'feature-test' }
       expect(() => CreateWorktreeArgsSchema.parse(validData)).not.toThrow()
-      
+
       // 無効なデータのテスト
       const invalidData = { invalidField: 'test' }
       expect(() => CreateWorktreeArgsSchema.parse(invalidData)).toThrow()
@@ -109,27 +109,27 @@ describe('MCP Server - Implementation Tests', () => {
 
     it('should define DeleteWorktreeArgsSchema', async () => {
       const { z } = await import('zod')
-      
+
       const DeleteWorktreeArgsSchema = z.object({
         branchName: z.string().describe('削除するブランチ名'),
         force: z.boolean().optional().describe('強制削除フラグ'),
       })
-      
+
       const validData = { branchName: 'feature-test', force: true }
       expect(() => DeleteWorktreeArgsSchema.parse(validData)).not.toThrow()
-      
+
       const minimalData = { branchName: 'feature-test' }
       expect(() => DeleteWorktreeArgsSchema.parse(minimalData)).not.toThrow()
     })
 
     it('should define ExecInWorktreeArgsSchema', async () => {
       const { z } = await import('zod')
-      
+
       const ExecInWorktreeArgsSchema = z.object({
         branchName: z.string().describe('実行対象のブランチ名'),
         command: z.string().describe('実行するコマンド'),
       })
-      
+
       const validData = { branchName: 'feature-test', command: 'npm test' }
       expect(() => ExecInWorktreeArgsSchema.parse(validData)).not.toThrow()
     })
@@ -140,12 +140,12 @@ describe('MCP Server - Implementation Tests', () => {
       // ツール実行のシミュレーション
       const toolName = 'create_orchestra_member'
       const args = { branchName: 'feature-test', baseBranch: 'main' }
-      
+
       mockGitManager.createWorktree.mockResolvedValue('/path/to/worktree/feature-test')
-      
+
       // ツールハンドラのロジックをシミュレート
       const result = await mockGitManager.createWorktree(args.branchName, args.baseBranch)
-      
+
       expect(result).toBe('/path/to/worktree/feature-test')
       expect(mockGitManager.createWorktree).toHaveBeenCalledWith('feature-test', 'main')
     })
@@ -155,43 +155,43 @@ describe('MCP Server - Implementation Tests', () => {
         { path: '/path/to/worktree/feature-1', branch: 'refs/heads/feature-1' },
         { path: '/path/to/worktree/feature-2', branch: 'refs/heads/feature-2' },
       ]
-      
+
       mockGitManager.listWorktrees.mockResolvedValue(mockWorktrees)
-      
+
       const worktrees = await mockGitManager.listWorktrees()
       const orchestraMembers = worktrees.filter(wt => !wt.path.endsWith('.'))
-      
+
       expect(orchestraMembers).toHaveLength(2)
       expect(orchestraMembers[0].branch).toBe('refs/heads/feature-1')
     })
 
     it('should handle delete_orchestra_member tool', async () => {
       const args = { branchName: 'feature-test', force: false }
-      
+
       mockGitManager.deleteWorktree.mockResolvedValue(undefined)
-      
+
       await mockGitManager.deleteWorktree(args.branchName, args.force)
-      
+
       expect(mockGitManager.deleteWorktree).toHaveBeenCalledWith('feature-test', false)
     })
 
     it('should handle exec_in_orchestra_member tool', async () => {
       const { execa } = await import('execa')
       const args = { branchName: 'feature-test', command: 'npm test' }
-      
+
       const mockWorktrees = [
         { path: '/path/to/worktree/feature-test', branch: 'refs/heads/feature-test' },
       ]
-      
+
       mockGitManager.listWorktrees.mockResolvedValue(mockWorktrees)
       ;(execa as any).mockResolvedValue({ stdout: 'Test passed' })
-      
+
       const worktrees = await mockGitManager.listWorktrees()
       const targetWorktree = worktrees.find(wt => {
         const branch = wt.branch?.replace('refs/heads/', '')
         return branch === args.branchName
       })
-      
+
       expect(targetWorktree).toBeDefined()
       expect(targetWorktree?.path).toBe('/path/to/worktree/feature-test')
     })
@@ -200,10 +200,10 @@ describe('MCP Server - Implementation Tests', () => {
   describe('Error Handling', () => {
     it('should handle git repository validation', async () => {
       mockGitManager.isGitRepository.mockResolvedValue(false)
-      
+
       const isGitRepo = await mockGitManager.isGitRepository()
       expect(isGitRepo).toBe(false)
-      
+
       // Gitリポジトリでない場合のエラーハンドリング
       if (!isGitRepo) {
         const errorResponse = {
@@ -220,7 +220,7 @@ describe('MCP Server - Implementation Tests', () => {
 
     it('should handle worktree creation errors', async () => {
       mockGitManager.createWorktree.mockRejectedValue(new Error('Branch already exists'))
-      
+
       try {
         await mockGitManager.createWorktree('existing-branch')
       } catch (error) {
@@ -238,7 +238,7 @@ describe('MCP Server - Implementation Tests', () => {
 
     it('should handle unknown tool names', async () => {
       const unknownTool = 'invalid_tool'
-      
+
       const errorResponse = {
         content: [
           {
@@ -247,7 +247,7 @@ describe('MCP Server - Implementation Tests', () => {
           },
         ],
       }
-      
+
       expect(errorResponse.content[0].text).toContain('不明なツール')
     })
   })
@@ -255,37 +255,39 @@ describe('MCP Server - Implementation Tests', () => {
   describe('Server Lifecycle', () => {
     it('should handle server startup', async () => {
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
-      
+
       // main関数のシミュレーション
       const mockServer = {
         connect: vi.fn().mockResolvedValue(undefined),
       }
-      
+
       const mockTransport = {
         transport: 'stdio',
       }
-      
+
       await mockServer.connect(mockTransport)
-      
+
       expect(mockServer.connect).toHaveBeenCalledWith(mockTransport)
-      
+
       consoleSpy.mockRestore()
     })
 
     it('should handle server startup errors', async () => {
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
-      const processExitSpy = vi.spyOn(process, 'exit').mockImplementation((code?: string | number | null | undefined) => {
-        throw new Error(`Process exited with code ${code}`)
-      })
-      
+      const processExitSpy = vi
+        .spyOn(process, 'exit')
+        .mockImplementation((code?: string | number | null | undefined) => {
+          throw new Error(`Process exited with code ${code}`)
+        })
+
       // エラーが発生した場合のハンドリング
       const error = new Error('Connection failed')
-      
+
       expect(() => {
         console.error('Fatal error:', error)
         process.exit(1)
       }).toThrow('Process exited with code 1')
-      
+
       consoleSpy.mockRestore()
       processExitSpy.mockRestore()
     })
@@ -295,7 +297,7 @@ describe('MCP Server - Implementation Tests', () => {
     it('should integrate with GitWorktreeManager correctly', async () => {
       // GitWorktreeManagerとの統合テスト
       const gitManager = new GitWorktreeManager()
-      
+
       expect(gitManager).toBeDefined()
       expect(mockGitManager.isGitRepository).toBeDefined()
       expect(mockGitManager.createWorktree).toBeDefined()
@@ -305,14 +307,14 @@ describe('MCP Server - Implementation Tests', () => {
 
     it('should handle Git operations correctly', async () => {
       const gitManager = new GitWorktreeManager()
-      
+
       // Git操作の基本テスト
       await gitManager.isGitRepository()
       expect(mockGitManager.isGitRepository).toHaveBeenCalled()
-      
+
       await gitManager.listWorktrees()
       expect(mockGitManager.listWorktrees).toHaveBeenCalled()
-      
+
       await gitManager.createWorktree('test-branch')
       expect(mockGitManager.createWorktree).toHaveBeenCalledWith('test-branch')
     })
@@ -324,11 +326,11 @@ describe('MCP Server - Implementation Tests', () => {
         content: [
           {
             type: 'text',
-            text: '✅ 演奏者 \'feature-test\' を作り出しました: /path/to/worktree',
+            text: "✅ 演奏者 'feature-test' を作り出しました: /path/to/worktree",
           },
         ],
       }
-      
+
       expect(successResponse.content[0].type).toBe('text')
       expect(successResponse.content[0].text).toContain('✅')
       expect(successResponse.content[0].text).toContain('演奏者')
@@ -343,7 +345,7 @@ describe('MCP Server - Implementation Tests', () => {
           },
         ],
       }
-      
+
       expect(errorResponse.content[0].type).toBe('text')
       expect(errorResponse.content[0].text).toContain('❌')
       expect(errorResponse.content[0].text).toContain('エラー')
@@ -354,7 +356,7 @@ describe('MCP Server - Implementation Tests', () => {
         { path: '/path/to/worktree/feature-1', branch: 'refs/heads/feature-1' },
         { path: '/path/to/worktree/feature-2', branch: 'refs/heads/feature-2' },
       ]
-      
+
       const orchestraMembers = mockWorktrees.filter(wt => !wt.path.endsWith('.'))
       const list = orchestraMembers
         .map(wt => {
@@ -362,7 +364,7 @@ describe('MCP Server - Implementation Tests', () => {
           return `• ${branchName} (${wt.path})`
         })
         .join('\n')
-      
+
       const listResponse = {
         content: [
           {
@@ -371,7 +373,7 @@ describe('MCP Server - Implementation Tests', () => {
           },
         ],
       }
-      
+
       expect(listResponse.content[0].text).toContain('🎼 演奏者一覧')
       expect(listResponse.content[0].text).toContain('feature-1')
       expect(listResponse.content[0].text).toContain('合計: 2 対の演奏者')

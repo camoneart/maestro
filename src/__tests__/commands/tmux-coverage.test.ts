@@ -24,7 +24,7 @@ describe('tmux command coverage', () => {
 
   it('should test tmux session check', async () => {
     const mockExeca = vi.fn()
-    
+
     const hasSession = async (sessionName: string): Promise<boolean> => {
       try {
         await mockExeca('tmux', ['has-session', '-t', sessionName])
@@ -37,7 +37,7 @@ describe('tmux command coverage', () => {
     // Session exists
     mockExeca.mockResolvedValueOnce({ stdout: '' })
     expect(await hasSession('test-session')).toBe(true)
-    
+
     // Session doesn't exist
     mockExeca.mockRejectedValueOnce(new Error('Session not found'))
     expect(await hasSession('test-session')).toBe(false)
@@ -45,25 +45,23 @@ describe('tmux command coverage', () => {
 
   it('should test window creation logic', async () => {
     const mockExeca = vi.fn()
-    
+
     const createWindow = async (sessionName: string, windowName: string, path: string) => {
-      const args = [
-        'new-window',
-        '-t', sessionName,
-        '-n', windowName,
-        '-c', path,
-      ]
-      
+      const args = ['new-window', '-t', sessionName, '-n', windowName, '-c', path]
+
       await mockExeca('tmux', args)
     }
 
     await createWindow('test-session', 'editor', '/path/to/project')
-    
+
     expect(mockExeca).toHaveBeenCalledWith('tmux', [
       'new-window',
-      '-t', 'test-session',
-      '-n', 'editor',
-      '-c', '/path/to/project',
+      '-t',
+      'test-session',
+      '-n',
+      'editor',
+      '-c',
+      '/path/to/project',
     ])
   })
 
@@ -96,30 +94,22 @@ describe('tmux command coverage', () => {
     ]
 
     const formatted = formatSessionList(sessions)
-    expect(formatted).toEqual([
-      'main (attached) [3 windows]',
-      'feature-test',
-      'bugfix [2 windows]',
-    ])
+    expect(formatted).toEqual(['main (attached) [3 windows]', 'feature-test', 'bugfix [2 windows]'])
   })
 
   it('should test command execution in tmux', async () => {
     const mockExeca = vi.fn()
-    
+
     const sendKeys = async (sessionName: string, command: string) => {
-      await mockExeca('tmux', [
-        'send-keys',
-        '-t', sessionName,
-        command,
-        'Enter',
-      ])
+      await mockExeca('tmux', ['send-keys', '-t', sessionName, command, 'Enter'])
     }
 
     await sendKeys('test-session', 'npm run dev')
-    
+
     expect(mockExeca).toHaveBeenCalledWith('tmux', [
       'send-keys',
-      '-t', 'test-session',
+      '-t',
+      'test-session',
       'npm run dev',
       'Enter',
     ])
@@ -134,7 +124,7 @@ describe('tmux command coverage', () => {
         horizontal: 'even-horizontal',
         vertical: 'even-vertical',
       }
-      
+
       return layouts[type] || 'tiled'
     }
 

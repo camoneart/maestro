@@ -34,28 +34,31 @@ export function formatSuggestions(suggestions: string[]): string {
 export function parseClaudeResponse(response: string): string[] {
   const lines = response.split('\n')
   const suggestions: string[] = []
-  
+
   for (const line of lines) {
     const match = line.match(/^\d+\.\s*(.+)$/)
     if (match && match[1]) {
       suggestions.push(match[1].trim())
     }
   }
-  
+
   return suggestions
 }
 
 // コミットメッセージ生成のためのプロンプトを作成する純粋関数
-export function createCommitPrompt(diffContent: string, options: {
-  type?: 'conventional' | 'standard'
-  scope?: string
-  maxLength?: number
-}): string {
+export function createCommitPrompt(
+  diffContent: string,
+  options: {
+    type?: 'conventional' | 'standard'
+    scope?: string
+    maxLength?: number
+  }
+): string {
   const { type = 'conventional', scope, maxLength = 72 } = options
-  
+
   let prompt = '# コミットメッセージの提案\n\n'
   prompt += '以下のdiffに基づいて、適切なコミットメッセージを5つ提案してください。\n\n'
-  
+
   if (type === 'conventional') {
     prompt += '## Conventional Commits形式で:\n'
     prompt += '- type(scope): description\n'
@@ -65,23 +68,23 @@ export function createCommitPrompt(diffContent: string, options: {
     }
     prompt += '\n'
   }
-  
+
   prompt += '## ルール:\n'
   prompt += `- 最大${maxLength}文字\n`
   prompt += '- 動詞で始める\n'
   prompt += '- 簡潔で分かりやすく\n'
   prompt += '- 変更の意図を明確に\n\n'
-  
+
   prompt += '## Diff:\n'
   prompt += '```diff\n'
   prompt += diffContent
   prompt += '\n```\n\n'
-  
+
   prompt += '## 出力形式:\n'
   prompt += '1. feat: add user authentication\n'
   prompt += '2. fix: resolve login validation bug\n'
   prompt += '（各行に1つずつ、番号付きで5つ）\n'
-  
+
   return prompt
 }
 
@@ -93,18 +96,18 @@ export function analyzeRepositoryInfo(repoPath: string): {
   packageManager: string
 } {
   const packageJsonPath = path.join(repoPath, 'package.json')
-  
+
   let projectName = path.basename(repoPath)
   let isMonorepo = false
   const detectedFrameworks: string[] = []
   let packageManager = 'npm'
-  
+
   try {
     // package.jsonから情報を取得
     if (existsSync(packageJsonPath)) {
       const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf-8'))
       projectName = packageJson.name || projectName
-      
+
       // フレームワーク検出
       const dependencies = { ...packageJson.dependencies, ...packageJson.devDependencies }
       if (dependencies.react) detectedFrameworks.push('React')
@@ -112,14 +115,14 @@ export function analyzeRepositoryInfo(repoPath: string): {
       if (dependencies.angular) detectedFrameworks.push('Angular')
       if (dependencies.express) detectedFrameworks.push('Express')
       if (dependencies.next) detectedFrameworks.push('Next.js')
-      
+
       // パッケージマネージャー検出
       if (existsSync(path.join(repoPath, 'pnpm-lock.yaml'))) {
         packageManager = 'pnpm'
       } else if (existsSync(path.join(repoPath, 'yarn.lock'))) {
         packageManager = 'yarn'
       }
-      
+
       // モノレポ検出
       if (packageJson.workspaces || existsSync(path.join(repoPath, 'lerna.json'))) {
         isMonorepo = true
@@ -128,12 +131,12 @@ export function analyzeRepositoryInfo(repoPath: string): {
   } catch {
     // package.jsonの読み取りに失敗した場合はデフォルト値を使用
   }
-  
+
   return {
     projectName,
     isMonorepo,
     detectedFrameworks,
-    packageManager
+    packageManager,
   }
 }
 

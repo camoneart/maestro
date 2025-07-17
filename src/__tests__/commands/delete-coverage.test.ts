@@ -37,13 +37,13 @@ vi.mock('inquirer', () => ({ default: mockInquirer }))
 vi.mock('ora', () => ({ default: mockOra }))
 vi.mock('chalk', () => ({
   default: {
-    red: vi.fn((text) => text),
-    green: vi.fn((text) => text),
-    yellow: vi.fn((text) => text),
-    cyan: vi.fn((text) => text),
-    gray: vi.fn((text) => text),
-    bold: vi.fn((text) => text),
-  }
+    red: vi.fn(text => text),
+    green: vi.fn(text => text),
+    yellow: vi.fn(text => text),
+    cyan: vi.fn(text => text),
+    gray: vi.fn(text => text),
+    bold: vi.fn(text => text),
+  },
 }))
 vi.mock('../../core/git.js', () => ({ GitWorktreeManager: mockGitWorktreeManager }))
 
@@ -153,7 +153,12 @@ describe('delete command coverage', () => {
 
     expect(mockExeca).toHaveBeenCalledWith('git', ['branch', '-r'])
     // Should not call push command
-    expect(mockExeca).not.toHaveBeenCalledWith('git', ['push', 'origin', '--delete', 'nonexistent-branch'])
+    expect(mockExeca).not.toHaveBeenCalledWith('git', [
+      'push',
+      'origin',
+      '--delete',
+      'nonexistent-branch',
+    ])
   })
 
   it('should test deleteRemoteBranch error handling', async () => {
@@ -181,7 +186,7 @@ describe('delete command coverage', () => {
 
   it('should test command builder pattern', async () => {
     const { deleteCommand } = await import('../../commands/delete.js')
-    
+
     expect(deleteCommand).toBeDefined()
     // The command may be created at module load time, so just check it exists
   })

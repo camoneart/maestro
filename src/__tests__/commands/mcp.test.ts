@@ -21,9 +21,9 @@ describe('mcp command', () => {
 
   describe('basic functionality', () => {
     it('should show usage when no subcommand is provided', async () => {
-      await expect(
-        mcpCommand.parseAsync(['node', 'mcp'])
-      ).rejects.toThrow('Process exited with code 0')
+      await expect(mcpCommand.parseAsync(['node', 'mcp'])).rejects.toThrow(
+        'Process exited with code 0'
+      )
 
       expect(consoleLogSpy).toHaveBeenCalledWith(chalk.yellow('使い方: maestro mcp serve'))
     })
@@ -47,9 +47,9 @@ describe('mcp command', () => {
     })
 
     it('should show usage for invalid subcommand', async () => {
-      await expect(
-        mcpCommand.parseAsync(['node', 'mcp', 'unknown'])
-      ).rejects.toThrow('Process exited with code 0')
+      await expect(mcpCommand.parseAsync(['node', 'mcp', 'unknown'])).rejects.toThrow(
+        'Process exited with code 0'
+      )
 
       expect(consoleLogSpy).toHaveBeenCalledWith(chalk.yellow('使い方: maestro mcp serve'))
     })

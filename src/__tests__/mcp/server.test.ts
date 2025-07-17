@@ -63,9 +63,9 @@ describe('MCP Server', () => {
           { name: 'create_orchestra_member', description: '演奏者を加える' },
           { name: 'list_orchestra_members', description: 'オーケストラ編成を表示' },
           { name: 'delete_orchestra_member', description: '演奏者を外す' },
-        ]
+        ],
       })
-      
+
       const tools = await mockServer.listTools()
       expect(tools.tools).toHaveLength(3)
       expect(tools.tools[0].name).toBe('create_orchestra_member')
@@ -74,13 +74,13 @@ describe('MCP Server', () => {
     it('should test MCP call tool functionality', async () => {
       // ツール呼び出しのテスト
       mockServer.callTool = vi.fn().mockResolvedValue({
-        content: [{ type: 'text', text: '✅ 演奏者を加えました' }]
+        content: [{ type: 'text', text: '✅ 演奏者を加えました' }],
       })
-      
+
       const result = await mockServer.callTool('create_orchestra_member', {
-        branchName: 'test-feature'
+        branchName: 'test-feature',
       })
-      
+
       expect(result.content[0].text).toContain('演奏者を加えました')
     })
 
@@ -96,7 +96,7 @@ describe('MCP Server', () => {
   describe('error handling', () => {
     it('should handle MCP server errors', async () => {
       mockServer.callTool = vi.fn().mockRejectedValue(new Error('Server error'))
-      
+
       try {
         await mockServer.callTool('invalid_tool', {})
       } catch (error) {

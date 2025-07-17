@@ -69,9 +69,9 @@ describe('where command', () => {
     it('should handle worktree not found', async () => {
       mockGitManager.listWorktrees.mockResolvedValue([])
 
-      await expect(
-        whereCommand.parseAsync(['node', 'where', 'non-existent'])
-      ).rejects.toThrow('Process exited with code 1')
+      await expect(whereCommand.parseAsync(['node', 'where', 'non-existent'])).rejects.toThrow(
+        'Process exited with code 1'
+      )
 
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         chalk.red(`エラー: 演奏者 'non-existent' が見つかりません`)
@@ -101,9 +101,9 @@ describe('where command', () => {
       ]
       mockGitManager.listWorktrees.mockResolvedValue(mockWorktrees)
 
-      await expect(
-        whereCommand.parseAsync(['node', 'where', 'auth'])
-      ).rejects.toThrow('Process exited with code 1')
+      await expect(whereCommand.parseAsync(['node', 'where', 'auth'])).rejects.toThrow(
+        'Process exited with code 1'
+      )
 
       expect(consoleLogSpy).toHaveBeenCalledWith(chalk.yellow('\n類似した演奏者:'))
       expect(consoleLogSpy).toHaveBeenCalledWith('  - feature-auth')
@@ -115,9 +115,9 @@ describe('where command', () => {
     it('should handle not a git repository', async () => {
       mockGitManager.isGitRepository.mockResolvedValue(false)
 
-      await expect(
-        whereCommand.parseAsync(['node', 'where', 'feature-1'])
-      ).rejects.toThrow('Process exited with code 1')
+      await expect(whereCommand.parseAsync(['node', 'where', 'feature-1'])).rejects.toThrow(
+        'Process exited with code 1'
+      )
 
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         chalk.red('エラー: このディレクトリはGitリポジトリではありません')
@@ -125,12 +125,14 @@ describe('where command', () => {
     })
 
     it('should show usage when no branch name provided', async () => {
-      await expect(
-        whereCommand.parseAsync(['node', 'where'])
-      ).rejects.toThrow('Process exited with code 1')
+      await expect(whereCommand.parseAsync(['node', 'where'])).rejects.toThrow(
+        'Process exited with code 1'
+      )
 
       expect(consoleErrorSpy).toHaveBeenCalledWith(
-        chalk.red('エラー: ブランチ名を指定するか、--fzf または --current オプションを使用してください')
+        chalk.red(
+          'エラー: ブランチ名を指定するか、--fzf または --current オプションを使用してください'
+        )
       )
       expect(consoleLogSpy).toHaveBeenCalledWith(chalk.gray('使い方:'))
     })
@@ -138,9 +140,9 @@ describe('where command', () => {
     it('should handle errors gracefully', async () => {
       mockGitManager.listWorktrees.mockRejectedValue(new Error('Git error'))
 
-      await expect(
-        whereCommand.parseAsync(['node', 'where', 'feature-1'])
-      ).rejects.toThrow('Process exited with code 1')
+      await expect(whereCommand.parseAsync(['node', 'where', 'feature-1'])).rejects.toThrow(
+        'Process exited with code 1'
+      )
 
       expect(consoleErrorSpy).toHaveBeenCalledWith(chalk.red('エラー:'), 'Git error')
     })
@@ -231,9 +233,7 @@ describe('where command', () => {
       await whereCommand.parseAsync(['node', 'where', '--fzf'])
 
       // closeイベントのコールバックを実行
-      const closeCallback = mockFzfProcess.on.mock.calls.find(
-        (call) => call[0] === 'close'
-      )?.[1]
+      const closeCallback = mockFzfProcess.on.mock.calls.find(call => call[0] === 'close')?.[1]
       closeCallback?.(1)
 
       expect(consoleLogSpy).toHaveBeenCalledWith(chalk.gray('キャンセルされました'))
@@ -242,9 +242,9 @@ describe('where command', () => {
     it('should handle empty worktrees with fzf option', async () => {
       mockGitManager.listWorktrees.mockResolvedValue([])
 
-      await expect(
-        whereCommand.parseAsync(['node', 'where', '--fzf'])
-      ).rejects.toThrow('Process exited with code 1')
+      await expect(whereCommand.parseAsync(['node', 'where', '--fzf'])).rejects.toThrow(
+        'Process exited with code 1'
+      )
 
       expect(consoleLogSpy).toHaveBeenCalledWith(chalk.yellow('演奏者が存在しません'))
     })
@@ -292,9 +292,7 @@ describe('where command', () => {
       await whereCommand.parseAsync(['node', 'where', '--fzf'])
 
       // closeイベントのコールバックを実行
-      const closeCallback = mockFzfProcess.on.mock.calls.find(
-        (call) => call[0] === 'close'
-      )?.[1]
+      const closeCallback = mockFzfProcess.on.mock.calls.find(call => call[0] === 'close')?.[1]
       closeCallback?.(0)
 
       expect(consoleLogSpy).toHaveBeenCalledWith('/path/to/worktree/feature-1')

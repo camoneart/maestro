@@ -27,12 +27,32 @@ describe('cli module - utility functions', () => {
   describe('Command registration structure', () => {
     it('should handle command import validation', () => {
       const commandNames = [
-        'create', 'list', 'delete', 'shell', 'exec', 'attach',
-        'mcp', 'config', 'github', 'completion', 'tmux', 'where',
-        'sync', 'review', 'issue', 'batch', 'history', 'suggest',
-        'graph', 'template', 'watch', 'health', 'dashboard', 'snapshot'
+        'create',
+        'list',
+        'delete',
+        'shell',
+        'exec',
+        'attach',
+        'mcp',
+        'config',
+        'github',
+        'completion',
+        'tmux',
+        'where',
+        'sync',
+        'review',
+        'issue',
+        'batch',
+        'history',
+        'suggest',
+        'graph',
+        'template',
+        'watch',
+        'health',
+        'dashboard',
+        'snapshot',
       ]
-      
+
       expect(commandNames).toContain('create')
       expect(commandNames).toContain('delete')
       expect(commandNames).toContain('suggest')
@@ -43,9 +63,9 @@ describe('cli module - utility functions', () => {
       const mockCommand = {
         name: 'create',
         description: 'Create a new worktree',
-        aliases: ['c']
+        aliases: ['c'],
       }
-      
+
       expect(mockCommand.name).toBe('create')
       expect(mockCommand.description).toContain('worktree')
       expect(mockCommand.aliases).toContain('c')
@@ -56,7 +76,7 @@ describe('cli module - utility functions', () => {
     it('should format error messages', () => {
       const error = new Error('Test error message')
       const formattedError = `エラー: ${error.message}`
-      
+
       expect(formattedError).toContain('エラー:')
       expect(formattedError).toContain('Test error message')
     })
@@ -64,14 +84,14 @@ describe('cli module - utility functions', () => {
     it('should handle process exit scenarios', () => {
       const exitCode = 1
       const isErrorExit = exitCode !== 0
-      
+
       expect(isErrorExit).toBe(true)
     })
 
     it('should validate error instance checking', () => {
       const error = new Error('test')
       const isErrorInstance = error instanceof Error
-      
+
       expect(isErrorInstance).toBe(true)
       expect(error.message).toBe('test')
     })
@@ -82,7 +102,7 @@ describe('cli module - utility functions', () => {
       const mockArgv = ['node', 'maestro', 'create', 'test-branch']
       const command = mockArgv[2]
       const branchName = mockArgv[3]
-      
+
       expect(command).toBe('create')
       expect(branchName).toBe('test-branch')
     })
@@ -97,7 +117,7 @@ describe('cli module - utility functions', () => {
     it('should handle red error formatting', () => {
       const message = 'Error message'
       const redMessage = `\u001b[31mエラー:\u001b[39m ${message}`
-      
+
       expect(redMessage).toContain('エラー:')
       expect(redMessage).toContain(message)
     })
@@ -105,7 +125,7 @@ describe('cli module - utility functions', () => {
     it('should validate color codes', () => {
       const redCode = '\u001b[31m'
       const resetCode = '\u001b[39m'
-      
+
       expect(redCode).toBe('\u001b[31m')
       expect(resetCode).toBe('\u001b[39m')
     })
@@ -117,9 +137,9 @@ describe('cli module - utility functions', () => {
         './commands/create.js',
         './commands/list.js',
         './commands/delete.js',
-        './commands/suggest.js'
+        './commands/suggest.js',
       ]
-      
+
       importPaths.forEach(path => {
         expect(path).toMatch(/^\.\/commands\/\w+\.js$/)
       })
@@ -141,7 +161,7 @@ describe('cli module - utility functions', () => {
       const coreCommands = ['create', 'list', 'delete', 'shell', 'exec']
       const integrationCommands = ['github', 'tmux', 'mcp']
       const utilityCommands = ['config', 'completion', 'health']
-      
+
       expect(coreCommands).toContain('create')
       expect(integrationCommands).toContain('github')
       expect(utilityCommands).toContain('config')
@@ -150,12 +170,32 @@ describe('cli module - utility functions', () => {
     it('should validate total command count', () => {
       const totalCommands = 24
       const expectedCommands = [
-        'create', 'list', 'delete', 'shell', 'exec', 'attach',
-        'mcp', 'config', 'github', 'completion', 'tmux', 'where',
-        'sync', 'review', 'issue', 'batch', 'history', 'suggest',
-        'graph', 'template', 'watch', 'health', 'dashboard', 'snapshot'
+        'create',
+        'list',
+        'delete',
+        'shell',
+        'exec',
+        'attach',
+        'mcp',
+        'config',
+        'github',
+        'completion',
+        'tmux',
+        'where',
+        'sync',
+        'review',
+        'issue',
+        'batch',
+        'history',
+        'suggest',
+        'graph',
+        'template',
+        'watch',
+        'health',
+        'dashboard',
+        'snapshot',
       ].length
-      
+
       expect(expectedCommands).toBe(totalCommands)
     })
   })
@@ -164,7 +204,7 @@ describe('cli module - utility functions', () => {
     it('should handle parseAsync structure', () => {
       const processArgv = ['node', 'maestro', 'command']
       const isNodeProcess = processArgv[0] === 'node'
-      
+
       expect(isNodeProcess).toBe(true)
       expect(processArgv.length).toBeGreaterThanOrEqual(2)
     })
@@ -172,7 +212,7 @@ describe('cli module - utility functions', () => {
     it('should validate async/await pattern', () => {
       const isAsyncFunction = true
       const hasAwaitKeyword = true
-      
+
       expect(isAsyncFunction).toBe(true)
       expect(hasAwaitKeyword).toBe(true)
     })
@@ -182,14 +222,14 @@ describe('cli module - utility functions', () => {
     it('should handle error catching structure', () => {
       const mockError = { message: 'Test error' }
       const caughtError = mockError instanceof Error ? mockError : new Error('Unknown')
-      
+
       expect(caughtError.message).toBeDefined()
     })
 
     it('should validate error logging format', () => {
       const errorMessage = 'Test error'
       const logFormat = `エラー: ${errorMessage}`
-      
+
       expect(logFormat).toMatch(/^エラー: .+/)
     })
   })

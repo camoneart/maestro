@@ -20,7 +20,7 @@ const mockGitWorktreeManager = vi.fn(() => ({
       locked: false,
       detached: false,
       prunable: false,
-    }
+    },
   ]),
   isGitRepository: vi.fn().mockResolvedValue(true),
 }))
@@ -84,13 +84,13 @@ vi.mock('path', () => ({ default: mockPath }))
 vi.mock('os', () => ({ tmpdir: mockTmpdir }))
 vi.mock('chalk', () => ({
   default: {
-    red: vi.fn((text) => text),
-    green: vi.fn((text) => text),
-    yellow: vi.fn((text) => text),
-    cyan: vi.fn((text) => text),
-    gray: vi.fn((text) => text),
-    bold: vi.fn((text) => text),
-  }
+    red: vi.fn(text => text),
+    green: vi.fn(text => text),
+    yellow: vi.fn(text => text),
+    cyan: vi.fn(text => text),
+    gray: vi.fn(text => text),
+    bold: vi.fn(text => text),
+  },
 }))
 vi.mock('../../core/git.js', () => ({ GitWorktreeManager: mockGitWorktreeManager }))
 vi.mock('../../core/config.js', () => ({ ConfigManager: mockConfigManager }))
@@ -110,15 +110,17 @@ describe('Command Action Integration Tests', () => {
 
   it('should execute create command action flow', async () => {
     // Mock successful responses
-    mockInquirer.prompt.mockResolvedValue({ 
+    mockInquirer.prompt.mockResolvedValue({
       confirm: true,
       editor: 'code',
-      template: 'default'
+      template: 'default',
     })
     mockExeca.mockResolvedValue({ stdout: '' })
 
-    // Import and test create command internals  
-    const { parseIssueNumber, fetchGitHubMetadata, saveWorktreeMetadata } = await import('../../commands/create.js')
+    // Import and test create command internals
+    const { parseIssueNumber, fetchGitHubMetadata, saveWorktreeMetadata } = await import(
+      '../../commands/create.js'
+    )
 
     // Test internal functions
     const issueResult = parseIssueNumber('123')
@@ -139,7 +141,9 @@ describe('Command Action Integration Tests', () => {
     mockInquirer.prompt.mockResolvedValue({ confirmDelete: true })
     mockExeca.mockResolvedValue({ stdout: 'origin/feature-test' })
 
-    const { formatDirectorySize, getDirectorySize, deleteRemoteBranch } = await import('../../commands/delete.js')
+    const { formatDirectorySize, getDirectorySize, deleteRemoteBranch } = await import(
+      '../../commands/delete.js'
+    )
 
     // Test utility functions
     expect(formatDirectorySize(1024)).toBe('1.0 KB')
@@ -153,20 +157,22 @@ describe('Command Action Integration Tests', () => {
     mockExeca
       .mockResolvedValueOnce({ stdout: 'origin/feature-test' })
       .mockResolvedValueOnce({ stdout: '' })
-    
+
     await deleteRemoteBranch('feature-test')
     expect(mockExeca).toHaveBeenCalledWith('git', ['branch', '-r'])
   })
 
   it('should execute suggest command action flow', async () => {
-    mockInquirer.prompt.mockResolvedValue({ 
+    mockInquirer.prompt.mockResolvedValue({
       action: 'branch',
       inputDescription: 'Add user authentication',
-      selectedBranch: 'feature/auth'
+      selectedBranch: 'feature/auth',
     })
     mockExeca.mockResolvedValue({ stdout: '' })
 
-    const { filterDuplicateSuggestions, formatSuggestions, parseClaudeResponse } = await import('../../commands/suggest.js')
+    const { filterDuplicateSuggestions, formatSuggestions, parseClaudeResponse } = await import(
+      '../../commands/suggest.js'
+    )
 
     // Test utility functions
     const filtered = filterDuplicateSuggestions(['a', 'b', 'a', 'c'])
@@ -180,24 +186,24 @@ describe('Command Action Integration Tests', () => {
   })
 
   it('should execute review command core functionality', async () => {
-    mockInquirer.prompt.mockResolvedValue({ 
+    mockInquirer.prompt.mockResolvedValue({
       action: 'approve',
-      reviewMessage: 'LGTM!'
+      reviewMessage: 'LGTM!',
     })
-    mockExeca.mockResolvedValue({ 
+    mockExeca.mockResolvedValue({
       stdout: JSON.stringify({
         number: 123,
         title: 'Test PR',
         state: 'open',
-        draft: false
-      })
+        draft: false,
+      }),
     })
 
     // Test review workflow helpers
     const validatePR = (pr: any) => {
       return {
         isValid: pr.state === 'open' && !pr.draft,
-        errors: []
+        errors: [],
       }
     }
 
@@ -212,14 +218,14 @@ describe('Command Action Integration Tests', () => {
       title: 'Bug in login',
       body: 'Description of the bug',
       labels: ['bug'],
-      assignees: ['dev1']
+      assignees: ['dev1'],
     })
-    mockExeca.mockResolvedValue({ 
+    mockExeca.mockResolvedValue({
       stdout: JSON.stringify({
         number: 1,
         title: 'Bug in login',
-        html_url: 'https://github.com/test/repo/issues/1'
-      })
+        html_url: 'https://github.com/test/repo/issues/1',
+      }),
     })
 
     // Test issue workflow
@@ -227,11 +233,15 @@ describe('Command Action Integration Tests', () => {
       return {
         number: data.number,
         title: data.title,
-        url: data.html_url
+        url: data.html_url,
       }
     }
 
-    const issueData = { number: 1, title: 'Test Issue', html_url: 'https://github.com/test/repo/issues/1' }
+    const issueData = {
+      number: 1,
+      title: 'Test Issue',
+      html_url: 'https://github.com/test/repo/issues/1',
+    }
     const formatted = formatIssueData(issueData)
     expect(formatted.number).toBe(1)
     expect(formatted.title).toBe('Test Issue')
@@ -240,9 +250,9 @@ describe('Command Action Integration Tests', () => {
   it('should test tmux command functionality', async () => {
     mockInquirer.prompt.mockResolvedValue({
       selectedSession: 'main',
-      action: 'attach'
+      action: 'attach',
     })
-    
+
     // Mock tmux commands
     mockExeca
       .mockResolvedValueOnce({ stdout: 'main: 1 windows' }) // list sessions
@@ -250,10 +260,12 @@ describe('Command Action Integration Tests', () => {
 
     const processTmuxSessions = (output: string) => {
       const lines = output.trim().split('\n')
-      return lines.map(line => {
-        const match = line.match(/^([^:]+):/)
-        return match ? match[1] : null
-      }).filter(Boolean)
+      return lines
+        .map(line => {
+          const match = line.match(/^([^:]+):/)
+          return match ? match[1] : null
+        })
+        .filter(Boolean)
     }
 
     const sessions = processTmuxSessions('main: 1 windows\nfeature: 2 windows')
@@ -266,14 +278,14 @@ describe('Command Action Integration Tests', () => {
       return {
         uri: resource.uri,
         name: resource.name,
-        description: resource.description || ''
+        description: resource.description || '',
       }
     }
 
     const mockResource = {
       uri: 'file://test.js',
       name: 'Test File',
-      description: 'A test file'
+      description: 'A test file',
     }
 
     const processed = processResource(mockResource)
@@ -304,11 +316,11 @@ describe('Command Action Integration Tests', () => {
     // Test config loading and validation
     const validateConfig = (config: any) => {
       const errors: string[] = []
-      
+
       if (config.worktrees?.path && !config.worktrees.path.startsWith('.git/')) {
         errors.push('Worktree path should be relative to .git/')
       }
-      
+
       return { isValid: errors.length === 0, errors }
     }
 

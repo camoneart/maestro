@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { 
+import {
   filterDuplicateSuggestions,
   formatSuggestions,
   parseClaudeResponse,
@@ -85,12 +85,12 @@ describe('suggest command functions', () => {
       const response = `1. feature/user-authentication
 2. feature/login-system
 3. fix/auth-bug`
-      
+
       const result = parseClaudeResponse(response)
       expect(result).toEqual([
         'feature/user-authentication',
         'feature/login-system',
-        'fix/auth-bug'
+        'fix/auth-bug',
       ])
     })
 
@@ -101,7 +101,7 @@ Some explanatory text
 2. fix/bug
 - Not numbered
 3. enhancement/ui`
-      
+
       const result = parseClaudeResponse(response)
       expect(result).toEqual(['feature/test', 'fix/bug', 'enhancement/ui'])
     })
@@ -110,7 +110,7 @@ Some explanatory text
       const response = `1.   feature/test   
 2.  fix/bug  
 3. enhancement/ui    `
-      
+
       const result = parseClaudeResponse(response)
       expect(result).toEqual(['feature/test', 'fix/bug', 'enhancement/ui'])
     })
@@ -124,7 +124,7 @@ Some explanatory text
 - Not numbered
 * Also not numbered
 Just plain text`
-      
+
       expect(parseClaudeResponse(response)).toEqual([])
     })
 
@@ -132,12 +132,12 @@ Just plain text`
       const response = `1. **feature/login** - User authentication
 2. *fix/bug* - Bug fix
 3. enhancement/ui (UI improvements)`
-      
+
       const result = parseClaudeResponse(response)
       expect(result).toEqual([
         '**feature/login** - User authentication',
         '*fix/bug* - Bug fix',
-        'enhancement/ui (UI improvements)'
+        'enhancement/ui (UI improvements)',
       ])
     })
 
@@ -145,7 +145,7 @@ Just plain text`
       const response = `3. third-item
 1. first-item
 2. second-item`
-      
+
       const result = parseClaudeResponse(response)
       expect(result).toEqual(['third-item', 'first-item', 'second-item'])
     })
@@ -154,7 +154,7 @@ Just plain text`
       const response = `1. feature/test
 10. feature/tenth
 2. feature/second`
-      
+
       const result = parseClaudeResponse(response)
       expect(result).toEqual(['feature/test', 'feature/tenth', 'feature/second'])
     })
@@ -164,9 +164,9 @@ Just plain text`
     it('should create conventional commit prompt', () => {
       const diff = '+  added new function\n-  removed old code'
       const options = { type: 'conventional' as const }
-      
+
       const result = createCommitPrompt(diff, options)
-      
+
       expect(result).toContain('# コミットメッセージの提案')
       expect(result).toContain('Conventional Commits形式で')
       expect(result).toContain('type(scope): description')
@@ -178,9 +178,9 @@ Just plain text`
     it('should create standard commit prompt', () => {
       const diff = '+  added new function'
       const options = { type: 'standard' as const }
-      
+
       const result = createCommitPrompt(diff, options)
-      
+
       expect(result).toContain('# コミットメッセージの提案')
       expect(result).toContain(diff)
       expect(result).not.toContain('Conventional Commits')
@@ -190,7 +190,7 @@ Just plain text`
     it('should include scope in conventional commits', () => {
       const diff = '+  auth changes'
       const options = { type: 'conventional' as const, scope: 'auth' }
-      
+
       const result = createCommitPrompt(diff, options)
       expect(result).toContain('scope: auth')
     })
@@ -198,7 +198,7 @@ Just plain text`
     it('should handle custom max length', () => {
       const diff = '+  test'
       const options = { type: 'conventional' as const, maxLength: 50 }
-      
+
       const result = createCommitPrompt(diff, options)
       expect(result).toContain('最大50文字')
     })
@@ -211,7 +211,7 @@ Just plain text`
     it('should handle default options', () => {
       const diff = '+  test change'
       const result = createCommitPrompt(diff, {})
-      
+
       // Should default to conventional
       expect(result).toContain('Conventional Commits形式で')
       expect(result).toContain('最大72文字')
@@ -222,7 +222,7 @@ Just plain text`
 +  added line 2
 -  removed line 1
    unchanged line`
-      
+
       const result = createCommitPrompt(diff, { type: 'standard' })
       expect(result).toContain(diff)
     })
@@ -244,11 +244,11 @@ Just plain text`
 
     it('should handle unicode in all functions', () => {
       const unicode = ['🚀feature/rocket', '🔥fix/fire', '⭐enhancement/star']
-      
+
       // Test filtering
       const filtered = filterDuplicateSuggestions([...unicode, unicode[0]])
       expect(filtered).toEqual(unicode)
-      
+
       // Test formatting
       const formatted = formatSuggestions(unicode)
       expect(formatted).toContain('1. 🚀feature/rocket')
@@ -267,7 +267,7 @@ Just plain text`
       const response = `  1.  feature/test  
     2.    fix/bug    
 3.enhancement/ui`
-      
+
       const result = parseClaudeResponse(response)
       // The regex pattern /^\d+\.\s*(.+)$/ requires line start with number
       // Lines with leading spaces don't match
@@ -279,9 +279,9 @@ Just plain text`
       const options = {
         type: 'conventional' as const,
         scope: 'test-scope',
-        maxLength: 100
+        maxLength: 100,
       }
-      
+
       const result = createCommitPrompt(diff, options)
       expect(result).toContain('scope: test-scope')
       expect(result).toContain('最大100文字')

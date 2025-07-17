@@ -12,7 +12,7 @@ describe('review command simple tests', () => {
     expect(reviewCommand.name()).toBe('review')
     expect(reviewCommand.description()).toContain('PRレビュー')
     expect(reviewCommand.aliases()).toContain('r')
-    
+
     // Check argument
     const args = reviewCommand.registeredArguments
     expect(args).toHaveLength(1)
@@ -23,11 +23,11 @@ describe('review command simple tests', () => {
   it('should test PR review state formatting', () => {
     const formatReviewState = (state: string): string => {
       const states: Record<string, string> = {
-        'APPROVED': '✅ 承認済み',
-        'CHANGES_REQUESTED': '❌ 変更依頼',
-        'COMMENTED': '💬 コメント',
-        'PENDING': '⏳ レビュー待ち',
-        'DISMISSED': '🚫 却下',
+        APPROVED: '✅ 承認済み',
+        CHANGES_REQUESTED: '❌ 変更依頼',
+        COMMENTED: '💬 コメント',
+        PENDING: '⏳ レビュー待ち',
+        DISMISSED: '🚫 却下',
       }
       return states[state] || state
     }
@@ -41,11 +41,11 @@ describe('review command simple tests', () => {
   it('should test check status formatting', () => {
     const formatCheckStatus = (status: string): string => {
       const statuses: Record<string, string> = {
-        'SUCCESS': '✅',
-        'FAILURE': '❌',
-        'PENDING': '⏳',
-        'ERROR': '⚠️',
-        'SKIPPED': '⏭️',
+        SUCCESS: '✅',
+        FAILURE: '❌',
+        PENDING: '⏳',
+        ERROR: '⚠️',
+        SKIPPED: '⏭️',
       }
       return statuses[status] || '❓'
     }
@@ -59,21 +59,21 @@ describe('review command simple tests', () => {
   it('should test PR summary generation', () => {
     const generatePRSummary = (pr: any): string => {
       const lines = []
-      
+
       lines.push(`PR #${pr.number}: ${pr.title}`)
       lines.push(`Author: ${pr.author}`)
       lines.push(`Branch: ${pr.headRef} → ${pr.baseRef}`)
-      
+
       if (pr.draft) {
         lines.push('Status: 📝 Draft')
       } else {
         lines.push(`Status: ${pr.state}`)
       }
-      
+
       if (pr.labels?.length > 0) {
         lines.push(`Labels: ${pr.labels.join(', ')}`)
       }
-      
+
       return lines.join('\n')
     }
 
@@ -100,7 +100,7 @@ describe('review command simple tests', () => {
       const header = `**${comment.author}** commented`
       const body = comment.body
       const footer = comment.path ? `📄 ${comment.path}:${comment.line}` : ''
-      
+
       return [header, body, footer].filter(Boolean).join('\n')
     }
 
@@ -108,7 +108,7 @@ describe('review command simple tests', () => {
       author: 'reviewer1',
       body: 'Good implementation!',
     }
-    
+
     const formatted1 = formatReviewComment(comment1)
     expect(formatted1).toContain('**reviewer1** commented')
     expect(formatted1).toContain('Good implementation!')
@@ -119,7 +119,7 @@ describe('review command simple tests', () => {
       path: 'src/index.js',
       line: 42,
     }
-    
+
     const formatted2 = formatReviewComment(comment2)
     expect(formatted2).toContain('📄 src/index.js:42')
   })
@@ -127,10 +127,10 @@ describe('review command simple tests', () => {
   it('should test review action messages', () => {
     const getReviewActionMessage = (action: string): string => {
       const messages: Record<string, string> = {
-        'approve': '✅ PRを承認しました',
+        approve: '✅ PRを承認しました',
         'request-changes': '❌ 変更を依頼しました',
-        'comment': '💬 コメントを追加しました',
-        'dismiss': '🚫 レビューを却下しました',
+        comment: '💬 コメントを追加しました',
+        dismiss: '🚫 レビューを却下しました',
       }
       return messages[action] || '✓ アクションを実行しました'
     }
@@ -143,11 +143,11 @@ describe('review command simple tests', () => {
   it('should test diff stats formatting', () => {
     const formatDiffStats = (additions: number, deletions: number): string => {
       const total = additions + deletions
-      
+
       if (total === 0) {
         return 'No changes'
       }
-      
+
       return `+${additions} -${deletions} (${total} changes)`
     }
 
@@ -158,17 +158,20 @@ describe('review command simple tests', () => {
 
   it('should test file change summary', () => {
     const summarizeFileChanges = (files: any[]): string => {
-      const byStatus = files.reduce((acc, file) => {
-        acc[file.status] = (acc[file.status] || 0) + 1
-        return acc
-      }, {} as Record<string, number>)
-      
+      const byStatus = files.reduce(
+        (acc, file) => {
+          acc[file.status] = (acc[file.status] || 0) + 1
+          return acc
+        },
+        {} as Record<string, number>
+      )
+
       const parts = []
       if (byStatus.added) parts.push(`${byStatus.added} added`)
       if (byStatus.modified) parts.push(`${byStatus.modified} modified`)
       if (byStatus.deleted) parts.push(`${byStatus.deleted} deleted`)
       if (byStatus.renamed) parts.push(`${byStatus.renamed} renamed`)
-      
+
       return parts.length > 0 ? parts.join(', ') : 'No file changes'
     }
 
@@ -188,22 +191,19 @@ describe('review command simple tests', () => {
       if (type === 'approve') {
         return `Great work! ${context.customMessage || 'LGTM'} 👍`
       }
-      
+
       if (type === 'request-changes') {
         return `Thanks for the PR! I have some suggestions:\n\n${context.suggestions || '- Please consider...'}`
       }
-      
+
       return `Review comment: ${context.message || 'Please see my comments'}`
     }
 
     expect(getReviewTemplate('approve')).toContain('Great work!')
-    expect(getReviewTemplate('approve', { customMessage: 'Excellent!' }))
-      .toContain('Excellent!')
-    
-    expect(getReviewTemplate('request-changes'))
-      .toContain('I have some suggestions')
-    
-    expect(getReviewTemplate('comment', { message: 'Nice approach' }))
-      .toContain('Nice approach')
+    expect(getReviewTemplate('approve', { customMessage: 'Excellent!' })).toContain('Excellent!')
+
+    expect(getReviewTemplate('request-changes')).toContain('I have some suggestions')
+
+    expect(getReviewTemplate('comment', { message: 'Nice approach' })).toContain('Nice approach')
   })
 })

@@ -58,9 +58,11 @@ describe('attach command', () => {
     vi.clearAllMocks()
     consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
     consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
-    processExitSpy = vi.spyOn(process, 'exit').mockImplementation((code?: string | number | null) => {
-      throw new Error(`Process exited with code ${code}`)
-    })
+    processExitSpy = vi
+      .spyOn(process, 'exit')
+      .mockImplementation((code?: string | number | null) => {
+        throw new Error(`Process exited with code ${code}`)
+      })
 
     // GitWorktreeManagerのモック
     mockGitManager = {
@@ -122,9 +124,7 @@ describe('attach command', () => {
       await attachCommand.parseAsync(['node', 'attach', 'feature-1'])
 
       expect(mockGitManager.attachWorktree).toHaveBeenCalledWith('feature-1')
-      expect(mockSpinner.succeed).toHaveBeenCalledWith(
-        expect.stringContaining('演奏者')
-      )
+      expect(mockSpinner.succeed).toHaveBeenCalledWith(expect.stringContaining('演奏者'))
     })
 
     it('should prompt for branch selection when no branch specified', async () => {
@@ -176,13 +176,11 @@ describe('attach command', () => {
     it('should handle not a git repository', async () => {
       mockGitManager.isGitRepository.mockResolvedValue(false)
 
-      await expect(
-        attachCommand.parseAsync(['node', 'attach'])
-      ).rejects.toThrow('Process exited with code 1')
-
-      expect(mockSpinner.fail).toHaveBeenCalledWith(
-        'このディレクトリはGitリポジトリではありません'
+      await expect(attachCommand.parseAsync(['node', 'attach'])).rejects.toThrow(
+        'Process exited with code 1'
       )
+
+      expect(mockSpinner.fail).toHaveBeenCalledWith('このディレクトリはGitリポジトリではありません')
     })
 
     it('should handle no available branches', async () => {
@@ -204,22 +202,20 @@ describe('attach command', () => {
         },
       ])
 
-      await expect(
-        attachCommand.parseAsync(['node', 'attach'])
-      ).rejects.toThrow('Process exited with code 1')
-
-      expect(mockSpinner.fail).toHaveBeenCalledWith(
-        '利用可能なブランチがありません'
+      await expect(attachCommand.parseAsync(['node', 'attach'])).rejects.toThrow(
+        'Process exited with code 1'
       )
+
+      expect(mockSpinner.fail).toHaveBeenCalledWith('利用可能なブランチがありません')
       expect(consoleLogSpy).toHaveBeenCalledWith(
         chalk.yellow('すべてのブランチは既に演奏者として存在します')
       )
     })
 
     it('should handle branch not found', async () => {
-      await expect(
-        attachCommand.parseAsync(['node', 'attach', 'non-existent'])
-      ).rejects.toThrow('Process exited with code 1')
+      await expect(attachCommand.parseAsync(['node', 'attach', 'non-existent'])).rejects.toThrow(
+        'Process exited with code 1'
+      )
 
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         chalk.red(`エラー: ブランチ 'non-existent' が見つかりません`)
@@ -227,18 +223,14 @@ describe('attach command', () => {
     })
 
     it('should handle worktree creation error', async () => {
-      mockGitManager.attachWorktree.mockRejectedValue(
-        new Error('Worktree creation failed')
-      )
+      mockGitManager.attachWorktree.mockRejectedValue(new Error('Worktree creation failed'))
 
-      await expect(
-        attachCommand.parseAsync(['node', 'attach', 'feature-1'])
-      ).rejects.toThrow('Process exited with code 1')
+      await expect(attachCommand.parseAsync(['node', 'attach', 'feature-1'])).rejects.toThrow(
+        'Process exited with code 1'
+      )
 
       expect(mockSpinner.fail).toHaveBeenCalledWith('演奏者を招集できませんでした')
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        chalk.red('Worktree creation failed')
-      )
+      expect(consoleErrorSpy).toHaveBeenCalledWith(chalk.red('Worktree creation failed'))
     })
   })
 
@@ -253,10 +245,7 @@ describe('attach command', () => {
 
       await attachCommand.parseAsync(['node', 'attach', 'feature-1', '--open'])
 
-      expect(execa).toHaveBeenCalledWith(
-        'cursor',
-        ['/path/to/worktree/feature-1']
-      )
+      expect(execa).toHaveBeenCalledWith('cursor', ['/path/to/worktree/feature-1'])
     })
 
     it('should run setup with --setup option', async () => {
@@ -266,11 +255,7 @@ describe('attach command', () => {
       await attachCommand.parseAsync(['node', 'attach', 'feature-1', '--setup'])
 
       // セットアップコマンドが実行されたことを確認
-      expect(execa).toHaveBeenCalledWith(
-        'npm',
-        ['install'],
-        { cwd: '/path/to/worktree/feature-1' }
-      )
+      expect(execa).toHaveBeenCalledWith('npm', ['install'], { cwd: '/path/to/worktree/feature-1' })
     })
 
     it('should handle remote branch checkout', async () => {
@@ -287,9 +272,7 @@ describe('attach command', () => {
     it('should handle user cancellation in branch selection', async () => {
       ;(inquirer.prompt as Mock).mockRejectedValue(new Error('User cancelled'))
 
-      await expect(
-        attachCommand.parseAsync(['node', 'attach'])
-      ).rejects.toThrow()
+      await expect(attachCommand.parseAsync(['node', 'attach'])).rejects.toThrow()
 
       expect(mockGitManager.createWorktree).not.toHaveBeenCalled()
     })

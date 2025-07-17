@@ -52,9 +52,11 @@ describe.skip('delete command - additional tests', () => {
     vi.clearAllMocks()
     consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
     consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
-    processExitSpy = vi.spyOn(process, 'exit').mockImplementation((code?: string | number | null) => {
-      throw new Error(`Process exited with code ${code}`)
-    })
+    processExitSpy = vi
+      .spyOn(process, 'exit')
+      .mockImplementation((code?: string | number | null) => {
+        throw new Error(`Process exited with code ${code}`)
+      })
 
     // GitWorktreeManagerのモック
     mockGitManager = {
@@ -77,10 +79,10 @@ describe.skip('delete command - additional tests', () => {
 
     // execaのデフォルトモック
     ;(execa as Mock).mockResolvedValue({ stdout: '100M\t/path/to/worktree' })
-    
+
     // inquirerのモック設定
     ;(inquirer as any).default = {
-      prompt: vi.fn().mockResolvedValue({ confirmDelete: true })
+      prompt: vi.fn().mockResolvedValue({ confirmDelete: true }),
     }
   })
 
@@ -205,9 +207,7 @@ describe.skip('delete command - additional tests', () => {
 
       await deleteCommand.parseAsync(['node', 'delete', 'feature-1', '--remove-remote'])
 
-      expect(mockSpinner.warn).toHaveBeenCalledWith(
-        expect.stringContaining('リモートブランチ')
-      )
+      expect(mockSpinner.warn).toHaveBeenCalledWith(expect.stringContaining('リモートブランチ'))
     })
   })
 
@@ -265,21 +265,19 @@ describe.skip('delete command - additional tests', () => {
     it('should handle not a git repository', async () => {
       mockGitManager.isGitRepository.mockResolvedValue(false)
 
-      await expect(
-        deleteCommand.parseAsync(['node', 'delete', 'feature-1'])
-      ).rejects.toThrow('Process exited with code 1')
-
-      expect(mockSpinner.fail).toHaveBeenCalledWith(
-        'このディレクトリはGitリポジトリではありません'
+      await expect(deleteCommand.parseAsync(['node', 'delete', 'feature-1'])).rejects.toThrow(
+        'Process exited with code 1'
       )
+
+      expect(mockSpinner.fail).toHaveBeenCalledWith('このディレクトリはGitリポジトリではありません')
     })
 
     it('should handle no worktrees available', async () => {
       mockGitManager.listWorktrees.mockResolvedValue([])
 
-      await expect(
-        deleteCommand.parseAsync(['node', 'delete', 'feature-1'])
-      ).rejects.toThrow('Process exited with code 0')
+      await expect(deleteCommand.parseAsync(['node', 'delete', 'feature-1'])).rejects.toThrow(
+        'Process exited with code 0'
+      )
 
       expect(consoleLogSpy).toHaveBeenCalledWith(chalk.yellow('演奏者が存在しません'))
     })
@@ -298,13 +296,11 @@ describe.skip('delete command - additional tests', () => {
       ]
       mockGitManager.listWorktrees.mockResolvedValue(mockWorktrees)
 
-      await expect(
-        deleteCommand.parseAsync(['node', 'delete', 'non-existent'])
-      ).rejects.toThrow('Process exited with code 1')
-
-      expect(mockSpinner.fail).toHaveBeenCalledWith(
-        expect.stringContaining('見つかりません')
+      await expect(deleteCommand.parseAsync(['node', 'delete', 'non-existent'])).rejects.toThrow(
+        'Process exited with code 1'
       )
+
+      expect(mockSpinner.fail).toHaveBeenCalledWith(expect.stringContaining('見つかりません'))
     })
 
     it('should handle delete cancellation', async () => {
@@ -371,9 +367,7 @@ describe.skip('delete command - additional tests', () => {
 
       await deleteCommand.parseAsync(['node', 'delete', 'feature-1'])
 
-      expect(consoleLogSpy).toHaveBeenCalledWith(
-        expect.stringContaining('ロックされています')
-      )
+      expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('ロックされています'))
     })
   })
 
