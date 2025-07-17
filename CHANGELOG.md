@@ -1,5 +1,60 @@
 # Changelog
 
+## 2.0.0
+
+### Major Changes
+
+- # 🎼 Maestro 2.0.0 - Complete Rebrand from Shadow Clone Jutsu
+
+  This is a **major release** that completely rebrands the project from "shadow-clone-jutsu" to "Maestro" with a conductor/orchestra theme.
+
+  ## 🚨 Breaking Changes
+
+  ### Package & Command Changes
+  - **Package name**: `shadow-clone-jutsu` → `maestro`
+  - **Command**: `scj` → `maestro` (or `mst` for short)
+  - **Configuration file**: `.scj.json` → `.maestro.json`
+  - **Default directory**: `.git/shadow-clones` → `.git/orchestrations`
+
+  ### Environment Variables
+  - `SHADOW_CLONE` → `MAESTRO_BRANCH`
+  - `SHADOW_CLONE_PATH` → `MAESTRO_PATH`
+
+  ### Terminology Changes
+  - 影分身 (Shadow Clone) → 演奏者 (Orchestra Member)
+  - 忍者 (Ninja) → 指揮者 (Conductor)
+  - 🥷 → 🎼
+
+  ## 📦 Migration Guide
+  1. **Uninstall old package**:
+     ```bash
+     npm uninstall -g shadow-clone-jutsu
+     ```
+  2. **Install new package**:
+     ```bash
+     npm install -g maestro
+     ```
+  3. **Update configuration**:
+     - Rename `.scj.json` to `.maestro.json`
+     - Update any scripts using `scj` command to use `maestro` or `mst`
+  4. **Update environment variables**:
+     - Replace `SHADOW_CLONE` with `MAESTRO_BRANCH`
+     - Replace `SHADOW_CLONE_PATH` with `MAESTRO_PATH`
+
+  ## ✨ What's New
+  - Complete theme migration to conductor/orchestra metaphor
+  - Improved command messages and user experience
+  - Consistent branding throughout the codebase
+  - Better alignment with Git worktree mental model
+
+  ## 🙏 Thank You
+
+  Thank you for using Maestro (formerly Shadow Clone Jutsu)! We believe this rebrand better represents the tool's purpose: orchestrating Git worktrees like a conductor leads an orchestra.
+
+  ***
+
+  For more details, see the [migration guide](https://github.com/hashiramaendure/maestro/wiki/migration-guide).
+
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
@@ -27,7 +82,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Patch Changes
 
-- [`4fcf9d1`](https://github.com/hashiramaendure/scj/commit/4fcf9d1740864bc7d860cf32650cafde36f742e3) Thanks [@hashiramaendure](https://github.com/hashiramaendure)! - Test automatic versioning and release workflow setup
+- [`4fcf9d1`](https://github.com/hashiramaendure/maestro/commit/4fcf9d1740864bc7d860cf32650cafde36f742e3) Thanks [@hashiramaendure](https://github.com/hashiramaendure)! - Test automatic versioning and release workflow setup
 
 ## [1.0.0] - 2025-07-15
 

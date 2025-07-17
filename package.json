@@ -1,12 +1,11 @@
 {
   "name": "maestro",
-  "version": "1.0.1",
+  "version": "2.0.0",
   "description": "Git Worktreeオーケストレーションで、Claude Codeとパラレル開発を実現するツール",
   "type": "module",
   "bin": {
     "maestro": "./dist/cli.js",
-    "mst": "./dist/cli.js",
-    "scj": "./dist/cli.js"
+    "mst": "./dist/cli.js"
   },
   "scripts": {
     "dev": "tsx watch src/cli.ts",
