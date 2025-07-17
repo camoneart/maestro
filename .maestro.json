@@ -1,6 +1,6 @@
 {
   "worktrees": {
-    "path": ".git/shadow-clones",
+    "path": ".git/orchestra-members",
     "branchPrefix": "feature/"
   },
   "development": {
@@ -13,6 +13,6 @@
   },
   "hooks": {
     "afterCreate": "npm install",
-    "beforeDelete": "echo \"影分身を削除します: $SHADOW_CLONE\""
+    "beforeDelete": "echo \"演奏者を削除します: $ORCHESTRA_MEMBER\""
   }
 }
