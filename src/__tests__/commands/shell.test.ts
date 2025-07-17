@@ -93,7 +93,7 @@ describe('shell command', () => {
       await shellCommand.parseAsync(['node', 'test', 'feature-a'])
 
       expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining("🥷 影分身 'feature-a' に入ります...")
+        expect.stringContaining("🎼 演奏者 'feature-a' に入ります...")
       )
       expect(console.log).toHaveBeenCalledWith(expect.stringContaining('📁 /repo/worktree-1'))
       expect(spawn).toHaveBeenCalledWith(
@@ -103,14 +103,14 @@ describe('shell command', () => {
           cwd: '/repo/worktree-1',
           stdio: 'inherit',
           env: expect.objectContaining({
-            SHADOW_CLONE: 'feature-a',
-            SHADOW_CLONE_PATH: '/repo/worktree-1',
+            MAESTRO_BRANCH: 'feature-a',
+            MAESTRO_PATH: '/repo/worktree-1',
           }),
         })
       )
     })
 
-    it('影分身が存在しない場合は警告を表示', async () => {
+    it('演奏者が存在しない場合は警告を表示', async () => {
       mockGitManager.listWorktrees.mockResolvedValue([
         createMockWorktree({ path: '/repo/.', branch: 'refs/heads/main' }),
       ])
@@ -119,9 +119,9 @@ describe('shell command', () => {
         'process.exit called with code 1'
       )
 
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('影分身が存在しません'))
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('演奏者が存在しません'))
       expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining('maestro create <branch-name> で影分身を作り出してください')
+        expect.stringContaining('maestro create <branch-name> で演奏者を作り出してください')
       )
     })
 
@@ -131,7 +131,7 @@ describe('shell command', () => {
       )
 
       expect(console.error).toHaveBeenCalledWith(
-        expect.stringContaining("エラー: 影分身 'non-existent' が見つかりません")
+        expect.stringContaining("エラー: 演奏者 'non-existent' が見つかりません")
       )
     })
 
@@ -141,10 +141,10 @@ describe('shell command', () => {
       )
 
       expect(console.error).toHaveBeenCalledWith(
-        expect.stringContaining("[shell] エラー: 影分身 'feat' が見つかりません")
+        expect.stringContaining("[shell] エラー: 演奏者 'feat' が見つかりません")
       )
       expect(console.error).toHaveBeenCalledWith(
-        expect.stringContaining('類似した影分身: feature-a, feature-b')
+        expect.stringContaining('類似した演奏者: feature-a, feature-b')
       )
     })
   })
@@ -160,12 +160,12 @@ describe('shell command', () => {
           expect.objectContaining({
             type: 'list',
             name: 'selectedBranch',
-            message: 'どの影分身に入りますか？',
+            message: 'どの演奏者に入りますか？',
           }),
         ])
       )
       expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining("🥷 影分身 'feature-b' に入ります...")
+        expect.stringContaining("🎼 演奏者 'feature-b' に入ります...")
       )
     })
 
@@ -188,7 +188,7 @@ describe('shell command', () => {
         'fzf',
         expect.arrayContaining([
           '--ansi',
-          '--header=影分身を選択してシェルに入る (Ctrl-C でキャンセル)',
+          '--header=演奏者を選択してシェルに入る (Ctrl-C でキャンセル)',
         ]),
         expect.any(Object)
       )
@@ -253,8 +253,8 @@ describe('shell command', () => {
           stdio: 'inherit',
           shell: true,
           env: expect.objectContaining({
-            SHADOW_CLONE: 'feature-a',
-            SHADOW_CLONE_PATH: '/repo/worktree-1',
+            MAESTRO_BRANCH: 'feature-a',
+            MAESTRO_PATH: '/repo/worktree-1',
           }),
         })
       )
@@ -279,8 +279,8 @@ describe('shell command', () => {
   describe('tmuxオプション', () => {
     it('--tmuxオプションで既存のtmuxセッションにアタッチする', async () => {
       vi.mocked(execa).mockResolvedValue({
-        ...createMockExecaResponse('shadow-clone-feature-a\nother-session'),
-        stdout: 'shadow-clone-feature-a\nother-session',
+        ...createMockExecaResponse('orchestra-member-feature-a\nother-session'),
+        stdout: 'orchestra-member-feature-a\nother-session',
       } as any)
 
       await shellCommand.parseAsync(['node', 'test', 'feature-a', '--tmux'])
@@ -292,13 +292,13 @@ describe('shell command', () => {
       )
       expect(spawn).toHaveBeenCalledWith(
         'tmux',
-        ['attach-session', '-t', 'shadow-clone-feature-a'],
+        ['attach-session', '-t', 'orchestra-member-feature-a'],
         expect.objectContaining({
           stdio: 'inherit',
         })
       )
       expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining("📺 既存のtmuxセッション 'shadow-clone-feature-a' にアタッチします")
+        expect.stringContaining("📺 既存のtmuxセッション 'orchestra-member-feature-a' にアタッチします")
       )
     })
 
@@ -312,18 +312,18 @@ describe('shell command', () => {
 
       expect(spawn).toHaveBeenCalledWith(
         'tmux',
-        ['new-session', '-s', 'shadow-clone-feature-a'],
+        ['new-session', '-s', 'orchestra-member-feature-a'],
         expect.objectContaining({
           cwd: '/repo/worktree-1',
           stdio: 'inherit',
           env: expect.objectContaining({
-            SHADOW_CLONE: 'feature-a',
-            SHADOW_CLONE_PATH: '/repo/worktree-1',
+            MAESTRO_BRANCH: 'feature-a',
+            MAESTRO_PATH: '/repo/worktree-1',
           }),
         })
       )
       expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining("📺 新しいtmuxセッション 'shadow-clone-feature-a' を作成します")
+        expect.stringContaining("📺 新しいtmuxセッション 'orchestra-member-feature-a' を作成します")
       )
     })
 
@@ -353,8 +353,8 @@ describe('shell command', () => {
         [],
         expect.objectContaining({
           env: expect.objectContaining({
-            PS1: expect.stringContaining('🥷'),
-            PROMPT: expect.stringContaining('🥷'),
+            PS1: expect.stringContaining('🎼'),
+            PROMPT: expect.stringContaining('🎼'),
           }),
         })
       )
@@ -370,7 +370,7 @@ describe('shell command', () => {
         [],
         expect.objectContaining({
           env: expect.objectContaining({
-            PS1: expect.stringContaining('🥷'),
+            PS1: expect.stringContaining('🎼'),
           }),
         })
       )
@@ -386,7 +386,7 @@ describe('shell command', () => {
         [],
         expect.objectContaining({
           env: expect.objectContaining({
-            fish_prompt: expect.stringContaining('🥷'),
+            fish_prompt: expect.stringContaining('🎼'),
           }),
         })
       )
@@ -450,7 +450,7 @@ describe('shell command', () => {
       await new Promise(resolve => setImmediate(resolve))
 
       expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining('影分身から戻りました (exit code: 0)')
+        expect.stringContaining('演奏者から戻りました (exit code: 0)')
       )
     })
   })

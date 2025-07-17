@@ -500,8 +500,8 @@ describe('Delete Command - Enhanced Coverage', () => {
             cwd: worktreePath,
             env: {
               ...process.env,
-              SHADOW_CLONE: branchName,
-              SHADOW_CLONE_PATH: worktreePath,
+              MAESTRO_BRANCH: branchName,
+              MAESTRO_PATH: worktreePath,
             },
           })
           return true
@@ -515,8 +515,8 @@ describe('Delete Command - Enhanced Coverage', () => {
       expect(mockExeca).toHaveBeenCalledWith('sh', ['-c', 'echo "Cleaning up"'], {
         cwd: '/path/to/worktree',
         env: expect.objectContaining({
-          SHADOW_CLONE: 'feature-test',
-          SHADOW_CLONE_PATH: '/path/to/worktree',
+          MAESTRO_BRANCH: 'feature-test',
+          MAESTRO_PATH: '/path/to/worktree',
         }),
       })
     })
@@ -530,8 +530,8 @@ describe('Delete Command - Enhanced Coverage', () => {
             cwd: worktreePath,
             env: {
               ...process.env,
-              SHADOW_CLONE: branchName,
-              SHADOW_CLONE_PATH: worktreePath,
+              MAESTRO_BRANCH: branchName,
+              MAESTRO_PATH: worktreePath,
             },
           })
           return true

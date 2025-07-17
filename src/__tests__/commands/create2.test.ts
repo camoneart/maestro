@@ -135,7 +135,7 @@ describe.skip('create command - additional tests', () => {
         expect.stringContaining('.git/orchestrations/feature-new')
       )
       expect(mockSpinner.succeed).toHaveBeenCalledWith(
-        '影分身の術が成功しました！'
+        '演奏者の招集が成功しました！'
       )
     })
 
@@ -398,7 +398,7 @@ describe.skip('create command - additional tests', () => {
         createCommand.parseAsync(['node', 'create', 'feature-new'])
       ).rejects.toThrow('Process exited with code 1')
 
-      expect(mockSpinner.fail).toHaveBeenCalledWith('影分身の術に失敗しました')
+      expect(mockSpinner.fail).toHaveBeenCalledWith('演奏者の招集に失敗しました')
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         chalk.red('エラー:'),
         'Permission denied'
@@ -424,7 +424,7 @@ describe.skip('create command - additional tests', () => {
         ['-c', 'echo "Hook executed"'],
         expect.objectContaining({
           env: expect.objectContaining({
-            SHADOW_CLONE: 'feature-new',
+            MAESTRO_BRANCH: 'feature-new',
           }),
         })
       )

@@ -65,8 +65,8 @@ describe('exec command', () => {
         expect.objectContaining({
           cwd: '/path/to/worktree/feature-1',
           env: expect.objectContaining({
-            SHADOW_CLONE: 'feature-1',
-            SHADOW_CLONE_PATH: '/path/to/worktree/feature-1',
+            MAESTRO_BRANCH: 'feature-1',
+            MAESTRO_PATH: '/path/to/worktree/feature-1',
           }),
         })
       )
