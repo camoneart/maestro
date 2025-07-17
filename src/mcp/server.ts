@@ -238,3 +238,6 @@ if (!isTestEnvironment) {
     process.exit(1)
   })
 }
+
+// テスト用にserverをエクスポート
+export { server }
