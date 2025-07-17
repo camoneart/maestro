@@ -52,8 +52,8 @@ export const execCommand = new Command('exec')
                 cwd: worktree.path,
                 env: {
                   ...process.env,
-                  SHADOW_CLONE: branchName,
-                  SHADOW_CLONE_PATH: worktree.path,
+                  MAESTRO_BRANCH: branchName,
+                  MAESTRO_PATH: worktree.path,
                 },
               })
 
@@ -120,8 +120,8 @@ export const execCommand = new Command('exec')
             cwd: targetWorktree.path,
             env: {
               ...process.env,
-              SHADOW_CLONE: displayBranchName,
-              SHADOW_CLONE_PATH: targetWorktree.path,
+              MAESTRO_BRANCH: displayBranchName,
+              MAESTRO_PATH: targetWorktree.path,
             },
           })
 
