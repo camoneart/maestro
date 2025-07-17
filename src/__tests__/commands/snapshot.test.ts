@@ -69,14 +69,14 @@ describe('snapshot command', () => {
         }
         if (args[0] === 'log' && args[1] === '-1') {
           return createMockExecaResponse(
-            'abc123|feat: add feature|John Doe|2024-01-01 12:00:00 +0900'
+            'abc123|feat: add feature|John Doe|2025-01-01 12:00:00 +0900'
           )
         }
         if (args[0] === 'stash' && args[1] === 'push') {
           return createMockExecaResponse('Saved working directory and index state')
         }
         if (args[0] === 'stash' && args[1] === 'list' && args[2] === '-1') {
-          return createMockExecaResponse('def456 stash@{0}: Shadow Clone Snapshot: snapshot-123')
+          return createMockExecaResponse('def456 stash@{0}: Orchestra Snapshot: snapshot-123')
         }
       }
       return createMockExecaResponse()
@@ -91,7 +91,7 @@ describe('snapshot command', () => {
     // fs.readFileのモック
     vi.mocked(fs.readFile).mockResolvedValue(
       JSON.stringify({
-        createdAt: '2024-01-01T10:00:00Z',
+        createdAt: '2025-01-01T10:00:00Z',
         branch: 'feature-a',
         worktreePath: '/repo/worktree-1',
       })
@@ -159,7 +159,7 @@ describe('snapshot command', () => {
           'stash',
           'push',
           '-m',
-          expect.stringContaining('Shadow Clone Snapshot'),
+          expect.stringContaining('Orchestra Snapshot'),
           '--include-untracked',
         ],
         expect.any(Object)
@@ -205,7 +205,7 @@ describe('snapshot command', () => {
         hash: 'abc123',
         message: 'feat: add feature',
         author: 'John Doe',
-        date: '2024-01-01 12:00:00 +0900',
+        date: '2025-01-01 12:00:00 +0900',
       })
     })
 
@@ -287,12 +287,12 @@ describe('snapshot command', () => {
         modified: ['file2.ts'],
         untracked: [],
       },
-      stash: { hash: 'abc123', message: 'Shadow Clone Snapshot: snapshot-123' },
+      stash: { hash: 'abc123', message: 'Orchestra Snapshot: snapshot-123' },
       lastCommit: {
         hash: 'abc123',
         message: 'feat: add feature',
         author: 'John Doe',
-        date: '2024-01-01 12:00:00 +0900',
+        date: '2025-01-01 12:00:00 +0900',
       },
     }
 
@@ -302,7 +302,7 @@ describe('snapshot command', () => {
       vi.mocked(execa).mockImplementation(async (cmd: string, args: string[]) => {
         if (cmd === 'git' && args[0] === 'stash' && args[1] === 'list') {
           return createMockExecaResponse(
-            'stash@{0}: Shadow Clone Snapshot: snapshot-123\nstash@{1}: Other stash'
+            'stash@{0}: Orchestra Snapshot: snapshot-123\nstash@{1}: Other stash'
           )
         }
         return createMockExecaResponse()
@@ -332,7 +332,7 @@ describe('snapshot command', () => {
       vi.mocked(execa).mockImplementation(async (cmd: string, args: string[]) => {
         if (cmd === 'git' && args[0] === 'stash' && args[1] === 'list') {
           return createMockExecaResponse(
-            'stash@{0}: Shadow Clone Snapshot: snapshot-123456789\nstash@{1}: Other stash'
+            'stash@{0}: Orchestra Snapshot: snapshot-123456789\nstash@{1}: Other stash'
           )
         }
         if (cmd === 'git' && args[0] === 'stash' && args[1] === 'apply') {
@@ -396,7 +396,9 @@ describe('snapshot command', () => {
     it('--deleteオプションでスナップショットを削除する', async () => {
       await snapshotCommand.parseAsync(['node', 'test', '--delete', 'snapshot-123'])
 
-      expect(fs.unlink).toHaveBeenCalledWith('/repo/worktree-1/.maestro/snapshots/snapshot-123.json')
+      expect(fs.unlink).toHaveBeenCalledWith(
+        '/repo/worktree-1/.maestro/snapshots/snapshot-123.json'
+      )
       expect(console.log).toHaveBeenCalledWith(
         expect.stringContaining("✨ スナップショット 'snapshot-123' を削除しました")
       )
@@ -461,14 +463,14 @@ describe('snapshot command', () => {
       )
     })
 
-    it('影分身が存在しない場合（--allオプション）', async () => {
+    it('演奏者が存在しない場合（--allオプション）', async () => {
       mockGitManager.listWorktrees.mockResolvedValue([
         createMockWorktree({ path: '/repo/.', branch: 'refs/heads/main' }),
       ])
 
       await snapshotCommand.parseAsync(['node', 'test', '--all'])
 
-      expect(mockSpinner.fail).toHaveBeenCalledWith('影分身が存在しません')
+      expect(mockSpinner.fail).toHaveBeenCalledWith('演奏者が存在しません')
     })
 
     it('スナップショット作成エラーを処理する', async () => {

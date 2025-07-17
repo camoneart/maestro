@@ -171,7 +171,7 @@ async function createSnapshot(
   // スタッシュを作成
   if (includeStash && (gitStatus.staged.length > 0 || gitStatus.modified.length > 0)) {
     try {
-      const stashMessage = `Shadow Clone Snapshot: ${snapshotId}`
+      const stashMessage = `Orchestra Snapshot: ${snapshotId}`
       await execa('git', ['stash', 'push', '-m', stashMessage, '--include-untracked'], {
         cwd: worktree.path,
       })
