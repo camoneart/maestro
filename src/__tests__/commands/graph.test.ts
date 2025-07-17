@@ -61,7 +61,7 @@ describe('graph command', () => {
         }
         if (args[0] === 'log' && args[1] === '-1') {
           // 最新コミット情報
-          return createMockExecaResponse('abc1234|2024-01-01 12:00:00 +0900|feat: add new feature')
+          return createMockExecaResponse('abc1234|2025-01-01 12:00:00 +0900|feat: add new feature')
         }
       }
       if (cmd === 'dot') {
@@ -113,7 +113,7 @@ describe('graph command', () => {
           return createMockExecaResponse('0')
         }
         if (args[0] === 'log') {
-          return createMockExecaResponse('abc1234|2024-01-01 12:00:00 +0900|feat: add new feature')
+          return createMockExecaResponse('abc1234|2025-01-01 12:00:00 +0900|feat: add new feature')
         }
         return createMockExecaResponse('abc123')
       })
@@ -167,7 +167,7 @@ describe('graph command', () => {
 
     it('--show-datesで最終更新日を表示する', async () => {
       // 現在の日付に基づいて日数を計算
-      const mockDate = new Date('2024-01-01')
+      const mockDate = new Date('2025-01-01')
       const daysAgo = Math.floor((Date.now() - mockDate.getTime()) / (1000 * 60 * 60 * 24))
 
       await graphCommand.parseAsync(['node', 'test', '--show-dates'])
@@ -239,7 +239,7 @@ describe('graph command', () => {
           return createMockExecaResponse('0')
         }
         if (args[0] === 'log') {
-          return createMockExecaResponse('abc1234|2024-01-01 12:00:00 +0900|feat: add new feature')
+          return createMockExecaResponse('abc1234|2025-01-01 12:00:00 +0900|feat: add new feature')
         }
         return createMockExecaResponse('abc123')
       })
@@ -280,7 +280,7 @@ describe('graph command', () => {
       expect(mockSpinner.fail).toHaveBeenCalledWith('このディレクトリはGitリポジトリではありません')
     })
 
-    it('影分身が存在しない場合は終了する', async () => {
+    it('演奏者が存在しない場合は終了する', async () => {
       // メインブランチのみ
       mockGitManager.listWorktrees.mockResolvedValue([
         createMockWorktree({ path: '/repo/.', branch: 'refs/heads/main' }),
@@ -292,7 +292,7 @@ describe('graph command', () => {
         // process.exitが呼ばれることを期待
       }
 
-      expect(mockSpinner.fail).toHaveBeenCalledWith('影分身が存在しません')
+      expect(mockSpinner.fail).toHaveBeenCalledWith('演奏者が存在しません')
       expect(process.exit).toHaveBeenCalled()
     })
 

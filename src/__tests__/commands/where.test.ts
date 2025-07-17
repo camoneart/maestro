@@ -74,7 +74,7 @@ describe('where command', () => {
       ).rejects.toThrow('Process exited with code 1')
 
       expect(consoleErrorSpy).toHaveBeenCalledWith(
-        chalk.red(`エラー: 影分身 'non-existent' が見つかりません`)
+        chalk.red(`エラー: 演奏者 'non-existent' が見つかりません`)
       )
     })
 
@@ -105,7 +105,7 @@ describe('where command', () => {
         whereCommand.parseAsync(['node', 'where', 'auth'])
       ).rejects.toThrow('Process exited with code 1')
 
-      expect(consoleLogSpy).toHaveBeenCalledWith(chalk.yellow('\n類似した影分身:'))
+      expect(consoleLogSpy).toHaveBeenCalledWith(chalk.yellow('\n類似した演奏者:'))
       expect(consoleLogSpy).toHaveBeenCalledWith('  - feature-auth')
       expect(consoleLogSpy).toHaveBeenCalledWith('  - feature-authentication')
     })
@@ -186,7 +186,7 @@ describe('where command', () => {
 
       expect(spawn).toHaveBeenCalledWith(
         'fzf',
-        expect.arrayContaining(['--ansi', '--header=影分身を選択 (Ctrl-C でキャンセル)']),
+        expect.arrayContaining(['--ansi', '--header=演奏者を選択 (Ctrl-C でキャンセル)']),
         expect.any(Object)
       )
 
@@ -246,7 +246,7 @@ describe('where command', () => {
         whereCommand.parseAsync(['node', 'where', '--fzf'])
       ).rejects.toThrow('Process exited with code 1')
 
-      expect(consoleLogSpy).toHaveBeenCalledWith(chalk.yellow('影分身が存在しません'))
+      expect(consoleLogSpy).toHaveBeenCalledWith(chalk.yellow('演奏者が存在しません'))
     })
 
     it('should display selected path from fzf', async () => {

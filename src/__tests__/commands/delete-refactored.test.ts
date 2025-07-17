@@ -50,7 +50,7 @@ describe('delete.ts refactored functions', () => {
       expect(result.filteredWorktrees.every(wt => !wt.path.endsWith('.'))).toBe(true)
     })
 
-    it('should return empty when no shadow clones exist', () => {
+    it('should return empty when no orchestra members exist', () => {
       const mainOnlyWorktrees = [mockWorktrees[2]]
       const result = prepareWorktreeSelection(mainOnlyWorktrees)
       

@@ -99,7 +99,7 @@ describe.skip('delete command - additional tests', () => {
 
       expect(mockGitManager.deleteWorktree).toHaveBeenCalledWith('refs/heads/feature-1', false)
       expect(mockSpinner.succeed).toHaveBeenCalledWith(
-        expect.stringContaining('影分身の削除が完了しました')
+        expect.stringContaining('演奏者の削除が完了しました')
       )
     })
 

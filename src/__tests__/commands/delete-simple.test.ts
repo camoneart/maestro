@@ -10,7 +10,7 @@ describe('delete command simple tests', () => {
   it('should have correct command configuration', () => {
     expect(deleteCommand).toBeInstanceOf(Command)
     expect(deleteCommand.name()).toBe('delete')
-    expect(deleteCommand.description()).toContain('影分身')
+    expect(deleteCommand.description()).toContain('演奏者')
     expect(deleteCommand.aliases()).toContain('rm')
     
     // Check options

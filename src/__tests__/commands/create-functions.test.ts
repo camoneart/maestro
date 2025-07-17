@@ -129,7 +129,7 @@ describe('create command - utility functions', () => {
 
     it('should generate appropriate error messages', () => {
       const error = new Error('Branch already exists')
-      const errorMessage = `影分身の作成に失敗しました: ${error.message}`
+      const errorMessage = `演奏者の作成に失敗しました: ${error.message}`
       
       expect(errorMessage).toContain('Branch already exists')
     })
@@ -319,7 +319,7 @@ describe('create command - utility functions', () => {
   describe('Spinner and UI utilities', () => {
     it('should handle loading messages', () => {
       const messages = [
-        '影分身を作成中...',
+        '演奏者を作成中...',
         'GitHub情報を取得中...',
         'テンプレートを適用中...'
       ]
@@ -331,7 +331,7 @@ describe('create command - utility functions', () => {
 
     it('should format success messages', () => {
       const branchName = 'feature-test'
-      const successMessage = `✨ 影分身 '${branchName}' の作成が完了しました！`
+      const successMessage = `✨ 演奏者 '${branchName}' の作成が完了しました！`
       
       expect(successMessage).toContain('✨')
       expect(successMessage).toContain(branchName)

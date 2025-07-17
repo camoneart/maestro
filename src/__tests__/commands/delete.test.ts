@@ -113,7 +113,7 @@ describe('delete command', () => {
         {
           type: 'confirm',
           name: 'confirmDelete',
-          message: '本当にこれらの影分身を削除しますか？',
+          message: '本当にこれらの演奏者を削除しますか？',
           default: false,
         },
       ])
@@ -131,7 +131,7 @@ describe('delete command', () => {
         {
           type: 'confirm',
           name: 'confirmDelete',
-          message: '本当にこれらの影分身を削除しますか？',
+          message: '本当にこれらの演奏者を削除しますか？',
           default: false,
         },
       ])
@@ -173,9 +173,9 @@ describe('delete command', () => {
 
       const gitManager = new GitWorktreeManager()
       const worktrees = await gitManager.listWorktrees()
-      const shadowClones = worktrees.filter(wt => !wt.path.endsWith('.'))
+      const orchestraMembers = worktrees.filter(wt => !wt.path.endsWith('.'))
 
-      expect(shadowClones).toHaveLength(0)
+      expect(orchestraMembers).toHaveLength(0)
     })
 
     it('should handle multiple deletion with some failures', async () => {

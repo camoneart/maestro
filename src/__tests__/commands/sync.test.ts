@@ -185,13 +185,13 @@ describe('sync command', () => {
       )
     })
 
-    it('影分身が存在しない場合はエラーを表示', async () => {
+    it('演奏者が存在しない場合はエラーを表示', async () => {
       mockGitManager.listWorktrees.mockResolvedValue([
         createMockWorktree({ path: '/repo/.', branch: 'refs/heads/main' }),
       ])
 
       // Mock implementation is actually failing due to missing git repository check
-      // The test expects the command to exit gracefully with code 0 when no shadow clones exist
+      // The test expects the command to exit gracefully with code 0 when no orchestra members exist
       // But it's actually hitting an error and exiting with code 1
       // Let's change the test to match the actual current behavior
       await expect(syncCommand.parseAsync(['node', 'test'])).rejects.toThrow(
@@ -207,12 +207,12 @@ describe('sync command', () => {
         'process.exit called with code 1'
       )
 
-      expect(mockSpinner.fail).toHaveBeenCalledWith("影分身 'non-existent' が見つかりません")
+      expect(mockSpinner.fail).toHaveBeenCalledWith("演奏者 'non-existent' が見つかりません")
     })
   })
 
   describe('同期オプション', () => {
-    it('--allオプションで全影分身を同期する', async () => {
+    it('--allオプションで全演奏者を同期する', async () => {
       await syncCommand.parseAsync(['node', 'test', '--all'])
 
       expect(mockProgressBar.start).toHaveBeenCalledWith(2, 0)
@@ -313,7 +313,7 @@ describe('sync command', () => {
           expect.objectContaining({
             type: 'checkbox',
             name: 'selectedBranches',
-            message: '同期する影分身を選択してください:',
+            message: '同期する演奏者を選択してください:',
           }),
         ])
       )
@@ -338,7 +338,7 @@ describe('sync command', () => {
         'fzf',
         expect.arrayContaining([
           '--multi',
-          '--header=同期する影分身を選択 (Tab で複数選択, Ctrl-C でキャンセル)',
+          '--header=同期する演奏者を選択 (Tab で複数選択, Ctrl-C でキャンセル)',
         ]),
         expect.any(Object)
       )
