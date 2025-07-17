@@ -1,0 +1,61 @@
+# Test files
+src/__tests__/
+e2e/
+vitest.config.ts
+vitest.config.e2e.ts
+coverage/
+.nyc_output/
+
+# Source files (only dist is needed)
+src/
+*.ts
+!*.d.ts
+
+# Development files
+.eslintrc*
+.prettierrc*
+eslint.config.js
+tsconfig.json
+tsup.config.ts
+
+# Documentation
+docs/
+_docs/
+_o3-chat/
+_issues/
+_todo/
+_features/
+_articles/
+
+# Public assets
+public/
+
+# CI/CD
+.github/
+.circleci/
+.travis.yml
+
+# Misc
+.vscode/
+.idea/
+.DS_Store
+*.log
+*.tmp
+.env*
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Changeset (development only)
+.changeset/
+
+# Examples
+examples/
+
+# Scripts (development only)
+scripts/
+
+# Scoop manifest
+scoop/
