@@ -244,7 +244,7 @@ async function createWorktreesInParallel(
   const failedCount = results.filter(r => r.status === 'failed').length
 
   if (successCount > 0) {
-    console.log(chalk.green(`✅ 成功: ${successCount}個`))
+    console.log(chalk.green(`✅ 成功: ${successCount}件`))
     results
       .filter(r => r.status === 'success')
       .forEach(r => {
@@ -253,7 +253,7 @@ async function createWorktreesInParallel(
   }
 
   if (failedCount > 0) {
-    console.log(chalk.red(`\n❌ 失敗: ${failedCount}個`))
+    console.log(chalk.red(`\n❌ 失敗: ${failedCount}件`))
     results
       .filter(r => r.status === 'failed')
       .forEach(r => {
@@ -267,7 +267,7 @@ async function createWorktreesInParallel(
       {
         type: 'confirm',
         name: 'openAll',
-        message: `${successCount}個のworktreeをエディタで開きますか？`,
+        message: `${successCount}件のworktreeをエディタで開きますか？`,
         default: false,
       },
     ])

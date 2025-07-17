@@ -45,7 +45,7 @@ export const configCommand = new Command('config')
       case 'show': {
         // 現在の設定を表示
         const config = configManager.getAll()
-        console.log(chalk.bold('\n🎼 orchestra-conductor 設定:\n'))
+        console.log(chalk.bold('\n🎼 maestro 設定:\n'))
         console.log(JSON.stringify(config, null, 2))
 
         if (options?.global) {
