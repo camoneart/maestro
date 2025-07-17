@@ -140,16 +140,9 @@ export class ConfigManager {
         path.join(process.cwd(), '.maestro.json'),
         path.join(process.cwd(), '.maestrorc.json'),
         path.join(process.cwd(), 'maestro.config.json'),
-        // 後方互換性のため旧設定ファイルも確認
-        path.join(process.cwd(), '.scj.json'),
-        path.join(process.cwd(), '.scjrc.json'),
-        path.join(process.cwd(), 'scj.config.json'),
         // グローバル設定ファイル
         path.join(process.env.HOME || '~', '.maestrorc'),
         path.join(process.env.HOME || '~', '.maestrorc.json'),
-        // 後方互換性のため旧設定ファイルも確認
-        path.join(process.env.HOME || '~', '.scjrc'),
-        path.join(process.env.HOME || '~', '.scjrc.json'),
       ]
 
       for (const configPath of configPaths) {

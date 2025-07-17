@@ -106,11 +106,10 @@ const BASH_COMPLETION = [
   '}',
   '',
   'complete -F _maestro_completions maestro',
-  'complete -F _maestro_completions scj',
 ].join('\n')
 
 const ZSH_COMPLETION = [
-  '#compdef maestro scj',
+  '#compdef maestro',
   '# maestro zsh completion',
   '',
   '_maestro() {',
@@ -296,8 +295,6 @@ const FISH_COMPLETION = [
   '# worktreeブランチ名の補完（動的）',
   'complete -c maestro -n "__fish_seen_subcommand_from shell sh exec e delete rm where w" -a "(git worktree list --porcelain 2>/dev/null | grep \'^branch\' | sed \'s/^branch refs\\/heads\\///\')"',
   '',
-  '# 互換性のためのscjエイリアス補完',
-  'complete -c scj -w maestro',
 ].join('\n')
 
 export const completionCommand = new Command('completion')
