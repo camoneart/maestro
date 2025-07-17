@@ -11,14 +11,14 @@ Currently, we support the following versions with security updates:
 
 ## Reporting a Vulnerability
 
-We take the security of shadow-clone-jutsu seriously. If you believe you have found a security vulnerability, please report it to us as described below.
+We take the security of maestro seriously. If you believe you have found a security vulnerability, please report it to us as described below.
 
 ### Where to Report
 
 **Please do not report security vulnerabilities through public GitHub issues.**
 
 Instead, please report them via email to:
-- Primary: [Create a security advisory](https://github.com/hashiramaendure/shadow-clone-jutsu/security/advisories/new) on GitHub
+- Primary: [Create a security advisory](https://github.com/hashiramaendure/maestro/security/advisories/new) on GitHub
 - Alternative: Open an issue with the `security` label (for low-severity issues only)
 
 ### What to Include
@@ -48,7 +48,7 @@ Please include the following information in your report:
 
 ## Security Best Practices
 
-When using shadow-clone-jutsu, please follow these security best practices:
+When using maestro, please follow these security best practices:
 
 1. **Keep the tool updated**: Always use the latest version
 2. **Secure your Git credentials**: Use SSH keys or secure credential managers
@@ -75,6 +75,6 @@ The following are **out of scope**:
 
 ## Recognition
 
-We appreciate the security research community's efforts in helping keep shadow-clone-jutsu secure. Reporters who follow this policy will be publicly acknowledged (unless they prefer to remain anonymous).
+We appreciate the security research community's efforts in helping keep maestro secure. Reporters who follow this policy will be publicly acknowledged (unless they prefer to remain anonymous).
 
-Thank you for helping keep shadow-clone-jutsu and its users safe!
+Thank you for helping keep maestro and its users safe!

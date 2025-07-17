@@ -1,12 +1,12 @@
-# scj batch
+# mst batch
 
-複数の影分身（Git Worktree）を一括で作成・管理するコマンドです。GitHub Issues、ファイル入力、対話形式など、様々な方法で効率的に複数のWorktreeを作成できます。
+複数の演奏者（Git Worktree）を一括で作成・管理するコマンドです。GitHub Issues、ファイル入力、対話形式など、様々な方法で効率的に複数のWorktreeを作成できます。
 
 ## 概要
 
 ```bash
-scj batch [options]
-scj b [options]  # エイリアス
+mst batch [options]
+mst b [options]  # エイリアス
 ```
 
 ## 使用例
@@ -15,16 +15,16 @@ scj b [options]  # エイリアス
 
 ```bash
 # GitHub Issuesから複数選択して一括作成
-scj batch
+mst batch
 
 # ファイルから一括作成
-scj batch --from-file worktrees.txt
+mst batch --from-file worktrees.txt
 
 # インタラクティブに複数入力
-scj batch --interactive
+mst batch --interactive
 
 # オプションを付けて一括作成
-scj batch -o -s -b develop  # 作成後に開く、セットアップ実行、ベースはdevelop
+mst batch -o -s -b develop  # 作成後に開く、セットアップ実行、ベースはdevelop
 ```
 
 ## オプション
@@ -45,7 +45,7 @@ scj batch -o -s -b develop  # 作成後に開く、セットアップ実行、�
 引数なしで実行すると、GitHub Issuesから複数選択できます：
 
 ```bash
-scj batch
+mst batch
 ```
 
 選択画面：
@@ -89,7 +89,7 @@ docs-update | ドキュメントの更新 | issue-123
 ### 実行
 
 ```bash
-scj batch --from-file worktrees.txt
+mst batch --from-file worktrees.txt
 ```
 
 ### CSVフォーマットもサポート
@@ -105,7 +105,7 @@ docs-update,"ドキュメントの更新",issue-123
 ## インタラクティブモード
 
 ```bash
-scj batch --interactive
+mst batch --interactive
 ```
 
 プロンプト表示：
@@ -127,17 +127,17 @@ Creating 3 worktrees...
 
 ```bash
 # 並列数を変更
-scj batch --parallel 8
+mst batch --parallel 8
 
 # 逐次実行（デバッグ用）
-scj batch --parallel 1
+mst batch --parallel 1
 ```
 
 ## 実行計画の確認
 
 ```bash
 # ドライランで計画を確認
-scj batch --from-file worktrees.txt --dry-run
+mst batch --from-file worktrees.txt --dry-run
 ```
 
 出力例：
@@ -160,7 +160,7 @@ Options: --open --setup
 
 ```bash
 # 全てにfeatureテンプレートを適用
-scj batch --template feature
+mst batch --template feature
 
 # ファイルで個別指定
 # worktrees-with-template.txt
@@ -195,10 +195,10 @@ Failed worktrees:
 
 ```bash
 # 失敗したものだけ再実行
-scj batch --retry-failed
+mst batch --retry-failed
 
 # または失敗リストをファイルに保存
-scj batch --save-failed failed.txt
+mst batch --save-failed failed.txt
 ```
 
 ## 高度な使用例
@@ -214,7 +214,7 @@ docs-api | APIドキュメント | #13
 test-integration | 統合テスト | #14
 
 # 一括作成してセットアップ
-scj batch --from-file setup-project.txt --setup --open
+mst batch --from-file setup-project.txt --setup --open
 ```
 
 ### チーム開発での利用
@@ -223,10 +223,10 @@ scj batch --from-file setup-project.txt --setup --open
 # チームメンバーごとにIssueを割り当て
 ASSIGNED_ISSUES=$(gh issue list --assignee @me --json number -q '.[].number')
 
-# 自分の担当分だけ影分身を作成
+# 自分の担当分だけ演奏者を作成
 echo "$ASSIGNED_ISSUES" | while read issue; do
   echo "issue-$issue | Issue #$issue | #$issue"
-done | scj batch --from-file -
+done | mst batch --from-file -
 ```
 
 ### CI/CDでの自動化
@@ -238,7 +238,7 @@ done | scj batch --from-file -
 # ラベルが"ready-for-dev"のIssueを取得
 gh issue list --label ready-for-dev --json number,title | \
   jq -r '.[] | "issue-\(.number) | \(.title) | #\(.number)"' | \
-  scj batch --from-file - --setup
+  mst batch --from-file - --setup
 
 # 作成完了後、ラベルを更新
 gh issue list --label ready-for-dev --json number -q '.[].number' | \
@@ -263,28 +263,28 @@ docs/auth-api | 認証APIドキュメント | #128
 
 ```bash
 # Phase 1: Core features
-scj batch --from-file phase1-core.txt --setup
+mst batch --from-file phase1-core.txt --setup
 
 # Phase 2: Additional features
-scj batch --from-file phase2-features.txt
+mst batch --from-file phase2-features.txt
 
 # Phase 3: Documentation
-scj batch --from-file phase3-docs.txt --template docs
+mst batch --from-file phase3-docs.txt --template docs
 ```
 
 ### 3. 進捗管理
 
 ```bash
 # バッチ実行結果をログに保存
-scj batch --from-file worktrees.txt | tee batch-$(date +%Y%m%d-%H%M%S).log
+mst batch --from-file worktrees.txt | tee batch-$(date +%Y%m%d-%H%M%S).log
 
-# 作成済みの影分身を確認
-scj list --json | jq '.summary'
+# 作成済みの演奏者を確認
+mst list --json | jq '.summary'
 ```
 
 ## 設定ファイルとの連携
 
-`.scj.json` でバッチ処理のデフォルトを設定：
+`.mst.json` でバッチ処理のデフォルトを設定：
 
 ```json
 {
@@ -294,8 +294,8 @@ scj list --json | jq '.summary'
     "defaultTemplate": "feature",
     "hooks": {
       "beforeBatch": "echo 'Starting batch creation...'",
-      "afterEach": "echo 'Created: $SHADOW_CLONE'",
-      "afterBatch": "scj list"
+      "afterEach": "echo 'Created: $ORCHESTRA_MEMBER'",
+      "afterBatch": "mst list"
     }
   }
 }
@@ -314,7 +314,7 @@ ISSUES=$(gh issue list --label "$SPRINT" --json number,title)
 
 echo "$ISSUES" | jq -r '.[] | "sprint23-\(.number) | \(.title) | #\(.number)"' > sprint23.txt
 
-scj batch --from-file sprint23.txt --base develop --setup --parallel 8
+mst batch --from-file sprint23.txt --base develop --setup --parallel 8
 ```
 
 ### 進捗バー付き実行
@@ -328,13 +328,13 @@ CURRENT=0
 while IFS='|' read -r branch desc issue; do
   ((CURRENT++))
   echo "[$CURRENT/$TOTAL] Creating $branch..."
-  scj create "$branch" ${issue:+--from-issue "$issue"}
+  mst create "$branch" ${issue:+--from-issue "$issue"}
 done < worktrees.txt
 ```
 
 ## 関連コマンド
 
-- [`scj create`](./create.md) - 単一の影分身を作成
-- [`scj github`](./github.md) - GitHub連携での作成
-- [`scj list`](./list.md) - 作成した影分身の確認
-- [`scj health`](./health.md) - 大量作成後の健全性チェック
+- [`mst create`](./create.md) - 単一の演奏者を作成
+- [`mst github`](./github.md) - GitHub連携での作成
+- [`mst list`](./list.md) - 作成した演奏者の確認
+- [`mst health`](./health.md) - 大量作成後の健全性チェック

@@ -64,10 +64,10 @@ The changeset will be saved in `.changeset/` directory.
 
 ## Pre-release Checklist
 
-- [ ] All tests passing (`pnpm test`)
-- [ ] TypeScript compiles without errors (`pnpm typecheck`)
-- [ ] Linting passes (`pnpm lint`)
-- [ ] E2E tests pass (`pnpm test:e2e`)
+- [ ] All tests passing (`npm test`)
+- [ ] TypeScript compiles without errors (`npm run typecheck`)
+- [ ] Linting passes (`npm run lint`)
+- [ ] E2E tests pass (`npm run test:e2e`)
 - [ ] Documentation is up to date
 - [ ] CHANGELOG entries are clear and user-friendly
 

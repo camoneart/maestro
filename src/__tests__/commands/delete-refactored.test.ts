@@ -17,7 +17,7 @@ vi.mock('../../core/git.js', () => ({
 describe('delete.ts refactored functions', () => {
   const mockWorktrees: Worktree[] = [
     {
-      path: '/project/.git/shadow-clones/feature-1',
+      path: '/project/.git/orchestrations/feature-1',
       head: 'abc123',
       branch: 'refs/heads/feature-1',
       locked: false,
@@ -25,7 +25,7 @@ describe('delete.ts refactored functions', () => {
       detached: false
     },
     {
-      path: '/project/.git/shadow-clones/feature-2',
+      path: '/project/.git/orchestrations/feature-2',
       head: 'def456',
       branch: 'refs/heads/feature-2',
       locked: true,
@@ -60,7 +60,7 @@ describe('delete.ts refactored functions', () => {
 
     it('should find current worktree when --current option is used', () => {
       const originalCwd = process.cwd
-      process.cwd = vi.fn().mockReturnValue('/project/.git/shadow-clones/feature-1')
+      process.cwd = vi.fn().mockReturnValue('/project/.git/orchestrations/feature-1')
       
       const result = prepareWorktreeSelection(mockWorktrees, undefined, { current: true })
       

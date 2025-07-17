@@ -433,7 +433,7 @@ tests/auth.test.ts
       mockFs.writeFile.mockResolvedValue(undefined)
 
       async function createTempSuggestionFile(suggestions: string[]): Promise<string> {
-        const tempFile = path.join('/tmp', `scj-suggestions-${Date.now()}.txt`)
+        const tempFile = path.join('/tmp', `maestro-suggestions-${Date.now()}.txt`)
         const content = suggestions.join('\n')
         
         await fs.writeFile(tempFile, content)
@@ -443,9 +443,9 @@ tests/auth.test.ts
       const suggestions = ['feature/auth', 'bugfix/login']
       const tempFile = await createTempSuggestionFile(suggestions)
       
-      expect(tempFile).toBe('/tmp/scj-suggestions-123.txt')
+      expect(tempFile).toBe('/tmp/maestro-suggestions-123.txt')
       expect(mockFs.writeFile).toHaveBeenCalledWith(
-        '/tmp/scj-suggestions-123.txt',
+        '/tmp/maestro-suggestions-123.txt',
         'feature/auth\nbugfix/login'
       )
     })

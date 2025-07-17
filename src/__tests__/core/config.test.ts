@@ -90,7 +90,7 @@ describe('ConfigManager', () => {
   })
 
   describe('loadProjectConfig', () => {
-    it('should load project config from .shadowclonerc', async () => {
+    it('should load project config from .maestrorc', async () => {
       const configData = {
         worktrees: {
           branchPrefix: 'feature/',
@@ -105,8 +105,8 @@ describe('ConfigManager', () => {
 
       await configManager.loadProjectConfig()
 
-      // .scj.jsonを最初に試す
-      expect(fs.readFile).toHaveBeenCalledWith(path.join(process.cwd(), '.scj.json'), 'utf-8')
+      // .maestro.jsonを最初に試す
+      expect(fs.readFile).toHaveBeenCalledWith(path.join(process.cwd(), '.maestro.json'), 'utf-8')
       expect(configManager.get('worktrees')?.branchPrefix).toBe('feature/')
       expect(configManager.get('development')?.autoSetup).toBe(false)
       expect(configManager.get('development')?.defaultEditor).toBe('vscode')
@@ -171,7 +171,7 @@ describe('ConfigManager', () => {
     it('should validate correct config', () => {
       const validConfig = {
         worktrees: {
-          path: '.git/shadow-clones',
+          path: '.git/orchestrations',
           branchPrefix: 'feature/',
         },
         development: {

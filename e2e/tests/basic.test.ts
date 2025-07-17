@@ -2,12 +2,12 @@ import { describe, it, expect } from 'vitest'
 import { execa } from 'execa'
 import path from 'path'
 
-describe('shadow-clone-jutsu E2E basic tests', () => {
-  const scjPath = path.resolve('dist/cli.js')
+describe('maestro E2E basic tests', () => {
+  const mstPath = path.resolve('dist/cli.js')
 
   it('should execute without errors and show help', async () => {
     // helpコマンドの出力を確認（エラーでも正常）
-    const result = await execa('node', [scjPath, '--help'], { reject: false })
+    const result = await execa('node', [mstPath, '--help'], { reject: false })
     const output = result.stdout + result.stderr
     
     // 基本的なコマンドが表示されることを確認
@@ -22,13 +22,13 @@ describe('shadow-clone-jutsu E2E basic tests', () => {
   })
 
   it('should show version', async () => {
-    const result = await execa('node', [scjPath, '--version'], { reject: false })
+    const result = await execa('node', [mstPath, '--version'], { reject: false })
     const output = result.stdout + result.stderr
     expect(output).toContain('1.0.0')
   })
 
   it('should handle list command in non-git directory with error', async () => {
-    const result = await execa('node', [scjPath, 'list'], { 
+    const result = await execa('node', [mstPath, 'list'], { 
       reject: false,
       cwd: '/tmp' 
     })

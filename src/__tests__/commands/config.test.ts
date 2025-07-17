@@ -42,10 +42,10 @@ describe('config command', () => {
       loadProjectConfig: vi.fn(),
       createProjectConfig: vi.fn(),
       getAll: vi.fn().mockReturnValue({
-        worktrees: { path: '.git/shadow-clones' },
+        worktrees: { path: '.git/orchestrations' },
         development: { autoSetup: true },
       }),
-      getConfigPath: vi.fn().mockReturnValue('/home/user/.config/scj/config.json'),
+      getConfigPath: vi.fn().mockReturnValue('/home/user/.config/maestro/config.json'),
     }
     ;(ConfigManager as any).mockImplementation(() => mockConfigManager)
   })
@@ -61,13 +61,13 @@ describe('config command', () => {
         {
           type: 'confirm',
           name: 'createConfig',
-          message: 'プロジェクト設定ファイル (.scj.json) を作成しますか？',
+          message: 'プロジェクト設定ファイル (.maestro.json) を作成しますか？',
           default: true,
         },
       ])
       expect(mockConfigManager.createProjectConfig).toHaveBeenCalled()
       expect(consoleLogSpy).toHaveBeenCalledWith(
-        chalk.green('✅ .scj.json を作成しました')
+        chalk.green('✅ .maestro.json を作成しました')
       )
     })
 
@@ -98,7 +98,7 @@ describe('config command', () => {
   describe('show action', () => {
     it('should display current configuration', async () => {
       const mockConfig = {
-        worktrees: { path: '.git/shadow-clones' },
+        worktrees: { path: '.git/orchestrations' },
         development: { autoSetup: true },
       }
       mockConfigManager.getAll.mockReturnValue(mockConfig)
@@ -106,7 +106,7 @@ describe('config command', () => {
       await configCommand.parseAsync(['node', 'config', 'show'])
 
       expect(consoleLogSpy).toHaveBeenCalledWith(
-        chalk.bold('\n🥷 shadow-clone-jutsu 設定:\n')
+        chalk.bold('\n🎼 maestro 設定:\n')
       )
       expect(consoleLogSpy).toHaveBeenCalledWith(JSON.stringify(mockConfig, null, 2))
     })
@@ -124,9 +124,9 @@ describe('config command', () => {
     it('should display config file paths', async () => {
       // fs.accessのモック設定
       ;(fs.access as Mock)
-        .mockRejectedValueOnce(new Error('Not found')) // .scj.json
-        .mockResolvedValueOnce(undefined) // .scjrc.json
-        .mockRejectedValueOnce(new Error('Not found')) // scj.config.json
+        .mockRejectedValueOnce(new Error('Not found')) // .maestro.json
+        .mockResolvedValueOnce(undefined) // .maestrorc.json
+        .mockRejectedValueOnce(new Error('Not found')) // maestro.config.json
 
       await configCommand.parseAsync(['node', 'config', 'path'])
 
@@ -142,16 +142,16 @@ describe('config command', () => {
       )
 
       // ファイルの存在確認
-      expect(fs.access).toHaveBeenCalledWith(path.join(process.cwd(), '.scj.json'))
-      expect(fs.access).toHaveBeenCalledWith(path.join(process.cwd(), '.scjrc.json'))
-      expect(fs.access).toHaveBeenCalledWith(path.join(process.cwd(), 'scj.config.json'))
+      expect(fs.access).toHaveBeenCalledWith(path.join(process.cwd(), '.maestro.json'))
+      expect(fs.access).toHaveBeenCalledWith(path.join(process.cwd(), '.maestrorc.json'))
+      expect(fs.access).toHaveBeenCalledWith(path.join(process.cwd(), 'maestro.config.json'))
 
       // 結果の表示確認
       expect(consoleLogSpy).toHaveBeenCalledWith(
-        expect.stringContaining('❌') && expect.stringContaining('.scj.json')
+        expect.stringContaining('❌') && expect.stringContaining('.maestro.json')
       )
       expect(consoleLogSpy).toHaveBeenCalledWith(
-        expect.stringContaining('✅') && expect.stringContaining('.scjrc.json')
+        expect.stringContaining('✅') && expect.stringContaining('.maestrorc.json')
       )
     })
 
@@ -161,7 +161,7 @@ describe('config command', () => {
       await configCommand.parseAsync(['node', 'config', 'path'])
 
       const logCalls = consoleLogSpy.mock.calls.map(call => call[0])
-      const configFiles = ['.scj.json', '.scjrc.json', 'scj.config.json']
+      const configFiles = ['.maestro.json', '.maestrorc.json', 'maestro.config.json']
       
       configFiles.forEach(file => {
         expect(logCalls.some(log => 
@@ -177,13 +177,13 @@ describe('config command', () => {
 
       expect(consoleLogSpy).toHaveBeenCalledWith(chalk.yellow('使い方:'))
       expect(consoleLogSpy).toHaveBeenCalledWith(
-        '  scj config init   # プロジェクト設定ファイルを作成'
+        '  maestro config init   # プロジェクト設定ファイルを作成'
       )
       expect(consoleLogSpy).toHaveBeenCalledWith(
-        '  scj config show   # 現在の設定を表示'
+        '  maestro config show   # 現在の設定を表示'
       )
       expect(consoleLogSpy).toHaveBeenCalledWith(
-        '  scj config path   # 設定ファイルのパスを表示'
+        '  maestro config path   # 設定ファイルのパスを表示'
       )
     })
 

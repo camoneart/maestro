@@ -229,8 +229,8 @@ feature-b | Feature B
       await batchCommand.parseAsync(['node', 'test', '--from-file', 'batch.txt'])
 
       // 成功と失敗のサマリーが表示される
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('成功: 2個'))
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('失敗: 1個'))
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('成功: 2件'))
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('失敗: 1件'))
     })
   })
 
@@ -316,7 +316,7 @@ feature-b | Feature B
       expect(mockSpinner.fail).toHaveBeenCalledWith('このディレクトリはGitリポジトリではありません')
     })
 
-    it('worktreeが0個の場合は作成をスキップする', async () => {
+    it('worktreeが0件の場合は作成をスキップする', async () => {
       vi.mocked(execa).mockImplementation((cmd: string, args: string[]) => {
         if (cmd === 'gh' && args[0] === 'issue' && args[1] === 'list') {
           return Promise.resolve(createMockExecaResponse('[]')) // 空のIssueリスト

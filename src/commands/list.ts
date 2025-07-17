@@ -34,7 +34,7 @@ interface WorktreeMetadata {
 
 export const listCommand = new Command('list')
   .alias('ls')
-  .description('影分身（worktree）の一覧を表示')
+  .description('オーケストラ編成（worktree）の一覧を表示')
   .option('-j, --json', 'JSON形式で出力')
   .option('--fzf', 'fzfで選択し、選択したブランチ名を出力')
   .option('--filter <keyword>', 'ブランチ名またはパスでフィルタ')
@@ -89,7 +89,7 @@ export const listCommand = new Command('list')
         if (options.metadata || options.json) {
           for (const worktree of worktrees) {
             try {
-              const metadataPath = path.join(worktree.path, '.scj-metadata.json')
+              const metadataPath = path.join(worktree.path, '.maestro-metadata.json')
               const metadataContent = await fs.promises.readFile(metadataPath, 'utf-8')
               ;(worktree as EnhancedWorktree).metadata = JSON.parse(metadataContent)
             } catch {
@@ -117,7 +117,7 @@ export const listCommand = new Command('list')
         }
 
         if (worktrees.length === 0) {
-          console.log(chalk.yellow('影分身が存在しません'))
+          console.log(chalk.yellow('演奏者が存在しません'))
           return
         }
 
@@ -139,7 +139,7 @@ export const listCommand = new Command('list')
             'fzf',
             [
               '--ansi',
-              '--header=影分身を選択 (Ctrl-C でキャンセル)',
+              '--header=演奏者を選択 (Ctrl-C でキャンセル)',
               '--preview',
               'echo {} | cut -d"|" -f2 | xargs ls -la',
               '--preview-window=right:50%:wrap',
@@ -178,7 +178,7 @@ export const listCommand = new Command('list')
           return
         }
 
-        console.log(chalk.bold('\n🥷 影分身一覧:\n'))
+        console.log(chalk.bold('\n🎼 オーケストラ編成:\n'))
 
         // メインワークツリーを先頭に表示
         const mainWorktree = worktrees.find(
@@ -194,7 +194,7 @@ export const listCommand = new Command('list')
           displayWorktree(wt, false, options.lastCommit, options.metadata)
         )
 
-        console.log(chalk.gray(`\n合計: ${worktrees.length} 対の影分身`))
+        console.log(chalk.gray(`\n合計: ${worktrees.length} 名の演奏者`))
       } catch (error) {
         console.error(chalk.red('エラー:'), error instanceof Error ? error.message : '不明なエラー')
         process.exit(1)
@@ -241,7 +241,7 @@ function displayWorktree(
   showLastCommit?: boolean,
   showMetadata?: boolean
 ) {
-  const prefix = isMain ? '📍' : '🥷'
+  const prefix = isMain ? '📍' : '🎵'
   const branchName = worktree.branch || '(detached)'
   const status = []
 

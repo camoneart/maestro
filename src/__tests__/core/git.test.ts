@@ -96,7 +96,7 @@ locked reason`
   describe('createWorktree', () => {
     it('should create a new worktree', async () => {
       const branchName = 'feature-test'
-      const expectedPath = path.resolve('.git/shadow-clones/' + branchName)
+      const expectedPath = path.resolve('.git/orchestrations/' + branchName)
 
       // git.raw()をモック
       ;(gitManager as any).git.raw = vi.fn().mockResolvedValue('')
@@ -110,7 +110,7 @@ locked reason`
         'add',
         '-b',
         branchName,
-        '.git/shadow-clones/feature-test',
+        '.git/orchestrations/feature-test',
         'main',
       ])
     })
@@ -118,7 +118,7 @@ locked reason`
     it('should use base branch if provided', async () => {
       const branchName = 'feature-test'
       const baseBranch = 'develop'
-      const expectedPath = path.resolve('.git/shadow-clones/' + branchName)
+      const expectedPath = path.resolve('.git/orchestrations/' + branchName)
 
       // git.raw()をモック
       ;(gitManager as any).git.raw = vi.fn().mockResolvedValue('')
@@ -131,7 +131,7 @@ locked reason`
         'add',
         '-b',
         branchName,
-        '.git/shadow-clones/feature-test',
+        '.git/orchestrations/feature-test',
         baseBranch,
       ])
     })
@@ -150,7 +150,7 @@ locked reason`
   describe('attachWorktree', () => {
     it('should attach to an existing branch', async () => {
       const branchName = 'existing-feature'
-      const expectedPath = path.resolve('.git/shadow-clones/existing-feature')
+      const expectedPath = path.resolve('.git/orchestrations/existing-feature')
 
       // git.raw()をモック
       ;(gitManager as any).git.raw = vi.fn().mockResolvedValue('')
@@ -161,7 +161,7 @@ locked reason`
       expect((gitManager as any).git.raw).toHaveBeenCalledWith([
         'worktree',
         'add',
-        '.git/shadow-clones/existing-feature',
+        '.git/orchestrations/existing-feature',
         branchName,
       ])
     })

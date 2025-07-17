@@ -172,10 +172,10 @@ describe('create command - utility functions', () => {
 
     it('should handle metadata file paths', () => {
       const worktreePath = '/path/to/worktree'
-      const metadataFileName = '.scj-metadata.json'
+      const metadataFileName = '.maestro-metadata.json'
       const metadataPath = `${worktreePath}/${metadataFileName}`
       
-      expect(metadataPath).toBe('/path/to/worktree/.scj-metadata.json')
+      expect(metadataPath).toBe('/path/to/worktree/.maestro-metadata.json')
     })
   })
 
@@ -253,10 +253,10 @@ describe('create command - utility functions', () => {
     })
 
     it('should handle metadata file naming', () => {
-      const metadataFile = '.scj-metadata.json'
+      const metadataFile = '.maestro-metadata.json'
       const claudeFile = 'CLAUDE.md'
       
-      expect(metadataFile).toBe('.scj-metadata.json')
+      expect(metadataFile).toBe('.maestro-metadata.json')
       expect(claudeFile).toBe('CLAUDE.md')
     })
 

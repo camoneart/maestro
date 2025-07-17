@@ -92,7 +92,7 @@ function generateBranchName(
 
 export const githubCommand = new Command('github')
   .alias('gh')
-  .description('GitHub PR/Issueから影分身を作り出す')
+  .description('GitHub PR/Issueから演奏者を招集する')
   .argument('[type]', 'タイプ (checkout, pr, issue, comment)')
   .argument('[number]', 'PR/Issue番号')
   .option('-o, --open', 'VSCode/Cursorで開く')
@@ -101,7 +101,7 @@ export const githubCommand = new Command('github')
   .option('--reopen', 'PR/Issueを再開')
   .option('--close', 'PR/Issueをクローズ')
   .action(async (type?: string, number?: string, options: GithubOptions = {}) => {
-    const spinner = ora('影分身の術！').start()
+    const spinner = ora('オーケストレーション！').start()
 
     try {
       // gh CLIがインストールされているか確認
@@ -178,11 +178,11 @@ export const githubCommand = new Command('github')
         // checkout または引数なしの場合
         if (!number && type === 'checkout') {
           console.error(chalk.red('PR/Issue番号を指定してください'))
-          console.log(chalk.gray('使い方: scj github checkout <number>'))
+          console.log(chalk.gray('使い方: maestro github checkout <number>'))
           process.exit(1)
         }
 
-        // typeが番号の場合（scj github 123）
+        // typeが番号の場合（maestro github 123）
         if (type && !isNaN(parseInt(type))) {
           number = type
           type = 'checkout'
@@ -197,7 +197,7 @@ export const githubCommand = new Command('github')
           {
             type: 'list',
             name: 'selectType',
-            message: '何から影分身を作り出しますか？',
+            message: '何から演奏者を招集しますか？',
             choices: [
               { name: 'Pull Request', value: 'pr' },
               { name: 'Issue', value: 'issue' },
@@ -379,7 +379,7 @@ export const githubCommand = new Command('github')
         {
           type: 'confirm',
           name: 'confirmCreate',
-          message: `ブランチ '${chalk.cyan(branchName)}' で影分身を作り出しますか？`,
+          message: `ブランチ '${chalk.cyan(branchName)}' で演奏者を招集しますか？`,
           default: true,
         },
       ])
@@ -389,7 +389,7 @@ export const githubCommand = new Command('github')
         return
       }
 
-      spinner.start('影分身を作り出し中...')
+      spinner.start('演奏者を招集中...')
 
       let worktreePath: string
 
@@ -414,7 +414,7 @@ export const githubCommand = new Command('github')
       }
 
       spinner.succeed(
-        `影分身 '${chalk.cyan(branchName)}' を作り出しました！\n` +
+        `演奏者 '${chalk.cyan(branchName)}' を招集しました！\n` +
           `  📁 ${chalk.gray(worktreePath)}\n` +
           `  🔗 ${chalk.blue(`${type === 'pr' ? 'PR' : 'Issue'} #${number}`)}`
       )
@@ -470,7 +470,7 @@ export const githubCommand = new Command('github')
         }
       }
 
-      console.log(chalk.green('\n✨ GitHub統合による影分身の作成が完了しました！'))
+      console.log(chalk.green('\n✨ GitHub統合による演奏者の招集が完了しました！'))
       console.log(chalk.gray(`\ncd ${worktreePath} で移動できます`))
     } catch (error) {
       spinner.fail('エラーが発生しました')

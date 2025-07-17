@@ -22,7 +22,7 @@ const htmlTemplate = `
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🥷 Shadow Clone Jutsu Dashboard</title>
+  <title>🎼 Orchestra Conductor Dashboard</title>
   <style>
     :root {
       --bg-color: #1a1a1a;
@@ -266,8 +266,8 @@ const htmlTemplate = `
 <body>
   <div class="container">
     <div class="header">
-      <h1>🥷 Shadow Clone Jutsu Dashboard</h1>
-      <p>全ての影分身の状態を一覧表示</p>
+      <h1>🎼 Orchestra Conductor Dashboard</h1>
+      <p>全ての演奏者の状態を一覧表示</p>
     </div>
     
     <div id="content">
@@ -298,7 +298,7 @@ const htmlTemplate = `
       const stats = \`
         <div class="stats">
           <div class="stat-card">
-            <h3>総影分身数</h3>
+            <h3>総演奏者数</h3>
             <p class="value">\${data.worktrees.length}</p>
           </div>
           <div class="stat-card">
@@ -321,7 +321,7 @@ const htmlTemplate = `
         <div class="worktree-card \${wt.isMain ? 'main' : ''}">
           <div class="worktree-header">
             <div class="branch-name">
-              \${wt.isMain ? '📍' : '🥷'} \${wt.branch}
+              \${wt.isMain ? '📍' : '🎵'} \${wt.branch}
             </div>
           </div>
           
@@ -447,7 +447,7 @@ async function getWorktreeData(): Promise<{
 
       // メタデータを取得
       try {
-        const metadataPath = path.join(wt.path, '.scj-metadata.json')
+        const metadataPath = path.join(wt.path, '.maestro-metadata.json')
         const metadataContent = await readFile(metadataPath, 'utf-8')
         result.metadata = JSON.parse(metadataContent)
       } catch {
@@ -501,7 +501,7 @@ async function getWorktreeData(): Promise<{
 
 export const dashboardCommand = new Command('dashboard')
   .alias('ui')
-  .description('Web UIで影分身の状態を表示')
+  .description('Web UIで演奏者の状態を表示')
   .option('-p, --port <number>', 'ポート番号', '8765')
   .option('--no-open', 'ブラウザを自動で開かない')
   .action(async (options: DashboardOptions) => {

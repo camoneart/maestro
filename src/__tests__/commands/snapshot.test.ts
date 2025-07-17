@@ -23,7 +23,7 @@ vi.mock('ora')
 describe('snapshot command', () => {
   let mockGitManager: any
   let mockSpinner: any
-  const mockSnapshotDir = '/repo/.scj/snapshots'
+  const mockSnapshotDir = '/repo/.maestro/snapshots'
 
   beforeEach(() => {
     // GitWorktreeManagerのモック
@@ -131,9 +131,9 @@ describe('snapshot command', () => {
     it('現在のworktreeのスナップショットを作成する', async () => {
       await snapshotCommand.parseAsync(['node', 'test'])
 
-      expect(mockSpinner.succeed).toHaveBeenCalledWith('スナップショットを作成しました')
+      expect(mockSpinner.succeed).toHaveBeenCalledWith('スナップショットを保存しました')
       expect(fs.writeFile).toHaveBeenCalledWith(
-        expect.stringContaining('/repo/worktree-1/.scj/snapshots/'),
+        expect.stringContaining('/repo/worktree-1/.maestro/snapshots/'),
         expect.stringContaining('"branch": "feature-a"')
       )
       expect(console.log).toHaveBeenCalledWith(
@@ -172,7 +172,7 @@ describe('snapshot command', () => {
     it('--allオプションで全worktreeのスナップショットを作成する', async () => {
       await snapshotCommand.parseAsync(['node', 'test', '--all'])
 
-      expect(mockSpinner.succeed).toHaveBeenCalledWith('2個のスナップショットを作成しました')
+      expect(mockSpinner.succeed).toHaveBeenCalledWith('2件のスナップショットを保存しました')
       expect(fs.writeFile).toHaveBeenCalledTimes(2)
       expect(console.log).toHaveBeenCalledWith(expect.stringContaining('feature-a:'))
       expect(console.log).toHaveBeenCalledWith(expect.stringContaining('feature-b:'))
@@ -396,7 +396,7 @@ describe('snapshot command', () => {
     it('--deleteオプションでスナップショットを削除する', async () => {
       await snapshotCommand.parseAsync(['node', 'test', '--delete', 'snapshot-123'])
 
-      expect(fs.unlink).toHaveBeenCalledWith('/repo/worktree-1/.scj/snapshots/snapshot-123.json')
+      expect(fs.unlink).toHaveBeenCalledWith('/repo/worktree-1/.maestro/snapshots/snapshot-123.json')
       expect(console.log).toHaveBeenCalledWith(
         expect.stringContaining("✨ スナップショット 'snapshot-123' を削除しました")
       )
@@ -415,7 +415,7 @@ describe('snapshot command', () => {
       await snapshotCommand.parseAsync(['node', 'test', '--delete', 'snapshot-123'])
 
       expect(fs.unlink).toHaveBeenCalledWith(
-        '/repo/worktree-1/.scj/snapshots/snapshot-123456789.json'
+        '/repo/worktree-1/.maestro/snapshots/snapshot-123456789.json'
       )
       expect(console.log).toHaveBeenCalledWith(
         expect.stringContaining("✨ スナップショット 'snapshot-123456789' を削除しました")

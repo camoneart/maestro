@@ -465,7 +465,7 @@ describe('sync command', () => {
 
       // エラーが発生してもコマンドは正常に完了する
       expect(mockSpinner.succeed).toHaveBeenCalledWith(
-        expect.stringContaining('ファイル同期完了: 0個成功')
+        expect.stringContaining('ファイル同期完了: 0件成功')
       )
     })
   })

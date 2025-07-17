@@ -85,7 +85,7 @@ describe.skip('create command - additional tests', () => {
     mockGitManager = {
       isGitRepository: vi.fn().mockResolvedValue(true),
       listWorktrees: vi.fn().mockResolvedValue([]),
-      createWorktree: vi.fn().mockResolvedValue('/project/root/.git/shadow-clones/feature-1'),
+      createWorktree: vi.fn().mockResolvedValue('/project/root/.git/orchestrations/feature-1'),
       getConfigValue: vi.fn().mockResolvedValue(null),
       getCurrentBranch: vi.fn().mockResolvedValue('main'),
     }
@@ -94,9 +94,9 @@ describe.skip('create command - additional tests', () => {
     // ConfigManagerのモック
     mockConfigManager = {
       loadProjectConfig: vi.fn(),
-      get: vi.fn().mockReturnValue({ path: '.git/shadow-clones' }),
+      get: vi.fn().mockReturnValue({ path: '.git/orchestrations' }),
       getAll: vi.fn().mockReturnValue({
-        worktrees: { path: '.git/shadow-clones' },
+        worktrees: { path: '.git/orchestrations' },
         development: { autoSetup: false },
       }),
     }
@@ -125,14 +125,14 @@ describe.skip('create command - additional tests', () => {
 
   describe('basic create functionality', () => {
     it('should create worktree with specified branch name', async () => {
-      mockGitManager.createWorktree.mockResolvedValue('/project/root/.git/shadow-clones/feature-1')
+      mockGitManager.createWorktree.mockResolvedValue('/project/root/.git/orchestrations/feature-1')
       ;(execa as Mock).mockResolvedValue({ stdout: '' })
 
       await createCommand.parseAsync(['node', 'create', 'feature-new'])
 
       expect(mockGitManager.createWorktree).toHaveBeenCalledWith(
         'feature-new',
-        expect.stringContaining('.git/shadow-clones/feature-new')
+        expect.stringContaining('.git/orchestrations/feature-new')
       )
       expect(mockSpinner.succeed).toHaveBeenCalledWith(
         '影分身の術が成功しました！'
@@ -241,7 +241,7 @@ describe.skip('create command - additional tests', () => {
         expect.any(Object)
       )
       expect(fs.writeFile).toHaveBeenCalledWith(
-        expect.stringContaining('.scj-metadata.json'),
+        expect.stringContaining('.maestro-metadata.json'),
         expect.stringContaining('Test Issue')
       )
     })
@@ -276,7 +276,7 @@ describe.skip('create command - additional tests', () => {
     it('should handle --open option', async () => {
       mockGitManager.createWorktree.mockResolvedValue(undefined)
       mockConfigManager.get.mockReturnValue({
-        worktrees: { path: '.git/shadow-clones' },
+        worktrees: { path: '.git/orchestrations' },
         development: { defaultEditor: 'code' },
       })
       ;(execa as Mock).mockResolvedValue({ stdout: '' })
@@ -285,7 +285,7 @@ describe.skip('create command - additional tests', () => {
 
       expect(execa).toHaveBeenCalledWith(
         'code',
-        [expect.stringContaining('.git/shadow-clones/feature-new')],
+        [expect.stringContaining('.git/orchestrations/feature-new')],
         expect.any(Object)
       )
     })
@@ -301,7 +301,7 @@ describe.skip('create command - additional tests', () => {
         'npm',
         ['install'],
         expect.objectContaining({
-          cwd: expect.stringContaining('.git/shadow-clones/feature-new'),
+          cwd: expect.stringContaining('.git/orchestrations/feature-new'),
         })
       )
     })
@@ -335,7 +335,7 @@ describe.skip('create command - additional tests', () => {
         'claude',
         [],
         expect.objectContaining({
-          cwd: expect.stringContaining('.git/shadow-clones/feature-new'),
+          cwd: expect.stringContaining('.git/orchestrations/feature-new'),
         })
       )
     })
@@ -409,7 +409,7 @@ describe.skip('create command - additional tests', () => {
   describe('hooks functionality', () => {
     it('should execute afterCreate hook from config', async () => {
       mockConfigManager.get.mockReturnValue({
-        worktrees: { path: '.git/shadow-clones' },
+        worktrees: { path: '.git/orchestrations' },
         hooks: {
           afterCreate: 'echo "Hook executed"',
         },
@@ -432,7 +432,7 @@ describe.skip('create command - additional tests', () => {
 
     it('should handle hook execution errors', async () => {
       mockConfigManager.get.mockReturnValue({
-        worktrees: { path: '.git/shadow-clones' },
+        worktrees: { path: '.git/orchestrations' },
         hooks: {
           afterCreate: 'exit 1',
         },
@@ -474,7 +474,7 @@ describe.skip('create command - additional tests', () => {
       await createCommand.parseAsync(['node', 'create', 'feature-new'])
 
       expect(fs.writeFile).toHaveBeenCalledWith(
-        expect.stringContaining('.scj-metadata.json'),
+        expect.stringContaining('.maestro-metadata.json'),
         expect.stringContaining('"branch":"feature-new"')
       )
     })

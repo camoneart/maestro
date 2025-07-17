@@ -204,11 +204,11 @@ describe('Create Command - Enhanced Coverage', () => {
 
   describe('saveWorktreeMetadata function', () => {
     it('should save metadata successfully', async () => {
-      mockPath.join.mockReturnValue('/path/to/worktree/.scj-metadata.json')
+      mockPath.join.mockReturnValue('/path/to/worktree/.maestro-metadata.json')
       mockFs.writeFile.mockResolvedValue(undefined)
 
       async function saveWorktreeMetadata(worktreePath: string, branchName: string, metadata: any) {
-        const metadataPath = path.join(worktreePath, '.scj-metadata.json')
+        const metadataPath = path.join(worktreePath, '.maestro-metadata.json')
         const metadataContent = {
           createdAt: new Date().toISOString(),
           branch: branchName,
@@ -225,17 +225,17 @@ describe('Create Command - Enhanced Coverage', () => {
 
       await expect(saveWorktreeMetadata('/path/to/worktree', 'test-branch', { template: 'feature' })).resolves.toBeUndefined()
       expect(mockFs.writeFile).toHaveBeenCalledWith(
-        '/path/to/worktree/.scj-metadata.json',
+        '/path/to/worktree/.maestro-metadata.json',
         expect.stringContaining('test-branch')
       )
     })
 
     it('should handle write errors gracefully', async () => {
-      mockPath.join.mockReturnValue('/path/to/worktree/.scj-metadata.json')
+      mockPath.join.mockReturnValue('/path/to/worktree/.maestro-metadata.json')
       mockFs.writeFile.mockRejectedValue(new Error('Permission denied'))
 
       async function saveWorktreeMetadata(worktreePath: string, branchName: string, metadata: any) {
-        const metadataPath = path.join(worktreePath, '.scj-metadata.json')
+        const metadataPath = path.join(worktreePath, '.maestro-metadata.json')
         const metadataContent = {
           createdAt: new Date().toISOString(),
           branch: branchName,
@@ -276,7 +276,7 @@ describe('Create Command - Enhanced Coverage', () => {
           await execa('tmux', ['new-session', '-d', '-s', sessionName, '-c', worktreePath])
           await execa('tmux', ['rename-window', '-t', sessionName, branchName])
           
-          console.log(`✨ tmuxセッション '${sessionName}' を作成しました`)
+          console.log(`✨ tmuxセッション '${sessionName}' を開始しました`)
         } catch (error) {
           console.error(`tmuxセッションの作成に失敗しました: ${error}`)
         }

@@ -8,7 +8,7 @@ const mockGitWorktreeManager = vi.fn(() => ({
 
 const mockExeca = vi.fn()
 const mockFs = {
-  mkdtemp: vi.fn().mockResolvedValue('/tmp/scj-test'),
+  mkdtemp: vi.fn().mockResolvedValue('/tmp/maestro-test'),
   writeFile: vi.fn().mockResolvedValue(undefined),
   readFile: vi.fn().mockResolvedValue('1. feature/test\n2. bugfix/test'),
   rm: vi.fn().mockResolvedValue(undefined),

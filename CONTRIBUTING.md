@@ -1,6 +1,6 @@
-# Contributing to shadow-clone-jutsu
+# Contributing to maestro
 
-First off, thank you for considering contributing to shadow-clone-jutsu! 🥷
+First off, thank you for considering contributing to maestro! 🥷
 
 ## Table of Contents
 
@@ -22,8 +22,8 @@ This project and everyone participating in it is governed by our Code of Conduct
 ## Getting Started
 
 1. Fork the repository
-2. Clone your fork: `git clone https://github.com/YOUR_USERNAME/shadow-clone-jutsu.git`
-3. Add upstream remote: `git remote add upstream https://github.com/hashiramaendure/shadow-clone-jutsu.git`
+2. Clone your fork: `git clone https://github.com/YOUR_USERNAME/maestro.git`
+3. Add upstream remote: `git remote add upstream https://github.com/hashiramaendure/maestro.git`
 4. Create a new branch: `git checkout -b feature/your-feature-name`
 
 ## Development Setup

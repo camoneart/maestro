@@ -147,7 +147,7 @@ async function suggestBranchName(
 
   try {
     // 一時ファイルにプロンプトを書き込む
-    const tempDir = await fs.mkdtemp(path.join(tmpdir(), 'scj-suggest-'))
+    const tempDir = await fs.mkdtemp(path.join(tmpdir(), 'maestro-suggest-'))
     const promptPath = path.join(tempDir, 'prompt.md')
 
     let prompt = `# ブランチ名の提案\n\n`
@@ -208,7 +208,7 @@ async function suggestCommitMessage(diffOutput?: string): Promise<string[]> {
 
   try {
     // 一時ファイルにプロンプトを書き込む
-    const tempDir = await fs.mkdtemp(path.join(tmpdir(), 'scj-suggest-'))
+    const tempDir = await fs.mkdtemp(path.join(tmpdir(), 'maestro-suggest-'))
     const promptPath = path.join(tempDir, 'prompt.md')
 
     let prompt = `# Conventional Commitメッセージの提案\n\n`
@@ -473,7 +473,7 @@ export const suggestCommand = new Command('suggest')
           spinner.text = 'Claude Codeで差分をレビュー中...'
 
           // 一時ファイルにdiffとプロンプトを書き込む
-          const tempDir = await fs.mkdtemp(path.join(tmpdir(), 'scj-review-'))
+          const tempDir = await fs.mkdtemp(path.join(tmpdir(), 'maestro-review-'))
           const diffPath = path.join(tempDir, 'diff.patch')
           const promptPath = path.join(tempDir, 'prompt.md')
 

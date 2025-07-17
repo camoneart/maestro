@@ -35,8 +35,8 @@ import { snapshotCommand } from './commands/snapshot.js'
 const program = new Command()
 
 program
-  .name('scj')
-  .description('🥷 shadow-clone-jutsu - 影分身の術でClaude Codeとパラレル開発')
+  .name('maestro')
+  .description('🎼 Maestro - Git Worktreeオーケストレーションで Claude Codeとパラレル開発')
   .version(packageJson.version)
 
 // サブコマンドを追加

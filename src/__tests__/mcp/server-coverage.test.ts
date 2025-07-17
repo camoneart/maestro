@@ -52,11 +52,11 @@ describe('MCP Server - Coverage Enhancement', () => {
   describe('Server configuration', () => {
     it('should handle server info structure', () => {
       const serverInfo = {
-        name: 'shadow-clone-jutsu',
+        name: 'maestro',
         version: '0.1.0',
       }
 
-      expect(serverInfo.name).toBe('shadow-clone-jutsu')
+      expect(serverInfo.name).toBe('maestro')
       expect(serverInfo.version).toBe('0.1.0')
     })
 
@@ -73,10 +73,10 @@ describe('MCP Server - Coverage Enhancement', () => {
   })
 
   describe('Tool definitions', () => {
-    it('should define create_shadow_clone tool correctly', () => {
+    it('should define create_orchestra_member tool correctly', () => {
       const createTool = {
-        name: 'create_shadow_clone',
-        description: '新しい影分身（Git worktree）を作り出す',
+        name: 'create_orchestra_member',
+        description: '新しい演奏者（Git worktree）を加える',
         inputSchema: {
           type: 'object',
           properties: {
@@ -93,15 +93,15 @@ describe('MCP Server - Coverage Enhancement', () => {
         },
       }
 
-      expect(createTool.name).toBe('create_shadow_clone')
-      expect(createTool.description).toContain('影分身')
+      expect(createTool.name).toBe('create_orchestra_member')
+      expect(createTool.description).toContain('演奏者')
       expect(createTool.inputSchema.required).toContain('branchName')
     })
 
-    it('should define delete_shadow_clone tool correctly', () => {
+    it('should define delete_orchestra_member tool correctly', () => {
       const deleteTool = {
-        name: 'delete_shadow_clone',
-        description: '影分身（Git worktree）を削除する',
+        name: 'delete_orchestra_member',
+        description: '演奏者（Git worktree）を削除する',
         inputSchema: {
           type: 'object',
           properties: {
@@ -118,30 +118,30 @@ describe('MCP Server - Coverage Enhancement', () => {
         },
       }
 
-      expect(deleteTool.name).toBe('delete_shadow_clone')
+      expect(deleteTool.name).toBe('delete_orchestra_member')
       expect(deleteTool.description).toContain('削除')
       expect(deleteTool.inputSchema.required).toContain('branchName')
     })
 
-    it('should define list_shadow_clones tool correctly', () => {
+    it('should define list_orchestra_members tool correctly', () => {
       const listTool = {
-        name: 'list_shadow_clones',
-        description: '影分身（Git worktree）の一覧を表示する',
+        name: 'list_orchestra_members',
+        description: '演奏者（Git worktree）の一覧を表示する',
         inputSchema: {
           type: 'object',
           properties: {},
         },
       }
 
-      expect(listTool.name).toBe('list_shadow_clones')
+      expect(listTool.name).toBe('list_orchestra_members')
       expect(listTool.description).toContain('一覧')
       expect(typeof listTool.inputSchema).toBe('object')
     })
 
-    it('should define exec_in_shadow_clone tool correctly', () => {
+    it('should define exec_in_orchestra_member tool correctly', () => {
       const execTool = {
-        name: 'exec_in_shadow_clone',
-        description: '指定した影分身でコマンドを実行する',
+        name: 'exec_in_orchestra_member',
+        description: '指定した演奏者でコマンドを実行する',
         inputSchema: {
           type: 'object',
           properties: {
@@ -158,7 +158,7 @@ describe('MCP Server - Coverage Enhancement', () => {
         },
       }
 
-      expect(execTool.name).toBe('exec_in_shadow_clone')
+      expect(execTool.name).toBe('exec_in_orchestra_member')
       expect(execTool.description).toContain('実行')
       expect(execTool.inputSchema.required).toEqual(['branchName', 'command'])
     })
@@ -168,10 +168,10 @@ describe('MCP Server - Coverage Enhancement', () => {
     it('should handle invalid tool names', () => {
       const invalidToolName = 'invalid_tool'
       const validToolNames = [
-        'create_shadow_clone',
-        'delete_shadow_clone',
-        'list_shadow_clones',
-        'exec_in_shadow_clone'
+        'create_orchestra_member',
+        'delete_orchestra_member',
+        'list_orchestra_members',
+        'exec_in_orchestra_member'
       ]
 
       expect(validToolNames).not.toContain(invalidToolName)
@@ -204,7 +204,7 @@ describe('MCP Server - Coverage Enhancement', () => {
         content: [
           {
             type: 'text',
-            text: '✅ 影分身の作成が完了しました',
+            text: '✅ 演奏者の追加が完了しました',
           },
         ],
       }
@@ -233,7 +233,7 @@ describe('MCP Server - Coverage Enhancement', () => {
         content: [
           {
             type: 'text',
-            text: '📋 影分身一覧:\n- feature/branch1\n- feature/branch2',
+            text: '📋 オーケストラ編成:\n- feature/branch1\n- feature/branch2',
           },
         ],
       }
@@ -308,21 +308,21 @@ describe('MCP Server - Coverage Enhancement', () => {
   describe('Request handling', () => {
     it('should handle ListToolsRequest', () => {
       const toolsList = [
-        'create_shadow_clone',
-        'delete_shadow_clone',
-        'list_shadow_clones',
-        'exec_in_shadow_clone'
+        'create_orchestra_member',
+        'delete_orchestra_member',
+        'list_orchestra_members',
+        'exec_in_orchestra_member'
       ]
 
       expect(toolsList).toHaveLength(4)
-      expect(toolsList).toContain('create_shadow_clone')
+      expect(toolsList).toContain('create_orchestra_member')
     })
 
     it('should handle CallToolRequest', () => {
       const callToolRequest = {
         method: 'tools/call',
         params: {
-          name: 'create_shadow_clone',
+          name: 'create_orchestra_member',
           arguments: {
             branchName: 'feature/test',
           },
@@ -330,7 +330,7 @@ describe('MCP Server - Coverage Enhancement', () => {
       }
 
       expect(callToolRequest.method).toBe('tools/call')
-      expect(callToolRequest.params.name).toBe('create_shadow_clone')
+      expect(callToolRequest.params.name).toBe('create_orchestra_member')
       expect(callToolRequest.params.arguments.branchName).toBe('feature/test')
     })
   })

@@ -109,7 +109,7 @@ function getEditorCommand(editor: string): string {
 
 export const tmuxCommand = new Command('tmux')
   .alias('t')
-  .description('tmux/fzfで影分身を選択して開く')
+  .description('tmux/fzfで演奏者を選択して開く')
   .argument('[branch-name]', 'ブランチ名（省略時はfzfで選択）')
   .option('-n, --new-window', '新しいウィンドウで開く')
   .option('-p, --split-pane', '現在のペインを分割して開く')
@@ -117,7 +117,7 @@ export const tmuxCommand = new Command('tmux')
   .option('-e, --editor <editor>', 'エディタを自動起動 (nvim, vim, code, emacs)')
   .option('-d, --detach', '新セッション作成のみ (attachしない)')
   .action(async (branchName?: string, options: TmuxOptions = {}) => {
-    const spinner = ora('影分身の術！').start()
+    const spinner = ora('オーケストレーション！').start()
 
     try {
       // tmuxがインストールされているか確認
@@ -157,9 +157,9 @@ export const tmuxCommand = new Command('tmux')
       const worktrees = await gitManager.listWorktrees()
 
       if (worktrees.length === 0) {
-        console.log(chalk.yellow('影分身が存在しません'))
+        console.log(chalk.yellow('演奏者が存在しません'))
         console.log(chalk.gray('\n作成方法:'))
-        console.log('  scj create <branch-name>')
+        console.log('  maestro create <branch-name>')
         process.exit(0)
       }
 
@@ -229,7 +229,7 @@ export const tmuxCommand = new Command('tmux')
         'fzf',
         [
           '--ansi',
-          '--header=影分身を選択 (Ctrl-C でキャンセル)',
+          '--header=演奏者を選択 (Ctrl-C でキャンセル)',
           '--preview',
           'echo {} | cut -d"|" -f2 | xargs ls -la',
           '--preview-window=right:50%:wrap',
@@ -359,7 +359,7 @@ export const tmuxCommand = new Command('tmux')
           )
         } else {
           // デフォルト: 現在のペインでディレクトリを変更
-          console.log(chalk.green(`\n✨ 影分身 '${selectedBranch}' を選択しました`))
+          console.log(chalk.green(`\n✨ 演奏者 '${selectedBranch}' を選択しました`))
           console.log(chalk.gray(`cd ${selectedPath} で移動してください`))
 
           // エディタ起動オプションが指定されている場合

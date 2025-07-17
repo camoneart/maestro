@@ -1,0 +1,49 @@
+{
+  "version": "0.1.0",
+  "description": "Git Worktree management tool with Claude Code integration",
+  "homepage": "https://github.com/hashiramaendure/maestro",
+  "license": "MIT",
+  "architecture": {
+    "64bit": {
+      "url": "https://registry.npmjs.org/maestro/-/maestro-0.1.0.tgz",
+      "hash": "PLACEHOLDER_SHA256"
+    }
+  },
+  "depends": "nodejs",
+  "pre_install": [
+    "if (!(Test-Path \"$dir\\node_modules\")) {",
+    "    Write-Host 'Installing maestro...' -ForegroundColor Yellow",
+    "    npm install --production --prefix \"$dir\"",
+    "}"
+  ],
+  "bin": [
+    [
+      "node_modules\\maestro\\dist\\cli.js",
+      "mst"
+    ],
+    [
+      "node_modules\\maestro\\dist\\cli.js",
+      "maestro"
+    ]
+  ],
+  "checkver": {
+    "url": "https://registry.npmjs.org/maestro/latest",
+    "regex": "\"version\":\\s*\"([\\d.]+)\""
+  },
+  "autoupdate": {
+    "architecture": {
+      "64bit": {
+        "url": "https://registry.npmjs.org/maestro/-/maestro-$version.tgz"
+      }
+    }
+  },
+  "notes": [
+    "maestro has been installed!",
+    "",
+    "To get started, run:",
+    "  mst --help",
+    "",
+    "For more information, visit:",
+    "  https://github.com/hashiramaendure/maestro"
+  ]
+}

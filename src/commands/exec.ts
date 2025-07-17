@@ -32,7 +32,7 @@ export const execCommand = new Command('exec')
 
         if (orchestraMembers.length === 0) {
           console.log(chalk.yellow('演奏者が存在しません'))
-          console.log(chalk.gray('scj create <branch-name> で演奏者を招集してください'))
+          console.log(chalk.gray('maestro create <branch-name> で演奏者を招集してください'))
           process.exit(0)
         }
 

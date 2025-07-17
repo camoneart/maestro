@@ -1,12 +1,12 @@
-# Scoop Manifest for shadow-clone-jutsu
+# Scoop Manifest for maestro
 
-This directory contains the Scoop manifest for installing shadow-clone-jutsu on Windows.
+This directory contains the Scoop manifest for installing maestro on Windows.
 
 ## Installation
 
 ```powershell
 scoop bucket add hashiramaendure https://github.com/hashiramaendure/scoop-bucket
-scoop install shadow-clone-jutsu
+scoop install maestro
 ```
 
 ## Development
@@ -28,7 +28,7 @@ This will:
 To test the manifest locally:
 
 ```powershell
-scoop install ./scoop/shadow-clone-jutsu.json
+scoop install ./scoop/maestro.json
 ```
 
 ## Publishing
@@ -36,7 +36,7 @@ scoop install ./scoop/shadow-clone-jutsu.json
 After updating the manifest, copy it to your Scoop bucket repository:
 
 ```bash
-cp scoop/shadow-clone-jutsu.json /path/to/scoop-bucket/bucket/
+cp scoop/maestro.json /path/to/scoop-bucket/bucket/
 ```
 
 Then commit and push the changes to your bucket repository.

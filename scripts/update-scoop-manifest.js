@@ -50,7 +50,7 @@ async function updateManifest() {
     const version = packageJson.version
 
     // Scoop manifestのパス
-    const manifestPath = path.join(__dirname, '..', 'scoop', 'shadow-clone-jutsu.json')
+    const manifestPath = path.join(__dirname, '..', 'scoop', 'maestro.json')
     const manifestContent = await readFile(manifestPath, 'utf8')
     const manifest = JSON.parse(manifestContent)
 
@@ -58,7 +58,7 @@ async function updateManifest() {
     manifest.version = version
 
     // URLを更新
-    const newUrl = `https://registry.npmjs.org/shadow-clone-jutsu/-/shadow-clone-jutsu-${version}.tgz`
+    const newUrl = `https://registry.npmjs.org/maestro/-/maestro-${version}.tgz`
     manifest.architecture['64bit'].url = newUrl
 
     // SHA256を更新（本番環境では実際のSHA256を計算）

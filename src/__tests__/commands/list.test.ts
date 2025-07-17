@@ -107,12 +107,12 @@ describe('list command', () => {
     it('worktreeの一覧を表示する', async () => {
       await listCommand.parseAsync(['node', 'test'])
 
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('🥷 影分身一覧:'))
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('🎼 オーケストラ編成:'))
       expect(console.log).toHaveBeenCalledWith(expect.stringContaining('📍 refs/heads/main'))
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('🥷 refs/heads/feature-a'))
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('🥷 refs/heads/feature-b'))
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('🥷 refs/heads/feature-c'))
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('合計: 4 対の影分身'))
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('🎵 refs/heads/feature-a'))
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('🎵 refs/heads/feature-b'))
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('🎵 refs/heads/feature-c'))
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('合計: 4 名の演奏者'))
     })
 
     it('worktreeが存在しない場合は警告を表示', async () => {
@@ -120,7 +120,7 @@ describe('list command', () => {
 
       await listCommand.parseAsync(['node', 'test'])
 
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('影分身が存在しません'))
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('演奏者が存在しません'))
     })
 
     it('ロック状態とpruna可能状態を表示', async () => {
@@ -192,7 +192,7 @@ describe('list command', () => {
       expect(output).not.toContain('refs/heads/main')
       expect(output).not.toContain('refs/heads/feature-b')
       expect(output).not.toContain('refs/heads/feature-c')
-      expect(output).toContain('合計: 1 対の影分身')
+      expect(output).toContain('合計: 1 名の演奏者')
     })
 
     it('--filterオプションでパスをフィルタする', async () => {
@@ -204,7 +204,7 @@ describe('list command', () => {
       expect(output).toContain('refs/heads/feature-b')
       expect(output).not.toContain('refs/heads/main')
       expect(output).not.toContain('refs/heads/feature-a')
-      expect(output).toContain('合計: 1 対の影分身')
+      expect(output).toContain('合計: 1 名の演奏者')
     })
   })
 
@@ -315,7 +315,7 @@ describe('list command', () => {
         'fzf',
         expect.arrayContaining([
           '--ansi',
-          '--header=影分身を選択 (Ctrl-C でキャンセル)',
+          '--header=演奏者を選択 (Ctrl-C でキャンセル)',
           '--preview',
           expect.any(String),
           '--preview-window=right:50%:wrap',
@@ -399,7 +399,7 @@ describe('list command', () => {
       // エラーが発生してもコマンドは正常に完了する
       await listCommand.parseAsync(['node', 'test', '--metadata'])
 
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('🥷 影分身一覧:'))
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('🎼 オーケストラ編成:'))
     })
 
     it('最終コミット取得エラーを無視する', async () => {
@@ -408,7 +408,7 @@ describe('list command', () => {
       // エラーが発生してもコマンドは正常に完了する
       await listCommand.parseAsync(['node', 'test', '--last-commit'])
 
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('🥷 影分身一覧:'))
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('🎼 オーケストラ編成:'))
     })
   })
 })

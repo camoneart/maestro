@@ -30,8 +30,8 @@ describe.skip('CLI Entry Point Tests', () => {
     it('should export program correctly', async () => {
       const { program } = await import('../cli.js')
       expect(program).toBeDefined()
-      expect(program.name()).toBe('scj')
-      expect(program.description()).toContain('shadow-clone-jutsu')
+      expect(program.name()).toBe('maestro')
+      expect(program.description()).toContain('maestro')
       expect(program.version()).toBe('1.0.0')
     })
 
@@ -104,7 +104,7 @@ describe.skip('CLI Entry Point Tests', () => {
         
         // 無効なコマンドでテスト
         await expect(async () => {
-          await program.parseAsync(['node', 'scj', 'invalid-command'])
+          await program.parseAsync(['node', 'maestro', 'invalid-command'])
         }).rejects.toThrow()
         
       } catch (error) {
@@ -120,7 +120,7 @@ describe.skip('CLI Entry Point Tests', () => {
       
       try {
         // CLI実行時のプロセス終了ハンドリング
-        process.argv = ['node', 'scj', '--invalid-option']
+        process.argv = ['node', 'maestro', '--invalid-option']
         
         // CLI moduleを再インポートして実行
         await expect(async () => {
@@ -141,9 +141,9 @@ describe.skip('CLI Entry Point Tests', () => {
       const { program } = await import('../cli.js')
       
       // ヘルプ情報が正しく設定されているか確認
-      expect(program.description()).toContain('影分身の術')
+      expect(program.description()).toContain('指揮者のように')
       expect(program.description()).toContain('Claude Code')
-      expect(program.description()).toContain('パラレル開発')
+      expect(program.description()).toContain('協奏開発')
     })
 
     it('should handle version command', async () => {
@@ -168,7 +168,7 @@ describe.skip('CLI Entry Point Tests', () => {
       
       // 不明なコマンドのハンドリング
       await expect(async () => {
-        await program.parseAsync(['node', 'scj', 'non-existent-command'])
+        await program.parseAsync(['node', 'maestro', 'non-existent-command'])
       }).rejects.toThrow()
     })
   })
@@ -205,7 +205,7 @@ describe.skip('CLI Entry Point Tests', () => {
       
       // プログラム説明にchalkが使用されているかどうかの間接テスト
       const description = program.description()
-      expect(description).toContain('🥷') // 忍者絵文字の存在確認
+      expect(description).toContain('🎼') // 指揮者絵文字の存在確認
     })
   })
 
@@ -234,7 +234,7 @@ describe.skip('CLI Entry Point Tests', () => {
       
       try {
         // 異なるargv形式でのテスト
-        process.argv = ['node', '/path/to/scj']
+        process.argv = ['node', '/path/to/maestro']
         
         await expect(async () => {
           const { program } = await import('../cli.js')

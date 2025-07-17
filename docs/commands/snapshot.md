@@ -1,12 +1,12 @@
-# scj snapshot
+# mst snapshot
 
-影分身（Git Worktree）の現在の状態をスナップショットとして保存・復元するコマンドです。実験的な変更の前や、重要な作業の節目でバックアップを作成できます。
+演奏者（Git Worktree）の現在の状態をスナップショットとして保存・復元するコマンドです。実験的な変更の前や、重要な作業の節目でバックアップを作成できます。
 
 ## 概要
 
 ```bash
-scj snapshot [options]
-scj snap [options]  # エイリアス
+mst snapshot [options]
+mst snap [options]  # エイリアス
 ```
 
 ## 使用例
@@ -14,33 +14,33 @@ scj snap [options]  # エイリアス
 ### 基本的な使用方法
 
 ```bash
-# 現在の影分身のスナップショットを作成
-scj snapshot
+# 現在の演奏者のスナップショットを作成
+mst snapshot
 
 # メッセージ付きでスナップショット作成
-scj snapshot -m "機能実装前の状態"
+mst snapshot -m "機能実装前の状態"
 
 # 変更をスタッシュに保存してスナップショット作成
-scj snapshot --stash
+mst snapshot --stash
 
-# 全ての影分身のスナップショットを作成
-scj snapshot --all
+# 全ての演奏者のスナップショットを作成
+mst snapshot --all
 ```
 
 ### スナップショット管理
 
 ```bash
 # スナップショット一覧を表示
-scj snapshot --list
+mst snapshot --list
 
 # JSON形式で一覧を表示
-scj snapshot --list --json
+mst snapshot --list --json
 
 # スナップショットを復元
-scj snapshot --restore snapshot-20240120-103045
+mst snapshot --restore snapshot-20240120-103045
 
 # スナップショットを削除
-scj snapshot --delete snapshot-20240120-103045
+mst snapshot --delete snapshot-20240120-103045
 ```
 
 ## オプション
@@ -49,7 +49,7 @@ scj snapshot --delete snapshot-20240120-103045
 |-----------|--------|------|-----------|
 | `--message <msg>` | `-m` | スナップショットの説明 | なし |
 | `--stash` | `-s` | 未コミット変更をスタッシュ | `false` |
-| `--all` | `-a` | 全影分身のスナップショット | `false` |
+| `--all` | `-a` | 全演奏者のスナップショット | `false` |
 | `--list` | `-l` | スナップショット一覧を表示 | `false` |
 | `--restore <id>` | `-r` | スナップショットを復元 | なし |
 | `--delete <id>` | `-d` | スナップショットを削除 | なし |
@@ -108,7 +108,7 @@ scj snapshot --delete snapshot-20240120-103045
 ### 通常の出力
 
 ```bash
-scj snapshot --list
+mst snapshot --list
 ```
 
 出力例：
@@ -161,7 +161,7 @@ Total: 3 snapshots across 2 worktrees
 
 ```bash
 # スナップショットIDを指定して復元
-scj snapshot --restore snapshot-20240120-103045
+mst snapshot --restore snapshot-20240120-103045
 ```
 
 復元プロセス：
@@ -189,17 +189,17 @@ Current state will be backed up as: snapshot-20240120-140000-backup
 
 ```bash
 # 1. 実験前にスナップショット作成
-scj snapshot -m "実験開始前の安定版"
+mst snapshot -m "実験開始前の安定版"
 
 # 2. 実験的な変更を実施
 # ... コードの変更 ...
 
 # 3. 実験が失敗した場合、元に戻す
-scj snapshot --list  # IDを確認
-scj snapshot --restore snapshot-20240120-103045
+mst snapshot --list  # IDを確認
+mst snapshot --restore snapshot-20240120-103045
 
 # 4. 実験が成功した場合、新しいスナップショット作成
-scj snapshot -m "実験成功 - 新機能完成"
+mst snapshot -m "実験成功 - 新機能完成"
 ```
 
 ### 定期的なバックアップ
@@ -208,10 +208,10 @@ scj snapshot -m "実験成功 - 新機能完成"
 #!/bin/bash
 # daily-snapshot.sh
 
-# アクティブな影分身のスナップショットを作成
-scj list --json | jq -r '.worktrees[] | select(.ahead > 0 or .behind > 0) | .branch' | while read branch; do
+# アクティブな演奏者のスナップショットを作成
+mst list --json | jq -r '.worktrees[] | select(.ahead > 0 or .behind > 0) | .branch' | while read branch; do
   echo "Creating snapshot for $branch..."
-  scj exec "$branch" scj snapshot -m "Daily backup - $(date +%Y-%m-%d)"
+  mst exec "$branch" mst snapshot -m "Daily backup - $(date +%Y-%m-%d)"
 done
 ```
 
@@ -223,13 +223,13 @@ deploy_with_snapshot() {
   local branch=$1
   
   # スナップショット作成
-  scj exec "$branch" scj snapshot -m "Pre-deployment snapshot"
+  mst exec "$branch" mst snapshot -m "Pre-deployment snapshot"
   
   # デプロイ実行
   if ! deploy_script.sh; then
     echo "Deployment failed! Rolling back..."
-    LATEST_SNAPSHOT=$(scj snapshot --list --json | jq -r '.snapshots[0].id')
-    scj snapshot --restore "$LATEST_SNAPSHOT"
+    LATEST_SNAPSHOT=$(mst snapshot --list --json | jq -r '.snapshots[0].id')
+    mst snapshot --restore "$LATEST_SNAPSHOT"
     return 1
   fi
   
@@ -243,8 +243,8 @@ deploy_with_snapshot() {
 
 ```bash
 # 7日以上古いスナップショットを削除
-scj snapshot --list --json | jq -r '.snapshots[] | select(.timestamp < (now - 604800 | strftime("%Y-%m-%dT%H:%M:%SZ"))) | .id' | while read snapshot; do
-  scj snapshot --delete "$snapshot"
+mst snapshot --list --json | jq -r '.snapshots[] | select(.timestamp < (now - 604800 | strftime("%Y-%m-%dT%H:%M:%SZ"))) | .id' | while read snapshot; do
+  mst snapshot --delete "$snapshot"
 done
 ```
 
@@ -256,31 +256,31 @@ SNAPSHOT_ID="snapshot-20240120-103045"
 EXPORT_DIR="./snapshot-exports"
 
 mkdir -p "$EXPORT_DIR"
-scj snapshot --export "$SNAPSHOT_ID" --output "$EXPORT_DIR/$SNAPSHOT_ID.tar.gz"
+mst snapshot --export "$SNAPSHOT_ID" --output "$EXPORT_DIR/$SNAPSHOT_ID.tar.gz"
 ```
 
 ### スナップショットの比較
 
 ```bash
 # 2つのスナップショット間の差分を表示
-scj snapshot --diff snapshot-20240120-103045 snapshot-20240120-140000
+mst snapshot --diff snapshot-20240120-103045 snapshot-20240120-140000
 ```
 
 ## ストレージ管理
 
-スナップショットは `.git/shadow-clones/.snapshots/` に保存されます：
+スナップショットは `.git/orchestrations/.snapshots/` に保存されます：
 
 ```bash
 # ストレージ使用量を確認
-du -sh .git/shadow-clones/.snapshots/
+du -sh .git/orchestrations/.snapshots/
 
 # 大きなスナップショットを検出
-find .git/shadow-clones/.snapshots/ -type f -size +10M -exec ls -lh {} \;
+find .git/orchestrations/.snapshots/ -type f -size +10M -exec ls -lh {} \;
 ```
 
 ## 設定
 
-`.scj.json` でスナップショットの動作をカスタマイズ：
+`.maestro.json` でスナップショットの動作をカスタマイズ：
 
 ```json
 {
@@ -305,9 +305,9 @@ find .git/shadow-clones/.snapshots/ -type f -size +10M -exec ls -lh {} \;
 
 ```bash
 # 一貫性のある命名規則を使用
-scj snapshot -m "feat: 認証機能実装前"
-scj snapshot -m "fix: メモリリーク修正前"
-scj snapshot -m "refactor: API構造変更前"
+mst snapshot -m "feat: 認証機能実装前"
+mst snapshot -m "fix: メモリリーク修正前"
+mst snapshot -m "refactor: API構造変更前"
 ```
 
 ### 2. 重要な変更前の習慣化
@@ -317,7 +317,7 @@ scj snapshot -m "refactor: API構造変更前"
 cat > .git/hooks/pre-rebase << 'EOF'
 #!/bin/bash
 echo "Creating snapshot before rebase..."
-scj snapshot -m "Auto-snapshot before rebase"
+mst snapshot -m "Auto-snapshot before rebase"
 EOF
 chmod +x .git/hooks/pre-rebase
 ```
@@ -326,10 +326,10 @@ chmod +x .git/hooks/pre-rebase
 
 ```bash
 # スナップショットをチームで共有
-scj snapshot --export snapshot-20240120-103045 --share
+mst snapshot --export snapshot-20240120-103045 --share
 
 # 共有されたスナップショットをインポート
-scj snapshot --import shared-snapshot-20240120-103045.tar.gz
+mst snapshot --import shared-snapshot-20240120-103045.tar.gz
 ```
 
 ## Tips & Tricks
@@ -338,19 +338,19 @@ scj snapshot --import shared-snapshot-20240120-103045.tar.gz
 
 ```bash
 # ~/.bashrc または ~/.zshrc に追加
-alias scj-backup='scj snapshot -m "Quick backup - $(date +%Y-%m-%d_%H:%M)"'
-alias scj-restore-latest='scj snapshot --restore $(scj snapshot --list --json | jq -r ".snapshots[0].id")'
+alias mst-backup='mst snapshot -m "Quick backup - $(date +%Y-%m-%d_%H:%M)"'
+alias mst-restore-latest='mst snapshot --restore $(mst snapshot --list --json | jq -r ".snapshots[0].id")'
 
 # 使用例
-scj-backup          # 素早くバックアップ
-scj-restore-latest  # 最新のスナップショットに復元
+mst-backup          # 素早くバックアップ
+mst-restore-latest  # 最新のスナップショットに復元
 ```
 
 ### スナップショット統計
 
 ```bash
 # スナップショット統計を表示
-scj snapshot --list --json | jq '
+mst snapshot --list --json | jq '
   {
     total: .summary.total,
     avgSize: (.snapshots | map(.size | gsub("MB"; "") | tonumber) | add / length),
@@ -366,7 +366,7 @@ scj snapshot --list --json | jq '
 
 ## 関連コマンド
 
-- [`scj list`](./list.md) - スナップショットを作成する影分身を確認
-- [`scj health`](./health.md) - スナップショット前に健全性をチェック
-- [`scj sync`](./sync.md) - スナップショット後に同期
-- [`scj history`](./history.md) - Claude Code履歴と併せて管理
+- [`mst list`](./list.md) - スナップショットを作成する演奏者を確認
+- [`mst health`](./health.md) - スナップショット前に健全性をチェック
+- [`mst sync`](./sync.md) - スナップショット後に同期
+- [`mst history`](./history.md) - Claude Code履歴と併せて管理

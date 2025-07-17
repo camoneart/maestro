@@ -40,9 +40,9 @@ interface WorktreeTemplate {
 // テンプレートディレクトリのパス
 function getTemplateDir(global = false): string {
   if (global) {
-    return path.join(homedir(), '.scj', 'templates')
+    return path.join(homedir(), '.maestro', 'templates')
   }
-  return path.join(process.cwd(), '.scj', 'templates')
+  return path.join(process.cwd(), '.maestro', 'templates')
 }
 
 // テンプレートファイルのパス

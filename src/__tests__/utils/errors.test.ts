@@ -1,19 +1,19 @@
 import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest'
 import {
   ErrorCode,
-  ShadowCloneError,
+  MaestroError,
   ErrorFactory,
   handleError,
   withErrorHandling,
 } from '../../utils/errors.js'
 
-describe('ShadowCloneError', () => {
+describe('MaestroError', () => {
   describe('constructor', () => {
     it('should create error with basic properties', () => {
-      const error = new ShadowCloneError('Test error', ErrorCode.UNKNOWN_ERROR)
+      const error = new MaestroError('Test error', ErrorCode.UNKNOWN_ERROR)
       
       expect(error.message).toBe('Test error')
-      expect(error.name).toBe('ShadowCloneError')
+      expect(error.name).toBe('MaestroError')
       expect(error.code).toBe(ErrorCode.UNKNOWN_ERROR)
       expect(error.suggestions).toEqual([])
       expect(error.originalError).toBeUndefined()
@@ -26,7 +26,7 @@ describe('ShadowCloneError', () => {
         { message: 'Read docs', url: 'https://example.com' },
       ]
       
-      const error = new ShadowCloneError(
+      const error = new MaestroError(
         'Test error',
         ErrorCode.VALIDATION_ERROR,
         suggestions,
@@ -41,12 +41,12 @@ describe('ShadowCloneError', () => {
 
   describe('getFormattedMessage', () => {
     it('should format message without suggestions', () => {
-      const error = new ShadowCloneError('Test error')
+      const error = new MaestroError('Test error')
       expect(error.getFormattedMessage()).toBe('エラー: Test error')
     })
 
     it('should format message with suggestions', () => {
-      const error = new ShadowCloneError(
+      const error = new MaestroError(
         'Test error',
         ErrorCode.UNKNOWN_ERROR,
         [
@@ -89,17 +89,17 @@ describe('ErrorFactory', () => {
     it('should create error without similar branches', () => {
       const error = ErrorFactory.worktreeNotFound('feature-x')
       
-      expect(error.message).toBe('影分身 \'feature-x\' が見つかりません')
+      expect(error.message).toBe('演奏者 \'feature-x\' が見つかりません')
       expect(error.code).toBe(ErrorCode.WORKTREE_NOT_FOUND)
       expect(error.suggestions).toHaveLength(1)
-      expect(error.suggestions[0].command).toBe('scj create feature-x')
+      expect(error.suggestions[0].command).toBe('maestro create feature-x')
     })
 
     it('should create error with similar branches', () => {
       const error = ErrorFactory.worktreeNotFound('feature-x', ['feature-a', 'feature-b'])
       
       expect(error.suggestions).toHaveLength(2)
-      expect(error.suggestions[0].message).toContain('類似した影分身: feature-a, feature-b')
+      expect(error.suggestions[0].message).toContain('類似した演奏者: feature-a, feature-b')
     })
   })
 
@@ -107,7 +107,7 @@ describe('ErrorFactory', () => {
     it('should create error with branch and path', () => {
       const error = ErrorFactory.worktreeAlreadyExists('feature-x', '/path/to/worktree')
       
-      expect(error.message).toBe('影分身 \'feature-x\' は既に存在します: /path/to/worktree')
+      expect(error.message).toBe('演奏者 \'feature-x\' は既に存在します: /path/to/worktree')
       expect(error.code).toBe(ErrorCode.WORKTREE_ALREADY_EXISTS)
       expect(error.suggestions).toHaveLength(2)
     })
@@ -193,8 +193,8 @@ describe('ErrorFactory', () => {
   })
 
   describe('fromError', () => {
-    it('should return ShadowCloneError as is', () => {
-      const shadowError = new ShadowCloneError('Test', ErrorCode.UNKNOWN_ERROR)
+    it('should return MaestroError as is', () => {
+      const shadowError = new MaestroError('Test', ErrorCode.UNKNOWN_ERROR)
       const result = ErrorFactory.fromError(shadowError)
       
       expect(result).toBe(shadowError)
@@ -244,16 +244,16 @@ describe('handleError', () => {
     })
   })
 
-  it('should handle ShadowCloneError', () => {
-    const error = new ShadowCloneError('Test error', ErrorCode.UNKNOWN_ERROR)
+  it('should handle MaestroError', () => {
+    const error = new MaestroError('Test error', ErrorCode.UNKNOWN_ERROR)
     
     expect(() => handleError(error)).toThrow('Process exited')
     expect(consoleErrorSpy).toHaveBeenCalledWith('エラー: Test error')
     expect(processExitSpy).toHaveBeenCalledWith(1)
   })
 
-  it('should handle ShadowCloneError with context', () => {
-    const error = new ShadowCloneError('Test error', ErrorCode.UNKNOWN_ERROR)
+  it('should handle MaestroError with context', () => {
+    const error = new MaestroError('Test error', ErrorCode.UNKNOWN_ERROR)
     
     expect(() => handleError(error, 'TestContext')).toThrow('Process exited')
     expect(consoleErrorSpy).toHaveBeenCalledWith('[TestContext] エラー: Test error')

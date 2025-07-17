@@ -134,7 +134,7 @@ import { Config } from '../../core/config'
 
 export const createMockConfig = (overrides?: Partial<Config>): Config => ({
   worktrees: {
-    path: '.git/shadow-clones',
+    path: '.git/orchestrations',
     branchPrefix: 'feature/',
   },
   development: {

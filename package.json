@@ -1,11 +1,12 @@
 {
-  "name": "shadow-clone-jutsu",
+  "name": "maestro",
   "version": "1.0.1",
-  "description": "影分身の術(Git Worktree)で、Claude Codeとパラレル開発を実現するツール",
+  "description": "Git Worktreeオーケストレーションで、Claude Codeとパラレル開発を実現するツール",
   "type": "module",
   "bin": {
-    "scj": "./dist/cli.js",
-    "shadow-clone-jutsu": "./dist/cli.js"
+    "maestro": "./dist/cli.js",
+    "mst": "./dist/cli.js",
+    "scj": "./dist/cli.js"
   },
   "scripts": {
     "dev": "tsx watch src/cli.ts",
@@ -35,11 +36,11 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/hashiramaendure/shadow-clone-jutsu.git"
+    "url": "git+https://github.com/hashiramaendure/maestro.git"
   },
-  "homepage": "https://github.com/hashiramaendure/shadow-clone-jutsu#readme",
+  "homepage": "https://github.com/hashiramaendure/maestro#readme",
   "bugs": {
-    "url": "https://github.com/hashiramaendure/shadow-clone-jutsu/issues"
+    "url": "https://github.com/hashiramaendure/maestro/issues"
   },
   "packageManager": "pnpm@10.13.1",
   "engines": {

@@ -14,14 +14,14 @@ describe('completion command', () => {
       await completionCommand.parseAsync(['node', 'completion', 'bash'])
 
       expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('#!/bin/bash'))
-      expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('_scj_completions'))
+      expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('_maestro_completions'))
     })
 
     it('should generate zsh completion script', async () => {
       await completionCommand.parseAsync(['node', 'completion', 'zsh'])
 
-      expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('#compdef scj'))
-      expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('_scj'))
+      expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('#compdef maestro'))
+      expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('_maestro'))
     })
 
     it('should show installation guide when no shell is specified', async () => {
@@ -33,8 +33,8 @@ describe('completion command', () => {
     it('should generate fish completion script', async () => {
       await completionCommand.parseAsync(['node', 'completion', 'fish'])
 
-      expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('# shadow-clone-jutsu fish completion'))
-      expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('complete -c scj'))
+      expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('# maestro fish completion'))
+      expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('complete -c maestro'))
     })
   })
 })

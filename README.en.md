@@ -1,18 +1,18 @@
-# 🥷 shadow-clone-jutsu
+# 🎼 Maestro
 
 **English** | **[日本語](/README.md)**
 
-_Parallel Development CLI powered by Git Worktree & Claude AI_
+_Parallel Development CLI powered by Git Worktree Orchestration & Claude AI_
 
-[![npm version](https://badge.fury.io/js/shadow-clone-jutsu.svg)](https://www.npmjs.com/package/shadow-clone-jutsu)
-[![CI](https://github.com/hashiramaendure/scj/actions/workflows/ci.yml/badge.svg)](https://github.com/hashiramaendure/scj/actions/workflows/ci.yml)
-[![codecov](https://codecov.io/gh/hashiramaendure/shadow-clone-jutsu/branch/main/graph/badge.svg)](https://codecov.io/gh/hashiramaendure/shadow-clone-jutsu)
+[![npm version](https://badge.fury.io/js/maestro.svg)](https://www.npmjs.com/package/maestro)
+[![CI](https://github.com/hashiramaendure/maestro/actions/workflows/ci.yml/badge.svg)](https://github.com/hashiramaendure/maestro/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/hashiramaendure/maestro/branch/main/graph/badge.svg)](https://codecov.io/gh/hashiramaendure/maestro)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-**Shadow Clone Jutsu (Git Worktree) CLI Tool for Parallel Development with Claude Code**  
-_Parallel Development CLI powered by Git Worktree & Claude AI_
+**Git Worktree Orchestration CLI Tool for Parallel Development with Claude Code**  
+_Parallel Development CLI powered by Git Worktree Orchestration & Claude AI_
 
-![Demo Animation](https://via.placeholder.com/800x400/1a1a1a/00ff00?text=shadow-clone-jutsu+demo)
+![Demo Animation](https://via.placeholder.com/800x400/1a1a1a/00ff00?text=maestro+demo)
 
 ## 📋 Table of Contents
 
@@ -28,13 +28,13 @@ _Parallel Development CLI powered by Git Worktree & Claude AI_
 
 ## Overview
 
-shadow-clone-jutsu is a CLI tool that makes Git Worktree management more intuitive. When working on multiple branches in parallel, you can treat each branch as an independent "shadow clone" without switching directories.
+Maestro is a CLI tool that makes Git Worktree management more intuitive. When working on multiple branches in parallel, you can treat each branch as an independent "orchestra member" without switching directories.
 
-### Why shadow-clone-jutsu?
+### Why Maestro?
 
 **Pain**: Traditional Git workflows involve frequent branch switching, stashing, and context switching when developing multiple features in parallel, significantly reducing development efficiency.
 
-**Solution**: shadow-clone-jutsu leverages Git Worktree to create each branch as an independent "shadow clone", enabling complete parallel development and AI integration.
+**Solution**: Maestro leverages Git Worktree to create each branch as an independent "performer", enabling complete parallel development and AI integration.
 
 **Benefit**: Developers can work on multiple features simultaneously, with AI-driven development through Claude Code integration and perfect workflow efficiency through tmux/fzf integration.
 
@@ -42,9 +42,9 @@ shadow-clone-jutsu is a CLI tool that makes Git Worktree management more intuiti
 
 | Feature | Description |
 |---------|-------------|
-| 🥷 **Ninja Theme** | Intuitive interface treating Worktrees as "shadow clones" |
+| 🎼 **Conductor Theme** | Intuitive interface treating Worktrees as "orchestra members" |
 | 🤖 **Claude Code Integration** | AI development assistance via MCP (Model Context Protocol) |
-| 🔗 **GitHub Integration** | Create shadow clones directly from PR/Issues |
+| 🔗 **GitHub Integration** | Create performers directly from PR/Issues |
 | 🎯 **tmux/fzf Integration** | Efficient workflow |
 | 🎨 **Interactive UI** | Beautiful and user-friendly CLI experience |
 | 📊 **Dashboard** | Visualize everything with Web UI |
@@ -65,44 +65,44 @@ shadow-clone-jutsu is a CLI tool that makes Git Worktree management more intuiti
 
 ```bash
 # pnpm (recommended)
-pnpm add -g shadow-clone-jutsu
+pnpm add -g maestro
 
 # npm
-npm install -g shadow-clone-jutsu
+npm install -g maestro
 
 # yarn
-yarn global add shadow-clone-jutsu
+yarn global add maestro
 ```
 
 #### ⚡ One-shot Execution
 
 ```bash
 # For trying out
-npx shadow-clone-jutsu create feature/my-feature
+npx maestro create feature/my-feature
 
 # pnpm dlx also available
-pnpm dlx shadow-clone-jutsu create feature/my-feature --tmux --claude --open
+pnpm dlx maestro create feature/my-feature --tmux --claude --open
 ```
 
 #### 🍺 Homebrew (macOS/Linux)
 
 ```bash
 brew tap hashiramaendure/tap
-brew install shadow-clone-jutsu
+brew install maestro
 ```
 
 #### 🪟 Scoop (Windows)
 
 ```powershell
 scoop bucket add hashiramaendure https://github.com/hashiramaendure/scoop-bucket
-scoop install shadow-clone-jutsu
+scoop install maestro
 ```
 
 #### 📂 Install from Source
 
 ```bash
-git clone https://github.com/hashiramaendure/scj.git
-cd scj
+git clone https://github.com/hashiramaendure/maestro.git
+cd maestro
 pnpm install
 pnpm run build
 pnpm link
@@ -116,11 +116,11 @@ pnpm link
 # 1. Navigate to your project directory
 cd your-git-project
 
-# 2. Create a new shadow clone (worktree)
-scj create feature/awesome-feature
+# 2. Create a new performer (worktree)
+mst create feature/awesome-feature
 
-# 3. Start working in the created shadow clone
-scj shell feature/awesome-feature
+# 3. Start working in the created performer
+mst shell feature/awesome-feature
 ```
 
 ### 📚 Basic Usage Examples
@@ -129,42 +129,42 @@ scj shell feature/awesome-feature
 
 ```bash
 # Develop authentication feature (with Claude Code integration)
-scj create feature/auth --tmux --claude
+mst create feature/auth --tmux --claude
 
 # Work on bug fixes in parallel
-scj create bugfix/login-issue
+mst create bugfix/login-issue
 
-# Check list of shadow clones
-scj list
+# Check list of performers
+mst list
 
-# Quickly switch between shadow clones
-scj tmux
+# Quickly switch between performers
+mst tmux
 ```
 
 #### GitHub Integration
 
 ```bash
 # Create Worktree from Issue
-scj create 123  # Created as issue-123
+mst create 123  # Created as issue-123
 
-# Create shadow clone from PR
-scj github pr 456
+# Create performer from PR
+mst github pr 456
 
 # Auto-create Draft PR
-scj create feature/new-ui --draft-pr
+mst create feature/new-ui --draft-pr
 ```
 
 #### Claude Code Integration
 
 ```bash
 # Start development with Claude Code
-scj create feature/ai-integration --tmux --claude
+mst create feature/ai-integration --tmux --claude
 
 # Run AI diff review
-scj suggest --review
+mst suggest --review
 
 # Auto review & merge flow
-scj review --auto-flow
+mst review --auto-flow
 ```
 
 ## Command Reference
@@ -175,35 +175,35 @@ For detailed command documentation, see [docs/COMMANDS.md](./docs/COMMANDS.md).
 
 | Command | Description | Example |
 |---------|-------------|---------|
-| `create` | Create new shadow clone | `scj create feature/new --tmux --claude --open` |
-| `list` | List shadow clones | `scj list --details` |
-| `delete` | Delete shadow clone | `scj delete feature/old --fzf` |
-| `tmux` | Open in tmux session | `scj tmux feature/new` |
-| `sync` | File synchronization | `scj sync --auto` |
-| `suggest` | AI suggestion feature | `scj suggest --branch --description "new feature"` |
-| `github` | GitHub integration | `scj github --issue 123` |
-| `dashboard` | Launch Web UI | `scj dashboard --open` |
-| `health` | Health check | `scj health --fix` |
-| `where` | Check current location | `scj where --verbose` |
+| `create` | Create new performer | `mst create feature/new --tmux --claude --open` |
+| `list` | List performers | `mst list --details` |
+| `delete` | Delete performer | `mst delete feature/old --fzf` |
+| `tmux` | Open in tmux session | `mst tmux feature/new` |
+| `sync` | File synchronization | `mst sync --auto` |
+| `suggest` | AI suggestion feature | `mst suggest --branch --description "new feature"` |
+| `github` | GitHub integration | `mst github --issue 123` |
+| `dashboard` | Launch Web UI | `mst dashboard --open` |
+| `health` | Health check | `mst health --fix` |
+| `where` | Check current location | `mst where --verbose` |
 
 ### 🎯 Quick Reference
 
 ```bash
 # Basic usage
-scj create feature/awesome-feature
-scj list
-scj tmux feature/awesome-feature
+mst create feature/awesome-feature
+mst list
+mst tmux feature/awesome-feature
 
 # Full setup
-scj create feature/full-setup --tmux --claude --open --setup
+mst create feature/full-setup --tmux --claude --open --setup
 
 # AI suggestions
-scj suggest --branch --description "user authentication feature"
-scj suggest --commit --diff
+mst suggest --branch --description "user authentication feature"
+mst suggest --commit --diff
 
 # GitHub integration
-scj github --issue 123
-scj github --create-pr
+mst github --issue 123
+mst github --create-pr
 ```
 
 ## Advanced Features
@@ -212,7 +212,7 @@ scj github --create-pr
 
 ```bash
 # Run auto flow
-scj review --auto-flow
+mst review --auto-flow
 ```
 
 **Executed processes:**
@@ -226,10 +226,10 @@ scj review --auto-flow
 
 ```bash
 # Launch dashboard
-scj dashboard
+mst dashboard
 
 # Launch on custom port
-scj dashboard --port 3000
+mst dashboard --port 3000
 ```
 
 **Dashboard features:**
@@ -242,26 +242,26 @@ scj dashboard --port 3000
 
 ```bash
 # Create snapshot
-scj snapshot -m "State before refactoring"
+mst snapshot -m "State before refactoring"
 
 # Snapshot all worktrees
-scj snapshot --all
+mst snapshot --all
 
 # Restore from snapshot
-scj snapshot --restore snapshot-xxxxx
+mst snapshot --restore snapshot-xxxxx
 ```
 
 ### 🏥 Worktree Health Check
 
 ```bash
 # Check health
-scj health
+mst health
 
 # Auto-fix
-scj health --fix
+mst health --fix
 
 # Remove old worktrees (30+ days)
-scj health --prune --days 30
+mst health --prune --days 30
 ```
 
 **Detected issues:**
@@ -274,12 +274,12 @@ scj health --prune --days 30
 
 ## Configuration
 
-### 📁 Project Configuration (.scj.json)
+### 📁 Project Configuration (.maestro.json)
 
 ```json
 {
   "worktrees": {
-    "path": ".git/shadow-clones",
+    "path": ".git/orchestra-members",
     "branchPrefix": "feature/"
   },
   "development": {
@@ -289,7 +289,7 @@ scj health --prune --days 30
   },
   "hooks": {
     "afterCreate": "npm install",
-    "beforeDelete": "echo \"Deleting shadow clone: $SHADOW_CLONE\""
+    "beforeDelete": "echo \"Deleting performer: $ORCHESTRA_MEMBER\""
   },
   "claude": {
     "autoStart": true,
@@ -306,8 +306,8 @@ Add to Claude Code configuration (`.claude/mcp_settings.json`):
 ```json
 {
   "mcpServers": {
-    "shadow-clone-jutsu": {
-      "command": "scj",
+    "maestro": {
+      "command": "mst",
       "args": ["mcp", "serve"]
     }
   }
@@ -319,7 +319,7 @@ Add to Claude Code configuration (`.claude/mcp_settings.json`):
 #### Bash
 
 ```bash
-scj completion bash >> ~/.bashrc
+mst completion bash >> ~/.bashrc
 source ~/.bashrc
 ```
 
@@ -327,7 +327,7 @@ source ~/.bashrc
 
 ```bash
 mkdir -p ~/.zsh/completions
-scj completion zsh > ~/.zsh/completions/_scj
+mst completion zsh > ~/.zsh/completions/_mst
 echo 'fpath=(~/.zsh/completions $fpath)' >> ~/.zshrc
 echo 'autoload -U compinit && compinit' >> ~/.zshrc
 source ~/.zshrc
@@ -336,7 +336,7 @@ source ~/.zshrc
 #### Fish
 
 ```bash
-scj completion fish > ~/.config/fish/completions/scj.fish
+mst completion fish > ~/.config/fish/completions/mst.fish
 ```
 
 ## Troubleshooting
@@ -354,17 +354,17 @@ scj completion fish > ~/.config/fish/completions/scj.fish
 
 ```bash
 # Show debug information
-DEBUG=scj:* scj create feature/debug
+DEBUG=mst:* mst create feature/debug
 
 # Output detailed logs
-scj --verbose create feature/test
+mst --verbose create feature/test
 ```
 
 ## Contributing
 
 ### 🤝 Contribution
 
-Please report bugs and feature requests to [GitHub Issues](https://github.com/hashiramaendure/scj/issues).
+Please report bugs and feature requests to [GitHub Issues](https://github.com/hashiramaendure/maestro/issues).
 
 Pull requests are welcome!
 
@@ -379,8 +379,8 @@ Pull requests are welcome!
 
 ```bash
 # Clone repository
-git clone https://github.com/hashiramaendure/scj.git
-cd shadow-clone-jutsu
+git clone https://github.com/hashiramaendure/maestro.git
+cd maestro
 
 # Install dependencies
 pnpm install

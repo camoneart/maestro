@@ -60,28 +60,28 @@ describe('MCP Server', () => {
       // MCP serverのツール機能をテスト
       mockServer.listTools = vi.fn().mockResolvedValue({
         tools: [
-          { name: 'create_shadow_clone', description: '影分身を作り出す' },
-          { name: 'list_shadow_clones', description: '影分身の一覧を表示' },
-          { name: 'delete_shadow_clone', description: '影分身を削除' },
+          { name: 'create_orchestra_member', description: '演奏者を加える' },
+          { name: 'list_orchestra_members', description: 'オーケストラ編成を表示' },
+          { name: 'delete_orchestra_member', description: '演奏者を外す' },
         ]
       })
       
       const tools = await mockServer.listTools()
       expect(tools.tools).toHaveLength(3)
-      expect(tools.tools[0].name).toBe('create_shadow_clone')
+      expect(tools.tools[0].name).toBe('create_orchestra_member')
     })
 
     it('should test MCP call tool functionality', async () => {
       // ツール呼び出しのテスト
       mockServer.callTool = vi.fn().mockResolvedValue({
-        content: [{ type: 'text', text: '✅ 影分身を作り出しました' }]
+        content: [{ type: 'text', text: '✅ 演奏者を加えました' }]
       })
       
-      const result = await mockServer.callTool('create_shadow_clone', {
+      const result = await mockServer.callTool('create_orchestra_member', {
         branchName: 'test-feature'
       })
       
-      expect(result.content[0].text).toContain('影分身を作り出しました')
+      expect(result.content[0].text).toContain('演奏者を加えました')
     })
 
     it('should test GitWorktreeManager integration', () => {

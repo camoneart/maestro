@@ -171,7 +171,7 @@ async function createWorktreesInParallel(
     error?: string
   }> = []
 
-  console.log(chalk.bold(`\n🥷 ${worktrees.length}つの影分身を並列で作り出します...\n`))
+  console.log(chalk.bold(`\n🎶 ${worktrees.length}名の演奏者を並列で招集します...\n`))
 
   // 並列実行制限を設定
   const concurrency = options.concurrency || 5
@@ -217,7 +217,7 @@ async function createWorktreesInParallel(
           }
         }
 
-        spinner.succeed(`${worktree.name} を作成しました`)
+        spinner.succeed(`${worktree.name} の演奏者を招集しました`)
 
         results.push({
           worktree,
@@ -225,7 +225,7 @@ async function createWorktreesInParallel(
           path: worktreePath,
         })
       } catch (error) {
-        spinner.fail(`${worktree.name} の作成に失敗しました`)
+        spinner.fail(`${worktree.name} の演奏者招集に失敗しました`)
         results.push({
           worktree,
           status: 'failed',
@@ -295,7 +295,7 @@ async function createWorktreesInParallel(
 
 export const batchCommand = new Command('batch')
   .alias('b')
-  .description('複数の影分身を一括で作り出す')
+  .description('複数の演奏者を一括で招集する')
   .option('-b, --base <branch>', 'ベースブランチ (デフォルト: 現在のブランチ)')
   .option('-o, --open', 'VSCode/Cursorで開く')
   .option('-s, --setup', '環境セットアップを実行')
@@ -334,7 +334,7 @@ export const batchCommand = new Command('batch')
           {
             type: 'list',
             name: 'inputMethod',
-            message: 'どのように影分身を作成しますか？',
+            message: 'どのように演奏者を招集しますか？',
             choices: [
               { name: '🐙 GitHub Issuesから選択', value: 'issues' },
               { name: '✍️  手動で入力', value: 'manual' },
@@ -386,7 +386,7 @@ export const batchCommand = new Command('batch')
         {
           type: 'confirm',
           name: 'confirmCreate',
-          message: `${worktrees.length}対の影分身を作成しますか？`,
+          message: `${worktrees.length}名の演奏者を招集しますか？`,
           default: true,
         },
       ])

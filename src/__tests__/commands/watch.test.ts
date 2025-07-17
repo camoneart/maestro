@@ -143,7 +143,7 @@ describe('watch command', () => {
           ignored: [
             'node_modules/**',
             '.git/**',
-            '.scj-metadata.json',
+            '.maestro-metadata.json',
             'dist/**',
             'build/**',
             '.next/**',

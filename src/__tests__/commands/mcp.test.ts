@@ -25,7 +25,7 @@ describe('mcp command', () => {
         mcpCommand.parseAsync(['node', 'mcp'])
       ).rejects.toThrow('Process exited with code 0')
 
-      expect(consoleLogSpy).toHaveBeenCalledWith(chalk.yellow('使い方: scj mcp serve'))
+      expect(consoleLogSpy).toHaveBeenCalledWith(chalk.yellow('使い方: maestro mcp serve'))
     })
 
     it('should start MCP server with serve subcommand', async () => {
@@ -51,7 +51,7 @@ describe('mcp command', () => {
         mcpCommand.parseAsync(['node', 'mcp', 'unknown'])
       ).rejects.toThrow('Process exited with code 0')
 
-      expect(consoleLogSpy).toHaveBeenCalledWith(chalk.yellow('使い方: scj mcp serve'))
+      expect(consoleLogSpy).toHaveBeenCalledWith(chalk.yellow('使い方: maestro mcp serve'))
     })
   })
 })

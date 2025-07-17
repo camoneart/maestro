@@ -1,12 +1,12 @@
-# scj sync
+# mst sync
 
-影分身（Git Worktree）間でコードや設定ファイルを同期するコマンドです。メインブランチの変更を他の影分身に反映したり、環境設定ファイルを共有したりできます。
+演奏者（Git Worktree）間でコードや設定ファイルを同期するコマンドです。メインブランチの変更を他の演奏者に反映したり、環境設定ファイルを共有したりできます。
 
 ## 概要
 
 ```bash
-scj sync [branch-name] [options]
-scj s [branch-name] [options]  # エイリアス
+mst sync [branch-name] [options]
+mst s [branch-name] [options]  # エイリアス
 ```
 
 ## 使用例
@@ -14,42 +14,42 @@ scj s [branch-name] [options]  # エイリアス
 ### 基本的な使用方法
 
 ```bash
-# メインブランチの変更を特定の影分身に同期
-scj sync feature-branch
+# メインブランチの変更を特定の演奏者に同期
+mst sync feature-branch
 
-# 全ての影分身に同期
-scj sync --all
+# 全ての演奏者に同期
+mst sync --all
 
 # インタラクティブに選択
-scj sync
+mst sync
 
 # rebaseで同期（デフォルトはmerge）
-scj sync --rebase
+mst sync --rebase
 ```
 
 ### ファイル同期
 
 ```bash
 # 環境変数・設定ファイルを同期
-scj sync --files
+mst sync --files
 
 # プリセットを使用してファイル同期
-scj sync --preset env     # .env系ファイルのみ
-scj sync --preset config  # 設定ファイルのみ
-scj sync --preset all     # 全ての設定ファイル
+mst sync --preset env     # .env系ファイルのみ
+mst sync --preset config  # 設定ファイルのみ
+mst sync --preset all     # 全ての設定ファイル
 
 # カスタムファイルを指定して同期
-scj sync --files --custom .env.local,config/app.json
+mst sync --files --custom .env.local,config/app.json
 
 # インタラクティブにファイルを選択
-scj sync --interactive
+mst sync --interactive
 ```
 
 ## オプション
 
 | オプション | 短縮形 | 説明 | デフォルト |
 |-----------|--------|------|-----------|
-| `--all` | `-a` | 全ての影分身に同期 | `false` |
+| `--all` | `-a` | 全ての演奏者に同期 | `false` |
 | `--rebase` | `-r` | rebaseで同期（デフォルトはmerge） | `false` |
 | `--files` | `-f` | ファイル同期モード | `false` |
 | `--preset <name>` | `-p` | プリセットを使用 | なし |
@@ -62,28 +62,28 @@ scj sync --interactive
 
 ### コード同期（デフォルト）
 
-メインブランチ（または指定したベースブランチ）の最新の変更を影分身に取り込みます：
+メインブランチ（または指定したベースブランチ）の最新の変更を演奏者に取り込みます：
 
 ```bash
 # merge方式（デフォルト）
-scj sync feature-branch
+mst sync feature-branch
 # 実行内容: git merge origin/main
 
 # rebase方式
-scj sync feature-branch --rebase
+mst sync feature-branch --rebase
 # 実行内容: git rebase origin/main
 
-# 全影分身に適用
-scj sync --all --rebase
+# 全演奏者に適用
+mst sync --all --rebase
 ```
 
 ### ファイル同期
 
-設定ファイルや環境変数ファイルを影分身間で共有します：
+設定ファイルや環境変数ファイルを演奏者間で共有します：
 
 ```bash
 # 基本的なファイル同期
-scj sync --files
+mst sync --files
 
 # 同期されるファイル（デフォルト）:
 # - .env
@@ -101,7 +101,7 @@ scj sync --files
 環境変数ファイルのみを同期：
 
 ```bash
-scj sync --preset env
+mst sync --preset env
 ```
 
 同期対象:
@@ -115,7 +115,7 @@ scj sync --preset env
 設定ファイルのみを同期：
 
 ```bash
-scj sync --preset config
+mst sync --preset config
 ```
 
 同期対象:
@@ -131,7 +131,7 @@ scj sync --preset config
 全ての設定ファイルを同期：
 
 ```bash
-scj sync --preset all
+mst sync --preset all
 ```
 
 同期対象:
@@ -147,7 +147,7 @@ scj sync --preset all
 ファイルを個別に選択して同期：
 
 ```bash
-scj sync --interactive
+mst sync --interactive
 ```
 
 表示例：
@@ -167,20 +167,20 @@ scj sync --interactive
 1. **事前確認**
    ```bash
    # ドライランで確認
-   scj sync feature-branch --dry-run
+   mst sync feature-branch --dry-run
    ```
 
 2. **同期実行**
    ```bash
    # 実際に同期
-   scj sync feature-branch
+   mst sync feature-branch
    ```
 
 3. **競合解決**
    ```bash
    # 競合が発生した場合
    # 1. 手動で解決
-   scj shell feature-branch
+   mst shell feature-branch
    # エディタで競合を解決
    
    # 2. 解決をコミット
@@ -193,19 +193,19 @@ scj sync --interactive
 1. **差分確認**
    ```bash
    # どのファイルが同期されるか確認
-   scj sync --files --dry-run
+   mst sync --files --dry-run
    ```
 
 2. **同期実行**
    ```bash
-   # メインブランチから全影分身へ
-   scj sync --all --files
+   # メインブランチから全演奏者へ
+   mst sync --all --files
    ```
 
 3. **カスタム同期**
    ```bash
    # 特定のファイルのみ
-   scj sync --files --custom .env.production,config/secrets.json
+   mst sync --files --custom .env.production,config/secrets.json
    ```
 
 ## 高度な使用例
@@ -213,14 +213,14 @@ scj sync --interactive
 ### CI/CD設定の同期
 
 ```bash
-# CI設定を全影分身に反映
-scj sync --all --files --custom .github/workflows/ci.yml,.gitlab-ci.yml
+# CI設定を全演奏者に反映
+mst sync --all --files --custom .github/workflows/ci.yml,.gitlab-ci.yml
 
 # または専用スクリプト
 cat > sync-ci.sh << 'EOF'
 #!/bin/bash
 CI_FILES=".github/workflows/*.yml,.gitlab-ci.yml,Jenkinsfile"
-scj sync --all --files --custom "$CI_FILES"
+mst sync --all --files --custom "$CI_FILES"
 EOF
 chmod +x sync-ci.sh
 ```
@@ -228,18 +228,18 @@ chmod +x sync-ci.sh
 ### 選択的同期
 
 ```bash
-# 特定のパターンに一致する影分身のみ同期
-scj list --json | jq -r '.worktrees[] | select(.branch | startswith("feature/")) | .branch' | while read branch; do
+# 特定のパターンに一致する演奏者のみ同期
+mst list --json | jq -r '.worktrees[] | select(.branch | startswith("feature/")) | .branch' | while read branch; do
   echo "Syncing $branch..."
-  scj sync "$branch" --rebase
+  mst sync "$branch" --rebase
 done
 ```
 
 ### 同期状態の確認
 
 ```bash
-# 各影分身の同期状態を確認
-scj list --json | jq -r '.worktrees[] | "\(.branch): \(.behind) commits behind"' | grep -v ": 0 commits"
+# 各演奏者の同期状態を確認
+mst list --json | jq -r '.worktrees[] | "\(.branch): \(.behind) commits behind"' | grep -v ": 0 commits"
 ```
 
 ## エラーハンドリング
@@ -250,7 +250,7 @@ scj list --json | jq -r '.worktrees[] | "\(.branch): \(.behind) commits behind"'
    ```
    Error: Merge conflict in files: src/index.js, src/utils.js
    ```
-   解決方法: 影分身に移動して手動で競合を解決
+   解決方法: 演奏者に移動して手動で競合を解決
 
 2. **未コミットの変更**
    ```
@@ -277,11 +277,11 @@ echo "🔄 Daily sync starting..."
 # 1. 最新のmainを取得
 git fetch origin main
 
-# 2. 全影分身をrebaseで同期
-scj sync --all --rebase
+# 2. 全演奏者をrebaseで同期
+mst sync --all --rebase
 
 # 3. 環境ファイルも同期
-scj sync --all --preset env
+mst sync --all --preset env
 
 echo "✅ Sync completed"
 ```
@@ -290,13 +290,13 @@ echo "✅ Sync completed"
 
 ```bash
 # スナップショットを作成してから同期
-scj snapshot --all -m "Before sync"
-scj sync --all --rebase
+mst snapshot --all -m "Before sync"
+mst sync --all --rebase
 ```
 
 ### 3. プロジェクト固有の設定
 
-`.scj.json` で同期設定をカスタマイズ：
+`.maestro.json` で同期設定をカスタマイズ：
 
 ```json
 {
@@ -320,13 +320,13 @@ scj sync --all --rebase
 
 ```bash
 # ~/.bashrc または ~/.zshrc に追加
-alias scj-sync-all='scj sync --all --rebase'
-alias scj-sync-env='scj sync --all --preset env'
-alias scj-sync-safe='scj sync --dry-run'
+alias mst-sync-all='mst sync --all --rebase'
+alias mst-sync-env='mst sync --all --preset env'
+alias mst-sync-safe='mst sync --dry-run'
 
 # 使用例
-scj-sync-all    # 全影分身をrebase同期
-scj-sync-env    # 環境ファイルを同期
+mst-sync-all    # 全演奏者をrebase同期
+mst-sync-env    # 環境ファイルを同期
 ```
 
 ### 条件付き同期
@@ -336,8 +336,8 @@ scj-sync-env    # 環境ファイルを同期
 sync_if_tests_pass() {
   local branch=$1
   
-  if scj exec "$branch" npm test; then
-    scj sync "$branch" --rebase
+  if mst exec "$branch" npm test; then
+    mst sync "$branch" --rebase
   else
     echo "Tests failed for $branch, skipping sync"
   fi
@@ -349,7 +349,7 @@ sync_if_tests_pass feature-branch
 
 ## 関連コマンド
 
-- [`scj list`](./list.md) - 同期が必要な影分身を確認
-- [`scj health`](./health.md) - 同期状態の健全性をチェック
-- [`scj snapshot`](./snapshot.md) - 同期前にスナップショットを作成
-- [`scj watch`](./watch.md) - ファイル変更を自動同期
+- [`mst list`](./list.md) - 同期が必要な演奏者を確認
+- [`mst health`](./health.md) - 同期状態の健全性をチェック
+- [`mst snapshot`](./snapshot.md) - 同期前にスナップショットを作成
+- [`mst watch`](./watch.md) - ファイル変更を自動同期

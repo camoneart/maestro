@@ -1,12 +1,12 @@
-# scj history
+# mst history
 
-Claude Code の会話履歴を管理するコマンドです。各影分身（Git Worktree）での開発履歴を保存、検索、エクスポートできます。
+Claude Code の会話履歴を管理するコマンドです。各演奏者（Git Worktree）での開発履歴を保存、検索、エクスポートできます。
 
 ## 概要
 
 ```bash
-scj history [options]
-scj h [options]  # エイリアス
+mst history [options]
+mst h [options]  # エイリアス
 ```
 
 ## 使用例
@@ -15,33 +15,33 @@ scj h [options]  # エイリアス
 
 ```bash
 # 全ての履歴を一覧表示
-scj history --list
+mst history --list
 
 # 特定ブランチの履歴を表示
-scj history --show feature-auth
+mst history --show feature-auth
 
 # 履歴をエクスポート
-scj history --export all-histories.json
-scj history --export all-histories.md
+mst history --export all-histories.json
+mst history --export all-histories.md
 
 # 全履歴を1ファイルにマージ
-scj history --merge merged-history.md
+mst history --merge merged-history.md
 ```
 
 ### 履歴管理
 
 ```bash
 # 不要な履歴をクリーンアップ
-scj history --cleanup
+mst history --cleanup
 
 # 履歴パスを同期
-scj history --sync
+mst history --sync
 
 # 履歴を検索
-scj history --search "authentication"
+mst history --search "authentication"
 
 # JSON形式で出力
-scj history --list --json
+mst history --list --json
 ```
 
 ## オプション
@@ -101,7 +101,7 @@ Claude Code の履歴は以下の形式で保存されます：
 ### 通常の出力
 
 ```bash
-scj history --list
+mst history --list
 ```
 
 出力例：
@@ -162,7 +162,7 @@ Summary:
 
 ```bash
 # 特定のキーワードを含む履歴を検索
-scj history --search "authentication"
+mst history --search "authentication"
 ```
 
 出力例：
@@ -183,13 +183,13 @@ Found 2 matches in 2 worktrees
 
 ```bash
 # 正規表現を使用
-scj history --search "auth(entication|orization)" --regex
+mst history --search "auth(entication|orization)" --regex
 
 # 期間を指定
-scj history --search "bug" --days 7
+mst history --search "bug" --days 7
 
 # 特定のブランチ内で検索
-scj history --show feature-auth --search "JWT"
+mst history --show feature-auth --search "JWT"
 ```
 
 ## エクスポート機能
@@ -197,12 +197,12 @@ scj history --show feature-auth --search "JWT"
 ### Markdown形式でエクスポート
 
 ```bash
-scj history --export all-histories.md
+mst history --export all-histories.md
 ```
 
 生成されるファイル：
 ```markdown
-# Shadow Clone Jutsu - Claude Code History Export
+# Maestro - Claude Code History Export
 
 Export date: 2024-01-20 16:00:00
 
@@ -224,17 +224,17 @@ Export date: 2024-01-20 16:00:00
 ### JSON形式でエクスポート
 
 ```bash
-scj history --export all-histories.json
+mst history --export all-histories.json
 ```
 
 ### 特定期間のエクスポート
 
 ```bash
 # 過去7日間の履歴のみエクスポート
-scj history --export recent-history.md --days 7
+mst history --export recent-history.md --days 7
 
 # 特定のブランチのみエクスポート
-scj history --show feature-auth --export feature-auth-history.md
+mst history --show feature-auth --export feature-auth-history.md
 ```
 
 ## マージ機能
@@ -242,19 +242,19 @@ scj history --show feature-auth --export feature-auth-history.md
 複数の履歴ファイルを時系列で1つにマージ：
 
 ```bash
-scj history --merge complete-history.md
+mst history --merge complete-history.md
 ```
 
 マージオプション：
 ```bash
 # 重複を除外
-scj history --merge complete-history.md --dedupe
+mst history --merge complete-history.md --dedupe
 
 # タイムスタンプでソート
-scj history --merge complete-history.md --sort-by-time
+mst history --merge complete-history.md --sort-by-time
 
 # トークン数でソート（コスト分析用）
-scj history --merge complete-history.md --sort-by-tokens
+mst history --merge complete-history.md --sort-by-tokens
 ```
 
 ## クリーンアップ
@@ -263,17 +263,17 @@ scj history --merge complete-history.md --sort-by-tokens
 
 ```bash
 # 30日以上古い履歴を削除
-scj history --cleanup --days 30
+mst history --cleanup --days 30
 
 # 削除対象を確認（ドライラン）
-scj history --cleanup --days 30 --dry-run
+mst history --cleanup --days 30 --dry-run
 ```
 
 ### 孤立した履歴の削除
 
 ```bash
 # Worktreeが存在しない履歴を削除
-scj history --cleanup --orphaned
+mst history --cleanup --orphaned
 ```
 
 ## 履歴の同期
@@ -282,7 +282,7 @@ scj history --cleanup --orphaned
 
 ```bash
 # 履歴ファイルのパスを現在の設定に同期
-scj history --sync
+mst history --sync
 ```
 
 これにより、設定ファイルで履歴パスを変更した場合でも、既存の履歴を新しい場所に移動できます。
@@ -293,7 +293,7 @@ scj history --sync
 
 ```bash
 # トークン使用量のレポート
-scj history --stats
+mst history --stats
 ```
 
 出力例：
@@ -319,12 +319,12 @@ Model Usage:
 
 ```bash
 # セッション時間と頻度の分析
-scj history --analyze
+mst history --analyze
 ```
 
 ## 設定
 
-`.scj.json` で履歴管理をカスタマイズ：
+`.mst.json` で履歴管理をカスタマイズ：
 
 ```json
 {
@@ -345,17 +345,17 @@ scj history --analyze
 
 ```bash
 # よく使うコマンドを抽出
-scj history --export - | grep -E "^### Human" -A1 | grep -v "^--" | sort | uniq -c | sort -nr | head -20
+mst history --export - | grep -E "^### Human" -A1 | grep -v "^--" | sort | uniq -c | sort -nr | head -20
 ```
 
 ### チーム共有
 
 ```bash
 # 履歴を匿名化してエクスポート
-scj history --export team-history.md --anonymize
+mst history --export team-history.md --anonymize
 
 # 特定のセッションのみ共有
-scj history --show feature-auth --session 2024-01-20 --export session.md
+mst history --show feature-auth --session 2024-01-20 --export session.md
 ```
 
 ### バックアップスクリプト
@@ -368,8 +368,8 @@ BACKUP_DIR="./history-backups/$(date +%Y%m%d)"
 mkdir -p "$BACKUP_DIR"
 
 # 全履歴をバックアップ
-scj history --export "$BACKUP_DIR/all-histories.json"
-scj history --merge "$BACKUP_DIR/merged-history.md"
+mst history --export "$BACKUP_DIR/all-histories.json"
+mst history --merge "$BACKUP_DIR/merged-history.md"
 
 # 圧縮
 tar -czf "$BACKUP_DIR.tar.gz" "$BACKUP_DIR"
@@ -387,7 +387,7 @@ echo "Backup created: $BACKUP_DIR.tar.gz"
 before_claude() {
   local branch=$(git branch --show-current)
   echo "📚 Previous sessions for $branch:"
-  scj history --show "$branch" --summary
+  mst history --show "$branch" --summary
 }
 ```
 
@@ -395,7 +395,7 @@ before_claude() {
 
 ```bash
 # 高コストのセッションを特定
-scj history --list --json | jq -r '
+mst history --list --json | jq -r '
   .histories[] | 
   select(.stats.tokens > 10000) | 
   "\(.branch): \(.stats.tokens) tokens ($\(.stats.tokens * 0.00003))"
@@ -406,7 +406,7 @@ scj history --list --json | jq -r '
 
 ```bash
 # 有用なセッションをドキュメント化
-scj history --show feature-auth --export docs/auth-implementation.md
+mst history --show feature-auth --export docs/auth-implementation.md
 echo "## Key Learnings" >> docs/auth-implementation.md
 echo "- JWT implementation details..." >> docs/auth-implementation.md
 ```
@@ -417,14 +417,14 @@ echo "- JWT implementation details..." >> docs/auth-implementation.md
 
 ```bash
 # ~/.bashrc または ~/.zshrc に追加
-alias scj-history='scj history --list'
-alias scj-history-search='scj history --search'
-alias scj-history-export='scj history --export "histories-$(date +%Y%m%d).md"'
+alias mst-history='mst history --list'
+alias mst-history-search='mst history --search'
+alias mst-history-export='mst history --export "histories-$(date +%Y%m%d).md"'
 
 # 使用例
-scj-history              # 履歴一覧
-scj-history-search bug   # バグ関連の履歴を検索
-scj-history-export       # 日付付きでエクスポート
+mst-history              # 履歴一覧
+mst-history-search bug   # バグ関連の履歴を検索
+mst-history-export       # 日付付きでエクスポート
 ```
 
 ### インテグレーション
@@ -434,7 +434,7 @@ scj-history-export       # 日付付きでエクスポート
 cat > .git/hooks/pre-push << 'EOF'
 #!/bin/bash
 echo "Exporting Claude Code history..."
-scj history --export .claude-history.md
+mst history --export .claude-history.md
 git add .claude-history.md
 git commit -m "chore: update Claude Code history" --no-verify
 EOF
@@ -443,7 +443,7 @@ chmod +x .git/hooks/pre-push
 
 ## 関連コマンド
 
-- [`scj create`](./create.md) - 新しい影分身と履歴を開始
-- [`scj suggest`](./suggest.md) - 履歴を基にした提案
-- [`scj snapshot`](./snapshot.md) - 履歴と併せてスナップショット管理
-- [`scj health`](./health.md) - 履歴ファイルの健全性チェック
+- [`mst create`](./create.md) - 新しい演奏者と履歴を開始
+- [`mst suggest`](./suggest.md) - 履歴を基にした提案
+- [`mst snapshot`](./snapshot.md) - 履歴と併せてスナップショット管理
+- [`mst health`](./health.md) - 履歴ファイルの健全性チェック

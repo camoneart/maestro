@@ -29,7 +29,7 @@ const mockConfigManager = vi.fn(() => ({
     development: { autoSetup: true, defaultEditor: 'code' },
     claude: { autoStart: true, markdownMode: 'shared', initialCommands: [] },
     github: { defaultBranch: 'main' },
-    tmux: { sessionName: 'scj' }
+    tmux: { sessionName: 'maestro' }
   }),
   save: vi.fn().mockResolvedValue(undefined),
 }))

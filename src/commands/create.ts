@@ -121,7 +121,7 @@ export async function saveWorktreeMetadata(
   branchName: string,
   metadata: Partial<WorktreeMetadata>
 ): Promise<void> {
-  const metadataPath = path.join(worktreePath, '.scj-metadata.json')
+  const metadataPath = path.join(worktreePath, '.maestro-metadata.json')
   const metadataContent = {
     createdAt: new Date().toISOString(),
     branch: branchName,
@@ -421,7 +421,7 @@ export async function createWorktreeWithProgress(
   githubMetadata: GithubMetadata | null,
   issueNumber: string | null
 ): Promise<void> {
-  const spinner = ora('影分身を作成中...').start()
+  const spinner = ora('新しい演奏者を招集中...').start()
   
   try {
     // Worktreeの作成
@@ -433,13 +433,13 @@ export async function createWorktreeWithProgress(
       template: options.template,
     })
 
-    spinner.succeed(chalk.green(`✨ 影分身を作り出しました: ${worktreePath}`))
+    spinner.succeed(chalk.green(`✨ 新しい演奏者を招集しました: ${worktreePath}`))
 
     // 後処理の実行
     await executePostCreationTasks(worktreePath, branchName, options, config)
     
   } catch (error) {
-    spinner.fail(chalk.red(`影分身の作成に失敗しました: ${error}`))
+    spinner.fail(chalk.red(`演奏者の招集に失敗しました: ${error}`))
     throw error
   }
 }
@@ -546,7 +546,7 @@ export async function createDraftPR(branchName: string, worktreePath: string): P
 }
 
 export const createCommand = new Command('create')
-  .description('新しい影分身（worktree）を作り出す')
+  .description('新しい演奏者（worktree）を招集する')
   .argument('<branch-name>', 'ブランチ名または Issue# (例: 123, #123, issue-123)')
   .option('-b, --base <branch>', 'ベースブランチ (デフォルト: 現在のブランチ)')
   .option('-o, --open', 'VSCode/Cursorで開く')

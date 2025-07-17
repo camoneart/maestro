@@ -8,7 +8,7 @@ export const ConfigSchema = z.object({
   // Git worktree設定
   worktrees: z
     .object({
-      // worktreeを作成するディレクトリ（デフォルト: .git/shadow-clones）
+      // worktreeを作成するディレクトリ（デフォルト: .git/orchestrations）
       path: z.string().optional(),
       // ブランチ名のプレフィックス
       branchPrefix: z.string().optional(),
@@ -94,7 +94,7 @@ export type Config = z.infer<typeof ConfigSchema>
 // デフォルト設定
 const DEFAULT_CONFIG: Config = {
   worktrees: {
-    path: '.git/shadow-clones',
+    path: '.git/orchestrations',
   },
   development: {
     autoSetup: true,
@@ -128,7 +128,7 @@ export class ConfigManager {
   constructor() {
     // グローバル設定（ユーザーホーム）
     this.conf = new Conf<Config>({
-      projectName: 'shadow-clone-jutsu',
+      projectName: 'maestro',
       defaults: DEFAULT_CONFIG,
     })
   }
@@ -137,10 +137,17 @@ export class ConfigManager {
     try {
       // プロジェクトルートの設定ファイルを探す
       const configPaths = [
+        path.join(process.cwd(), '.maestro.json'),
+        path.join(process.cwd(), '.maestrorc.json'),
+        path.join(process.cwd(), 'maestro.config.json'),
+        // 後方互換性のため旧設定ファイルも確認
         path.join(process.cwd(), '.scj.json'),
         path.join(process.cwd(), '.scjrc.json'),
         path.join(process.cwd(), 'scj.config.json'),
         // グローバル設定ファイル
+        path.join(process.env.HOME || '~', '.maestrorc'),
+        path.join(process.env.HOME || '~', '.maestrorc.json'),
+        // 後方互換性のため旧設定ファイルも確認
         path.join(process.env.HOME || '~', '.scjrc'),
         path.join(process.env.HOME || '~', '.scjrc.json'),
       ]
@@ -189,10 +196,10 @@ export class ConfigManager {
 
   // プロジェクト設定ファイルの作成
   async createProjectConfig(configPath?: string): Promise<void> {
-    const targetPath = configPath || path.join(process.cwd(), '.scj.json')
+    const targetPath = configPath || path.join(process.cwd(), '.maestro.json')
     const exampleConfig: Partial<Config> = {
       worktrees: {
-        path: '.git/shadow-clones',
+        path: '.git/orchestrations',
         branchPrefix: 'feature/',
       },
       development: {
@@ -224,7 +231,7 @@ export class ConfigManager {
       },
       hooks: {
         afterCreate: 'npm install',
-        beforeDelete: 'echo "影分身を削除します: $SHADOW_CLONE"',
+        beforeDelete: 'echo "オーケストラメンバーを解散します: $MAESTRO_BRANCH"',
       },
     }
 

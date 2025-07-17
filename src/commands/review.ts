@@ -45,7 +45,7 @@ class ReviewCommandError extends Error {
 
 // ハンドラ関数
 async function checkoutPR(pr: PullRequest, gitManager: GitWorktreeManager): Promise<void> {
-  const checkoutSpinner = ora('PRを影分身として作り出し中...').start()
+  const checkoutSpinner = ora('PRを演奏者として招集中...').start()
 
   try {
     // 既存のワークツリーを確認
@@ -54,7 +54,7 @@ async function checkoutPR(pr: PullRequest, gitManager: GitWorktreeManager): Prom
     const existingWorktree = worktrees.find(wt => wt.branch?.includes(prBranchName))
 
     if (existingWorktree) {
-      checkoutSpinner.warn(`影分身 '${prBranchName}' は既に存在します`)
+      checkoutSpinner.warn(`演奏者 '${prBranchName}' は既に存在します`)
       console.log(chalk.gray(`📁 ${existingWorktree.path}`))
     } else {
       // gh pr checkoutを使用してPRをフェッチ
@@ -66,7 +66,7 @@ async function checkoutPR(pr: PullRequest, gitManager: GitWorktreeManager): Prom
       // ワークツリーを作成
       const worktreePath = await gitManager.createWorktree(currentBranch)
 
-      checkoutSpinner.succeed(`PR #${pr.number} を影分身 '${currentBranch}' として作り出しました`)
+      checkoutSpinner.succeed(`PR #${pr.number} を演奏者 '${currentBranch}' として招集しました`)
       console.log(chalk.gray(`📁 ${worktreePath}`))
       console.log(chalk.green(`\ncd ${worktreePath} で移動できます`))
     }
@@ -263,7 +263,7 @@ export const reviewCommand = new Command('review')
   .alias('r')
   .description('PRレビューをサポート')
   .argument('[pr-number]', 'PR番号')
-  .option('-c, --checkout', 'PRを影分身として作り出してチェックアウト')
+  .option('-c, --checkout', 'PRを演奏者として招集してチェックアウト')
   .option('-d, --diff', 'PRの差分を表示')
   .option('-w, --web', 'ブラウザでPRを開く')
   .option('-a, --approve', 'PRを承認')
@@ -403,7 +403,7 @@ export const reviewCommand = new Command('review')
           name: 'action',
           message: '何をしますか？',
           choices: [
-            { name: '🥷 PRを影分身として作り出す', value: 'checkout' },
+            { name: '🎵 PRを演奏者として招集する', value: 'checkout' },
             { name: '📝 差分を表示', value: 'diff' },
             { name: '🌐 ブラウザで開く', value: 'web' },
             { name: '💬 コメントを追加', value: 'comment' },

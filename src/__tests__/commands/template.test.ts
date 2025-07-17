@@ -96,7 +96,7 @@ describe('template command', () => {
     it('--list --globalでグローバルテンプレートを表示する', async () => {
       await templateCommand.parseAsync(['node', 'test', '--list', '--global'])
 
-      expect(fs.readdir).toHaveBeenCalledWith(`${mockHomeDir}/.scj/templates`)
+      expect(fs.readdir).toHaveBeenCalledWith(`${mockHomeDir}/.maestro/templates`)
       expect(console.log).toHaveBeenCalledWith(
         expect.stringContaining('📋 利用可能なテンプレート:')
       )
@@ -123,7 +123,7 @@ describe('template command', () => {
       await templateCommand.parseAsync(['node', 'test', '--save', 'custom'])
 
       expect(fs.writeFile).toHaveBeenCalledWith(
-        '/repo/.scj/templates/custom.json',
+        '/repo/.maestro/templates/custom.json',
         expect.stringContaining('"name": "custom"')
       )
       expect(console.log).toHaveBeenCalledWith(
@@ -140,7 +140,7 @@ describe('template command', () => {
       await templateCommand.parseAsync(['node', 'test', '--save', 'global-template', '--global'])
 
       expect(fs.writeFile).toHaveBeenCalledWith(
-        `${mockHomeDir}/.scj/templates/global-template.json`,
+        `${mockHomeDir}/.maestro/templates/global-template.json`,
         expect.any(String)
       )
     })
@@ -231,7 +231,7 @@ describe('template command', () => {
           }),
         ])
       )
-      expect(fs.unlink).toHaveBeenCalledWith('/repo/.scj/templates/custom.json')
+      expect(fs.unlink).toHaveBeenCalledWith('/repo/.maestro/templates/custom.json')
       expect(console.log).toHaveBeenCalledWith(
         expect.stringContaining("✨ テンプレート 'custom' を削除しました")
       )

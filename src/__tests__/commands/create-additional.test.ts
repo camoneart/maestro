@@ -81,7 +81,7 @@ describe.skip('create command - integration tests', () => {
       loadProjectConfig: vi.fn().mockResolvedValue(undefined),
       getAll: vi.fn().mockReturnValue({
         worktrees: { 
-          path: '.git/shadow-clones',
+          path: '.git/orchestrations',
           branchPrefix: '',
         },
         development: {

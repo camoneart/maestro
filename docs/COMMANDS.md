@@ -1,15 +1,15 @@
 # 📚 コマンドリファレンス
 
-shadow-clone-jutsu (scj) の全コマンドの詳細な使用方法を説明します。
+maestro (mst) の全コマンドの詳細な使用方法を説明します。
 
 ## 基本コマンド
 
-### 🥷 create - 影分身の作成
+### 🎼 create - 演奏者の作成
 
-新しい影分身（worktree）を作成します。
+新しい演奏者（worktree）を作成します。
 
 ```bash
-scj create <branch-name> [options]
+mst create <branch-name> [options]
 ```
 
 #### オプション
@@ -25,21 +25,21 @@ scj create <branch-name> [options]
 #### 例
 ```bash
 # 基本的な使用
-scj create feature/awesome-feature
+mst create feature/awesome-feature
 
 # 完全セットアップ
-scj create feature/full-setup --tmux --claude --open --setup
+mst create feature/full-setup --tmux --claude --open --setup
 
 # GitHub Issueから作成
-scj create 123  # Issue #123 から自動でブランチ名を生成
+mst create 123  # Issue #123 から自動でブランチ名を生成
 ```
 
-### 📋 list - 影分身の一覧表示
+### 📋 list - 演奏者の一覧表示
 
-すべての影分身を一覧表示します。
+すべての演奏者を一覧表示します。
 
 ```bash
-scj list [options]
+mst list [options]
 ```
 
 #### オプション
@@ -51,21 +51,21 @@ scj list [options]
 #### 例
 ```bash
 # 基本的な一覧表示
-scj list
+mst list
 
 # 詳細情報付き
-scj list --details
+mst list --details
 
 # サイズ順でソート
-scj list --sort size
+mst list --sort size
 ```
 
-### 🗑️ delete - 影分身の削除
+### 🗑️ delete - 演奏者の削除
 
-影分身を削除します。
+演奏者を削除します。
 
 ```bash
-scj delete [branch-name] [options]
+mst delete [branch-name] [options]
 ```
 
 #### オプション
@@ -77,21 +77,21 @@ scj delete [branch-name] [options]
 #### 例
 ```bash
 # 基本的な削除
-scj delete feature/old-feature
+mst delete feature/old-feature
 
 # 強制削除（未コミット変更があっても削除）
-scj delete feature/broken --force
+mst delete feature/broken --force
 
 # fzfで複数選択削除
-scj delete --fzf
+mst delete --fzf
 ```
 
-### 🔄 sync - 影分身の同期
+### 🔄 sync - 演奏者の同期
 
-影分身間でファイルを同期します。
+演奏者間でファイルを同期します。
 
 ```bash
-scj sync [options]
+mst sync [options]
 ```
 
 #### オプション
@@ -104,13 +104,13 @@ scj sync [options]
 #### 例
 ```bash
 # 基本的な同期
-scj sync
+mst sync
 
 # 特定のファイルのみ同期
-scj sync --files "*.env"
+mst sync --files "*.env"
 
 # ドライランモード
-scj sync --dry-run
+mst sync --dry-run
 ```
 
 ## 統合コマンド
@@ -120,7 +120,7 @@ scj sync --dry-run
 Claude Codeを使用して各種提案を行います。
 
 ```bash
-scj suggest [options]
+mst suggest [options]
 ```
 
 #### オプション
@@ -135,13 +135,13 @@ scj suggest [options]
 #### 例
 ```bash
 # ブランチ名の提案
-scj suggest --branch --description "ユーザー認証機能の追加"
+mst suggest --branch --description "ユーザー認証機能の追加"
 
 # コミットメッセージの提案
-scj suggest --commit --diff
+mst suggest --commit --diff
 
 # PR説明の提案
-scj suggest --pr --description "ログイン機能の実装"
+mst suggest --pr --description "ログイン機能の実装"
 ```
 
 ### 🔗 github - GitHub統合
@@ -149,7 +149,7 @@ scj suggest --pr --description "ログイン機能の実装"
 GitHubとの統合機能を提供します。
 
 ```bash
-scj github [options]
+mst github [options]
 ```
 
 #### オプション
@@ -161,22 +161,22 @@ scj github [options]
 
 #### 例
 ```bash
-# Issue #123 から影分身を作成
-scj github --issue 123
+# Issue #123 から演奏者を作成
+mst github --issue 123
 
-# PR #456 から影分身を作成
-scj github --pr 456
+# PR #456 から演奏者を作成
+mst github --pr 456
 
 # 現在のブランチからPRを作成
-scj github --create-pr
+mst github --create-pr
 ```
 
 ### 🖥️ tmux - tmux統合
 
-tmuxセッションで影分身を管理します。
+tmuxセッションで演奏者を管理します。
 
 ```bash
-scj tmux [branch-name] [options]
+mst tmux [branch-name] [options]
 ```
 
 #### オプション
@@ -187,14 +187,14 @@ scj tmux [branch-name] [options]
 
 #### 例
 ```bash
-# 影分身をtmuxで開く
-scj tmux feature/awesome
+# 演奏者をtmuxで開く
+mst tmux feature/awesome
 
 # fzfで選択
-scj tmux
+mst tmux
 
 # デタッチモードで起動
-scj tmux feature/background --detach
+mst tmux feature/background --detach
 ```
 
 ## 高度な機能
@@ -204,7 +204,7 @@ scj tmux feature/background --detach
 Web UIダッシュボードを起動します。
 
 ```bash
-scj dashboard [options]
+mst dashboard [options]
 ```
 
 #### オプション
@@ -215,18 +215,18 @@ scj dashboard [options]
 #### 例
 ```bash
 # ダッシュボードを起動
-scj dashboard
+mst dashboard
 
 # ポート8080で起動
-scj dashboard --port 8080 --open
+mst dashboard --port 8080 --open
 ```
 
 ### 🩺 health - ヘルスチェック
 
-影分身の健康状態をチェックします。
+演奏者の健康状態をチェックします。
 
 ```bash
-scj health [options]
+mst health [options]
 ```
 
 #### オプション
@@ -237,13 +237,13 @@ scj health [options]
 #### 例
 ```bash
 # 基本的なヘルスチェック
-scj health
+mst health
 
 # 問題を自動修正
-scj health --fix
+mst health --fix
 
 # 詳細な診断
-scj health --verbose
+mst health --verbose
 ```
 
 ### 📸 snapshot - スナップショット
@@ -251,7 +251,7 @@ scj health --verbose
 作業状態のスナップショットを管理します。
 
 ```bash
-scj snapshot <command> [options]
+mst snapshot <command> [options]
 ```
 
 #### サブコマンド
@@ -263,13 +263,13 @@ scj snapshot <command> [options]
 #### 例
 ```bash
 # スナップショットを作成
-scj snapshot create before-refactor
+mst snapshot create before-refactor
 
 # スナップショット一覧
-scj snapshot list
+mst snapshot list
 
 # スナップショットを復元
-scj snapshot restore before-refactor
+mst snapshot restore before-refactor
 ```
 
 ### 👁️ watch - ファイル監視
@@ -277,7 +277,7 @@ scj snapshot restore before-refactor
 ファイル変更を監視して自動同期します。
 
 ```bash
-scj watch [options]
+mst watch [options]
 ```
 
 #### オプション
@@ -289,13 +289,13 @@ scj watch [options]
 #### 例
 ```bash
 # 基本的な監視
-scj watch
+mst watch
 
 # 特定のファイルのみ監視
-scj watch --files "src/**/*.ts"
+mst watch --files "src/**/*.ts"
 
 # 自動同期モード
-scj watch --auto
+mst watch --auto
 ```
 
 ## ユーティリティコマンド
@@ -305,7 +305,7 @@ scj watch --auto
 設定を管理します。
 
 ```bash
-scj config <command> [options]
+mst config <command> [options]
 ```
 
 #### サブコマンド
@@ -317,13 +317,13 @@ scj config <command> [options]
 #### 例
 ```bash
 # 設定を確認
-scj config list
+mst config list
 
 # エディタを設定
-scj config set development.defaultEditor cursor
+mst config set development.defaultEditor cursor
 
 # 設定を取得
-scj config get worktrees.root
+mst config get worktrees.root
 ```
 
 ### 📍 where - 現在位置確認
@@ -331,7 +331,7 @@ scj config get worktrees.root
 現在のworktreeの位置を確認します。
 
 ```bash
-scj where [options]
+mst where [options]
 ```
 
 #### オプション
@@ -341,18 +341,18 @@ scj where [options]
 #### 例
 ```bash
 # 現在位置を確認
-scj where
+mst where
 
 # 詳細情報付き
-scj where --verbose
+mst where --verbose
 ```
 
 ### 🔗 exec - コマンド実行
 
-全ての影分身で同じコマンドを実行します。
+全ての演奏者で同じコマンドを実行します。
 
 ```bash
-scj exec <command> [options]
+mst exec <command> [options]
 ```
 
 #### オプション
@@ -362,33 +362,33 @@ scj exec <command> [options]
 
 #### 例
 ```bash
-# 全ての影分身でテストを実行
-scj exec "npm test"
+# 全ての演奏者でテストを実行
+mst exec "npm test"
 
 # 並列実行
-scj exec "npm run lint" --parallel
+mst exec "npm run lint" --parallel
 ```
 
 ### 🔄 batch - バッチ処理
 
-複数の影分身を一括処理します。
+複数の演奏者を一括処理します。
 
 ```bash
-scj batch <command> [options]
+mst batch <command> [options]
 ```
 
 #### サブコマンド
 - `create <pattern>` - パターンに基づいて複数作成
 - `delete <pattern>` - パターンに基づいて複数削除
-- `sync` - 全ての影分身を同期
+- `sync` - 全ての演奏者を同期
 
 #### 例
 ```bash
-# 複数の影分身を作成
-scj batch create feature/task-{1..5}
+# 複数の演奏者を作成
+mst batch create feature/task-{1..5}
 
 # パターンに基づいて削除
-scj batch delete "feature/old-*"
+mst batch delete "feature/old-*"
 ```
 
 ### 📋 template - テンプレート管理
@@ -396,7 +396,7 @@ scj batch delete "feature/old-*"
 プロジェクトテンプレートを管理します。
 
 ```bash
-scj template <command> [options]
+mst template <command> [options]
 ```
 
 #### サブコマンド
@@ -408,13 +408,13 @@ scj template <command> [options]
 #### 例
 ```bash
 # テンプレート一覧
-scj template list
+mst template list
 
 # テンプレートを作成
-scj template create react-component
+mst template create react-component
 
 # テンプレートを適用
-scj template apply react-component
+mst template apply react-component
 ```
 
 ### 🔍 mcp - MCP サーバー
@@ -422,7 +422,7 @@ scj template apply react-component
 MCPサーバーを管理します。
 
 ```bash
-scj mcp <command> [options]
+mst mcp <command> [options]
 ```
 
 #### サブコマンド
@@ -434,10 +434,10 @@ scj mcp <command> [options]
 #### 例
 ```bash
 # MCPサーバーを起動
-scj mcp start
+mst mcp start
 
 # サーバーの状態を確認
-scj mcp status
+mst mcp status
 ```
 
 ### 🎯 attach - セッション接続
@@ -445,7 +445,7 @@ scj mcp status
 既存のtmuxセッションに接続します。
 
 ```bash
-scj attach [session-name] [options]
+mst attach [session-name] [options]
 ```
 
 #### オプション
@@ -455,18 +455,18 @@ scj attach [session-name] [options]
 #### 例
 ```bash
 # セッションに接続
-scj attach feature-awesome
+mst attach feature-awesome
 
 # セッションを作成して接続
-scj attach new-session --create
+mst attach new-session --create
 ```
 
 ### 📈 graph - 関係図表示
 
-影分身の関係図を表示します。
+演奏者の関係図を表示します。
 
 ```bash
-scj graph [options]
+mst graph [options]
 ```
 
 #### オプション
@@ -476,18 +476,18 @@ scj graph [options]
 #### 例
 ```bash
 # 関係図を表示
-scj graph
+mst graph
 
 # Mermaid形式で出力
-scj graph --format mermaid
+mst graph --format mermaid
 ```
 
 ### 📚 history - 履歴表示
 
-影分身の操作履歴を表示します。
+演奏者の操作履歴を表示します。
 
 ```bash
-scj history [options]
+mst history [options]
 ```
 
 #### オプション
@@ -498,10 +498,10 @@ scj history [options]
 #### 例
 ```bash
 # 履歴を表示
-scj history
+mst history
 
 # 最新10件のみ表示
-scj history --limit 10
+mst history --limit 10
 ```
 
 ### 🔍 issue - Issue管理
@@ -509,7 +509,7 @@ scj history --limit 10
 GitHub Issueと連携します。
 
 ```bash
-scj issue <command> [options]
+mst issue <command> [options]
 ```
 
 #### サブコマンド
@@ -521,13 +521,13 @@ scj issue <command> [options]
 #### 例
 ```bash
 # Issueを作成
-scj issue create
+mst issue create
 
 # Issue一覧を表示
-scj issue list
+mst issue list
 
 # Issue #123 を表示
-scj issue view 123
+mst issue view 123
 ```
 
 ### 🔍 review - レビュー管理
@@ -535,7 +535,7 @@ scj issue view 123
 Pull Requestのレビューを管理します。
 
 ```bash
-scj review <command> [options]
+mst review <command> [options]
 ```
 
 #### サブコマンド
@@ -547,13 +547,13 @@ scj review <command> [options]
 #### 例
 ```bash
 # レビューを作成
-scj review create
+mst review create
 
 # PRを承認
-scj review approve 123
+mst review approve 123
 
 # 変更を要求
-scj review request-changes 123
+mst review request-changes 123
 ```
 
 ### 🔄 completion - 自動補完
@@ -561,7 +561,7 @@ scj review request-changes 123
 シェルの自動補完を設定します。
 
 ```bash
-scj completion <shell>
+mst completion <shell>
 ```
 
 #### 対応シェル
@@ -572,10 +572,10 @@ scj completion <shell>
 #### 例
 ```bash
 # Zsh用補完を設定
-scj completion zsh > ~/.zsh/completions/_scj
+mst completion zsh > ~/.zsh/completions/_mst
 
 # Bash用補完を設定
-scj completion bash > /etc/bash_completion.d/scj
+mst completion bash > /etc/bash_completion.d/mst
 ```
 
 ## グローバルオプション
@@ -591,7 +591,7 @@ scj completion bash > /etc/bash_completion.d/scj
 
 ## 設定ファイル
 
-`scj.config.json` で設定をカスタマイズできます：
+`mst.config.json` で設定をカスタマイズできます：
 
 ```json
 {
@@ -624,7 +624,7 @@ scj completion bash > /etc/bash_completion.d/scj
     }
   },
   "ui": {
-    "theme": "ninja",
+    "theme": "orchestra",
     "colors": true,
     "animations": true
   }
@@ -633,16 +633,16 @@ scj completion bash > /etc/bash_completion.d/scj
 
 ## 環境変数
 
-- `SCJ_CONFIG_PATH` - 設定ファイルのパス
-- `SCJ_WORKTREES_ROOT` - Worktreeのルートディレクトリ
-- `SCJ_DEFAULT_EDITOR` - デフォルトエディタ
-- `SCJ_GITHUB_TOKEN` - GitHub API トークン
-- `SCJ_CLAUDE_ENABLED` - Claude Code統合の有効/無効
-- `DEBUG` - デバッグモード (`DEBUG=scj:*`)
+- `MST_CONFIG_PATH` - 設定ファイルのパス
+- `MST_WORKTREES_ROOT` - Worktreeのルートディレクトリ
+- `MST_DEFAULT_EDITOR` - デフォルトエディタ
+- `MST_GITHUB_TOKEN` - GitHub API トークン
+- `MST_CLAUDE_ENABLED` - Claude Code統合の有効/無効
+- `DEBUG` - デバッグモード (`DEBUG=mst:*`)
 
 ## エラーハンドリング
 
-shadow-clone-jutsuは以下のエラーを適切に処理します：
+maestroは以下のエラーを適切に処理します：
 
 - Git関連エラー
 - ファイルシステムエラー

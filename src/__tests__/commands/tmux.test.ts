@@ -63,7 +63,7 @@ describe('tmux command', () => {
     // ConfigManagerのモック
     mockConfigManager.prototype.get = vi.fn().mockReturnValue({
       enabled: true,
-      sessionPrefix: 'scj',
+      sessionPrefix: 'maestro',
       openIn: 'window',
     })
 
@@ -71,7 +71,7 @@ describe('tmux command', () => {
     mockGitManager.prototype.isGitRepository = vi.fn().mockResolvedValue(true)
     mockGitManager.prototype.listWorktrees = vi.fn().mockResolvedValue([
       {
-        path: '/project/.git/shadow-clones/feature-1',
+        path: '/project/.git/orchestrations/feature-1',
         branch: 'refs/heads/feature-1',
         head: 'abc123',
       },
@@ -106,7 +106,7 @@ describe('tmux command', () => {
       const mockStdout = {
         on: vi.fn((event, callback) => {
           if (event === 'data') {
-            callback('refs/heads/feature-1 | /project/.git/shadow-clones/feature-1')
+            callback('refs/heads/feature-1 | /project/.git/orchestrations/feature-1')
           }
         }),
       }
@@ -147,7 +147,7 @@ describe('tmux command', () => {
         stdout: {
           on: vi.fn((event, callback) => {
             if (event === 'data') {
-              callback('refs/heads/feature-1 | /project/.git/shadow-clones/feature-1')
+              callback('refs/heads/feature-1 | /project/.git/orchestrations/feature-1')
             }
           }),
         },
@@ -182,7 +182,7 @@ describe('tmux command', () => {
         stdout: {
           on: vi.fn((event, callback) => {
             if (event === 'data') {
-              callback('refs/heads/feature-1 | /project/.git/shadow-clones/feature-1')
+              callback('refs/heads/feature-1 | /project/.git/orchestrations/feature-1')
             }
           }),
         },
@@ -317,7 +317,7 @@ describe('tmux command', () => {
         stdout: {
           on: vi.fn((event, callback) => {
             if (event === 'data') {
-              callback('refs/heads/feature-1 | /project/.git/shadow-clones/feature-1')
+              callback('refs/heads/feature-1 | /project/.git/orchestrations/feature-1')
             }
           }),
         },

@@ -9,6 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **BREAKING**: Rebranded from "shadow-clone-jutsu" to "Maestro" with conductor/orchestra theme
+- **BREAKING**: Changed package name from `shadow-clone-jutsu` to `maestro`
+- **BREAKING**: Changed CLI command from `scj` to `maestro` (alias: `mst`), keeping `scj` for backward compatibility
+- **BREAKING**: Changed configuration file from `.scj.json` to `.maestro.json` (with fallback support)
+- **BREAKING**: Changed default worktree directory from `.git/shadow-clones` to `.git/orchestrations`
+- Changed all ninja-themed terminology to conductor/orchestra theme:
+  - 影分身 → 演奏者/オーケストラメンバー
+  - 忍者 → 指揮者
+  - 🥷 → 🎼
 - Internal: Improved test coverage from 78.21% to 81.23%
 - Internal: Refactored create.ts command to reduce complexity from 89 to smaller, maintainable functions
 - Internal: Added comprehensive error path tests for github.ts and issue.ts commands

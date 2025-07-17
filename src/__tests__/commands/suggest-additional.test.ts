@@ -98,7 +98,7 @@ describe.skip('suggest command - additional tests', () => {
     })
 
     // fs/promisesのモック
-    ;(fs as any).default.mkdtemp.mockResolvedValue('/tmp/scj-suggest-123')
+    ;(fs as any).default.mkdtemp.mockResolvedValue('/tmp/maestro-suggest-123')
     ;(fs as any).default.writeFile.mockResolvedValue(undefined)
     ;(fs as any).default.readFile.mockResolvedValue('1. feature/new-feature\n2. feature/add-component')
     ;(fs as any).default.rm.mockResolvedValue(undefined)
@@ -373,7 +373,7 @@ describe.skip('suggest command - additional tests', () => {
       await suggestCommand.parseAsync(['node', 'suggest'])
 
       expect((fs as any).default.rm).toHaveBeenCalledWith(
-        '/tmp/scj-suggest-123',
+        '/tmp/maestro-suggest-123',
         { recursive: true, force: true }
       )
     })

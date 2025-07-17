@@ -1,16 +1,16 @@
-# 🥷 shadow-clone-jutsu
+# 🎼 Maestro
 
 **[English](/README.en.md)** | **日本語**
 
-[![npm version](https://badge.fury.io/js/shadow-clone-jutsu.svg)](https://www.npmjs.com/package/shadow-clone-jutsu)
-[![CI](https://github.com/hashiramaendure/scj/actions/workflows/ci.yml/badge.svg)](https://github.com/hashiramaendure/scj/actions/workflows/ci.yml)
-[![codecov](https://codecov.io/gh/hashiramaendure/scj/branch/main/graph/badge.svg)](https://codecov.io/gh/hashiramaendure/scj)
+[![npm version](https://badge.fury.io/js/maestro.svg)](https://www.npmjs.com/package/maestro)
+[![CI](https://github.com/hashiramaendure/maestro/actions/workflows/ci.yml/badge.svg)](https://github.com/hashiramaendure/maestro/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/hashiramaendure/maestro/branch/main/graph/badge.svg)](https://codecov.io/gh/hashiramaendure/maestro)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-**影分身の術（Git Worktree）で、Claude Codeとパラレル開発を実現するCLIツール**  
-_Parallel Development CLI powered by Git Worktree & Claude AI_
+**Git Worktreeオーケストレーションで、Claude Codeとパラレル開発を実現するCLIツール**  
+_Parallel Development CLI powered by Git Worktree Orchestration & Claude AI_
 
-![Demo Animation](https://via.placeholder.com/800x400/1a1a1a/00ff00?text=shadow-clone-jutsu+demo)
+![Demo Animation](https://via.placeholder.com/800x400/1a1a1a/00ff00?text=maestro+demo)
 
 ## 📋 目次
 
@@ -26,13 +26,13 @@ _Parallel Development CLI powered by Git Worktree & Claude AI_
 
 ## 概要
 
-shadow-clone-jutsuは、Git Worktreeをより直感的に管理できるCLIツールです。複数のブランチで並行作業を行う際に、ディレクトリを切り替えることなく、各ブランチを独立した「影分身」として扱うことができます。
+Maestroは、Git Worktreeをより直感的に管理できるCLIツールです。複数のブランチで並行作業を行う際に、ディレクトリを切り替えることなく、各ブランチを独立した「オーケストラメンバー」として扱うことができます。
 
-### なぜ shadow-clone-jutsu？
+### なぜ Maestro？
 
 **Pain**: 従来のGitワークフローでは複数機能の並行開発時に頻繁なブランチ切り替え、stash、コンテキストスイッチが発生し、開発効率が著しく低下します。
 
-**Solution**: shadow-clone-jutsuはGit Worktreeを活用して各ブランチを独立した「影分身」として作成し、完全並行開発とAI統合を実現します。
+**Solution**: MaestroはGit Worktreeを活用して各ブランチを独立した「演奏者」として作成し、完全並行開発とAI統合を実現します。
 
 **Benefit**: 開発者は複数機能を同時進行し、Claude Codeによる AI駆動開発、tmux/fzf統合による完璧なワークフロー効率を手に入れることができます。
 
@@ -40,9 +40,9 @@ shadow-clone-jutsuは、Git Worktreeをより直感的に管理できるCLIツ�
 
 | 機能 | 説明 |
 |------|------|
-| 🥷 **忍者テーマ** | Worktreeを「影分身」として扱う直感的なインターフェース |
+| 🎼 **指揮者テーマ** | Worktreeを「オーケストラメンバー」として扱う直感的なインターフェース |
 | 🤖 **Claude Code統合** | MCP (Model Context Protocol) によるAI開発支援 |
-| 🔗 **GitHub統合** | PR/Issueから直接影分身を作成 |
+| 🔗 **GitHub統合** | PR/Issueから直接演奏者を作成 |
 | 🎯 **tmux/fzf統合** | 効率的なワークフロー |
 | 🎨 **インタラクティブUI** | 美しく使いやすいCLI体験 |
 | 📊 **ダッシュボード** | Web UIで全体を可視化 |
@@ -63,44 +63,44 @@ shadow-clone-jutsuは、Git Worktreeをより直感的に管理できるCLIツ�
 
 ```bash
 # pnpm (推奨)
-pnpm add -g shadow-clone-jutsu
+pnpm add -g maestro
 
 # npm
-npm install -g shadow-clone-jutsu
+npm install -g maestro
 
 # yarn
-yarn global add shadow-clone-jutsu
+yarn global add maestro
 ```
 
 #### ⚡ ワンショット実行
 
 ```bash
 # 試してみる場合
-npx shadow-clone-jutsu create feature/my-feature
+npx maestro create feature/my-feature
 
 # また pnpm dlx も使用可能
-pnpm dlx shadow-clone-jutsu create feature/my-feature --tmux --claude --open
+pnpm dlx maestro create feature/my-feature --tmux --claude --open
 ```
 
 #### 🍺 Homebrew (macOS/Linux)
 
 ```bash
 brew tap hashiramaendure/tap
-brew install shadow-clone-jutsu
+brew install maestro
 ```
 
 #### 🪟 Scoop (Windows)
 
 ```powershell
 scoop bucket add hashiramaendure https://github.com/hashiramaendure/scoop-bucket
-scoop install shadow-clone-jutsu
+scoop install maestro
 ```
 
 #### 📂 ソースからインストール
 
 ```bash
-git clone https://github.com/hashiramaendure/scj.git
-cd scj
+git clone https://github.com/hashiramaendure/maestro.git
+cd maestro
 pnpm install
 pnpm run build
 pnpm link
@@ -114,11 +114,11 @@ pnpm link
 # 1. プロジェクトディレクトリに移動
 cd your-git-project
 
-# 2. 新しい影分身（worktree）を作成
-scj create feature/awesome-feature
+# 2. 新しい演奏者（worktree）を作成
+mst create feature/awesome-feature
 
-# 3. 作成した影分身で作業を開始
-scj shell feature/awesome-feature
+# 3. 作成した演奏者で作業を開始
+mst shell feature/awesome-feature
 ```
 
 ### 📚 基本的な使用例
@@ -127,42 +127,42 @@ scj shell feature/awesome-feature
 
 ```bash
 # 認証機能の開発（Claude Code連携）
-scj create feature/auth --tmux --claude
+mst create feature/auth --tmux --claude
 
 # バグ修正を並行で実施
-scj create bugfix/login-issue
+mst create bugfix/login-issue
 
-# 影分身の一覧を確認
-scj list
+# 演奏者の一覧を確認
+mst list
 
-# 影分身間を素早く切り替え
-scj tmux
+# 演奏者間を素早く切り替え
+mst tmux
 ```
 
 #### GitHub連携
 
 ```bash
 # IssueからWorktreeを作成
-scj create 123  # issue-123として作成される
+mst create 123  # issue-123として作成される
 
-# PRから影分身を作成
-scj github pr 456
+# PRから演奏者を作成
+mst github pr 456
 
 # Draft PRを自動作成
-scj create feature/new-ui --draft-pr
+mst create feature/new-ui --draft-pr
 ```
 
 #### Claude Code統合
 
 ```bash
 # Claude Codeと一緒に開発を開始
-scj create feature/ai-integration --tmux --claude
+mst create feature/ai-integration --tmux --claude
 
 # AI差分レビューを実行
-scj suggest --review
+mst suggest --review
 
 # 自動レビュー&マージフロー
-scj review --auto-flow
+mst review --auto-flow
 ```
 
 ## コマンドリファレンス
@@ -173,35 +173,35 @@ scj review --auto-flow
 
 | コマンド | 説明 | 使用例 |
 |---------|------|-------|
-| `create` | 新しい影分身を作成 | `scj create feature/new --tmux --claude --open` |
-| `list` | 影分身の一覧表示 | `scj list --details` |
-| `delete` | 影分身を削除 | `scj delete feature/old --fzf` |
-| `tmux` | tmuxセッションで開く | `scj tmux feature/new` |
-| `sync` | ファイル同期 | `scj sync --auto` |
-| `suggest` | AI提案機能 | `scj suggest --branch --description "新機能"` |
-| `github` | GitHub統合 | `scj github --issue 123` |
-| `dashboard` | Web UI起動 | `scj dashboard --open` |
-| `health` | 健全性チェック | `scj health --fix` |
-| `where` | 現在位置確認 | `scj where --verbose` |
+| `create` | 新しい演奏者を作成 | `mst create feature/new --tmux --claude --open` |
+| `list` | 演奏者の一覧表示 | `mst list --details` |
+| `delete` | 演奏者を削除 | `mst delete feature/old --fzf` |
+| `tmux` | tmuxセッションで開く | `mst tmux feature/new` |
+| `sync` | ファイル同期 | `mst sync --auto` |
+| `suggest` | AI提案機能 | `mst suggest --branch --description "新機能"` |
+| `github` | GitHub統合 | `mst github --issue 123` |
+| `dashboard` | Web UI起動 | `mst dashboard --open` |
+| `health` | 健全性チェック | `mst health --fix` |
+| `where` | 現在位置確認 | `mst where --verbose` |
 
 ### 🎯 クイックリファレンス
 
 ```bash
 # 基本的な使い方
-scj create feature/awesome-feature
-scj list
-scj tmux feature/awesome-feature
+mst create feature/awesome-feature
+mst list
+mst tmux feature/awesome-feature
 
 # 完全セットアップ
-scj create feature/full-setup --tmux --claude --open --setup
+mst create feature/full-setup --tmux --claude --open --setup
 
 # AI提案
-scj suggest --branch --description "ユーザー認証機能"
-scj suggest --commit --diff
+mst suggest --branch --description "ユーザー認証機能"
+mst suggest --commit --diff
 
 # GitHub統合
-scj github --issue 123
-scj github --create-pr
+mst github --issue 123
+mst github --create-pr
 ```
 
 ## 高度な機能
@@ -210,7 +210,7 @@ scj github --create-pr
 
 ```bash
 # 自動フローを実行
-scj review --auto-flow
+mst review --auto-flow
 ```
 
 **実行される処理:**
@@ -224,10 +224,10 @@ scj review --auto-flow
 
 ```bash
 # ダッシュボードを起動
-scj dashboard
+mst dashboard
 
 # カスタムポートで起動
-scj dashboard --port 3000
+mst dashboard --port 3000
 ```
 
 **ダッシュボード機能:**
@@ -240,26 +240,26 @@ scj dashboard --port 3000
 
 ```bash
 # スナップショットを作成
-scj snapshot -m "リファクタリング前の状態"
+mst snapshot -m "リファクタリング前の状態"
 
 # 全worktreeのスナップショット
-scj snapshot --all
+mst snapshot --all
 
 # スナップショットから復元
-scj snapshot --restore snapshot-xxxxx
+mst snapshot --restore snapshot-xxxxx
 ```
 
 ### 🏥 worktree健全性チェック
 
 ```bash
 # 健全性をチェック
-scj health
+mst health
 
 # 自動修正
-scj health --fix
+mst health --fix
 
 # 古いworktreeを削除（30日以上）
-scj health --prune --days 30
+mst health --prune --days 30
 ```
 
 **検出される問題:**
@@ -272,12 +272,12 @@ scj health --prune --days 30
 
 ## 設定
 
-### 📁 プロジェクト設定 (.scj.json)
+### 📁 プロジェクト設定 (.maestro.json)
 
 ```json
 {
   "worktrees": {
-    "path": ".git/shadow-clones",
+    "path": ".git/orchestra-members",
     "branchPrefix": "feature/"
   },
   "development": {
@@ -287,7 +287,7 @@ scj health --prune --days 30
   },
   "hooks": {
     "afterCreate": "npm install",
-    "beforeDelete": "echo \"影分身を削除します: $SHADOW_CLONE\""
+    "beforeDelete": "echo \"演奏者を削除します: $ORCHESTRA_MEMBER\""
   },
   "claude": {
     "autoStart": true,
@@ -304,8 +304,8 @@ Claude Codeの設定（`.claude/mcp_settings.json`）に追加:
 ```json
 {
   "mcpServers": {
-    "shadow-clone-jutsu": {
-      "command": "scj",
+    "maestro": {
+      "command": "mst",
       "args": ["mcp", "serve"]
     }
   }
@@ -317,7 +317,7 @@ Claude Codeの設定（`.claude/mcp_settings.json`）に追加:
 #### Bash
 
 ```bash
-scj completion bash >> ~/.bashrc
+mst completion bash >> ~/.bashrc
 source ~/.bashrc
 ```
 
@@ -325,7 +325,7 @@ source ~/.bashrc
 
 ```bash
 mkdir -p ~/.zsh/completions
-scj completion zsh > ~/.zsh/completions/_scj
+mst completion zsh > ~/.zsh/completions/_mst
 echo 'fpath=(~/.zsh/completions $fpath)' >> ~/.zshrc
 echo 'autoload -U compinit && compinit' >> ~/.zshrc
 source ~/.zshrc
@@ -334,7 +334,7 @@ source ~/.zshrc
 #### Fish
 
 ```bash
-scj completion fish > ~/.config/fish/completions/scj.fish
+mst completion fish > ~/.config/fish/completions/mst.fish
 ```
 
 ## トラブルシューティング
@@ -352,17 +352,17 @@ scj completion fish > ~/.config/fish/completions/scj.fish
 
 ```bash
 # デバッグ情報を表示
-DEBUG=scj:* scj create feature/debug
+DEBUG=mst:* mst create feature/debug
 
 # 詳細なログを出力
-scj --verbose create feature/test
+mst --verbose create feature/test
 ```
 
 ## 貢献
 
 ### 🤝 コントリビューション
 
-バグ報告や機能リクエストは[GitHub Issues](https://github.com/hashiramaendure/scj/issues)へお願いします。
+バグ報告や機能リクエストは[GitHub Issues](https://github.com/hashiramaendure/maestro/issues)へお願いします。
 
 プルリクエストも歓迎します！
 
@@ -377,8 +377,8 @@ scj --verbose create feature/test
 
 ```bash
 # リポジトリをクローン
-git clone https://github.com/hashiramaendure/scj.git
-cd scj
+git clone https://github.com/hashiramaendure/maestro.git
+cd maestro
 
 # 依存関係をインストール
 pnpm install

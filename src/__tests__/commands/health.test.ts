@@ -98,7 +98,7 @@ describe('health command', () => {
       )
     })
 
-    it('影分身が存在しない場合は終了する', async () => {
+    it('演奏者が存在しない場合は終了する', async () => {
       mockGitManager.listWorktrees.mockResolvedValue([
         createMockWorktree({ path: '/repo/.', branch: 'refs/heads/main' }),
       ])
@@ -109,7 +109,7 @@ describe('health command', () => {
         // process.exitが呼ばれることを期待
       }
 
-      expect(mockSpinner.succeed).toHaveBeenCalledWith('影分身が存在しません')
+      expect(mockSpinner.succeed).toHaveBeenCalledWith('演奏者が存在しません')
       expect(process.exit).toHaveBeenCalledWith(0)
     })
   })
@@ -126,9 +126,9 @@ describe('health command', () => {
       await healthCommand.parseAsync(['node', 'test'])
 
       expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining('2個の未コミット変更があります')
+        expect.stringContaining('2件の未コミット変更があります')
       )
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('⚠️  警告: 2個'))
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('⚠️  警告: 2件'))
     })
 
     it('mainブランチからの大幅な遅れを検出する', async () => {
@@ -163,7 +163,7 @@ describe('health command', () => {
       await healthCommand.parseAsync(['node', 'test'])
 
       expect(console.log).toHaveBeenCalledWith(expect.stringContaining('40日間更新されていません'))
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('ℹ️  情報: 2個'))
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('ℹ️  情報: 2件'))
     })
 
     it('マージ競合を検出する', async () => {
@@ -184,7 +184,7 @@ describe('health command', () => {
       expect(console.log).toHaveBeenCalledWith(
         expect.stringContaining('マージ競合が解決されていません')
       )
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('🚨 重大: 2個'))
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('🚨 重大: 2件'))
     })
 
     it('存在しないディレクトリを検出する', async () => {
@@ -252,7 +252,7 @@ describe('health command', () => {
         ['merge', 'main', '--no-edit'],
         expect.objectContaining({ cwd: expect.any(String) })
       )
-      expect(mockSpinner.succeed).toHaveBeenCalledWith('2個の問題を修正しました')
+      expect(mockSpinner.succeed).toHaveBeenCalledWith('2件の問題を修正しました')
     })
 
     it('存在しないディレクトリのworktreeを削除する', async () => {
@@ -295,7 +295,7 @@ describe('health command', () => {
         ])
       )
       expect(mockGitManager.deleteWorktree).toHaveBeenCalledTimes(2)
-      expect(mockSpinner.succeed).toHaveBeenCalledWith('2個のworktreeを削除しました')
+      expect(mockSpinner.succeed).toHaveBeenCalledWith('2件のworktreeを削除しました')
     })
 
     it('カスタム日数しきい値を使用できる', async () => {

@@ -179,7 +179,7 @@ export const watchCommand = new Command('watch')
       const excludePatterns = options.exclude || [
         'node_modules/**',
         '.git/**',
-        '.scj-metadata.json', // メタデータファイルは同期対象外
+        '.maestro-metadata.json', // メタデータファイルは同期対象外
         'dist/**',
         'build/**',
         '.next/**',

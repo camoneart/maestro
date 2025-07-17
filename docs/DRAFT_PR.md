@@ -11,13 +11,13 @@ The `--draft-pr` option for the `create` command automatically creates a GitHub 
 
 ```bash
 # Create worktree and draft PR
-scj create feature-awesome --draft-pr
+mst create feature-awesome --draft-pr
 
 # With Issue integration
-scj create 123 --draft-pr
+mst create 123 --draft-pr
 
 # Full options
-scj create feature-awesome --base develop --open --setup --draft-pr
+mst create feature-awesome --base develop --open --setup --draft-pr
 ```
 
 ## What it does

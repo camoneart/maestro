@@ -12,8 +12,8 @@ describe('CLI Integration Tests', () => {
       try {
         await execa('tsx', [cliPath, '--help'], { timeout: 10000 })
       } catch (error: any) {
-        expect(error.stdout).toContain('shadow-clone-jutsu')
-        expect(error.stdout).toContain('影分身の術')
+        expect(error.stdout).toContain('maestro')
+        expect(error.stdout).toContain('指揮者のように')
       }
     }, 10000)
 

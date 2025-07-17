@@ -1,6 +1,6 @@
 # Creating Demo Media
 
-This document explains how to create demo media for shadow-clone-jutsu.
+This document explains how to create demo media for Maestro.
 
 ## asciinema Recording
 
@@ -21,9 +21,9 @@ sudo apt-get install asciinema
 asciinema rec demo.cast
 
 # Run your demo commands
-scj create feature-demo
-scj list
-scj where feature-demo
+mst create feature-demo
+mst list
+mst where feature-demo
 # ... etc
 
 # Exit to stop recording (Ctrl+D)
@@ -79,27 +79,27 @@ ttygif myrecording
 clear
 
 # Show tool version
-echo "$ scj --version"
-scj --version
+echo "$ mst --version"
+mst --version
 sleep 2
 
 # Create a new worktree
-echo "$ scj create feature-awesome"
-scj create feature-awesome -y
+echo "$ mst create feature-awesome"
+mst create feature-awesome -y
 sleep 3
 
 # List worktrees
-echo "$ scj list"
-scj list
+echo "$ mst list"
+mst list
 sleep 2
 
 # Show interactive features
-echo "$ scj github"
+echo "$ mst github"
 # (demonstrate interactive selection)
 
 # Clean up
-echo "$ scj delete feature-awesome"
-scj delete feature-awesome -y
+echo "$ mst delete feature-awesome"
+mst delete feature-awesome -y
 ```
 
 ## Best Practices

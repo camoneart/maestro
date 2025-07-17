@@ -91,4 +91,4 @@ For the complete text of each license, please refer to:
 - Python-2.0: https://opensource.org/licenses/Python-2.0
 - 0BSD: https://opensource.org/licenses/0BSD
 
-All of these licenses are compatible with the MIT License under which shadow-clone-jutsu is distributed.
+All of these licenses are compatible with the MIT License under which maestro is distributed.

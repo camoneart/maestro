@@ -1,11 +1,11 @@
-# scj create
+# mst create
 
-影分身（Git Worktree）を作成するコマンドです。新しいブランチとWorktreeを同時に作成し、独立した開発環境を構築します。
+演奏者（Git Worktree）を作成するコマンドです。新しいブランチとWorktreeを同時に作成し、独立した開発環境を構築します。
 
 ## 概要
 
 ```bash
-scj create <branch-name> [options]
+mst create <branch-name> [options]
 ```
 
 ## 使用例
@@ -13,32 +13,32 @@ scj create <branch-name> [options]
 ### 基本的な使用方法
 
 ```bash
-# 新しい影分身を作成
-scj create feature/new-feature
+# 新しい演奏者を作成
+mst create feature/new-feature
 
-# Issue番号から影分身を作成
-scj create 123           # issue-123として作成
-scj create #123          # issue-123として作成
-scj create issue-123     # issue-123として作成
+# Issue番号から演奏者を作成
+mst create 123           # issue-123として作成
+mst create #123          # issue-123として作成
+mst create issue-123     # issue-123として作成
 ```
 
 ### 高度な使用方法
 
 ```bash
 # tmuxセッション付きで作成（Claude Code自動起動）
-scj create feature/new-feature --tmux --claude
+mst create feature/new-feature --tmux --claude
 
 # Draft PRを自動作成
-scj create feature/new-feature --draft-pr
+mst create feature/new-feature --draft-pr
 
 # ベースブランチを指定して作成
-scj create feature/new-feature --base develop
+mst create feature/new-feature --base develop
 
 # テンプレートを使用して作成
-scj create feature/new-feature --template feature
+mst create feature/new-feature --template feature
 
 # 全てのオプションを組み合わせて使用
-scj create feature/new-feature --base main --open --setup --tmux --claude --draft-pr
+mst create feature/new-feature --base main --open --setup --tmux --claude --draft-pr
 ```
 
 ## オプション
@@ -59,9 +59,9 @@ Issue番号を指定すると、GitHub APIを使用して自動的にIssue情報
 
 ```bash
 # 以下のいずれの形式でも可能
-scj create 123
-scj create #123
-scj create issue-123
+mst create 123
+mst create #123
+mst create issue-123
 ```
 
 取得される情報：
@@ -74,17 +74,17 @@ scj create issue-123
 
 ## テンプレート機能
 
-事前定義されたテンプレートを使用して、特定の設定を持つ影分身を作成できます：
+事前定義されたテンプレートを使用して、特定の設定を持つ演奏者を作成できます：
 
 ```bash
 # 機能開発用テンプレート
-scj create feature/auth --template feature
+mst create feature/auth --template feature
 
 # バグ修正用テンプレート
-scj create bugfix/login --template bugfix
+mst create bugfix/login --template bugfix
 
 # 実験用テンプレート
-scj create experiment/new-arch --template experiment
+mst create experiment/new-arch --template experiment
 ```
 
 利用可能なテンプレート：
@@ -95,10 +95,10 @@ scj create experiment/new-arch --template experiment
 
 ## Draft PR機能
 
-`--draft-pr` オプションを使用すると、影分身作成と同時にGitHub上にDraft Pull Requestを作成します：
+`--draft-pr` オプションを使用すると、演奏者作成と同時にGitHub上にDraft Pull Requestを作成します：
 
 ```bash
-scj create feature/new-ui --draft-pr
+mst create feature/new-ui --draft-pr
 ```
 
 作成されるPRの内容：
@@ -109,10 +109,10 @@ scj create feature/new-ui --draft-pr
 
 ## Claude Code統合
 
-`--claude` オプションを使用すると、影分身作成後に自動的にClaude Codeが起動します：
+`--claude` オプションを使用すると、演奏者作成後に自動的にClaude Codeが起動します：
 
 ```bash
-scj create feature/ai-feature --tmux --claude
+mst create feature/ai-feature --tmux --claude
 ```
 
 実行される処理：
@@ -123,12 +123,12 @@ scj create feature/ai-feature --tmux --claude
 
 ## 設定ファイルとの連携
 
-`.scj.json` の設定が自動的に適用されます：
+`.mst.json` の設定が自動的に適用されます：
 
 ```json
 {
   "worktrees": {
-    "path": ".git/shadow-clones",
+    "path": ".git/orchestra-members",
     "branchPrefix": "feature/"
   },
   "development": {
@@ -147,10 +147,10 @@ scj create feature/ai-feature --tmux --claude
 
 ```bash
 # よく使う組み合わせはエイリアスにすると便利
-alias scjf='scj create --tmux --claude --setup'
+alias mstf='mst create --tmux --claude --setup'
 
 # 使用例
-scjf feature/new-feature
+mstf feature/new-feature
 ```
 
 ### 2. Issue駆動開発
@@ -159,8 +159,8 @@ scjf feature/new-feature
 # Issueを確認
 gh issue list
 
-# Issue番号で影分身を作成
-scj create 123 --tmux --claude
+# Issue番号で演奏者を作成
+mst create 123 --tmux --claude
 
 # 開発を開始
 # Issue情報は自動的にメタデータとして保存される
@@ -170,13 +170,13 @@ scj create 123 --tmux --claude
 
 ```bash
 # メイン機能の開発
-scj create feature/main-feature --tmux
+mst create feature/main-feature --tmux
 
 # サブ機能の開発（別ウィンドウ）
-scj create feature/sub-feature --tmux --new-window
+mst create feature/sub-feature --tmux --new-window
 
 # バグ修正（さらに別ウィンドウ）
-scj create bugfix/urgent-fix --tmux --new-window
+mst create bugfix/urgent-fix --tmux --new-window
 ```
 
 ## エラーハンドリング
@@ -203,7 +203,7 @@ scj create bugfix/urgent-fix --tmux --new-window
 
 ## 関連コマンド
 
-- [`scj list`](./list.md) - 作成した影分身の一覧を表示
-- [`scj delete`](./delete.md) - 影分身を削除
-- [`scj github`](./github.md) - GitHubのPR/Issueから影分身を作成
-- [`scj template`](./template.md) - テンプレートの管理
+- [`mst list`](./list.md) - 作成した演奏者の一覧を表示
+- [`mst delete`](./delete.md) - 演奏者を削除
+- [`mst github`](./github.md) - GitHubのPR/Issueから演奏者を作成
+- [`mst template`](./template.md) - テンプレートの管理

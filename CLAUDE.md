@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-shadow-clone-jutsu is a CLI tool for managing Git Worktrees with a ninja theme. It helps developers work on multiple branches in parallel by creating "shadow clones" (worktrees) with integration for Claude Code, tmux, GitHub, and more.
+Maestro is a CLI tool for managing Git Worktrees with a conductor/orchestra theme. It helps developers work on multiple branches in parallel by creating "orchestra members" (worktrees) with integration for Claude Code, tmux, GitHub, and more.
 
 ## Development Commands
 
@@ -78,7 +78,7 @@ The project includes MCP (Model Context Protocol) server functionality in `src/m
 - **Package Manager**: pnpm (specified in package.json)
 - **Node Version**: >=20.0.0
 - **Module Type**: ESM with .js extensions in imports
-- **Binaries**: `scj` and `shadow-clone-jutsu` commands
+- **Binaries**: `maestro`, `mst`, and `scj` (backward compatibility) commands
 
 ## Key Dependencies
 

@@ -10,15 +10,15 @@ describe('CLI', () => {
     it('should have correct name', () => {
       const { Command } = require('commander')
       const program = new Command()
-      program.name('scj')
-      expect(program.name()).toBe('scj')
+      program.name('maestro')
+      expect(program.name()).toBe('maestro')
     })
 
     it('should have correct description', () => {
       const { Command } = require('commander')
       const program = new Command()
-      program.description('🥷 shadow-clone-jutsu - 影分身の術でClaude Codeとパラレル開発')
-      expect(program.description()).toContain('影分身の術')
+      program.description('🎼 maestro - 指揮者のようにClaude Codeと協奏開発')
+      expect(program.description()).toContain('指揮者のように')
     })
 
     it('should have version', () => {

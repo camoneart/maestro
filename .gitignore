@@ -61,9 +61,12 @@ temp/
 *.gz
 *.tgz
 
-# shadow-clone-jutsu specific
+# maestro specific
+.orchestrations/
 .shadow-clones/
 worktrees/
+.maestro-config.json
+.maestro/
 .scj-config.json
 .scj/
 
@@ -90,3 +93,12 @@ test-output*.txt
 release-*.md
 *-release.md
 coverage_report.json
+
+# ToDo
+_todo/
+
+# feature
+_features/
+
+# article
+_articles/

@@ -199,8 +199,8 @@ describe('suggest command simple tests', () => {
       return `${prefix}-${timestamp}-${random}.${extension}`
     }
 
-    const filename = getTempFileName('scj-suggest', 'md')
-    expect(filename).toMatch(/^scj-suggest-\d+-[a-z0-9]+\.md$/)
+    const filename = getTempFileName('maestro-suggest', 'md')
+    expect(filename).toMatch(/^maestro-suggest-\d+-[a-z0-9]+\.md$/)
   })
 
   it('should test error messages', () => {

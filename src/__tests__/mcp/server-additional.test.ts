@@ -69,11 +69,11 @@ describe('MCP Server - Implementation Tests', () => {
       
       // サーバー作成時のパラメータをテスト
       const serverInstance = new (Server as any)(
-        { name: 'shadow-clone-jutsu', version: '0.1.0' },
+        { name: 'maestro', version: '0.1.0' },
         { capabilities: { tools: {} } }
       )
       
-      expect(serverInstance.serverInfo.name).toBe('shadow-clone-jutsu')
+      expect(serverInstance.serverInfo.name).toBe('maestro')
       expect(serverInstance.serverInfo.version).toBe('0.1.0')
       expect(serverInstance.serverOptions.capabilities.tools).toBeDefined()
     })
@@ -136,9 +136,9 @@ describe('MCP Server - Implementation Tests', () => {
   })
 
   describe('MCP Tool Handlers', () => {
-    it('should handle create_shadow_clone tool', async () => {
+    it('should handle create_orchestra_member tool', async () => {
       // ツール実行のシミュレーション
-      const toolName = 'create_shadow_clone'
+      const toolName = 'create_orchestra_member'
       const args = { branchName: 'feature-test', baseBranch: 'main' }
       
       mockGitManager.createWorktree.mockResolvedValue('/path/to/worktree/feature-test')
@@ -150,7 +150,7 @@ describe('MCP Server - Implementation Tests', () => {
       expect(mockGitManager.createWorktree).toHaveBeenCalledWith('feature-test', 'main')
     })
 
-    it('should handle list_shadow_clones tool', async () => {
+    it('should handle list_orchestra_members tool', async () => {
       const mockWorktrees = [
         { path: '/path/to/worktree/feature-1', branch: 'refs/heads/feature-1' },
         { path: '/path/to/worktree/feature-2', branch: 'refs/heads/feature-2' },
@@ -165,7 +165,7 @@ describe('MCP Server - Implementation Tests', () => {
       expect(shadowClones[0].branch).toBe('refs/heads/feature-1')
     })
 
-    it('should handle delete_shadow_clone tool', async () => {
+    it('should handle delete_orchestra_member tool', async () => {
       const args = { branchName: 'feature-test', force: false }
       
       mockGitManager.deleteWorktree.mockResolvedValue(undefined)
@@ -175,7 +175,7 @@ describe('MCP Server - Implementation Tests', () => {
       expect(mockGitManager.deleteWorktree).toHaveBeenCalledWith('feature-test', false)
     })
 
-    it('should handle exec_in_shadow_clone tool', async () => {
+    it('should handle exec_in_orchestra_member tool', async () => {
       const { execa } = await import('execa')
       const args = { branchName: 'feature-test', command: 'npm test' }
       
@@ -324,14 +324,14 @@ describe('MCP Server - Implementation Tests', () => {
         content: [
           {
             type: 'text',
-            text: '✅ 影分身 \'feature-test\' を作り出しました: /path/to/worktree',
+            text: '✅ 演奏者 \'feature-test\' を作り出しました: /path/to/worktree',
           },
         ],
       }
       
       expect(successResponse.content[0].type).toBe('text')
       expect(successResponse.content[0].text).toContain('✅')
-      expect(successResponse.content[0].text).toContain('影分身')
+      expect(successResponse.content[0].text).toContain('演奏者')
     })
 
     it('should format error responses correctly', async () => {
@@ -367,14 +367,14 @@ describe('MCP Server - Implementation Tests', () => {
         content: [
           {
             type: 'text',
-            text: `🥷 影分身一覧:\n${list}\n\n合計: ${shadowClones.length} 対の影分身`,
+            text: `🎼 演奏者一覧:\n${list}\n\n合計: ${shadowClones.length} 対の演奏者`,
           },
         ],
       }
       
-      expect(listResponse.content[0].text).toContain('🥷 影分身一覧')
+      expect(listResponse.content[0].text).toContain('🎼 演奏者一覧')
       expect(listResponse.content[0].text).toContain('feature-1')
-      expect(listResponse.content[0].text).toContain('合計: 2 対の影分身')
+      expect(listResponse.content[0].text).toContain('合計: 2 対の演奏者')
     })
   })
 })

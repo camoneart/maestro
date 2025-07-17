@@ -212,12 +212,12 @@ export const issueCommand = new Command('issue')
           createSpinner.succeed('Issueを作成しました')
           console.log(chalk.gray(`URL: ${issueUrl}`))
 
-          // 作成したIssueから影分身を作るか確認
+          // 作成したIssueから演奏者を招集するか確認
           const { createBranch } = await inquirer.prompt([
             {
               type: 'confirm',
               name: 'createBranch',
-              message: 'このIssueから影分身を作り出しますか？',
+              message: 'このIssueから演奏者を招集しますか？',
               default: true,
             },
           ])
@@ -228,9 +228,9 @@ export const issueCommand = new Command('issue')
               const newIssueNumber = issueNumberMatch[1]
               const branchName = `issue-${newIssueNumber}`
 
-              const branchSpinner = ora('影分身を作り出し中...').start()
+              const branchSpinner = ora('演奏者を招集中...').start()
               const worktreePath = await gitManager.createWorktree(branchName)
-              branchSpinner.succeed(`影分身 '${chalk.cyan(branchName)}' を作り出しました`)
+              branchSpinner.succeed(`演奏者 '${chalk.cyan(branchName)}' を招集しました`)
               console.log(chalk.gray(`📁 ${worktreePath}`))
             }
           }
@@ -349,7 +349,7 @@ export const issueCommand = new Command('issue')
             name: 'action',
             message: '何をしますか？',
             choices: [
-              { name: '🥷 このIssueから影分身を作り出す', value: 'create-branch' },
+              { name: '🎵 このIssueから演奏者を招集する', value: 'create-branch' },
               { name: '🌐 ブラウザで開く', value: 'web' },
               { name: '✅ Issueをクローズ', value: 'close' },
               { name: '👤 アサイン', value: 'assign' },
@@ -363,14 +363,14 @@ export const issueCommand = new Command('issue')
         switch (action) {
           case 'create-branch': {
             const branchName = `issue-${issueNumber}`
-            const branchSpinner = ora('影分身を作り出し中...').start()
+            const branchSpinner = ora('演奏者を招集中...').start()
 
             try {
               const worktreePath = await gitManager.createWorktree(branchName)
-              branchSpinner.succeed(`影分身 '${chalk.cyan(branchName)}' を作り出しました`)
+              branchSpinner.succeed(`演奏者 '${chalk.cyan(branchName)}' を招集しました`)
               console.log(chalk.gray(`📁 ${worktreePath}`))
             } catch (error) {
-              branchSpinner.fail('影分身の作成に失敗しました')
+              branchSpinner.fail('演奏者の招集に失敗しました')
               throw new IssueCommandError(error instanceof Error ? error.message : '不明なエラー')
             }
             break

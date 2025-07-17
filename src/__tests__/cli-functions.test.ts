@@ -5,15 +5,15 @@ import { describe, it, expect, vi } from 'vitest'
 describe('cli module - utility functions', () => {
   describe('CLI configuration structure', () => {
     it('should validate program name', () => {
-      const programName = 'scj'
-      expect(programName).toBe('scj')
-      expect(programName.length).toBe(3)
+      const programName = 'maestro'
+      expect(programName).toBe('maestro')
+      expect(programName.length).toBe(7)
     })
 
     it('should validate program description', () => {
-      const description = '🥷 shadow-clone-jutsu - 影分身の術でClaude Codeとパラレル開発'
-      expect(description).toContain('shadow-clone-jutsu')
-      expect(description).toContain('影分身の術')
+      const description = '🎼 maestro - 指揮者のようにClaude Codeと協奏開発'
+      expect(description).toContain('maestro')
+      expect(description).toContain('指揮者のように')
       expect(description).toContain('Claude Code')
     })
 
@@ -79,7 +79,7 @@ describe('cli module - utility functions', () => {
 
   describe('Program initialization', () => {
     it('should handle program argv parsing', () => {
-      const mockArgv = ['node', 'scj', 'create', 'test-branch']
+      const mockArgv = ['node', 'maestro', 'create', 'test-branch']
       const command = mockArgv[2]
       const branchName = mockArgv[3]
       
@@ -162,7 +162,7 @@ describe('cli module - utility functions', () => {
 
   describe('Async parsing utilities', () => {
     it('should handle parseAsync structure', () => {
-      const processArgv = ['node', 'script.js', 'command']
+      const processArgv = ['node', 'maestro', 'command']
       const isNodeProcess = processArgv[0] === 'node'
       
       expect(isNodeProcess).toBe(true)

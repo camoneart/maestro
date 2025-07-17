@@ -1,5 +1,5 @@
 /**
- * shadow-clone-jutsu用の統一エラークラス
+ * maestro用の統一エラークラス
  */
 
 /* eslint-disable no-unused-vars */
@@ -30,7 +30,7 @@ interface SolutionSuggestion {
   url?: string
 }
 
-export class ShadowCloneError extends Error {
+export class MaestroError extends Error {
   public readonly code: ErrorCode
   public readonly suggestions: SolutionSuggestion[]
   public readonly originalError?: Error
@@ -42,14 +42,14 @@ export class ShadowCloneError extends Error {
     originalError?: Error
   ) {
     super(message)
-    this.name = 'ShadowCloneError'
+    this.name = 'MaestroError'
     this.code = code
     this.suggestions = suggestions
     this.originalError = originalError
 
     // Error.captureStackTraceが利用可能な場合に使用
     if (Error.captureStackTrace) {
-      Error.captureStackTrace(this, ShadowCloneError)
+      Error.captureStackTrace(this, MaestroError)
     }
   }
 
@@ -80,8 +80,8 @@ export class ShadowCloneError extends Error {
  * 一般的なエラーパターンのファクトリ関数
  */
 export class ErrorFactory {
-  static notGitRepository(path?: string): ShadowCloneError {
-    return new ShadowCloneError(
+  static notGitRepository(path?: string): MaestroError {
+    return new MaestroError(
       path
         ? `${path} はGitリポジトリではありません`
         : 'このディレクトリはGitリポジトリではありません',
@@ -99,39 +99,39 @@ export class ErrorFactory {
     )
   }
 
-  static worktreeNotFound(branch: string, similar?: string[]): ShadowCloneError {
+  static worktreeNotFound(branch: string, similar?: string[]): MaestroError {
     const suggestions: SolutionSuggestion[] = [
       {
-        message: '影分身を作成する',
-        command: `scj create ${branch}`,
+        message: '演奏者を招集する',
+        command: `maestro create ${branch}`,
       },
     ]
 
     if (similar && similar.length > 0) {
       suggestions.unshift({
-        message: `類似した影分身: ${similar.join(', ')}`,
+        message: `類似した演奏者: ${similar.join(', ')}`,
       })
     }
 
-    return new ShadowCloneError(
-      `影分身 '${branch}' が見つかりません`,
+    return new MaestroError(
+      `演奏者 '${branch}' が見つかりません`,
       ErrorCode.WORKTREE_NOT_FOUND,
       suggestions
     )
   }
 
-  static worktreeAlreadyExists(branch: string, path: string): ShadowCloneError {
-    return new ShadowCloneError(
-      `影分身 '${branch}' は既に存在します: ${path}`,
+  static worktreeAlreadyExists(branch: string, path: string): MaestroError {
+    return new MaestroError(
+      `演奏者 '${branch}' は既に存在します: ${path}`,
       ErrorCode.WORKTREE_ALREADY_EXISTS,
       [
         {
-          message: '既存の影分身を削除してから再作成する',
-          command: `scj delete ${branch}`,
+          message: '既存の演奏者を解散してから再招集する',
+          command: `maestro delete ${branch}`,
         },
         {
-          message: '既存の影分身に移動する',
-          command: `scj shell ${branch}`,
+          message: '既存の演奏者に移動する',
+          command: `maestro shell ${branch}`,
         },
       ]
     )
@@ -141,7 +141,7 @@ export class ErrorFactory {
     tool: string,
     installCommand?: string,
     url?: string
-  ): ShadowCloneError {
+  ): MaestroError {
     const suggestions: SolutionSuggestion[] = []
 
     if (installCommand) {
@@ -158,15 +158,15 @@ export class ErrorFactory {
       })
     }
 
-    return new ShadowCloneError(
+    return new MaestroError(
       `${tool} が見つかりません`,
       ErrorCode.EXTERNAL_TOOL_NOT_FOUND,
       suggestions
     )
   }
 
-  static githubAuthRequired(): ShadowCloneError {
-    return new ShadowCloneError('GitHub CLIが認証されていません', ErrorCode.GITHUB_AUTH_REQUIRED, [
+  static githubAuthRequired(): MaestroError {
+    return new MaestroError('GitHub CLIが認証されていません', ErrorCode.GITHUB_AUTH_REQUIRED, [
       {
         message: 'GitHub CLIで認証する',
         command: 'gh auth login',
@@ -179,22 +179,22 @@ export class ErrorFactory {
     ])
   }
 
-  static operationCancelled(operation?: string): ShadowCloneError {
-    return new ShadowCloneError(
+  static operationCancelled(operation?: string): MaestroError {
+    return new MaestroError(
       operation ? `${operation}がキャンセルされました` : '操作がキャンセルされました',
       ErrorCode.OPERATION_CANCELLED
     )
   }
 
-  static validationError(field: string, value: unknown, expected: string): ShadowCloneError {
-    return new ShadowCloneError(
+  static validationError(field: string, value: unknown, expected: string): MaestroError {
+    return new MaestroError(
       `不正な値: ${field} = '${value}' (期待値: ${expected})`,
       ErrorCode.VALIDATION_ERROR
     )
   }
 
-  static networkError(operation: string, originalError?: Error): ShadowCloneError {
-    return new ShadowCloneError(
+  static networkError(operation: string, originalError?: Error): MaestroError {
+    return new MaestroError(
       `ネットワークエラー: ${operation}`,
       ErrorCode.NETWORK_ERROR,
       [
@@ -209,8 +209,8 @@ export class ErrorFactory {
     )
   }
 
-  static fromError(error: Error): ShadowCloneError {
-    if (error instanceof ShadowCloneError) {
+  static fromError(error: Error): MaestroError {
+    if (error instanceof MaestroError) {
       return error
     }
 
@@ -222,7 +222,7 @@ export class ErrorFactory {
     }
 
     if (message.includes('permission denied')) {
-      return new ShadowCloneError(
+      return new MaestroError(
         `権限エラー: ${error.message}`,
         ErrorCode.PERMISSION_DENIED,
         [
@@ -235,7 +235,7 @@ export class ErrorFactory {
     }
 
     if (message.includes('command not found') || message.includes('not found')) {
-      return new ShadowCloneError(
+      return new MaestroError(
         `コマンドが見つかりません: ${error.message}`,
         ErrorCode.EXTERNAL_TOOL_NOT_FOUND,
         [],
@@ -244,7 +244,7 @@ export class ErrorFactory {
     }
 
     // 一般的なエラーとして扱う
-    return new ShadowCloneError(error.message, ErrorCode.UNKNOWN_ERROR, [], error)
+    return new MaestroError(error.message, ErrorCode.UNKNOWN_ERROR, [], error)
   }
 }
 
@@ -253,7 +253,7 @@ export class ErrorFactory {
  */
 export function handleError(error: unknown, context?: string): never {
   const shadowError =
-    error instanceof ShadowCloneError
+    error instanceof MaestroError
       ? error
       : ErrorFactory.fromError(error instanceof Error ? error : new Error(String(error)))
 

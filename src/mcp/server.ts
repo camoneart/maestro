@@ -5,7 +5,7 @@ import { CallToolRequestSchema, ListToolsRequestSchema } from '@modelcontextprot
 
 // テスト環境では早期リターンしてprocess.exitを避ける
 if (process.env.NODE_ENV === 'test') {
-  console.log('🥷 shadow-clone-jutsu MCP server started')
+  console.log('🎼 Maestro MCP server started')
   // process.exit(0) を削除し、モジュールの読み込みを継続
 }
 import { z } from 'zod'
@@ -36,7 +36,7 @@ const ExecInWorktreeArgsSchema = z.object({
 // MCPサーバーの作成
 const server = new Server(
   {
-    name: 'shadow-clone-jutsu',
+    name: 'maestro',
     version: packageJson.version,
   },
   {
@@ -52,8 +52,8 @@ const gitManager = new GitWorktreeManager()
 // ツール定義
 const TOOLS = [
   {
-    name: 'create_shadow_clone',
-    description: '新しい影分身（Git worktree）を作り出す',
+    name: 'create_orchestra_member',
+    description: '新しい演奏者（Git worktree）を招集する',
     inputSchema: {
       type: 'object',
       properties: {
@@ -70,16 +70,16 @@ const TOOLS = [
     },
   },
   {
-    name: 'list_shadow_clones',
-    description: 'すべての影分身（Git worktree）を一覧表示',
+    name: 'list_orchestra_members',
+    description: 'すべての演奏者（Git worktree）を一覧表示',
     inputSchema: {
       type: 'object',
       properties: {},
     },
   },
   {
-    name: 'delete_shadow_clone',
-    description: '影分身（Git worktree）を削除',
+    name: 'delete_orchestra_member',
+    description: '演奏者（Git worktree）を解散',
     inputSchema: {
       type: 'object',
       properties: {
@@ -96,8 +96,8 @@ const TOOLS = [
     },
   },
   {
-    name: 'exec_in_shadow_clone',
-    description: '影分身でコマンドを実行',
+    name: 'exec_in_orchestra_member',
+    description: '演奏者でコマンドを実行',
     inputSchema: {
       type: 'object',
       properties: {
@@ -128,7 +128,7 @@ server.setRequestHandler(CallToolRequestSchema, async request => {
 
   try {
     switch (name) {
-      case 'create_shadow_clone': {
+      case 'create_orchestra_member': {
         const validatedArgs = CreateWorktreeArgsSchema.parse(args)
         const worktreePath = await gitManager.createWorktree(
           validatedArgs.branchName,
@@ -138,17 +138,17 @@ server.setRequestHandler(CallToolRequestSchema, async request => {
           content: [
             {
               type: 'text',
-              text: `✅ 影分身 '${validatedArgs.branchName}' を作り出しました！\n📁 ${worktreePath}`,
+              text: `✅ 演奏者 '${validatedArgs.branchName}' を招集しました！\n📁 ${worktreePath}`,
             },
           ],
         }
       }
 
-      case 'list_shadow_clones': {
+      case 'list_orchestra_members': {
         const worktrees = await gitManager.listWorktrees()
-        const shadowClones = worktrees.filter(wt => !wt.path.endsWith('.'))
+        const orchestraMembers = worktrees.filter(wt => !wt.path.endsWith('.'))
 
-        const list = shadowClones
+        const list = orchestraMembers
           .map(wt => {
             const branchName = wt.branch?.replace('refs/heads/', '') || wt.branch
             return `• ${branchName} (${wt.path})`
@@ -160,28 +160,28 @@ server.setRequestHandler(CallToolRequestSchema, async request => {
             {
               type: 'text',
               text:
-                shadowClones.length > 0
-                  ? `🥷 影分身一覧:\n${list}\n\n合計: ${shadowClones.length} 対の影分身`
-                  : '影分身が存在しません',
+                orchestraMembers.length > 0
+                  ? `🎼 オーケストラ編成:\n${list}\n\n合計: ${orchestraMembers.length} 名の演奏者`
+                  : '演奏者が存在しません',
             },
           ],
         }
       }
 
-      case 'delete_shadow_clone': {
+      case 'delete_orchestra_member': {
         const validatedArgs = DeleteWorktreeArgsSchema.parse(args)
         await gitManager.deleteWorktree(validatedArgs.branchName, validatedArgs.force)
         return {
           content: [
             {
               type: 'text',
-              text: `✅ 影分身 '${validatedArgs.branchName}' を削除しました`,
+              text: `✅ 演奏者 '${validatedArgs.branchName}' を解散しました`,
             },
           ],
         }
       }
 
-      case 'exec_in_shadow_clone': {
+      case 'exec_in_orchestra_member': {
         const validatedArgs = ExecInWorktreeArgsSchema.parse(args)
         const { execa } = await import('execa')
 
@@ -192,7 +192,7 @@ server.setRequestHandler(CallToolRequestSchema, async request => {
         })
 
         if (!targetWorktree) {
-          throw new Error(`影分身 '${validatedArgs.branchName}' が見つかりません`)
+          throw new Error(`演奏者 '${validatedArgs.branchName}' が見つかりません`)
         }
 
         const result = await execa('sh', ['-c', validatedArgs.command], {
@@ -228,7 +228,7 @@ server.setRequestHandler(CallToolRequestSchema, async request => {
 async function main() {
   const transport = new StdioServerTransport()
   await server.connect(transport)
-  console.error('🥷 shadow-clone-jutsu MCP server started')
+  console.error('🎼 Maestro MCP server started')
 }
 
 main().catch(error => {

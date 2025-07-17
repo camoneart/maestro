@@ -6,8 +6,8 @@ vi.mock('../cli.js', async () => {
   const program = new Command()
   
   program
-    .name('scj')
-    .description('🥷 shadow-clone-jutsu - 影分身の術でClaude Codeとパラレル開発')
+    .name('maestro')
+    .description('🎼 maestro - 指揮者のようにClaude Codeと協奏開発')
     .version('0.1.0')
     
   // Mock all the command imports to avoid loading actual command modules
@@ -55,12 +55,12 @@ describe('CLI Unit Tests', () => {
 
   describe('CLI structure', () => {
     it('should have correct program name', () => {
-      expect(program.name()).toBe('scj')
+      expect(program.name()).toBe('maestro')
     })
 
     it('should have correct description', () => {
-      expect(program.description()).toContain('shadow-clone-jutsu')
-      expect(program.description()).toContain('影分身の術')
+      expect(program.description()).toContain('maestro')
+      expect(program.description()).toContain('指揮者のように')
     })
 
     it('should have correct version', () => {

@@ -161,12 +161,12 @@ describe('Delete Command - Enhanced Coverage', () => {
         }
       }
 
-      mockPath.join.mockReturnValue('/path/to/worktree/.scj-metadata.json')
+      mockPath.join.mockReturnValue('/path/to/worktree/.maestro-metadata.json')
       mockFs.readFile.mockResolvedValue(JSON.stringify(mockMetadata))
 
       async function readWorktreeMetadata(worktreePath: string): Promise<any | null> {
         try {
-          const metadataPath = path.join(worktreePath, '.scj-metadata.json')
+          const metadataPath = path.join(worktreePath, '.maestro-metadata.json')
           const content = await fs.readFile(metadataPath, 'utf-8')
           return JSON.parse(content)
         } catch {
@@ -180,12 +180,12 @@ describe('Delete Command - Enhanced Coverage', () => {
     })
 
     it('should handle missing metadata gracefully', async () => {
-      mockPath.join.mockReturnValue('/path/to/worktree/.scj-metadata.json')
+      mockPath.join.mockReturnValue('/path/to/worktree/.maestro-metadata.json')
       mockFs.readFile.mockRejectedValue(new Error('File not found'))
 
       async function readWorktreeMetadata(worktreePath: string): Promise<any | null> {
         try {
-          const metadataPath = path.join(worktreePath, '.scj-metadata.json')
+          const metadataPath = path.join(worktreePath, '.maestro-metadata.json')
           const content = await fs.readFile(metadataPath, 'utf-8')
           return JSON.parse(content)
         } catch {
@@ -198,12 +198,12 @@ describe('Delete Command - Enhanced Coverage', () => {
     })
 
     it('should handle corrupted metadata', async () => {
-      mockPath.join.mockReturnValue('/path/to/worktree/.scj-metadata.json')
+      mockPath.join.mockReturnValue('/path/to/worktree/.maestro-metadata.json')
       mockFs.readFile.mockResolvedValue('invalid json content')
 
       async function readWorktreeMetadata(worktreePath: string): Promise<any | null> {
         try {
-          const metadataPath = path.join(worktreePath, '.scj-metadata.json')
+          const metadataPath = path.join(worktreePath, '.maestro-metadata.json')
           const content = await fs.readFile(metadataPath, 'utf-8')
           return JSON.parse(content)
         } catch {

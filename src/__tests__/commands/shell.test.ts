@@ -1,3 +1,4 @@
+
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { GitWorktreeManager } from '../../core/git'
 import { spawn } from 'child_process'
@@ -120,7 +121,7 @@ describe('shell command', () => {
 
       expect(console.log).toHaveBeenCalledWith(expect.stringContaining('影分身が存在しません'))
       expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining('scj create <branch-name> で影分身を作り出してください')
+        expect.stringContaining('maestro create <branch-name> で影分身を作り出してください')
       )
     })
 

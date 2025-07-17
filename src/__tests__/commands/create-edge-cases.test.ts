@@ -21,9 +21,9 @@ describe('create command - edge cases', () => {
   })
 
   describe('saveWorktreeMetadata', () => {
-    it('should save metadata to .scj-metadata.json', async () => {
+    it('should save metadata to .maestro-metadata.json', async () => {
       vi.mocked(fs.writeFile).mockResolvedValue(undefined)
-      vi.mocked(path.join).mockReturnValue('/path/to/worktree/.scj-metadata.json')
+      vi.mocked(path.join).mockReturnValue('/path/to/worktree/.maestro-metadata.json')
 
       await saveWorktreeMetadata('/path/to/worktree', 'feature/test', {
         template: 'test-template',
@@ -39,14 +39,14 @@ describe('create command - edge cases', () => {
       })
 
       expect(fs.writeFile).toHaveBeenCalledWith(
-        '/path/to/worktree/.scj-metadata.json',
+        '/path/to/worktree/.maestro-metadata.json',
         expect.stringContaining('"branch": "feature/test"')
       )
     })
 
     it('should handle metadata save failure gracefully', async () => {
       vi.mocked(fs.writeFile).mockRejectedValue(new Error('write failed'))
-      vi.mocked(path.join).mockReturnValue('/path/to/worktree/.scj-metadata.json')
+      vi.mocked(path.join).mockReturnValue('/path/to/worktree/.maestro-metadata.json')
 
       // Should not throw error
       await expect(saveWorktreeMetadata('/path/to/worktree', 'feature/test', {})).resolves.not.toThrow()

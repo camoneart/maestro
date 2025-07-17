@@ -5,7 +5,7 @@ import { spawn } from 'child_process'
 
 export const whereCommand = new Command('where')
   .alias('w')
-  .description('影分身（worktree）のパスを表示')
+  .description('演奏者（worktree）のパスを表示')
   .argument('[branch-name]', 'ブランチ名')
   .option('--fzf', 'fzfで選択')
   .option('--current', '現在のworktreeのパスを表示')
@@ -31,7 +31,7 @@ export const whereCommand = new Command('where')
       // fzfで選択
       if (options?.fzf) {
         if (worktrees.length === 0) {
-          console.log(chalk.yellow('影分身が存在しません'))
+          console.log(chalk.yellow('演奏者が存在しません'))
           process.exit(0)
         }
 
@@ -52,7 +52,7 @@ export const whereCommand = new Command('where')
           'fzf',
           [
             '--ansi',
-            '--header=影分身を選択 (Ctrl-C でキャンセル)',
+            '--header=演奏者を選択 (Ctrl-C でキャンセル)',
             '--preview',
             'echo {} | cut -d"|" -f2 | xargs ls -la',
             '--preview-window=right:50%:wrap',
@@ -95,9 +95,9 @@ export const whereCommand = new Command('where')
           )
         )
         console.log(chalk.gray('使い方:'))
-        console.log('  scj where <branch-name>    # 指定した影分身のパスを表示')
-        console.log('  scj where --fzf            # fzfで影分身を選択')
-        console.log('  scj where --current        # 現在のworktreeのパスを表示')
+        console.log('  maestro where <branch-name>    # 指定した演奏者のパスを表示')
+        console.log('  maestro where --fzf            # fzfで演奏者を選択')
+        console.log('  maestro where --current        # 現在のworktreeのパスを表示')
         process.exit(1)
       }
 
@@ -115,15 +115,15 @@ export const whereCommand = new Command('where')
       )
 
       if (!worktree) {
-        console.error(chalk.red(`エラー: 影分身 '${branchName}' が見つかりません`))
+        console.error(chalk.red(`エラー: 演奏者 '${branchName}' が見つかりません`))
 
-        // 類似した影分身を提案
+        // 類似した演奏者を提案
         const suggestions = worktrees
           .filter(w => w.branch.toLowerCase().includes(branchName.toLowerCase()))
           .map(w => w.branch.replace('refs/heads/', ''))
 
         if (suggestions.length > 0) {
-          console.log(chalk.yellow('\n類似した影分身:'))
+          console.log(chalk.yellow('\n類似した演奏者:'))
           suggestions.forEach(s => console.log(`  - ${s}`))
         }
 

@@ -87,7 +87,7 @@ describe('attach command', () => {
     // ConfigManagerのモック
     mockConfigManager = {
       loadProjectConfig: vi.fn(),
-      get: vi.fn().mockReturnValue({ path: '.git/shadow-clones' }),
+      get: vi.fn().mockReturnValue({ path: '.git/orchestrations' }),
     }
     ;(ConfigManager as any).mockImplementation(() => mockConfigManager)
 
@@ -246,7 +246,7 @@ describe('attach command', () => {
     it('should open editor with --open option', async () => {
       mockGitManager.attachWorktree.mockResolvedValue('/path/to/worktree/feature-1')
       mockConfigManager.get.mockReturnValue({
-        path: '.git/shadow-clones',
+        path: '.git/orchestrations',
         development: { defaultEditor: 'code' },
       })
       ;(execa as Mock).mockResolvedValue({ stdout: '' })

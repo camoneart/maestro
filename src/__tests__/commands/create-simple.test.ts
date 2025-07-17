@@ -10,7 +10,7 @@ describe('create command simple tests', () => {
   it('should have correct command configuration', () => {
     expect(createCommand).toBeInstanceOf(Command)
     expect(createCommand.name()).toBe('create')
-    expect(createCommand.description()).toContain('新しい影分身')
+    expect(createCommand.description()).toContain('新しい演奏者')
     
     // Check options
     const options = createCommand.options
@@ -149,7 +149,7 @@ describe('create command simple tests', () => {
       const metadata: any = {
         branch,
         createdAt: new Date().toISOString(),
-        shadowCloneJutsu: true,
+        maestro: true,
       }
 
       if (options.template) {
@@ -166,7 +166,7 @@ describe('create command simple tests', () => {
     const meta1 = createMetadata('feature-test', { template: 'react' })
     expect(meta1.branch).toBe('feature-test')
     expect(meta1.template).toBe('react')
-    expect(meta1.shadowCloneJutsu).toBe(true)
+    expect(meta1.maestro).toBe(true)
     expect(meta1.createdAt).toMatch(/\d{4}-\d{2}-\d{2}/)
 
     const meta2 = createMetadata('issue-123', {
@@ -183,7 +183,7 @@ describe('create command simple tests', () => {
 ## Project Context
 - Project: ${projectName}
 - Current Branch: ${branch}
-- Created by: shadow-clone-jutsu
+- Created by: maestro
 
 ## Working Directory
 This is a git worktree for parallel development.
@@ -194,7 +194,7 @@ This is a git worktree for parallel development.
 3. Use conventional commits
 
 ## Additional Notes
-- This is a shadow clone (git worktree)
+- This is an orchestra member (git worktree)
 - Changes here don't affect other worktrees
 `
     }
@@ -202,7 +202,7 @@ This is a git worktree for parallel development.
     const content = generateClaudeInstructions('my-project', 'feature-awesome')
     expect(content).toContain('Project: my-project')
     expect(content).toContain('Current Branch: feature-awesome')
-    expect(content).toContain('shadow-clone-jutsu')
+    expect(content).toContain('maestro')
     expect(content).toContain('git worktree')
   })
 
