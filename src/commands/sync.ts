@@ -35,11 +35,11 @@ interface SyncResult {
 
 export const syncCommand = new Command('sync')
   .alias('s')
-  .description('メインブランチの変更を影分身に同期')
-  .argument('[branch-name]', '同期する影分身のブランチ名')
-  .option('-a, --all', '全ての影分身に同期')
+  .description('メインブランチの変更を演奏者に同期')
+  .argument('[branch-name]', '同期する演奏者のブランチ名')
+  .option('-a, --all', '全ての演奏者に同期')
   .option('-m, --main <branch>', 'メインブランチを指定 (デフォルト: main または master)')
-  .option('--fzf', 'fzfで同期する影分身を選択')
+  .option('--fzf', 'fzfで同期する演奏者を選択')
   .option('--rebase', 'マージの代わりにrebaseを使用')
   .option('--dry-run', '実行内容のみ表示（実際の同期は行わない）')
   .option('--push', 'merge/rebase後にgit pushを実施')
@@ -48,7 +48,7 @@ export const syncCommand = new Command('sync')
   .option('-p, --preset <name>', '同期プリセットを使用（env, config, all）')
   .option('-c, --concurrency <number>', '並列実行数 (デフォルト: 5)', parseInt)
   .action(async (branchName?: string, options: SyncOptions = {}) => {
-    const spinner = ora('影分身を確認中...').start()
+    const spinner = ora('演奏者を確認中...').start()
 
     try {
       const gitManager = new GitWorktreeManager()
@@ -84,23 +84,23 @@ export const syncCommand = new Command('sync')
 
       spinner.text = 'ワークツリーを取得中...'
       const worktrees = await gitManager.listWorktrees()
-      const shadowClones = worktrees.filter(wt => !wt.path.endsWith('.'))
+      const orchestraMembers = worktrees.filter(wt => !wt.path.endsWith('.'))
 
-      if (shadowClones.length === 0) {
-        spinner.fail('影分身が存在しません')
+      if (orchestraMembers.length === 0) {
+        spinner.fail('演奏者が存在しません')
         process.exit(0)
       }
 
-      let targetWorktrees: typeof shadowClones = []
+      let targetWorktrees: typeof orchestraMembers = []
 
       // 同期対象を決定
       if (options.all) {
-        targetWorktrees = shadowClones
+        targetWorktrees = orchestraMembers
       } else if (options.fzf && !branchName) {
         spinner.stop()
 
         // fzfで選択（複数選択可能）
-        const fzfInput = shadowClones
+        const fzfInput = orchestraMembers
           .map(w => {
             const branch = w.branch?.replace('refs/heads/', '') || w.branch
             return `${branch} | ${w.path}`
@@ -112,7 +112,7 @@ export const syncCommand = new Command('sync')
           [
             '--ansi',
             '--multi',
-            '--header=同期する影分身を選択 (Tab で複数選択, Ctrl-C でキャンセル)',
+            '--header=同期する演奏者を選択 (Tab で複数選択, Ctrl-C でキャンセル)',
             '--preview',
             'echo {} | cut -d"|" -f2 | xargs ls -la',
             '--preview-window=right:50%:wrap',
@@ -143,7 +143,7 @@ export const syncCommand = new Command('sync')
               .map(line => line.split('|')[0]?.trim())
               .filter(Boolean)
 
-            targetWorktrees = shadowClones.filter(wt => {
+            targetWorktrees = orchestraMembers.filter(wt => {
               const branch = wt.branch?.replace('refs/heads/', '')
               return selectedBranches.includes(branch)
             })
@@ -155,13 +155,13 @@ export const syncCommand = new Command('sync')
         spinner.start()
       } else if (branchName) {
         // 特定のブランチ
-        const target = shadowClones.find(wt => {
+        const target = orchestraMembers.find(wt => {
           const branch = wt.branch?.replace('refs/heads/', '')
           return branch === branchName || wt.branch === branchName
         })
 
         if (!target) {
-          spinner.fail(`影分身 '${branchName}' が見つかりません`)
+          spinner.fail(`演奏者 '${branchName}' が見つかりません`)
           process.exit(1)
         }
 
@@ -174,8 +174,8 @@ export const syncCommand = new Command('sync')
           {
             type: 'checkbox',
             name: 'selectedBranches',
-            message: '同期する影分身を選択してください:',
-            choices: shadowClones.map(wt => {
+            message: '同期する演奏者を選択してください:',
+            choices: orchestraMembers.map(wt => {
               const branchName = wt.branch?.replace('refs/heads/', '') || wt.branch
               return {
                 name: `${chalk.cyan(branchName)} ${chalk.gray(wt.path)}`,
@@ -212,7 +212,7 @@ export const syncCommand = new Command('sync')
         console.log(chalk.gray(`メインブランチ: ${mainBranch}`))
         console.log(chalk.gray(`同期方法: ${options.rebase ? 'rebase' : 'merge'}`))
         console.log(chalk.gray(`同期後のpush: ${options.push ? 'あり' : 'なし'}`))
-        console.log('\n' + chalk.bold('同期予定の影分身:'))
+        console.log('\n' + chalk.bold('同期予定の演奏者:'))
 
         for (const worktree of targetWorktrees) {
           const branchName = worktree.branch?.replace('refs/heads/', '') || worktree.branch
@@ -264,7 +264,7 @@ export const syncCommand = new Command('sync')
         hideCursor: true,
       })
 
-      // 各影分身を並列同期
+      // 各演奏者を並列同期
       const results: SyncResult[] = []
       progressBar.start(targetWorktrees.length, 0)
 
@@ -364,7 +364,7 @@ export const syncCommand = new Command('sync')
       progressBar.stop()
 
       // 結果サマリー
-      console.log('\n' + chalk.bold('🥷 同期結果:\n'))
+      console.log('\n' + chalk.bold('🎼 同期結果:\n'))
 
       const successCount = results.filter(r => r.status === 'success').length
       const failedCount = results.filter(r => r.status === 'failed').length
@@ -406,7 +406,7 @@ export const syncCommand = new Command('sync')
 
       if (failedCount > 0) {
         console.log(
-          chalk.yellow('\n💡 ヒント: 競合が発生した場合は、各影分身で手動で解決してください')
+          chalk.yellow('\n💡 ヒント: 競合が発生した場合は、各演奏者で手動で解決してください')
         )
       }
 

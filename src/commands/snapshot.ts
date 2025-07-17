@@ -194,7 +194,7 @@ async function createSnapshot(
 
   // メタデータを読み込み
   try {
-    const metadataPath = path.join(worktree.path, '.scj-metadata.json')
+    const metadataPath = path.join(worktree.path, '.maestro-metadata.json')
     const metadataContent = await fs.readFile(metadataPath, 'utf-8')
     snapshot.metadata = JSON.parse(metadataContent)
   } catch {
@@ -206,7 +206,7 @@ async function createSnapshot(
 
 // スナップショットを保存
 async function saveSnapshot(snapshot: WorktreeSnapshot): Promise<void> {
-  const snapshotDir = path.join(process.cwd(), '.scj', 'snapshots')
+  const snapshotDir = path.join(process.cwd(), '.maestro', 'snapshots')
   await fs.mkdir(snapshotDir, { recursive: true })
 
   const snapshotPath = path.join(snapshotDir, `${snapshot.id}.json`)
@@ -215,7 +215,7 @@ async function saveSnapshot(snapshot: WorktreeSnapshot): Promise<void> {
 
 // スナップショット一覧を取得
 async function listSnapshots(): Promise<WorktreeSnapshot[]> {
-  const snapshotDir = path.join(process.cwd(), '.scj', 'snapshots')
+  const snapshotDir = path.join(process.cwd(), '.maestro', 'snapshots')
 
   try {
     const files = await fs.readdir(snapshotDir)
@@ -435,7 +435,7 @@ export const snapshotCommand = new Command('snapshot')
         if (options.delete) {
           const snapshotPath = path.join(
             process.cwd(),
-            '.scj',
+            '.maestro',
             'snapshots',
             `${options.delete}.json`
           )
@@ -449,7 +449,7 @@ export const snapshotCommand = new Command('snapshot')
             const snapshot = snapshots.find(s => s.id.startsWith(options.delete!))
 
             if (snapshot) {
-              const fullPath = path.join(process.cwd(), '.scj', 'snapshots', `${snapshot.id}.json`)
+              const fullPath = path.join(process.cwd(), '.maestro', 'snapshots', `${snapshot.id}.json`)
               await fs.unlink(fullPath)
               console.log(chalk.green(`✨ スナップショット '${snapshot.id}' を削除しました`))
             } else {
@@ -469,16 +469,16 @@ export const snapshotCommand = new Command('snapshot')
           const spinner = ora('全worktreeのスナップショットを作成中...').start()
 
           const worktrees = await gitManager.listWorktrees()
-          const shadowClones = worktrees.filter(wt => !wt.path.endsWith('.'))
+          const orchestraMembers = worktrees.filter(wt => !wt.path.endsWith('.'))
 
-          if (shadowClones.length === 0) {
-            spinner.fail('影分身が存在しません')
+          if (orchestraMembers.length === 0) {
+            spinner.fail('演奏者が存在しません')
             return
           }
 
           const snapshots: WorktreeSnapshot[] = []
 
-          for (const worktree of shadowClones) {
+          for (const worktree of orchestraMembers) {
             try {
               const snapshot = await createSnapshot(worktree, message, options.stash || false)
               await saveSnapshot(snapshot)

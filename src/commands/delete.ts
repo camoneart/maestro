@@ -81,15 +81,15 @@ export function prepareWorktreeSelection(
   filteredWorktrees: Worktree[]
   needsInteractiveSelection: boolean
 } {
-  const shadowClones = worktrees.filter(wt => !wt.path.endsWith('.'))
+  const orchestraMembers = worktrees.filter(wt => !wt.path.endsWith('.'))
   
-  if (shadowClones.length === 0) {
+  if (orchestraMembers.length === 0) {
     return { filteredWorktrees: [], needsInteractiveSelection: false }
   }
   
   // 現在のworktreeを削除する場合
   if (options.current) {
-    const currentWorktree = shadowClones.find(wt => 
+    const currentWorktree = orchestraMembers.find(wt => 
       process.cwd().startsWith(wt.path)
     )
     if (currentWorktree) {
@@ -99,7 +99,7 @@ export function prepareWorktreeSelection(
   
   // ブランチ名が指定されている場合
   if (branchName && !options.fzf) {
-    const targetWorktree = shadowClones.find(wt => 
+    const targetWorktree = orchestraMembers.find(wt => 
       wt.branch === branchName || wt.branch === `refs/heads/${branchName}`
     )
     if (targetWorktree) {
@@ -109,7 +109,7 @@ export function prepareWorktreeSelection(
   
   // fzfで選択、またはインタラクティブ選択が必要
   return { 
-    filteredWorktrees: shadowClones, 
+    filteredWorktrees: orchestraMembers, 
     needsInteractiveSelection: true 
   }
 }
@@ -169,7 +169,7 @@ export async function executeWorktreeDeletion(
 
 export const deleteCommand = new Command('delete')
   .alias('rm')
-  .description('影分身（worktree）を削除')
+  .description('演奏者（worktree）を解散')
   .argument('[branch-name]', '削除するブランチ名')
   .option('-f, --force', '強制削除')
   .option('-r, --remove-remote', 'リモートブランチも削除')
@@ -180,7 +180,7 @@ export const deleteCommand = new Command('delete')
       branchName?: string,
       options: DeleteOptions & { fzf?: boolean; current?: boolean } = {}
     ) => {
-      const spinner = ora('影分身を確認中...').start()
+      const spinner = ora('演奏者を確認中...').start()
 
       try {
         const gitManager = new GitWorktreeManager()
@@ -200,7 +200,7 @@ export const deleteCommand = new Command('delete')
         )
 
         if (filteredWorktrees.length === 0) {
-          spinner.fail('影分身が存在しません')
+          spinner.fail('演奏者が存在しません')
           return
         }
 
@@ -229,7 +229,7 @@ export const deleteCommand = new Command('delete')
             [
               '--ansi',
               '--multi',
-              '--header=削除する影分身を選択 (Tab で複数選択, Ctrl-C でキャンセル)',
+              '--header=解散する演奏者を選択 (Tab で複数選択, Ctrl-C でキャンセル)',
               '--preview',
               'echo {} | cut -d"|" -f2 | xargs ls -la',
               '--preview-window=right:50%:wrap',
@@ -284,7 +284,7 @@ export const deleteCommand = new Command('delete')
           })
 
           if (!targetWorktree) {
-            spinner.fail(`影分身 '${branchName}' が見つかりません`)
+            spinner.fail(`演奏者 '${branchName}' が見つかりません`)
 
             // 類似した名前を提案
             const similarBranches = filteredWorktrees
@@ -292,13 +292,13 @@ export const deleteCommand = new Command('delete')
               .map(wt => wt.branch?.replace('refs/heads/', '') || wt.branch)
 
             if (similarBranches.length > 0) {
-              console.log(chalk.yellow('\n類似した影分身:'))
+              console.log(chalk.yellow('\n類似した演奏者:'))
               similarBranches.forEach(branch => {
                 console.log(`  - ${chalk.cyan(branch)}`)
               })
             }
 
-            throw new DeleteCommandError('指定された影分身が見つかりません')
+            throw new DeleteCommandError('指定された演奏者が見つかりません')
           }
 
           targetWorktrees = [targetWorktree]
@@ -309,7 +309,7 @@ export const deleteCommand = new Command('delete')
         spinner.stop()
 
         // 削除対象の詳細表示
-        console.log(chalk.bold('\n🗑️  削除対象の影分身:\n'))
+        console.log(chalk.bold('\n🗑️  解散対象の演奏者:\n'))
 
         const deletionDetails = await Promise.all(
           targetWorktrees.map(async wt => {
@@ -332,7 +332,7 @@ export const deleteCommand = new Command('delete')
           }
         })
 
-        console.log(chalk.gray(`\n合計: ${targetWorktrees.length} 対の影分身`))
+        console.log(chalk.gray(`\n合計: ${targetWorktrees.length} 名の演奏者`))
 
         // 削除確認
         if (!options.force) {
@@ -340,7 +340,7 @@ export const deleteCommand = new Command('delete')
             {
               type: 'confirm',
               name: 'confirmDelete',
-              message: chalk.yellow('本当にこれらの影分身を削除しますか？'),
+              message: chalk.yellow('本当にこれらの演奏者を解散しますか？'),
               default: false,
             },
           ])
@@ -357,12 +357,12 @@ export const deleteCommand = new Command('delete')
 
         for (const worktree of targetWorktrees) {
           const branch = worktree.branch?.replace('refs/heads/', '') || worktree.branch || 'unknown'
-          const deleteSpinner = ora(`影分身 '${chalk.cyan(branch)}' を削除中...`).start()
+          const deleteSpinner = ora(`演奏者 '${chalk.cyan(branch)}' を解散中...`).start()
 
           try {
             // ワークツリーを削除
             await gitManager.deleteWorktree(worktree.branch || '', options.force)
-            deleteSpinner.succeed(`影分身 '${chalk.cyan(branch)}' を削除しました`)
+            deleteSpinner.succeed(`演奏者 '${chalk.cyan(branch)}' を解散しました`)
 
             // リモートブランチも削除
             if (options.removeRemote && worktree.branch) {
@@ -371,7 +371,7 @@ export const deleteCommand = new Command('delete')
 
             results.push({ branch, status: 'success' })
           } catch (error) {
-            deleteSpinner.fail(`影分身 '${chalk.cyan(branch)}' の削除に失敗しました`)
+            deleteSpinner.fail(`演奏者 '${chalk.cyan(branch)}' の解散に失敗しました`)
             results.push({
               branch,
               status: 'failed',
@@ -381,7 +381,7 @@ export const deleteCommand = new Command('delete')
         }
 
         // 結果サマリー
-        console.log(chalk.bold('\n🥷 削除結果:\n'))
+        console.log(chalk.bold('\n🎼 解散結果:\n'))
 
         const successCount = results.filter(r => r.status === 'success').length
         const failedCount = results.filter(r => r.status === 'failed').length
@@ -399,7 +399,7 @@ export const deleteCommand = new Command('delete')
         console.log(chalk.gray(`\n合計: ${successCount} 成功, ${failedCount} 失敗`))
 
         if (successCount > 0) {
-          console.log(chalk.green('\n✨ 影分身の削除が完了しました！'))
+          console.log(chalk.green('\n✨ 演奏者の解散が完了しました！'))
         }
       } catch (error) {
         spinner.fail('エラーが発生しました')

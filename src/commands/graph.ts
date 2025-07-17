@@ -207,17 +207,17 @@ export const graphCommand = new Command('graph')
 
       // worktreeを取得
       const worktrees = await gitManager.listWorktrees()
-      const shadowClones = worktrees.filter(wt => !wt.path.endsWith('.'))
+      const orchestraMembers = worktrees.filter(wt => !wt.path.endsWith('.'))
 
-      if (shadowClones.length === 0) {
-        spinner.fail('影分身が存在しません')
+      if (orchestraMembers.length === 0) {
+        spinner.fail('演奏者が存在しません')
         process.exit(0)
       }
 
       spinner.text = 'ブランチ関係を分析中...'
 
       // ブランチ関係を分析
-      const relations = await analyzeBranchRelations(shadowClones)
+      const relations = await analyzeBranchRelations(orchestraMembers)
 
       spinner.stop()
 
@@ -258,7 +258,7 @@ export const graphCommand = new Command('graph')
 
       // 統計情報
       console.log(chalk.bold('\n📊 統計情報:\n'))
-      console.log(chalk.gray(`総worktree数: ${shadowClones.length + 1}`))
+      console.log(chalk.gray(`総worktree数: ${orchestraMembers.length + 1}`))
       console.log(chalk.gray(`アクティブなブランチ: ${relations.length}`))
 
       const outdated = relations.filter(r => r.behind > 10)

@@ -277,10 +277,10 @@ export const healthCommand = new Command('health')
 
       // worktreeを取得
       const worktrees = await gitManager.listWorktrees()
-      const shadowClones = worktrees.filter(wt => !wt.path.endsWith('.'))
+      const orchestraMembers = worktrees.filter(wt => !wt.path.endsWith('.'))
 
-      if (shadowClones.length === 0) {
-        spinner.succeed('影分身が存在しません')
+      if (orchestraMembers.length === 0) {
+        spinner.succeed('演奏者が存在しません')
         process.exit(0)
       }
 
@@ -290,7 +290,7 @@ export const healthCommand = new Command('health')
       const allIssues: HealthIssue[] = []
       const daysThreshold = parseInt(options.days?.toString() || '30')
 
-      for (const worktree of shadowClones) {
+      for (const worktree of orchestraMembers) {
         const issues = await checkWorktreeHealth(worktree, mainBranch, daysThreshold)
         allIssues.push(...issues)
       }

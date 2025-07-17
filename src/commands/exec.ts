@@ -6,11 +6,11 @@ import ora from 'ora'
 
 export const execCommand = new Command('exec')
   .alias('e')
-  .description('影分身でコマンドを実行')
+  .description('演奏者でコマンドを実行')
   .argument('<branch-name>', 'ブランチ名')
   .argument('<command...>', '実行するコマンド')
   .option('-s, --silent', '出力を抑制')
-  .option('-a, --all', 'すべての影分身で実行')
+  .option('-a, --all', 'すべての演奏者で実行')
   .action(
     async (
       branchName: string,
@@ -28,22 +28,22 @@ export const execCommand = new Command('exec')
         }
 
         const worktrees = await gitManager.listWorktrees()
-        const shadowClones = worktrees.filter(wt => !wt.path.endsWith('.'))
+        const orchestraMembers = worktrees.filter(wt => !wt.path.endsWith('.'))
 
-        if (shadowClones.length === 0) {
-          console.log(chalk.yellow('影分身が存在しません'))
-          console.log(chalk.gray('scj create <branch-name> で影分身を作り出してください'))
+        if (orchestraMembers.length === 0) {
+          console.log(chalk.yellow('演奏者が存在しません'))
+          console.log(chalk.gray('scj create <branch-name> で演奏者を招集してください'))
           process.exit(0)
         }
 
         // コマンドを結合
         const command = commandParts.join(' ')
 
-        // すべての影分身で実行
+        // すべての演奏者で実行
         if (options?.all) {
-          console.log(chalk.bold(`\n🥷 すべての影分身でコマンドを実行: ${chalk.cyan(command)}\n`))
+          console.log(chalk.bold(`\n🎵 すべての演奏者でコマンドを実行: ${chalk.cyan(command)}\n`))
 
-          for (const worktree of shadowClones) {
+          for (const worktree of orchestraMembers) {
             const branchName = worktree.branch?.replace('refs/heads/', '') || worktree.branch
             console.log(chalk.green(`▶ ${branchName}`))
 
@@ -75,17 +75,17 @@ export const execCommand = new Command('exec')
           return
         }
 
-        // 特定の影分身で実行
-        const targetWorktree = shadowClones.find(wt => {
+        // 特定の演奏者で実行
+        const targetWorktree = orchestraMembers.find(wt => {
           const branch = wt.branch?.replace('refs/heads/', '')
           return branch === branchName || wt.branch === branchName
         })
 
         if (!targetWorktree) {
-          console.error(chalk.red(`エラー: 影分身 '${branchName}' が見つかりません`))
+          console.error(chalk.red(`エラー: 演奏者 '${branchName}' が見つかりません`))
 
           // 類似した名前を提案
-          const similarBranches = shadowClones
+          const similarBranches = orchestraMembers
             .filter(wt => {
               const branch = wt.branch?.replace('refs/heads/', '') || ''
               return branch.includes(branchName)
@@ -93,7 +93,7 @@ export const execCommand = new Command('exec')
             .map(wt => wt.branch?.replace('refs/heads/', '') || wt.branch)
 
           if (similarBranches.length > 0) {
-            console.log(chalk.yellow('\n類似した影分身:'))
+            console.log(chalk.yellow('\n類似した演奏者:'))
             similarBranches.forEach(branch => {
               console.log(`  - ${chalk.cyan(branch)}`)
             })
@@ -107,7 +107,7 @@ export const execCommand = new Command('exec')
 
         if (!options?.silent) {
           console.log(
-            chalk.green(`\n🥷 影分身 '${chalk.cyan(displayBranchName)}' でコマンドを実行`)
+            chalk.green(`\n🎵 演奏者 '${chalk.cyan(displayBranchName)}' でコマンドを実行`)
           )
           console.log(chalk.gray(`📁 ${targetWorktree.path}`))
           console.log(chalk.gray(`$ ${command}\n`))

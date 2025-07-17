@@ -8,7 +8,7 @@ import { ErrorFactory, handleError } from '../utils/errors.js'
 
 export const shellCommand = new Command('shell')
   .alias('sh')
-  .description('影分身のシェルに入る')
+  .description('演奏者のシェルに入る')
   .argument('[branch-name]', 'ブランチ名（省略時は選択）')
   .option('--fzf', 'fzfで選択')
   .option('--cmd <command>', '指定コマンド実行して終了')
@@ -27,11 +27,11 @@ export const shellCommand = new Command('shell')
         const worktrees = await gitManager.listWorktrees()
 
         // メインブランチを除外
-        const shadowClones = worktrees.filter(wt => !wt.path.endsWith('.'))
+        const orchestraMembers = worktrees.filter(wt => !wt.path.endsWith('.'))
 
-        if (shadowClones.length === 0) {
-          console.log(chalk.yellow('影分身が存在しません'))
-          console.log(chalk.gray('scj create <branch-name> で影分身を作り出してください'))
+        if (orchestraMembers.length === 0) {
+          console.log(chalk.yellow('演奏者が存在しません'))
+          console.log(chalk.gray('scj create <branch-name> で演奏者を招集してください'))
           process.exit(0)
         }
 
@@ -39,7 +39,7 @@ export const shellCommand = new Command('shell')
         if (!branchName) {
           // fzfオプションが指定されている場合
           if (options?.fzf) {
-            const fzfInput = shadowClones
+            const fzfInput = orchestraMembers
               .map(w => {
                 const status = []
                 if (w.locked) status.push(chalk.red('ロック'))
@@ -55,7 +55,7 @@ export const shellCommand = new Command('shell')
               'fzf',
               [
                 '--ansi',
-                '--header=影分身を選択してシェルに入る (Ctrl-C でキャンセル)',
+                '--header=演奏者を選択してシェルに入る (Ctrl-C でキャンセル)',
                 '--preview',
                 'echo {} | cut -d"|" -f2 | xargs ls -la',
                 '--preview-window=right:50%:wrap',
@@ -97,8 +97,8 @@ export const shellCommand = new Command('shell')
               {
                 type: 'list',
                 name: 'selectedBranch',
-                message: 'どの影分身に入りますか？',
-                choices: shadowClones.map(wt => {
+                message: 'どの演奏者に入りますか？',
+                choices: orchestraMembers.map(wt => {
                   const branchName = wt.branch?.replace('refs/heads/', '') || wt.branch
                   return {
                     name: `${chalk.cyan(branchName)} ${chalk.gray(wt.path)}`,
@@ -112,14 +112,14 @@ export const shellCommand = new Command('shell')
         }
 
         // 指定されたブランチのworktreeを探す
-        const targetWorktree = shadowClones.find(wt => {
+        const targetWorktree = orchestraMembers.find(wt => {
           const branch = wt.branch?.replace('refs/heads/', '')
           return branch === branchName || wt.branch === branchName
         })
 
         if (!targetWorktree) {
           // 類似した名前を検索
-          const similarBranches = shadowClones
+          const similarBranches = orchestraMembers
             .filter(
               wt => wt.branch && wt.branch.toLowerCase().includes((branchName || '').toLowerCase())
             )
@@ -129,7 +129,7 @@ export const shellCommand = new Command('shell')
           throw ErrorFactory.worktreeNotFound(branchName || '', similarBranches)
         }
 
-        console.log(chalk.green(`\n🥷 影分身 '${chalk.cyan(branchName)}' に入ります...`))
+        console.log(chalk.green(`\n🎵 演奏者 '${chalk.cyan(branchName)}' に入ります...`))
         console.log(chalk.gray(`📁 ${targetWorktree.path}\n`))
 
         // --cmd オプションの処理
@@ -142,8 +142,8 @@ export const shellCommand = new Command('shell')
               shell: true,
               env: {
                 ...process.env,
-                SHADOW_CLONE: branchName,
-                SHADOW_CLONE_PATH: targetWorktree.path,
+                MAESTRO_BRANCH: branchName,
+                MAESTRO_PATH: targetWorktree.path,
               },
             })
             console.log(chalk.green(`\n✅ コマンド実行完了 (exit code: ${result.exitCode})`))
@@ -160,7 +160,7 @@ export const shellCommand = new Command('shell')
 
         // --tmux オプションの処理
         if (options.tmux) {
-          const sessionName = `shadow-clone-${branchName}`
+          const sessionName = `maestro-${branchName}`
 
           try {
             // 既存のtmuxセッションがあるかチェック
@@ -192,8 +192,8 @@ export const shellCommand = new Command('shell')
                 stdio: 'inherit',
                 env: {
                   ...process.env,
-                  SHADOW_CLONE: branchName,
-                  SHADOW_CLONE_PATH: targetWorktree.path,
+                  MAESTRO_BRANCH: branchName,
+                  MAESTRO_PATH: targetWorktree.path,
                 },
               })
 
@@ -234,13 +234,13 @@ export const shellCommand = new Command('shell')
             env: {
               ...process.env,
               ...shellEnv,
-              SHADOW_CLONE: branchName,
-              SHADOW_CLONE_PATH: targetWorktree.path,
+              MAESTRO_BRANCH: branchName,
+              MAESTRO_PATH: targetWorktree.path,
             },
           })
 
           shellProcess.on('exit', code => {
-            console.log(chalk.gray(`\n影分身から戻りました (exit code: ${code})`))
+            console.log(chalk.gray(`\n演奏者から戻りました (exit code: ${code})`))
           })
         }
 
@@ -255,17 +255,17 @@ export const shellCommand = new Command('shell')
           switch (shellName) {
             case 'zsh':
               return {
-                PS1: `${chalk.magenta('🥷')} [${chalk.cyan(branchName)}] ${chalk.yellow('%~')} $ `,
-                PROMPT: `${chalk.magenta('🥷')} [${chalk.cyan(branchName)}] ${chalk.yellow('%~')} $ `,
+                PS1: `${chalk.magenta('🎵')} [${chalk.cyan(branchName)}] ${chalk.yellow('%~')} $ `,
+                PROMPT: `${chalk.magenta('🎵')} [${chalk.cyan(branchName)}] ${chalk.yellow('%~')} $ `,
               }
             case 'fish':
               return {
-                fish_prompt: `echo "${chalk.magenta('🥷')} [${chalk.cyan(branchName)}] ${chalk.yellow('(prompt_pwd)')} $ "`,
+                fish_prompt: `echo "${chalk.magenta('🎵')} [${chalk.cyan(branchName)}] ${chalk.yellow('(prompt_pwd)')} $ "`,
               }
             case 'bash':
             default:
               return {
-                PS1: `${chalk.magenta('🥷')} [${chalk.cyan(branchName)}] ${chalk.yellow('\\W')} $ `,
+                PS1: `${chalk.magenta('🎵')} [${chalk.cyan(branchName)}] ${chalk.yellow('\\W')} $ `,
               }
           }
         }
