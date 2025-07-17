@@ -1,5 +1,5 @@
 {
-  "name": "maestro",
+  "name": "@hashiramaendure/maestro",
   "version": "2.0.0",
   "description": "Git Worktreeオーケストレーションで、Claude Codeとパラレル開発を実現するツール",
   "type": "module",
