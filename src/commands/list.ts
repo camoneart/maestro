@@ -184,13 +184,13 @@ export const listCommand = new Command('list')
         const mainWorktree = worktrees.find(
           wt => wt.branch === 'refs/heads/main' || wt.isCurrentDirectory
         )
-        const cloneWorktrees = worktrees.filter(wt => wt !== mainWorktree)
+        const memberWorktrees = worktrees.filter(wt => wt !== mainWorktree)
 
         if (mainWorktree) {
           displayWorktree(mainWorktree, true, options.lastCommit, options.metadata)
         }
 
-        cloneWorktrees.forEach(wt =>
+        memberWorktrees.forEach(wt =>
           displayWorktree(wt, false, options.lastCommit, options.metadata)
         )
 
