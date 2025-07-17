@@ -7,8 +7,9 @@
 [![codecov](https://codecov.io/gh/hashiramaendure/maestro/branch/main/graph/badge.svg)](https://codecov.io/gh/hashiramaendure/maestro)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-**Git Worktreeオーケストレーションで、Claude Codeとパラレル開発を実現するCLIツール**  
-_Parallel Development CLI powered by Git Worktree Orchestration & Claude AI_
+**Git Worktreeオーケストレーションで、Claude Codeとパラレル開発を実現するCLIツール**
+
+![maestro](public/image/logo/maestro-logo.png)
 
 ![Demo Animation](https://via.placeholder.com/800x400/1a1a1a/00ff00?text=maestro+demo)
 

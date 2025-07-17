@@ -9,8 +9,9 @@ _Parallel Development CLI powered by Git Worktree Orchestration & Claude AI_
 [![codecov](https://codecov.io/gh/hashiramaendure/maestro/branch/main/graph/badge.svg)](https://codecov.io/gh/hashiramaendure/maestro)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-**Git Worktree Orchestration CLI Tool for Parallel Development with Claude Code**  
-_Parallel Development CLI powered by Git Worktree Orchestration & Claude AI_
+**Git Worktree Orchestration CLI Tool for Parallel Development with Claude Code**
+
+![maestro](public/image/logo/maestro-logo.png)
 
 ![Demo Animation](https://via.placeholder.com/800x400/1a1a1a/00ff00?text=maestro+demo)
 
