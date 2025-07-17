@@ -11,7 +11,7 @@ export interface Worktree {
   isPrunable?: boolean
 }
 
-export interface ScjConfig {
+export interface MaestroConfig {
   worktreesPath?: string
   defaultBranchPrefix?: string
   autoSetupEnv?: boolean
