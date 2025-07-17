@@ -199,9 +199,9 @@ function displayHealthReport(allIssues: HealthIssue[], verbose: boolean): void {
 
   // サマリー
   console.log(chalk.bold('📊 サマリー:'))
-  if (criticalCount > 0) console.log(chalk.red(`  🚨 重大: ${criticalCount}個`))
-  if (warningCount > 0) console.log(chalk.yellow(`  ⚠️  警告: ${warningCount}個`))
-  if (infoCount > 0) console.log(chalk.blue(`  ℹ️  情報: ${infoCount}個`))
+  if (criticalCount > 0) console.log(chalk.red(`  🚨 重大: ${criticalCount}件`))
+  if (warningCount > 0) console.log(chalk.yellow(`  ⚠️  警告: ${warningCount}件`))
+  if (infoCount > 0) console.log(chalk.blue(`  ℹ️  情報: ${infoCount}件`))
   console.log()
 
   // 詳細表示
@@ -329,7 +329,7 @@ export const healthCommand = new Command('health')
       if (options.fix && allIssues.some(i => i.fixable)) {
         const fixableIssues = allIssues.filter(i => i.fixable)
 
-        console.log(chalk.bold(`\n🔧 ${fixableIssues.length}個の修正可能な問題があります\n`))
+        console.log(chalk.bold(`\n🔧 ${fixableIssues.length}件の修正可能な問題があります\n`))
 
         const { confirmFix } = await inquirer.prompt([
           {
@@ -350,7 +350,7 @@ export const healthCommand = new Command('health')
             }
           }
 
-          fixSpinner.succeed(`${fixedCount}個の問題を修正しました`)
+          fixSpinner.succeed(`${fixedCount}件の問題を修正しました`)
         }
       }
 
@@ -362,7 +362,7 @@ export const healthCommand = new Command('health')
           .filter((wt, index, self) => self.findIndex(w => w.path === wt.path) === index)
 
         if (staleWorktrees.length > 0) {
-          console.log(chalk.bold(`\n🗑️  ${staleWorktrees.length}個の古いworktreeがあります\n`))
+          console.log(chalk.bold(`\n🗑️  ${staleWorktrees.length}件の古いworktreeがあります\n`))
 
           staleWorktrees.forEach(wt => {
             const branch = wt.branch?.replace('refs/heads/', '') || wt.branch
@@ -391,7 +391,7 @@ export const healthCommand = new Command('health')
               }
             }
 
-            pruneSpinner.succeed(`${prunedCount}個のworktreeを削除しました`)
+            pruneSpinner.succeed(`${prunedCount}件のworktreeを削除しました`)
           }
         }
       }

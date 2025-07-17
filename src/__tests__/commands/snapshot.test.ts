@@ -131,7 +131,7 @@ describe('snapshot command', () => {
     it('現在のworktreeのスナップショットを作成する', async () => {
       await snapshotCommand.parseAsync(['node', 'test'])
 
-      expect(mockSpinner.succeed).toHaveBeenCalledWith('スナップショットを保存しました')
+      expect(mockSpinner.succeed).toHaveBeenCalledWith('スナップショットを作成しました')
       expect(fs.writeFile).toHaveBeenCalledWith(
         expect.stringContaining('/repo/worktree-1/.maestro/snapshots/'),
         expect.stringContaining('"branch": "feature-a"')
@@ -172,7 +172,7 @@ describe('snapshot command', () => {
     it('--allオプションで全worktreeのスナップショットを作成する', async () => {
       await snapshotCommand.parseAsync(['node', 'test', '--all'])
 
-      expect(mockSpinner.succeed).toHaveBeenCalledWith('2件のスナップショットを保存しました')
+      expect(mockSpinner.succeed).toHaveBeenCalledWith('2件のスナップショットを作成しました')
       expect(fs.writeFile).toHaveBeenCalledTimes(2)
       expect(console.log).toHaveBeenCalledWith(expect.stringContaining('feature-a:'))
       expect(console.log).toHaveBeenCalledWith(expect.stringContaining('feature-b:'))

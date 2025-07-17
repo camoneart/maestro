@@ -493,7 +493,7 @@ export const snapshotCommand = new Command('snapshot')
             }
           }
 
-          spinner.succeed(`${snapshots.length}個のスナップショットを作成しました`)
+          spinner.succeed(`${snapshots.length}件のスナップショットを作成しました`)
 
           snapshots.forEach(snapshot => {
             console.log(chalk.gray(`  - ${snapshot.branch}: ${snapshot.id}`))

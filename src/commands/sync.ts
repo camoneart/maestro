@@ -554,7 +554,7 @@ async function syncEnvironmentFiles(
     }
   }
 
-  syncSpinner.succeed(`ファイル同期完了: ${syncedCount}個成功, ${failedCount}個失敗`)
+  syncSpinner.succeed(`ファイル同期完了: ${syncedCount}件成功, ${failedCount}件失敗`)
 
   // 同期したファイルの一覧を表示
   if (filesToSync.length > 0) {

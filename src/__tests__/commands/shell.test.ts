@@ -278,8 +278,8 @@ describe('shell command', () => {
   describe('tmuxオプション', () => {
     it('--tmuxオプションで既存のtmuxセッションにアタッチする', async () => {
       vi.mocked(execa).mockResolvedValue({
-        ...createMockExecaResponse('orchestra-member-feature-a\nother-session'),
-        stdout: 'orchestra-member-feature-a\nother-session',
+        ...createMockExecaResponse('maestro-feature-a\nother-session'),
+        stdout: 'maestro-feature-a\nother-session',
       } as any)
 
       await shellCommand.parseAsync(['node', 'test', 'feature-a', '--tmux'])
@@ -291,15 +291,13 @@ describe('shell command', () => {
       )
       expect(spawn).toHaveBeenCalledWith(
         'tmux',
-        ['attach-session', '-t', 'orchestra-member-feature-a'],
+        ['attach-session', '-t', 'maestro-feature-a'],
         expect.objectContaining({
           stdio: 'inherit',
         })
       )
       expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining(
-          "📺 既存のtmuxセッション 'orchestra-member-feature-a' にアタッチします"
-        )
+        expect.stringContaining("📺 既存のtmuxセッション 'maestro-feature-a' にアタッチします")
       )
     })
 
@@ -313,7 +311,7 @@ describe('shell command', () => {
 
       expect(spawn).toHaveBeenCalledWith(
         'tmux',
-        ['new-session', '-s', 'orchestra-member-feature-a'],
+        ['new-session', '-s', 'maestro-feature-a'],
         expect.objectContaining({
           cwd: '/repo/worktree-1',
           stdio: 'inherit',
@@ -324,7 +322,7 @@ describe('shell command', () => {
         })
       )
       expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining("📺 新しいtmuxセッション 'orchestra-member-feature-a' を作成します")
+        expect.stringContaining("📺 新しいtmuxセッション 'maestro-feature-a' を作成します")
       )
     })
 
