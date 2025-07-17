@@ -37,24 +37,24 @@ mst snapshot --list
 mst snapshot --list --json
 
 # スナップショットを復元
-mst snapshot --restore snapshot-20240120-103045
+mst snapshot --restore snapshot-20250120-103045
 
 # スナップショットを削除
-mst snapshot --delete snapshot-20240120-103045
+mst snapshot --delete snapshot-20250120-103045
 ```
 
 ## オプション
 
-| オプション | 短縮形 | 説明 | デフォルト |
-|-----------|--------|------|-----------|
-| `--message <msg>` | `-m` | スナップショットの説明 | なし |
-| `--stash` | `-s` | 未コミット変更をスタッシュ | `false` |
-| `--all` | `-a` | 全演奏者のスナップショット | `false` |
-| `--list` | `-l` | スナップショット一覧を表示 | `false` |
-| `--restore <id>` | `-r` | スナップショットを復元 | なし |
-| `--delete <id>` | `-d` | スナップショットを削除 | なし |
-| `--json` | `-j` | JSON形式で出力 | `false` |
-| `--force` | `-f` | 確認なしで実行 | `false` |
+| オプション        | 短縮形 | 説明                       | デフォルト |
+| ----------------- | ------ | -------------------------- | ---------- |
+| `--message <msg>` | `-m`   | スナップショットの説明     | なし       |
+| `--stash`         | `-s`   | 未コミット変更をスタッシュ | `false`    |
+| `--all`           | `-a`   | 全演奏者のスナップショット | `false`    |
+| `--list`          | `-l`   | スナップショット一覧を表示 | `false`    |
+| `--restore <id>`  | `-r`   | スナップショットを復元     | なし       |
+| `--delete <id>`   | `-d`   | スナップショットを削除     | なし       |
+| `--json`          | `-j`   | JSON形式で出力             | `false`    |
+| `--force`         | `-f`   | 確認なしで実行             | `false`    |
 
 ## スナップショットの内容
 
@@ -72,9 +72,9 @@ mst snapshot --delete snapshot-20240120-103045
 
 ```json
 {
-  "id": "snapshot-20240120-103045",
+  "id": "snapshot-20250120-103045",
   "worktree": "feature/auth",
-  "timestamp": "2024-01-20T10:30:45Z",
+  "timestamp": "2025-01-20T10:30:45Z",
   "message": "機能実装前の状態",
   "git": {
     "branch": "feature/auth",
@@ -93,7 +93,7 @@ mst snapshot --delete snapshot-20240120-103045
       "hash": "abc123def456",
       "message": "feat: add login functionality",
       "author": "user@example.com",
-      "date": "2024-01-20T09:00:00Z"
+      "date": "2025-01-20T09:00:00Z"
     }
   ],
   "stash": {
@@ -112,15 +112,16 @@ mst snapshot --list
 ```
 
 出力例：
+
 ```
 📸 Snapshots:
 
 feature/auth:
-  • snapshot-20240120-103045 - "機能実装前の状態" (2 hours ago)
-  • snapshot-20240119-150000 - "バグ修正前" (1 day ago)
+  • snapshot-20250120-103045 - "機能実装前の状態" (2 hours ago)
+  • snapshot-20250119-150000 - "バグ修正前" (1 day ago)
 
 bugfix/memory-leak:
-  • snapshot-20240120-090000 - "デバッグ開始前" (4 hours ago)
+  • snapshot-20250120-090000 - "デバッグ開始前" (4 hours ago)
 
 Total: 3 snapshots across 2 worktrees
 ```
@@ -131,17 +132,17 @@ Total: 3 snapshots across 2 worktrees
 {
   "snapshots": [
     {
-      "id": "snapshot-20240120-103045",
+      "id": "snapshot-20250120-103045",
       "worktree": "feature/auth",
-      "timestamp": "2024-01-20T10:30:45Z",
+      "timestamp": "2025-01-20T10:30:45Z",
       "message": "機能実装前の状態",
       "size": "2.3MB",
       "hasStash": false
     },
     {
-      "id": "snapshot-20240119-150000",
+      "id": "snapshot-20250119-150000",
       "worktree": "feature/auth",
-      "timestamp": "2024-01-19T15:00:00Z",
+      "timestamp": "2025-01-19T15:00:00Z",
       "message": "バグ修正前",
       "size": "1.8MB",
       "hasStash": true
@@ -161,10 +162,11 @@ Total: 3 snapshots across 2 worktrees
 
 ```bash
 # スナップショットIDを指定して復元
-mst snapshot --restore snapshot-20240120-103045
+mst snapshot --restore snapshot-20250120-103045
 ```
 
 復元プロセス：
+
 1. 現在の状態を一時保存
 2. HEADを指定されたコミットに移動
 3. ファイルの変更状態を復元
@@ -173,12 +175,12 @@ mst snapshot --restore snapshot-20240120-103045
 ### 復元時の確認
 
 ```
-🔄 Restoring snapshot: snapshot-20240120-103045
+🔄 Restoring snapshot: snapshot-20250120-103045
    Worktree: feature/auth
-   Created: 2024-01-20 10:30:45
+   Created: 2025-01-20 10:30:45
    Message: "機能実装前の状態"
 
-Current state will be backed up as: snapshot-20240120-140000-backup
+Current state will be backed up as: snapshot-20250120-140000-backup
 
 ? Proceed with restoration? (y/N)
 ```
@@ -196,7 +198,7 @@ mst snapshot -m "実験開始前の安定版"
 
 # 3. 実験が失敗した場合、元に戻す
 mst snapshot --list  # IDを確認
-mst snapshot --restore snapshot-20240120-103045
+mst snapshot --restore snapshot-20250120-103045
 
 # 4. 実験が成功した場合、新しいスナップショット作成
 mst snapshot -m "実験成功 - 新機能完成"
@@ -221,10 +223,10 @@ done
 # デプロイ前の状態を保存
 deploy_with_snapshot() {
   local branch=$1
-  
+
   # スナップショット作成
   mst exec "$branch" mst snapshot -m "Pre-deployment snapshot"
-  
+
   # デプロイ実行
   if ! deploy_script.sh; then
     echo "Deployment failed! Rolling back..."
@@ -232,7 +234,7 @@ deploy_with_snapshot() {
     mst snapshot --restore "$LATEST_SNAPSHOT"
     return 1
   fi
-  
+
   echo "Deployment successful!"
 }
 ```
@@ -252,7 +254,7 @@ done
 
 ```bash
 # スナップショットをアーカイブとしてエクスポート
-SNAPSHOT_ID="snapshot-20240120-103045"
+SNAPSHOT_ID="snapshot-20250120-103045"
 EXPORT_DIR="./snapshot-exports"
 
 mkdir -p "$EXPORT_DIR"
@@ -263,7 +265,7 @@ mst snapshot --export "$SNAPSHOT_ID" --output "$EXPORT_DIR/$SNAPSHOT_ID.tar.gz"
 
 ```bash
 # 2つのスナップショット間の差分を表示
-mst snapshot --diff snapshot-20240120-103045 snapshot-20240120-140000
+mst snapshot --diff snapshot-20250120-103045 snapshot-20250120-140000
 ```
 
 ## ストレージ管理
@@ -289,12 +291,7 @@ find .git/orchestrations/.snapshots/ -type f -size +10M -exec ls -lh {} \;
     "maxSnapshots": 50,
     "compression": true,
     "includeNodeModules": false,
-    "excludePatterns": [
-      "*.log",
-      "*.tmp",
-      "dist/*",
-      "build/*"
-    ]
+    "excludePatterns": ["*.log", "*.tmp", "dist/*", "build/*"]
   }
 }
 ```
@@ -326,10 +323,10 @@ chmod +x .git/hooks/pre-rebase
 
 ```bash
 # スナップショットをチームで共有
-mst snapshot --export snapshot-20240120-103045 --share
+mst snapshot --export snapshot-20250120-103045 --share
 
 # 共有されたスナップショットをインポート
-mst snapshot --import shared-snapshot-20240120-103045.tar.gz
+mst snapshot --import shared-snapshot-20250120-103045.tar.gz
 ```
 
 ## Tips & Tricks
@@ -355,9 +352,9 @@ mst snapshot --list --json | jq '
     total: .summary.total,
     avgSize: (.snapshots | map(.size | gsub("MB"; "") | tonumber) | add / length),
     oldestDays: (
-      .snapshots | 
-      map(.timestamp | strptime("%Y-%m-%dT%H:%M:%SZ") | mktime) | 
-      min | 
+      .snapshots |
+      map(.timestamp | strptime("%Y-%m-%dT%H:%M:%SZ") | mktime) |
+      min |
       ((now - .) / 86400 | floor)
     )
   }

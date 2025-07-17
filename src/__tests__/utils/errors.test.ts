@@ -194,10 +194,10 @@ describe('ErrorFactory', () => {
 
   describe('fromError', () => {
     it('should return MaestroError as is', () => {
-      const shadowError = new MaestroError('Test', ErrorCode.UNKNOWN_ERROR)
-      const result = ErrorFactory.fromError(shadowError)
+      const maestroError = new MaestroError('Test', ErrorCode.UNKNOWN_ERROR)
+      const result = ErrorFactory.fromError(maestroError)
       
-      expect(result).toBe(shadowError)
+      expect(result).toBe(maestroError)
     })
 
     it('should detect git repository error', () => {

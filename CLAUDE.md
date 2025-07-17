@@ -78,7 +78,7 @@ The project includes MCP (Model Context Protocol) server functionality in `src/m
 - **Package Manager**: pnpm (specified in package.json)
 - **Node Version**: >=20.0.0
 - **Module Type**: ESM with .js extensions in imports
-- **Binaries**: `maestro`, `mst`, and `scj` (backward compatibility) commands
+- **Binaries**: `maestro` and `mst` commands
 
 ## Key Dependencies
 

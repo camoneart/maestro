@@ -108,7 +108,7 @@ describe.skip('delete command - additional tests', () => {
         false
       )
       expect(mockSpinner.succeed).toHaveBeenCalledWith(
-        expect.stringContaining('影分身の削除が完了しました')
+        expect.stringContaining('演奏者の削除が完了しました')
       )
     })
 
@@ -281,7 +281,7 @@ describe.skip('delete command - additional tests', () => {
         deleteCommand.parseAsync(['node', 'delete', 'feature-1'])
       ).rejects.toThrow('Process exited with code 0')
 
-      expect(consoleLogSpy).toHaveBeenCalledWith(chalk.yellow('影分身が存在しません'))
+      expect(consoleLogSpy).toHaveBeenCalledWith(chalk.yellow('演奏者が存在しません'))
     })
 
     it('should handle worktree not found', async () => {

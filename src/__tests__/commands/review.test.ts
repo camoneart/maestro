@@ -64,7 +64,7 @@ describe('review command', () => {
     mockExeca.mockImplementation((cmd: string, args: string[]) => {
       if (cmd === 'gh' && args[0] === '--version') {
         return Promise.resolve({
-          stdout: 'gh version 2.40.0 (2024-01-01)',
+          stdout: 'gh version 2.40.0 (2025-01-01)',
           stderr: '',
           exitCode: 0,
         } as any)

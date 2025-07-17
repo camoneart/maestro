@@ -1,6 +1,6 @@
 # Contributing to maestro
 
-First off, thank you for considering contributing to maestro! 🥷
+First off, thank you for considering contributing to maestro! 🎼
 
 ## Table of Contents
 

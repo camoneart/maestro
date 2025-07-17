@@ -46,17 +46,17 @@ mst history --list --json
 
 ## オプション
 
-| オプション | 短縮形 | 説明 | デフォルト |
-|-----------|--------|------|-----------|
-| `--list` | `-l` | 履歴一覧を表示 | `false` |
-| `--show <branch>` | `-s` | 特定ブランチの履歴を表示 | なし |
-| `--export <file>` | `-e` | 履歴をエクスポート | なし |
-| `--merge <file>` | `-m` | 全履歴を1ファイルにマージ | なし |
-| `--cleanup` | `-c` | 不要な履歴をクリーンアップ | `false` |
-| `--sync` | | 履歴パスを同期 | `false` |
-| `--search <query>` | | 履歴を検索 | なし |
-| `--json` | `-j` | JSON形式で出力 | `false` |
-| `--days <n>` | `-d` | 指定日数以内の履歴のみ | なし |
+| オプション         | 短縮形 | 説明                       | デフォルト |
+| ------------------ | ------ | -------------------------- | ---------- |
+| `--list`           | `-l`   | 履歴一覧を表示             | `false`    |
+| `--show <branch>`  | `-s`   | 特定ブランチの履歴を表示   | なし       |
+| `--export <file>`  | `-e`   | 履歴をエクスポート         | なし       |
+| `--merge <file>`   | `-m`   | 全履歴を1ファイルにマージ  | なし       |
+| `--cleanup`        | `-c`   | 不要な履歴をクリーンアップ | `false`    |
+| `--sync`           |        | 履歴パスを同期             | `false`    |
+| `--search <query>` |        | 履歴を検索                 | なし       |
+| `--json`           | `-j`   | JSON形式で出力             | `false`    |
+| `--days <n>`       | `-d`   | 指定日数以内の履歴のみ     | なし       |
 
 ## 履歴の保存形式
 
@@ -77,22 +77,26 @@ Claude Code の履歴は以下の形式で保存されます：
 ```markdown
 # Claude Code History - feature/auth
 
-## Session: 2024-01-20 10:30:00
+## Session: 2025-01-20 10:30:00
 
 ### Human
+
 認証機能を実装してください。JWTを使用してください。
 
 ### Assistant
+
 認証機能をJWTで実装します。まず必要なパッケージをインストールしましょう...
 
 ---
 
-## Session: 2024-01-20 14:00:00
+## Session: 2025-01-20 14:00:00
 
 ### Human
+
 テストを追加してください。
 
 ### Assistant
+
 認証機能のテストを追加します...
 ```
 
@@ -105,6 +109,7 @@ mst history --list
 ```
 
 出力例：
+
 ```
 📚 Claude Code Histories:
 
@@ -137,7 +142,7 @@ Summary:
     {
       "branch": "feature/auth",
       "sessions": 3,
-      "lastActivity": "2024-01-20T14:30:00Z",
+      "lastActivity": "2025-01-20T14:30:00Z",
       "stats": {
         "messages": 45,
         "tokens": 12500,
@@ -166,14 +171,15 @@ mst history --search "authentication"
 ```
 
 出力例：
+
 ```
 🔍 Search results for "authentication":
 
-feature/auth - Session 2024-01-20 10:30:00
+feature/auth - Session 2025-01-20 10:30:00
   Line 15: "認証機能を実装してください。JWTを使用してください。"
   Line 20: "認証機能をJWTで実装します..."
 
-feature/api - Session 2024-01-19 15:00:00
+feature/api - Session 2025-01-19 15:00:00
   Line 45: "APIの認証をOAuth2.0に変更..."
 
 Found 2 matches in 2 worktrees
@@ -201,10 +207,11 @@ mst history --export all-histories.md
 ```
 
 生成されるファイル：
+
 ```markdown
 # Maestro - Claude Code History Export
 
-Export date: 2024-01-20 16:00:00
+Export date: 2025-01-20 16:00:00
 
 ## Table of Contents
 
@@ -216,7 +223,7 @@ Export date: 2024-01-20 16:00:00
 
 ## feature/auth
 
-### Session: 2024-01-20 10:30:00
+### Session: 2025-01-20 10:30:00
 
 ...
 ```
@@ -246,6 +253,7 @@ mst history --merge complete-history.md
 ```
 
 マージオプション：
+
 ```bash
 # 重複を除外
 mst history --merge complete-history.md --dedupe
@@ -297,6 +305,7 @@ mst history --stats
 ```
 
 出力例：
+
 ```
 📊 Token Usage Report
 
@@ -355,7 +364,7 @@ mst history --export - | grep -E "^### Human" -A1 | grep -v "^--" | sort | uniq 
 mst history --export team-history.md --anonymize
 
 # 特定のセッションのみ共有
-mst history --show feature-auth --session 2024-01-20 --export session.md
+mst history --show feature-auth --session 2025-01-20 --export session.md
 ```
 
 ### バックアップスクリプト
@@ -396,8 +405,8 @@ before_claude() {
 ```bash
 # 高コストのセッションを特定
 mst history --list --json | jq -r '
-  .histories[] | 
-  select(.stats.tokens > 10000) | 
+  .histories[] |
+  select(.stats.tokens > 10000) |
   "\(.branch): \(.stats.tokens) tokens ($\(.stats.tokens * 0.00003))"
 '
 ```

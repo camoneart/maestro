@@ -29,14 +29,14 @@ mst health --verbose
 
 ## オプション
 
-| オプション | 短縮形 | 説明 | デフォルト |
-|-----------|--------|------|-----------|
-| `--fix` | `-f` | 修正可能な問題を自動修正 | `false` |
-| `--prune` | `-p` | 古い演奏者を削除 | `false` |
-| `--days <n>` | `-d` | 古いと判定する日数 | `30` |
-| `--verbose` | `-v` | 詳細情報を表示 | `false` |
-| `--json` | `-j` | JSON形式で出力 | `false` |
-| `--dry-run` | `-n` | 実際には修正せず、結果を表示 | `false` |
+| オプション   | 短縮形 | 説明                         | デフォルト |
+| ------------ | ------ | ---------------------------- | ---------- |
+| `--fix`      | `-f`   | 修正可能な問題を自動修正     | `false`    |
+| `--prune`    | `-p`   | 古い演奏者を削除             | `false`    |
+| `--days <n>` | `-d`   | 古いと判定する日数           | `30`       |
+| `--verbose`  | `-v`   | 詳細情報を表示               | `false`    |
+| `--json`     | `-j`   | JSON形式で出力               | `false`    |
+| `--dry-run`  | `-n`   | 実際には修正せず、結果を表示 | `false`    |
 
 ## 検出される問題
 
@@ -134,7 +134,7 @@ Run 'mst health --prune' to remove stale worktrees
 
 ```json
 {
-  "timestamp": "2024-01-20T10:30:00Z",
+  "timestamp": "2025-01-20T10:30:00Z",
   "worktrees": [
     {
       "branch": "main",
@@ -197,12 +197,14 @@ mst health --fix
 ```
 
 実行内容：
+
 - リモートブランチが削除されている場合、ローカルのトラッキング情報を削除
 - 必要に応じて新しいリモートブランチを作成するか確認
 
 ### missing（ディレクトリ不在）の修正
 
 自動的にWorktreeエントリを削除：
+
 ```bash
 git worktree prune
 ```
@@ -225,6 +227,7 @@ mst health --prune --days 60
 ```
 
 プルーニング時の確認：
+
 ```
 The following stale worktrees will be deleted:
 - feature/old-ui (60 days old)
@@ -254,7 +257,7 @@ name: Worktree Health Check
 
 on:
   schedule:
-    - cron: '0 0 * * *'  # 毎日実行
+    - cron: '0 0 * * *' # 毎日実行
 
 jobs:
   health-check:
@@ -296,8 +299,8 @@ echo "## Detailed Issues"
 
 # 問題のある演奏者の詳細
 mst health --json | jq -r '
-  .worktrees[] | 
-  select(.status != "healthy") | 
+  .worktrees[] |
+  select(.status != "healthy") |
   "### \(.branch)",
   "- Status: \(.status)",
   "- Path: \(.path)",
@@ -380,7 +383,7 @@ fi
 mst health --json | jq -r '.worktrees[] | select(.status != "healthy") | .branch' | while read branch; do
   echo "=== $branch ==="
   mst health --verbose | grep -A5 "$branch"
-  
+
   read -p "Fix this issue? (y/n) " -n 1 -r
   echo
   if [[ $REPLY =~ ^[Yy]$ ]]; then

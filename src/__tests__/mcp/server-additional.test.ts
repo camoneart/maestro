@@ -159,10 +159,10 @@ describe('MCP Server - Implementation Tests', () => {
       mockGitManager.listWorktrees.mockResolvedValue(mockWorktrees)
       
       const worktrees = await mockGitManager.listWorktrees()
-      const shadowClones = worktrees.filter(wt => !wt.path.endsWith('.'))
+      const orchestraMembers = worktrees.filter(wt => !wt.path.endsWith('.'))
       
-      expect(shadowClones).toHaveLength(2)
-      expect(shadowClones[0].branch).toBe('refs/heads/feature-1')
+      expect(orchestraMembers).toHaveLength(2)
+      expect(orchestraMembers[0].branch).toBe('refs/heads/feature-1')
     })
 
     it('should handle delete_orchestra_member tool', async () => {
@@ -355,8 +355,8 @@ describe('MCP Server - Implementation Tests', () => {
         { path: '/path/to/worktree/feature-2', branch: 'refs/heads/feature-2' },
       ]
       
-      const shadowClones = mockWorktrees.filter(wt => !wt.path.endsWith('.'))
-      const list = shadowClones
+      const orchestraMembers = mockWorktrees.filter(wt => !wt.path.endsWith('.'))
+      const list = orchestraMembers
         .map(wt => {
           const branchName = wt.branch?.replace('refs/heads/', '') || wt.branch
           return `• ${branchName} (${wt.path})`
@@ -367,7 +367,7 @@ describe('MCP Server - Implementation Tests', () => {
         content: [
           {
             type: 'text',
-            text: `🎼 演奏者一覧:\n${list}\n\n合計: ${shadowClones.length} 対の演奏者`,
+            text: `🎼 演奏者一覧:\n${list}\n\n合計: ${orchestraMembers.length} 対の演奏者`,
           },
         ],
       }

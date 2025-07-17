@@ -50,7 +50,7 @@ describe('list command', () => {
         }),
       ]),
       getLastCommit: vi.fn().mockResolvedValue({
-        date: '2024-01-01T12:00:00Z',
+        date: '2025-01-01T12:00:00Z',
         message: 'feat: add new feature',
         hash: 'abc1234',
       }),
@@ -70,7 +70,7 @@ describe('list command', () => {
     const fs = await import('fs')
     vi.mocked(fs.default.promises.readFile).mockResolvedValue(
       JSON.stringify({
-        createdAt: '2024-01-01T10:00:00Z',
+        createdAt: '2025-01-01T10:00:00Z',
         branch: 'feature-a',
         worktreePath: '/repo/worktree-1',
         github: {
@@ -163,7 +163,7 @@ describe('list command', () => {
 
       // 最終コミット情報
       expect(mainWorktree.lastCommit).toEqual({
-        date: '2024-01-01T12:00:00Z',
+        date: '2025-01-01T12:00:00Z',
         message: 'feat: add new feature',
         hash: 'abc1234',
       })
@@ -235,13 +235,13 @@ describe('list command', () => {
     it('--sort ageで最終コミット日時でソート', async () => {
       mockGitManager.getLastCommit.mockImplementation((path: string) => {
         const dates = {
-          '/repo/.': '2024-01-03T12:00:00Z',
-          '/repo/worktree-1': '2024-01-01T12:00:00Z',
-          '/repo/worktree-2': '2024-01-04T12:00:00Z',
-          '/repo/worktree-3': '2024-01-02T12:00:00Z',
+          '/repo/.': '2025-01-03T12:00:00Z',
+          '/repo/worktree-1': '2025-01-01T12:00:00Z',
+          '/repo/worktree-2': '2025-01-04T12:00:00Z',
+          '/repo/worktree-3': '2025-01-02T12:00:00Z',
         }
         return Promise.resolve({
-          date: dates[path] || '2024-01-01T12:00:00Z',
+          date: dates[path] || '2025-01-01T12:00:00Z',
           message: 'commit message',
           hash: 'abc123',
         })
@@ -282,7 +282,7 @@ describe('list command', () => {
       await listCommand.parseAsync(['node', 'test', '--last-commit'])
 
       expect(console.log).toHaveBeenCalledWith(expect.stringContaining('最終コミット:'))
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('2024-01-01T12:00:00Z'))
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('2025-01-01T12:00:00Z'))
       expect(console.log).toHaveBeenCalledWith(expect.stringContaining('feat: add new feature'))
     })
 

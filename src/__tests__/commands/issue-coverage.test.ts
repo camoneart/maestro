@@ -30,8 +30,8 @@ describe('issue command coverage', () => {
       assignees: [{ login: 'dev1' }, { login: 'dev2' }],
       labels: [{ name: 'bug' }, { name: 'high-priority' }],
       milestone: { title: 'v2.0' },
-      createdAt: '2024-01-01T00:00:00Z',
-      updatedAt: '2024-01-02T00:00:00Z',
+      createdAt: '2025-01-01T00:00:00Z',
+      updatedAt: '2025-01-02T00:00:00Z',
     }
 
     const parsed = parseIssueData(issueData)
@@ -98,7 +98,7 @@ describe('issue command coverage', () => {
 ### Environment
 - OS: 
 - Version: `,
-        
+
         feature: `## Feature Request
 
 ### Problem Statement
@@ -112,7 +112,7 @@ describe('issue command coverage', () => {
 
 ### Additional Context
 <!-- Any other relevant information -->`,
-        
+
         task: `## Task
 
 ### Objective
@@ -126,7 +126,7 @@ describe('issue command coverage', () => {
 ### Dependencies
 <!-- Any blockers or prerequisites -->`,
       }
-      
+
       return templates[type] || 'No template available'
     }
 
@@ -134,49 +134,55 @@ describe('issue command coverage', () => {
     expect(bugTemplate).toContain('Bug Report')
     expect(bugTemplate).toContain('Steps to Reproduce')
     expect(bugTemplate).toContain('Expected Behavior')
-    
+
     const featureTemplate = generateIssueTemplate('feature')
     expect(featureTemplate).toContain('Feature Request')
     expect(featureTemplate).toContain('Problem Statement')
     expect(featureTemplate).toContain('Proposed Solution')
-    
+
     const taskTemplate = generateIssueTemplate('task')
     expect(taskTemplate).toContain('Task')
     expect(taskTemplate).toContain('Acceptance Criteria')
     expect(taskTemplate).toContain('Dependencies')
-    
+
     expect(generateIssueTemplate('unknown')).toBe('No template available')
   })
 
   it('should test issue filtering logic', () => {
     const filterIssues = (issues: any[], filter: any) => {
       let filtered = [...issues]
-      
+
       if (filter.state) {
         filtered = filtered.filter(i => i.state === filter.state)
       }
-      
+
       if (filter.labels && filter.labels.length > 0) {
-        filtered = filtered.filter(i => 
+        filtered = filtered.filter(i =>
           filter.labels.some((label: string) => i.labels.includes(label))
         )
       }
-      
+
       if (filter.assignee) {
         filtered = filtered.filter(i => i.assignees.includes(filter.assignee))
       }
-      
+
       if (filter.milestone) {
         filtered = filtered.filter(i => i.milestone === filter.milestone)
       }
-      
+
       return filtered
     }
 
     const issues = [
       { number: 1, state: 'open', labels: ['bug'], assignees: ['dev1'], milestone: 'v1.0' },
       { number: 2, state: 'closed', labels: ['feature'], assignees: ['dev2'], milestone: 'v1.0' },
-      { number: 3, state: 'open', labels: ['bug', 'urgent'], assignees: ['dev1', 'dev2'], milestone: 'v2.0' },
+      {
+        number: 3,
+        state: 'open',
+        labels: ['bug', 'urgent'],
+        assignees: ['dev1', 'dev2'],
+        milestone: 'v2.0',
+      },
       { number: 4, state: 'open', labels: ['docs'], assignees: [], milestone: null },
     ]
 
@@ -194,13 +200,12 @@ describe('issue command coverage', () => {
       return number ? `${baseUrl}/${number}` : `${baseUrl}/new`
     }
 
-    expect(generateIssueUrl('owner', 'repo', 123))
-      .toBe('https://github.com/owner/repo/issues/123')
-    
-    expect(generateIssueUrl('owner', 'repo'))
-      .toBe('https://github.com/owner/repo/issues/new')
-    
-    expect(generateIssueUrl('org', 'project', 456))
-      .toBe('https://github.com/org/project/issues/456')
+    expect(generateIssueUrl('owner', 'repo', 123)).toBe('https://github.com/owner/repo/issues/123')
+
+    expect(generateIssueUrl('owner', 'repo')).toBe('https://github.com/owner/repo/issues/new')
+
+    expect(generateIssueUrl('org', 'project', 456)).toBe(
+      'https://github.com/org/project/issues/456'
+    )
   })
 })

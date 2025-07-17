@@ -153,8 +153,8 @@ mst github [options]
 ```
 
 #### オプション
-- `--issue <number>` - Issue番号から影分身を作成
-- `--pr <number>` - PR番号から影分身を作成
+- `--issue <number>` - Issue番号から演奏者を作成
+- `--pr <number>` - PR番号から演奏者を作成
 - `--create-pr` - PRを作成
 - `--draft` - Draft PRとして作成
 - `--branch <name>` - ブランチ名を指定

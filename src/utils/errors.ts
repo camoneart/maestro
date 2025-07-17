@@ -252,15 +252,15 @@ export class ErrorFactory {
  * エラーハンドリングのユーティリティ関数
  */
 export function handleError(error: unknown, context?: string): never {
-  const shadowError =
+  const maestroError =
     error instanceof MaestroError
       ? error
       : ErrorFactory.fromError(error instanceof Error ? error : new Error(String(error)))
 
   if (context) {
-    console.error(`[${context}] ${shadowError.getFormattedMessage()}`)
+    console.error(`[${context}] ${maestroError.getFormattedMessage()}`)
   } else {
-    console.error(shadowError.getFormattedMessage())
+    console.error(maestroError.getFormattedMessage())
   }
 
   process.exit(1)

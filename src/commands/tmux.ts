@@ -273,7 +273,7 @@ export const tmuxCommand = new Command('tmux')
 
         if (!inTmux) {
           // tmux外から実行された場合は新しいセッションを作成
-          const sessionName = selectedBranch?.replace(/[^a-zA-Z0-9_-]/g, '-') || 'shadow'
+          const sessionName = selectedBranch?.replace(/[^a-zA-Z0-9_-]/g, '-') || 'maestro'
 
           // エディタコマンドを構築
           const editorCmd = options.editor ? getEditorCommand(options.editor) : ''

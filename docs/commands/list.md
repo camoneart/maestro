@@ -29,11 +29,11 @@ mst list --fzf
 
 ## オプション
 
-| オプション | 短縮形 | 説明 | デフォルト |
-|-----------|--------|------|-----------|
-| `--json` | `-j` | JSON形式で出力 | `false` |
-| `--metadata` | `-m` | メタデータを含めて表示 | `false` |
-| `--fzf` | `-f` | fzfで選択モード | `false` |
+| オプション   | 短縮形 | 説明                   | デフォルト |
+| ------------ | ------ | ---------------------- | ---------- |
+| `--json`     | `-j`   | JSON形式で出力         | `false`    |
+| `--metadata` | `-m`   | メタデータを含めて表示 | `false`    |
+| `--fzf`      | `-f`   | fzfで選択モード        | `false`    |
 
 ## 出力形式
 
@@ -71,7 +71,7 @@ mst list --fzf
       "ahead": 3,
       "behind": 0,
       "metadata": {
-        "createdAt": "2024-01-15T10:30:00Z",
+        "createdAt": "2025-01-15T10:30:00Z",
         "createdBy": "mst",
         "template": "feature",
         "githubIssue": null
@@ -86,7 +86,7 @@ mst list --fzf
       "ahead": 1,
       "behind": 0,
       "metadata": {
-        "createdAt": "2024-01-16T14:00:00Z",
+        "createdAt": "2025-01-16T14:00:00Z",
         "createdBy": "mst",
         "githubIssue": {
           "number": 123,
@@ -117,12 +117,12 @@ mst list --fzf
 
   feature/auth       /Users/user/project/.git/orchestra-members/feature-auth
     Status: ahead 3
-    Created: 2024-01-15 10:30:00
+    Created: 2025-01-15 10:30:00
     Template: feature
-    
+
   issue-123         /Users/user/project/.git/orchestra-members/issue-123
     Status: ahead 1
-    Created: 2024-01-16 14:00:00
+    Created: 2025-01-16 14:00:00
     Issue: #123 - 認証機能の実装
     Labels: enhancement, backend
     Assignees: user123
@@ -216,8 +216,8 @@ done
 ```bash
 # 30日以上更新されていない演奏者を検出
 mst list --json | jq -r '
-  .worktrees[] | 
-  select(.metadata.createdAt < (now - 2592000 | strftime("%Y-%m-%dT%H:%M:%SZ"))) | 
+  .worktrees[] |
+  select(.metadata.createdAt < (now - 2592000 | strftime("%Y-%m-%dT%H:%M:%SZ"))) |
   .branch
 ' | while read branch; do
   echo "Old worktree: $branch"

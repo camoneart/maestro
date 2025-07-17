@@ -429,7 +429,7 @@ tests/auth.test.ts
 
   describe('Temporary file handling', () => {
     it('should create temporary file for suggestions', async () => {
-      mockPath.join.mockReturnValue('/tmp/scj-suggestions-123.txt')
+      mockPath.join.mockReturnValue('/tmp/maestro-suggestions-123.txt')
       mockFs.writeFile.mockResolvedValue(undefined)
 
       async function createTempSuggestionFile(suggestions: string[]): Promise<string> {

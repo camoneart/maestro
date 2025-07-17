@@ -69,7 +69,7 @@ describe('history command', () => {
 
     // fs.statのモック - デフォルトで履歴ファイルが存在
     vi.mocked(fs.stat).mockResolvedValue({
-      mtime: new Date('2024-01-01'),
+      mtime: new Date('2025-01-01'),
       size: 1024,
       isFile: () => true,
       isDirectory: () => false,
@@ -132,7 +132,7 @@ describe('history command', () => {
       vi.mocked(fs.stat).mockImplementation(async () => {
         statCallCount++
         // 異なる日付を返す
-        const dates = [new Date('2024-01-03'), new Date('2024-01-01'), new Date('2024-01-02')]
+        const dates = [new Date('2025-01-03'), new Date('2025-01-01'), new Date('2025-01-02')]
         return {
           mtime: dates[statCallCount - 1] || new Date(),
           size: 1024,
@@ -253,7 +253,7 @@ describe('history command', () => {
       let statCallCount = 0
       vi.mocked(fs.stat).mockImplementation(async () => {
         statCallCount++
-        const dates = [new Date('2024-01-02'), new Date('2024-01-01')]
+        const dates = [new Date('2025-01-02'), new Date('2025-01-01')]
         return {
           mtime: dates[statCallCount - 1] || new Date(),
           size: 1024,

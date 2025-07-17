@@ -22,7 +22,7 @@ export const mockGhAuthStatus = () => {
 // gh --versionのモックレスポンス
 export const mockGhVersion = () => {
   return {
-    stdout: 'gh version 2.40.0 (2024-01-01)',
+    stdout: 'gh version 2.40.0 (2025-01-01)',
     stderr: '',
     exitCode: 0,
   }

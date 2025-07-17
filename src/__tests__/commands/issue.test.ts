@@ -173,8 +173,8 @@ describe('issue command', () => {
         author: { login: 'user1' },
         labels: [{ name: 'bug', color: 'ff0000' }],
         assignees: [{ login: 'dev1' }],
-        createdAt: '2024-01-01T00:00:00Z',
-        updatedAt: '2024-01-02T00:00:00Z',
+        createdAt: '2025-01-01T00:00:00Z',
+        updatedAt: '2025-01-02T00:00:00Z',
       }
 
       mockExeca.mockImplementation((cmd: string, args: string[]) => {

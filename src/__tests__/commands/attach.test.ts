@@ -123,7 +123,7 @@ describe('attach command', () => {
 
       expect(mockGitManager.attachWorktree).toHaveBeenCalledWith('feature-1')
       expect(mockSpinner.succeed).toHaveBeenCalledWith(
-        expect.stringContaining('影分身')
+        expect.stringContaining('演奏者')
       )
     })
 
@@ -138,7 +138,7 @@ describe('attach command', () => {
         expect.objectContaining({
           type: 'list',
           name: 'selectedBranch',
-          message: 'どのブランチから影分身を作り出しますか？',
+          message: 'どのブランチから演奏者を招集しますか？',
           choices: expect.arrayContaining([
             expect.objectContaining({ value: 'feature-1' }),
             expect.objectContaining({ value: 'feature-2' }),
@@ -212,7 +212,7 @@ describe('attach command', () => {
         '利用可能なブランチがありません'
       )
       expect(consoleLogSpy).toHaveBeenCalledWith(
-        chalk.yellow('すべてのブランチは既に影分身として存在します')
+        chalk.yellow('すべてのブランチは既に演奏者として存在します')
       )
     })
 
@@ -235,7 +235,7 @@ describe('attach command', () => {
         attachCommand.parseAsync(['node', 'attach', 'feature-1'])
       ).rejects.toThrow('Process exited with code 1')
 
-      expect(mockSpinner.fail).toHaveBeenCalledWith('影分身を作り出せませんでした')
+      expect(mockSpinner.fail).toHaveBeenCalledWith('演奏者を招集できませんでした')
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         chalk.red('Worktree creation failed')
       )
