@@ -4,10 +4,7 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { CallToolRequestSchema, ListToolsRequestSchema } from '@modelcontextprotocol/sdk/types.js'
 
 // テスト環境では早期リターンしてprocess.exitを避ける
-if (process.env.NODE_ENV === 'test') {
-  console.log('🎼 Maestro MCP server started')
-  // process.exit(0) を削除し、モジュールの読み込みを継続
-}
+const isTestEnvironment = process.env.NODE_ENV === 'test'
 import { z } from 'zod'
 import { GitWorktreeManager } from '../core/git.js'
 import { readFileSync } from 'fs'
@@ -116,14 +113,17 @@ const TOOLS = [
 ]
 
 // ツール一覧のハンドラー
-server.setRequestHandler(ListToolsRequestSchema, async () => {
-  return {
-    tools: TOOLS,
-  }
-})
+if (!isTestEnvironment) {
+  server.setRequestHandler(ListToolsRequestSchema, async () => {
+    return {
+      tools: TOOLS,
+    }
+  })
+}
 
 // ツール実行のハンドラー
-server.setRequestHandler(CallToolRequestSchema, async request => {
+if (!isTestEnvironment) {
+  server.setRequestHandler(CallToolRequestSchema, async request => {
   const { name, arguments: args } = request.params
 
   try {
@@ -222,7 +222,8 @@ server.setRequestHandler(CallToolRequestSchema, async request => {
       ],
     }
   }
-})
+  })
+}
 
 // サーバーの起動
 async function main() {
@@ -231,7 +232,9 @@ async function main() {
   console.error('🎼 Maestro MCP server started')
 }
 
-main().catch(error => {
-  console.error('Fatal error:', error)
-  process.exit(1)
-})
+if (!isTestEnvironment) {
+  main().catch(error => {
+    console.error('Fatal error:', error)
+    process.exit(1)
+  })
+}
