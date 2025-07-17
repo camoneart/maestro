@@ -11,7 +11,7 @@
   ## 🚨 Breaking Changes
 
   ### Package & Command Changes
-  - **Package name**: `shadow-clone-jutsu` → `maestro`
+  - **Package name**: `shadow-clone-jutsu` → `@hashiramaendure/maestro`
   - **Command**: `scj` → `maestro` (or `mst` for short)
   - **Configuration file**: `.scj.json` → `.maestro.json`
   - **Default directory**: `.git/shadow-clones` → `.git/orchestrations`
@@ -32,7 +32,7 @@
      ```
   2. **Install new package**:
      ```bash
-     npm install -g maestro
+     npm install -g @hashiramaendure/maestro
      ```
   3. **Update configuration**:
      - Rename `.scj.json` to `.maestro.json`
@@ -65,7 +65,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - **BREAKING**: Rebranded from "shadow-clone-jutsu" to "Maestro" with conductor/orchestra theme
-- **BREAKING**: Changed package name from `shadow-clone-jutsu` to `maestro`
+- **BREAKING**: Changed package name from `shadow-clone-jutsu` to `@hashiramaendure/maestro`
 - **BREAKING**: Changed CLI command from `scj` to `maestro` (alias: `mst`), keeping `scj` for backward compatibility
 - **BREAKING**: Changed configuration file from `.scj.json` to `.maestro.json` (with fallback support)
 - **BREAKING**: Changed default worktree directory from `.git/shadow-clones` to `.git/orchestrations`
