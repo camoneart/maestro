@@ -106,14 +106,14 @@ jobs:
         run: pnpm run test:e2e
 
       - name: Skip coverage upload (no token)
-        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '20' && secrets.CODECOV_TOKEN == ''
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '20' && github.event_name == 'push'
         run: |
           echo "⚠️  Codecov token not available - skipping coverage upload"
           echo "To enable coverage reporting, add CODECOV_TOKEN to repository secrets"
           echo "Visit: https://app.codecov.io/github/hashiramaendure/maestro"
 
       - name: Upload coverage reports
-        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '20' && secrets.CODECOV_TOKEN != ''
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '20' && github.event_name == 'push'
         uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
