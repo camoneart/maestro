@@ -1,6 +1,6 @@
 import { Command } from 'commander'
 import chalk from 'chalk'
-import ora from 'ora'
+import ora, { type Ora } from 'ora'
 import inquirer from 'inquirer'
 import { GitWorktreeManager } from '../core/git.js'
 import { ConfigManager } from '../core/config.js'
@@ -35,7 +35,7 @@ interface SyncResult {
 }
 
 // メインブランチを特定
-async function detectMainBranch(gitManager: GitWorktreeManager, specified?: string): Promise<string> {
+async function detectMainBranch(_gitManager: GitWorktreeManager, specified?: string): Promise<string> {
   if (specified) return specified
 
   try {
@@ -401,7 +401,7 @@ async function executeSyncCommand(branchName?: string, options: SyncOptions = {}
 
 // 初期化処理
 async function initializeSync(
-  spinner: ora.Ora,
+  spinner: Ora,
   options: SyncOptions
 ): Promise<{
   worktrees: Worktree[]
@@ -434,7 +434,7 @@ async function initializeSync(
 
 // メインブランチの更新
 async function updateMainBranch(
-  spinner: ora.Ora,
+  spinner: Ora,
   worktrees: Worktree[],
   mainBranch: string
 ): Promise<void> {

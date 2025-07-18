@@ -497,11 +497,11 @@ async function processWorktreeCreation(
 
   // 環境セットアップ
   const shouldSetup = options?.setup || (options?.setup === undefined && config.development?.autoSetup)
-  await setupEnvironment(worktreePath, config, shouldSetup)
+  await setupEnvironment(worktreePath, config, !!shouldSetup)
 
   // エディタで開く
   const shouldOpen = options?.open || (options?.open === undefined && config.development?.defaultEditor !== 'none')
-  await openInEditor(worktreePath, config, shouldOpen)
+  await openInEditor(worktreePath, config, !!shouldOpen)
 
   console.log(chalk.green('\n✨ GitHub統合による演奏者の招集が完了しました！'))
   console.log(chalk.gray(`\ncd ${worktreePath} で移動できます`))
