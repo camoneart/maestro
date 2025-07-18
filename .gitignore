@@ -93,6 +93,9 @@ release-*.md
 *-release.md
 coverage_report.json
 
+# ESLint reports
+*eslint-report*.json
+
 # ToDo
 _todo/
 
