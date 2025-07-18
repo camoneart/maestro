@@ -211,10 +211,7 @@ async function openInEditor(
 // ====== コマンドハンドラー ======
 
 // コメントコマンドの処理
-async function handleCommentCommand(
-  number: string,
-  options: GithubOptions
-): Promise<void> {
+async function handleCommentCommand(number: string, options: GithubOptions): Promise<void> {
   const spinner = ora('PR/Issueを確認中...').start()
   const targetType = await detectType(number)
   spinner.stop()
@@ -256,7 +253,7 @@ async function handleInteractiveComment(): Promise<void> {
       },
     },
   ])
-  
+
   const { comment } = await inquirer.prompt([
     {
       type: 'input',
@@ -269,7 +266,7 @@ async function handleInteractiveComment(): Promise<void> {
   const spinner = ora('PR/Issueを確認中...').start()
   const targetType = await detectType(inputNumber)
   spinner.stop()
-  
+
   await addComment(inputNumber, comment, targetType)
 }
 
@@ -278,17 +275,8 @@ async function fetchItems(type: 'pr' | 'issue'): Promise<ItemInfo[]> {
   const spinner = ora(`${type === 'pr' ? 'Pull Request' : 'Issue'}一覧を取得中...`).start()
 
   try {
-    const fields = type === 'pr'
-      ? 'number,title,author,draft'
-      : 'number,title,author'
-    const result = await execa('gh', [
-      type,
-      'list',
-      '--json',
-      fields,
-      '--limit',
-      '20',
-    ])
+    const fields = type === 'pr' ? 'number,title,author,draft' : 'number,title,author'
+    const result = await execa('gh', [type, 'list', '--json', fields, '--limit', '20'])
     spinner.stop()
     return JSON.parse(result.stdout)
   } catch (error) {
@@ -301,9 +289,7 @@ async function fetchItems(type: 'pr' | 'issue'): Promise<ItemInfo[]> {
 // アイテム選択プロンプト
 async function selectItem(items: ItemInfo[], type: 'pr' | 'issue'): Promise<string> {
   if (items.length === 0) {
-    console.log(
-      chalk.yellow(`開いている${type === 'pr' ? 'Pull Request' : 'Issue'}がありません`)
-    )
+    console.log(chalk.yellow(`開いている${type === 'pr' ? 'Pull Request' : 'Issue'}がありません`))
     process.exit(0)
   }
 
@@ -356,9 +342,10 @@ async function generateBranchForItem(
   info: ItemInfo,
   config: ProjectConfig
 ): Promise<string> {
-  const template = type === 'pr'
-    ? config.github?.branchNaming?.prTemplate || 'pr-{number}'
-    : config.github?.branchNaming?.issueTemplate || 'issue-{number}'
+  const template =
+    type === 'pr'
+      ? config.github?.branchNaming?.prTemplate || 'pr-{number}'
+      : config.github?.branchNaming?.issueTemplate || 'issue-{number}'
   let branchName = generateBranchName(template, number, info.title, type)
 
   // ブランチ名にプレフィックスを追加
@@ -425,9 +412,10 @@ async function createWorktreeFromGithub(
 
   spinner.start('演奏者を招集中...')
 
-  const worktreePath = type === 'pr'
-    ? await createWorktreeForPR(number, branchName, gitManager)
-    : await gitManager.createWorktree(branchName)
+  const worktreePath =
+    type === 'pr'
+      ? await createWorktreeForPR(number, branchName, gitManager)
+      : await gitManager.createWorktree(branchName)
 
   spinner.succeed(
     `演奏者 '${chalk.cyan(branchName)}' を招集しました！\n` +
@@ -455,7 +443,7 @@ function parseArguments(type?: string, number?: string): { type?: string; number
       return { type: 'checkout', number: type }
     }
   }
-  
+
   return { type, number }
 }
 
@@ -488,19 +476,16 @@ async function processWorktreeCreation(
   gitManager: GitWorktreeManager
 ): Promise<void> {
   // Worktree作成
-  const worktreePath = await createWorktreeFromGithub(
-    type,
-    number,
-    config,
-    gitManager
-  )
+  const worktreePath = await createWorktreeFromGithub(type, number, config, gitManager)
 
   // 環境セットアップ
-  const shouldSetup = options?.setup || (options?.setup === undefined && config.development?.autoSetup)
+  const shouldSetup =
+    options?.setup || (options?.setup === undefined && config.development?.autoSetup)
   await setupEnvironment(worktreePath, config, !!shouldSetup)
 
   // エディタで開く
-  const shouldOpen = options?.open || (options?.open === undefined && config.development?.defaultEditor !== 'none')
+  const shouldOpen =
+    options?.open || (options?.open === undefined && config.development?.defaultEditor !== 'none')
   await openInEditor(worktreePath, config, !!shouldOpen)
 
   console.log(chalk.green('\n✨ GitHub統合による演奏者の招集が完了しました！'))
@@ -527,7 +512,7 @@ async function executeGithubCommand(
   // インタラクティブモードの処理
   let finalType = type
   let finalNumber = number
-  
+
   if (!finalNumber) {
     try {
       const result = await handleInteractiveMode()
@@ -573,7 +558,7 @@ export const githubCommand = new Command('github')
     try {
       // 引数を解析
       const args = parseArguments(type, number)
-      
+
       // 初期化
       spinner.text = '初期化中...'
       const { gitManager, config } = await initialize()

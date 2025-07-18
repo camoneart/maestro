@@ -78,7 +78,10 @@ interface GitHubApiResponse {
 
 // GitHub Issue/PRの情報を取得
 // GitHubアイテム（PR/Issue）の情報を取得
-async function fetchGitHubItem(issueNumber: string, type: 'pr' | 'issue'): Promise<GitHubApiResponse> {
+async function fetchGitHubItem(
+  issueNumber: string,
+  type: 'pr' | 'issue'
+): Promise<GitHubApiResponse> {
   const { stdout } = await execa('gh', [
     type,
     'view',

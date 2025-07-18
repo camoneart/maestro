@@ -35,7 +35,10 @@ interface SyncResult {
 }
 
 // メインブランチを特定
-async function detectMainBranch(_gitManager: GitWorktreeManager, specified?: string): Promise<string> {
+async function detectMainBranch(
+  _gitManager: GitWorktreeManager,
+  specified?: string
+): Promise<string> {
   if (specified) return specified
 
   try {
@@ -212,9 +215,7 @@ async function performDryRun(
     }
   }
 
-  console.log(
-    '\n' + chalk.gray('実際に同期を実行するには --dry-run を外して再実行してください')
-  )
+  console.log('\n' + chalk.gray('実際に同期を実行するには --dry-run を外して再実行してください'))
 }
 
 // 単一のWorktreeを同期
@@ -332,9 +333,7 @@ function displaySyncResults(results: SyncResult[]): void {
   )
 
   if (failedCount > 0) {
-    console.log(
-      chalk.yellow('\n💡 ヒント: 競合が発生した場合は、各演奏者で手動で解決してください')
-    )
+    console.log(chalk.yellow('\n💡 ヒント: 競合が発生した場合は、各演奏者で手動で解決してください'))
   }
 }
 
@@ -542,7 +541,7 @@ async function determineFilesToSync(
   // インタラクティブモード
   if (options.interactive) {
     const availableFiles = await findAvailableFiles(mainWorktree.path, filesToSync)
-    
+
     if (availableFiles.length === 0) {
       console.log(chalk.yellow('同期可能なファイルが見つかりません'))
       return []
@@ -568,7 +567,10 @@ async function determineFilesToSync(
 }
 
 // 利用可能なファイルを検索
-async function findAvailableFiles(mainWorktreePath: string, defaultFiles: string[]): Promise<string[]> {
+async function findAvailableFiles(
+  mainWorktreePath: string,
+  defaultFiles: string[]
+): Promise<string[]> {
   const availableFiles: string[] = []
   const potentialFiles = [
     ...new Set([
@@ -645,7 +647,7 @@ function displayFileSyncResults(
   failedCount: number
 ): void {
   console.log(chalk.green(`\n✨ ファイル同期完了: ${syncedCount}件成功, ${failedCount}件失敗`))
-  
+
   if (filesToSync.length > 0) {
     console.log(chalk.gray('\n同期したファイル:'))
     filesToSync.forEach(file => {

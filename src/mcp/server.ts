@@ -124,104 +124,104 @@ if (!isTestEnvironment) {
 // ツール実行のハンドラー
 if (!isTestEnvironment) {
   server.setRequestHandler(CallToolRequestSchema, async request => {
-  const { name, arguments: args } = request.params
+    const { name, arguments: args } = request.params
 
-  try {
-    switch (name) {
-      case 'create_orchestra_member': {
-        const validatedArgs = CreateWorktreeArgsSchema.parse(args)
-        const worktreePath = await gitManager.createWorktree(
-          validatedArgs.branchName,
-          validatedArgs.baseBranch
-        )
-        return {
-          content: [
-            {
-              type: 'text',
-              text: `✅ 演奏者 '${validatedArgs.branchName}' を招集しました！\n📁 ${worktreePath}`,
-            },
-          ],
+    try {
+      switch (name) {
+        case 'create_orchestra_member': {
+          const validatedArgs = CreateWorktreeArgsSchema.parse(args)
+          const worktreePath = await gitManager.createWorktree(
+            validatedArgs.branchName,
+            validatedArgs.baseBranch
+          )
+          return {
+            content: [
+              {
+                type: 'text',
+                text: `✅ 演奏者 '${validatedArgs.branchName}' を招集しました！\n📁 ${worktreePath}`,
+              },
+            ],
+          }
         }
-      }
 
-      case 'list_orchestra_members': {
-        const worktrees = await gitManager.listWorktrees()
-        const orchestraMembers = worktrees.filter(wt => !wt.path.endsWith('.'))
+        case 'list_orchestra_members': {
+          const worktrees = await gitManager.listWorktrees()
+          const orchestraMembers = worktrees.filter(wt => !wt.path.endsWith('.'))
 
-        const list = orchestraMembers
-          .map(wt => {
-            const branchName = wt.branch?.replace('refs/heads/', '') || wt.branch
-            return `• ${branchName} (${wt.path})`
+          const list = orchestraMembers
+            .map(wt => {
+              const branchName = wt.branch?.replace('refs/heads/', '') || wt.branch
+              return `• ${branchName} (${wt.path})`
+            })
+            .join('\n')
+
+          return {
+            content: [
+              {
+                type: 'text',
+                text:
+                  orchestraMembers.length > 0
+                    ? `🎼 オーケストラ編成:\n${list}\n\n合計: ${orchestraMembers.length} 名の演奏者`
+                    : '演奏者が存在しません',
+              },
+            ],
+          }
+        }
+
+        case 'delete_orchestra_member': {
+          const validatedArgs = DeleteWorktreeArgsSchema.parse(args)
+          await gitManager.deleteWorktree(validatedArgs.branchName, validatedArgs.force)
+          return {
+            content: [
+              {
+                type: 'text',
+                text: `✅ 演奏者 '${validatedArgs.branchName}' を解散しました`,
+              },
+            ],
+          }
+        }
+
+        case 'exec_in_orchestra_member': {
+          const validatedArgs = ExecInWorktreeArgsSchema.parse(args)
+          const { execa } = await import('execa')
+
+          const worktrees = await gitManager.listWorktrees()
+          const targetWorktree = worktrees.find(wt => {
+            const branch = wt.branch?.replace('refs/heads/', '')
+            return branch === validatedArgs.branchName || wt.branch === validatedArgs.branchName
           })
-          .join('\n')
 
-        return {
-          content: [
-            {
-              type: 'text',
-              text:
-                orchestraMembers.length > 0
-                  ? `🎼 オーケストラ編成:\n${list}\n\n合計: ${orchestraMembers.length} 名の演奏者`
-                  : '演奏者が存在しません',
-            },
-          ],
+          if (!targetWorktree) {
+            throw new Error(`演奏者 '${validatedArgs.branchName}' が見つかりません`)
+          }
+
+          const result = await execa('sh', ['-c', validatedArgs.command], {
+            cwd: targetWorktree.path,
+          })
+
+          return {
+            content: [
+              {
+                type: 'text',
+                text: `📍 ${validatedArgs.branchName} で実行: ${validatedArgs.command}\n\n${result.stdout}`,
+              },
+            ],
+          }
         }
+
+        default:
+          throw new Error(`不明なツール: ${name}`)
       }
-
-      case 'delete_orchestra_member': {
-        const validatedArgs = DeleteWorktreeArgsSchema.parse(args)
-        await gitManager.deleteWorktree(validatedArgs.branchName, validatedArgs.force)
-        return {
-          content: [
-            {
-              type: 'text',
-              text: `✅ 演奏者 '${validatedArgs.branchName}' を解散しました`,
-            },
-          ],
-        }
+    } catch (error) {
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `❌ エラー: ${error instanceof Error ? error.message : '不明なエラー'}`,
+          },
+        ],
       }
-
-      case 'exec_in_orchestra_member': {
-        const validatedArgs = ExecInWorktreeArgsSchema.parse(args)
-        const { execa } = await import('execa')
-
-        const worktrees = await gitManager.listWorktrees()
-        const targetWorktree = worktrees.find(wt => {
-          const branch = wt.branch?.replace('refs/heads/', '')
-          return branch === validatedArgs.branchName || wt.branch === validatedArgs.branchName
-        })
-
-        if (!targetWorktree) {
-          throw new Error(`演奏者 '${validatedArgs.branchName}' が見つかりません`)
-        }
-
-        const result = await execa('sh', ['-c', validatedArgs.command], {
-          cwd: targetWorktree.path,
-        })
-
-        return {
-          content: [
-            {
-              type: 'text',
-              text: `📍 ${validatedArgs.branchName} で実行: ${validatedArgs.command}\n\n${result.stdout}`,
-            },
-          ],
-        }
-      }
-
-      default:
-        throw new Error(`不明なツール: ${name}`)
     }
-  } catch (error) {
-    return {
-      content: [
-        {
-          type: 'text',
-          text: `❌ エラー: ${error instanceof Error ? error.message : '不明なエラー'}`,
-        },
-      ],
-    }
-  }
   })
 }
 
