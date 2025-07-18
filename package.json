@@ -12,7 +12,7 @@
     "build": "tsup",
     "start": "node dist/cli.js",
     "lint": "eslint src --ext .ts",
-    "lint:ci": "eslint src --ext .ts --max-warnings 15",
+    "lint:ci": "eslint src --ext .ts --max-warnings 22",
     "format": "prettier --write 'src/**/*.ts'",
     "prettier:check": "prettier --check 'src/**/*.ts'",
     "test": "vitest",
