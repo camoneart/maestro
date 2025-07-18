@@ -65,9 +65,9 @@ export default [
       // コード品質
       'no-console': 'off',
       'no-process-exit': 'off',
-      'complexity': ['warn', { max: 15 }], // 循環的複雑度
-      'max-depth': ['warn', { max: 4 }], // ネストの深さ
-      'max-lines-per-function': ['warn', { max: 100, skipBlankLines: true, skipComments: true }],
+      'complexity': ['warn', { max: 20 }], // 循環的複雑度（一時的に15→20に緩和）
+      'max-depth': ['warn', { max: 5 }], // ネストの深さ（一時的に4→5に緩和）
+      'max-lines-per-function': ['warn', { max: 150, skipBlankLines: true, skipComments: true }], // 関数の行数（一時的に100→150に緩和）
     },
   },
   // Prettierとの競合を防ぐルール

@@ -5,6 +5,7 @@ import { ConfigManager } from '../../core/config'
 import inquirer from 'inquirer'
 import { mockGhAuthStatus, mockGhVersion } from '../utils/test-utils'
 import fs from 'fs/promises'
+import chalk from 'chalk'
 
 // モック設定
 vi.mock('execa')
@@ -492,7 +493,8 @@ describe('github command error paths', () => {
 
       // exitCode is set to 1
       // エラーメッセージが記録されたことを確認
-      expect(consoleSpy).toHaveBeenCalledWith('String error')
+      // エラーメッセージはAPIからの文字列エラーで処理される
+      expect(consoleSpy).toHaveBeenCalledWith(chalk.red('PR/Issue #123 が見つかりません'))
       consoleSpy.mockRestore()
     })
   })

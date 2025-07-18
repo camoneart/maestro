@@ -65,49 +65,57 @@ export function parseIssueNumber(input: string): {
   }
 }
 
+interface GitHubApiResponse {
+  number: number
+  title: string
+  body?: string
+  author?: GithubUser
+  labels?: GithubLabel[]
+  assignees?: GithubUser[]
+  milestone?: { title: string }
+  url: string
+}
+
 // GitHub Issue/PRの情報を取得
+// GitHubアイテム（PR/Issue）の情報を取得
+async function fetchGitHubItem(
+  issueNumber: string,
+  type: 'pr' | 'issue'
+): Promise<GitHubApiResponse> {
+  const { stdout } = await execa('gh', [
+    type,
+    'view',
+    issueNumber,
+    '--json',
+    'number,title,body,author,labels,assignees,milestone,url',
+  ])
+  return JSON.parse(stdout)
+}
+
+// GitHubアイテムをメタデータに変換
+function convertToMetadata(item: GitHubApiResponse, type: 'pr' | 'issue'): GithubMetadata {
+  return {
+    type,
+    title: item.title,
+    body: item.body || '',
+    author: item.author?.login || '',
+    labels: item.labels?.map((l: GithubLabel) => l.name) || [],
+    assignees: item.assignees?.map((a: GithubUser) => a.login) || [],
+    milestone: item.milestone?.title,
+    url: item.url,
+  }
+}
+
 export async function fetchGitHubMetadata(issueNumber: string): Promise<GithubMetadata | null> {
   try {
     // まずPRとして試す
     try {
-      const { stdout } = await execa('gh', [
-        'pr',
-        'view',
-        issueNumber,
-        '--json',
-        'number,title,body,author,labels,assignees,milestone,url',
-      ])
-      const pr = JSON.parse(stdout)
-      return {
-        type: 'pr',
-        title: pr.title,
-        body: pr.body || '',
-        author: pr.author?.login || '',
-        labels: pr.labels?.map((l: GithubLabel) => l.name) || [],
-        assignees: pr.assignees?.map((a: GithubUser) => a.login) || [],
-        milestone: pr.milestone?.title,
-        url: pr.url,
-      }
+      const pr = await fetchGitHubItem(issueNumber, 'pr')
+      return convertToMetadata(pr, 'pr')
     } catch {
       // PRでなければIssueとして試す
-      const { stdout } = await execa('gh', [
-        'issue',
-        'view',
-        issueNumber,
-        '--json',
-        'number,title,body,author,labels,assignees,milestone,url',
-      ])
-      const issue = JSON.parse(stdout)
-      return {
-        type: 'issue',
-        title: issue.title,
-        body: issue.body || '',
-        author: issue.author?.login || '',
-        labels: issue.labels?.map((l: GithubLabel) => l.name) || [],
-        assignees: issue.assignees?.map((a: GithubUser) => a.login) || [],
-        milestone: issue.milestone?.title,
-        url: issue.url,
-      }
+      const issue = await fetchGitHubItem(issueNumber, 'issue')
+      return convertToMetadata(issue, 'issue')
     }
   } catch {
     // GitHub CLIが使えない、または認証されていない場合
@@ -219,27 +227,33 @@ Add specific instructions for this worktree here.
   }
 }
 
+interface TemplateConfig {
+  autoSetup?: boolean
+  editor?: 'vscode' | 'cursor' | 'none'
+  tmux?: boolean
+  claude?: boolean
+  branchPrefix?: string
+  syncFiles?: string[]
+  hooks?: Config['hooks']
+}
+
 // テンプレート設定を適用する純粋関数
-export async function applyTemplateConfig(
-  templateName: string,
+// テンプレート設定からオプションを更新
+function updateOptionsFromTemplate(
   options: CreateOptions & { template?: string },
-  baseConfig: Config
-): Promise<{ config: Config; updatedOptions: CreateOptions & { template?: string } }> {
-  const templateConfig = await getTemplateConfig(templateName)
-
-  if (!templateConfig) {
-    return { config: baseConfig, updatedOptions: options }
-  }
-
-  // テンプレート設定でオプションを上書き
+  templateConfig: TemplateConfig
+): CreateOptions & { template?: string } {
   const updatedOptions = { ...options }
   if (templateConfig.autoSetup !== undefined) updatedOptions.setup = templateConfig.autoSetup
   if (templateConfig.editor !== 'none') updatedOptions.open = true
   if (templateConfig.tmux) updatedOptions.tmux = true
   if (templateConfig.claude) updatedOptions.claude = true
+  return updatedOptions
+}
 
-  // 設定を一時的に上書き
-  const config = {
+// テンプレート設定から設定オブジェクトを更新
+function updateConfigFromTemplate(baseConfig: Config, templateConfig: TemplateConfig): Config {
+  return {
     ...baseConfig,
     worktrees: {
       ...baseConfig.worktrees,
@@ -254,6 +268,21 @@ export async function applyTemplateConfig(
     },
     hooks: templateConfig.hooks || baseConfig.hooks,
   }
+}
+
+export async function applyTemplateConfig(
+  templateName: string,
+  options: CreateOptions & { template?: string },
+  baseConfig: Config
+): Promise<{ config: Config; updatedOptions: CreateOptions & { template?: string } }> {
+  const templateConfig = await getTemplateConfig(templateName)
+
+  if (!templateConfig) {
+    return { config: baseConfig, updatedOptions: options }
+  }
+
+  const updatedOptions = updateOptionsFromTemplate(options, templateConfig)
+  const config = updateConfigFromTemplate(baseConfig, templateConfig)
 
   return { config, updatedOptions }
 }

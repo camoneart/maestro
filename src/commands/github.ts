@@ -17,12 +17,105 @@ interface GithubOptions {
   close?: boolean
 }
 
+interface ItemInfo {
+  number: number
+  title: string
+  author: { login: string }
+  draft?: boolean
+  headRefName?: string
+}
+
+interface ProjectConfig {
+  github?: {
+    branchNaming?: {
+      prTemplate?: string
+      issueTemplate?: string
+    }
+  }
+  worktrees?: {
+    branchPrefix?: string
+  }
+  development?: {
+    autoSetup?: boolean
+    syncFiles?: string[]
+    defaultEditor?: string
+  }
+}
+
 // エラークラス
 class GithubCommandError extends Error {
   constructor(message: string) {
     super(message)
     this.name = 'GithubCommandError'
   }
+}
+
+// ====== ヘルパー関数 ======
+
+// gh CLIの検証
+async function validateGhCli(): Promise<void> {
+  // gh CLIがインストールされているか確認
+  try {
+    await execa('gh', ['--version'])
+  } catch {
+    console.error(chalk.red('GitHub CLI (gh) がインストールされていません'))
+    console.log(chalk.yellow('\nインストール方法:'))
+    console.log('  brew install gh')
+    console.log('  または https://cli.github.com/')
+    process.exit(1)
+  }
+
+  // 認証状態を確認
+  try {
+    await execa('gh', ['auth', 'status'])
+  } catch {
+    console.error(chalk.red('GitHub CLIが認証されていません'))
+    console.log(chalk.yellow('\n認証方法:'))
+    console.log('  gh auth login')
+    process.exit(1)
+  }
+}
+
+// ブランチ名を生成
+function generateBranchName(
+  template: string,
+  number: string,
+  title: string,
+  type: 'pr' | 'issue'
+): string {
+  // タイトルをブランチ名に適した形式に変換
+  const sanitizedTitle = title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .substring(0, 50) // 長すぎるタイトルは切り詰める
+
+  return template
+    .replace('{number}', number)
+    .replace('{title}', sanitizedTitle)
+    .replace('{type}', type)
+}
+
+// PR/Issueの自動判定
+async function detectType(number: string): Promise<'pr' | 'issue'> {
+  try {
+    await execa('gh', ['pr', 'view', number])
+    return 'pr'
+  } catch {
+    try {
+      await execa('gh', ['issue', 'view', number])
+      return 'issue'
+    } catch {
+      throw new GithubCommandError(`PR/Issue #${number} が見つかりません`)
+    }
+  }
+}
+
+// PR/Issue情報を取得
+async function fetchItemInfo(number: string, type: 'pr' | 'issue'): Promise<ItemInfo> {
+  const fields = type === 'pr' ? 'number,title,headRefName,author' : 'number,title,author'
+  const result = await execa('gh', [type, 'view', number, '--json', fields])
+  return JSON.parse(result.stdout)
 }
 
 // コメント追加処理
@@ -55,40 +148,399 @@ async function changeState(
   }
 }
 
-// PR/Issueの自動判定
-async function detectType(number: string): Promise<'pr' | 'issue'> {
+// 環境セットアップ
+async function setupEnvironment(
+  worktreePath: string,
+  config: ProjectConfig,
+  shouldSetup: boolean
+): Promise<void> {
+  if (!shouldSetup) return
+
+  const setupSpinner = ora('環境をセットアップ中...').start()
+
   try {
-    await execa('gh', ['pr', 'view', number])
-    return 'pr'
+    await execa('npm', ['install'], { cwd: worktreePath })
+    setupSpinner.succeed('npm install 完了')
   } catch {
-    try {
-      await execa('gh', ['issue', 'view', number])
-      return 'issue'
-    } catch {
-      throw new GithubCommandError(`PR/Issue #${number} が見つかりません`)
+    setupSpinner.warn('npm install をスキップ')
+  }
+
+  // 同期ファイルのコピー
+  if (config.development?.syncFiles) {
+    for (const file of config.development.syncFiles) {
+      try {
+        const sourcePath = path.join(process.cwd(), file)
+        const destPath = path.join(worktreePath, file)
+        await fs.copyFile(sourcePath, destPath)
+        setupSpinner.succeed(`${file} をコピーしました`)
+      } catch {
+        // ファイルが存在しない場合はスキップ
+      }
     }
   }
 }
 
-// ブランチ名を生成
-function generateBranchName(
-  template: string,
-  number: string,
-  title: string,
-  type: 'pr' | 'issue'
-): string {
-  // タイトルをブランチ名に適した形式に変換
-  const sanitizedTitle = title
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-    .substring(0, 50) // 長すぎるタイトルは切り詰める
+// エディタで開く
+async function openInEditor(
+  worktreePath: string,
+  config: ProjectConfig,
+  shouldOpen: boolean
+): Promise<void> {
+  if (!shouldOpen) return
 
-  return template
-    .replace('{number}', number)
-    .replace('{title}', sanitizedTitle)
-    .replace('{type}', type)
+  const openSpinner = ora('エディタで開いています...').start()
+  const editor = config.development?.defaultEditor || 'cursor'
+
+  try {
+    if (editor === 'cursor') {
+      await execa('cursor', [worktreePath])
+      openSpinner.succeed('Cursorで開きました')
+    } else if (editor === 'vscode') {
+      await execa('code', [worktreePath])
+      openSpinner.succeed('VSCodeで開きました')
+    } else if (editor && editor !== 'none') {
+      // カスタムエディタコマンドのサポート
+      await execa(editor, [worktreePath])
+      openSpinner.succeed(`${editor}で開きました`)
+    }
+  } catch {
+    openSpinner.warn(`${editor}が見つかりません`)
+  }
 }
+
+// ====== コマンドハンドラー ======
+
+// コメントコマンドの処理
+async function handleCommentCommand(number: string, options: GithubOptions): Promise<void> {
+  const spinner = ora('PR/Issueを確認中...').start()
+  const targetType = await detectType(number)
+  spinner.stop()
+
+  // コメント処理
+  if (options.message) {
+    await addComment(number, options.message, targetType)
+  } else {
+    // インタラクティブにコメントを入力
+    const { comment } = await inquirer.prompt([
+      {
+        type: 'input',
+        name: 'comment',
+        message: 'コメント内容:',
+        validate: input => input.trim().length > 0 || 'コメントを入力してください',
+      },
+    ])
+    await addComment(number, comment, targetType)
+  }
+
+  // 状態変更オプション
+  if (options.reopen) {
+    await changeState(number, 'reopen', targetType)
+  } else if (options.close) {
+    await changeState(number, 'close', targetType)
+  }
+}
+
+// インタラクティブコメント処理
+async function handleInteractiveComment(): Promise<void> {
+  const { inputNumber } = await inquirer.prompt([
+    {
+      type: 'input',
+      name: 'inputNumber',
+      message: 'PR/Issue番号:',
+      validate: input => {
+        const num = parseInt(input)
+        return (!isNaN(num) && num > 0) || '有効な番号を入力してください'
+      },
+    },
+  ])
+
+  const { comment } = await inquirer.prompt([
+    {
+      type: 'input',
+      name: 'comment',
+      message: 'コメント内容:',
+      validate: input => input.trim().length > 0 || 'コメントを入力してください',
+    },
+  ])
+
+  const spinner = ora('PR/Issueを確認中...').start()
+  const targetType = await detectType(inputNumber)
+  spinner.stop()
+
+  await addComment(inputNumber, comment, targetType)
+}
+
+// PR/Issue一覧を取得
+async function fetchItems(type: 'pr' | 'issue'): Promise<ItemInfo[]> {
+  const spinner = ora(`${type === 'pr' ? 'Pull Request' : 'Issue'}一覧を取得中...`).start()
+
+  try {
+    const fields = type === 'pr' ? 'number,title,author,draft' : 'number,title,author'
+    const result = await execa('gh', [type, 'list', '--json', fields, '--limit', '20'])
+    spinner.stop()
+    return JSON.parse(result.stdout)
+  } catch (error) {
+    spinner.fail('一覧の取得に失敗しました')
+    console.error(error)
+    process.exit(1)
+  }
+}
+
+// アイテム選択プロンプト
+async function selectItem(items: ItemInfo[], type: 'pr' | 'issue'): Promise<string> {
+  if (items.length === 0) {
+    console.log(chalk.yellow(`開いている${type === 'pr' ? 'Pull Request' : 'Issue'}がありません`))
+    process.exit(0)
+  }
+
+  const { selectedNumber } = await inquirer.prompt([
+    {
+      type: 'list',
+      name: 'selectedNumber',
+      message: `${type === 'pr' ? 'Pull Request' : 'Issue'}を選択:`,
+      choices: items.map(item => ({
+        name: `#${item.number} ${item.title} ${chalk.gray(`by ${item.author.login}`)}${item.draft ? chalk.yellow(' [draft]') : ''}`,
+        value: item.number.toString(),
+      })),
+      pageSize: 15,
+    },
+  ])
+
+  return selectedNumber
+}
+
+// インタラクティブモードの処理
+async function handleInteractiveMode(): Promise<{ type: string; number: string }> {
+  const { selectType } = await inquirer.prompt([
+    {
+      type: 'list',
+      name: 'selectType',
+      message: '何から演奏者を招集しますか？',
+      choices: [
+        { name: 'Pull Request', value: 'pr' },
+        { name: 'Issue', value: 'issue' },
+        { name: 'コメントを追加', value: 'comment' },
+      ],
+    },
+  ])
+
+  if (selectType === 'comment') {
+    await handleInteractiveComment()
+    throw new Error('INTERACTIVE_COMMENT_COMPLETE') // 特別な終了フラグ
+  }
+
+  const items = await fetchItems(selectType as 'pr' | 'issue')
+  const selectedNumber = await selectItem(items, selectType as 'pr' | 'issue')
+
+  return { type: selectType, number: selectedNumber }
+}
+
+// ブランチ名の生成
+async function generateBranchForItem(
+  type: 'pr' | 'issue',
+  number: string,
+  info: ItemInfo,
+  config: ProjectConfig
+): Promise<string> {
+  const template =
+    type === 'pr'
+      ? config.github?.branchNaming?.prTemplate || 'pr-{number}'
+      : config.github?.branchNaming?.issueTemplate || 'issue-{number}'
+  let branchName = generateBranchName(template, number, info.title, type)
+
+  // ブランチ名にプレフィックスを追加
+  if (config.worktrees?.branchPrefix && !branchName.startsWith(config.worktrees.branchPrefix)) {
+    branchName = config.worktrees.branchPrefix + branchName
+  }
+
+  return branchName
+}
+
+// PR用のworktree作成
+async function createWorktreeForPR(
+  number: string,
+  branchName: string,
+  gitManager: GitWorktreeManager
+): Promise<string> {
+  const tempBranch = `pr-${number}-checkout`
+
+  // 一時的にcheckout
+  await execa('gh', ['pr', 'checkout', number, '-b', tempBranch])
+
+  // worktreeを作成
+  const worktreePath = await gitManager.attachWorktree(branchName)
+
+  // 元のブランチに戻る
+  await execa('git', ['checkout', '-'])
+
+  // 一時ブランチを削除
+  await execa('git', ['branch', '-D', tempBranch])
+
+  return worktreePath
+}
+
+// Worktree作成処理
+async function createWorktreeFromGithub(
+  type: 'pr' | 'issue',
+  number: string,
+  config: ProjectConfig,
+  gitManager: GitWorktreeManager
+): Promise<string> {
+  const spinner = ora('情報を取得中...').start()
+
+  // PR/Issueの情報を取得
+  const info = await fetchItemInfo(number, type)
+  spinner.succeed(`${type === 'pr' ? 'PR' : 'Issue'} #${number}: ${info.title}`)
+
+  // ブランチ名を生成
+  const branchName = await generateBranchForItem(type, number, info, config)
+
+  // 確認
+  const { confirmCreate } = await inquirer.prompt([
+    {
+      type: 'confirm',
+      name: 'confirmCreate',
+      message: `ブランチ '${chalk.cyan(branchName)}' で演奏者を招集しますか？`,
+      default: true,
+    },
+  ])
+
+  if (!confirmCreate) {
+    console.log(chalk.gray('キャンセルされました'))
+    process.exit(0)
+  }
+
+  spinner.start('演奏者を招集中...')
+
+  const worktreePath =
+    type === 'pr'
+      ? await createWorktreeForPR(number, branchName, gitManager)
+      : await gitManager.createWorktree(branchName)
+
+  spinner.succeed(
+    `演奏者 '${chalk.cyan(branchName)}' を招集しました！\n` +
+      `  📁 ${chalk.gray(worktreePath)}\n` +
+      `  🔗 ${chalk.blue(`${type === 'pr' ? 'PR' : 'Issue'} #${number}`)}`
+  )
+
+  return worktreePath
+}
+
+// ====== 引数解析 ======
+
+function parseArguments(type?: string, number?: string): { type?: string; number?: string } {
+  // typeとnumberの正規化
+  if (!type || type === 'checkout') {
+    // checkout または引数なしの場合
+    if (!number && type === 'checkout') {
+      console.error(chalk.red('PR/Issue番号を指定してください'))
+      console.log(chalk.gray('使い方: maestro github checkout <number>'))
+      process.exit(1)
+    }
+
+    // typeが番号の場合（maestro github 123）
+    if (type && !isNaN(parseInt(type))) {
+      return { type: 'checkout', number: type }
+    }
+  }
+
+  return { type, number }
+}
+
+// 初期化処理
+async function initialize(): Promise<{ gitManager: GitWorktreeManager; config: ProjectConfig }> {
+  // 初期検証
+  await validateGhCli()
+
+  const gitManager = new GitWorktreeManager()
+  const configManager = new ConfigManager()
+  await configManager.loadProjectConfig()
+  const config = configManager.getAll()
+
+  // Gitリポジトリかチェック
+  const isGitRepo = await gitManager.isGitRepository()
+  if (!isGitRepo) {
+    console.error(chalk.red('このディレクトリはGitリポジトリではありません'))
+    process.exit(1)
+  }
+
+  return { gitManager, config }
+}
+
+// worktreeの作成と環境セットアップ
+async function processWorktreeCreation(
+  type: 'pr' | 'issue',
+  number: string,
+  options: GithubOptions,
+  config: ProjectConfig,
+  gitManager: GitWorktreeManager
+): Promise<void> {
+  // Worktree作成
+  const worktreePath = await createWorktreeFromGithub(type, number, config, gitManager)
+
+  // 環境セットアップ
+  const shouldSetup =
+    options?.setup || (options?.setup === undefined && config.development?.autoSetup)
+  await setupEnvironment(worktreePath, config, !!shouldSetup)
+
+  // エディタで開く
+  const shouldOpen =
+    options?.open || (options?.open === undefined && config.development?.defaultEditor !== 'none')
+  await openInEditor(worktreePath, config, !!shouldOpen)
+
+  console.log(chalk.green('\n✨ GitHub統合による演奏者の招集が完了しました！'))
+  console.log(chalk.gray(`\ncd ${worktreePath} で移動できます`))
+}
+
+// メイン処理
+async function executeGithubCommand(
+  type: string | undefined,
+  number: string | undefined,
+  options: GithubOptions,
+  gitManager: GitWorktreeManager,
+  config: ProjectConfig
+): Promise<void> {
+  // commentサブコマンドの処理
+  if (type === 'comment') {
+    if (!number) {
+      throw new GithubCommandError('PR/Issue番号を指定してください')
+    }
+    await handleCommentCommand(number, options)
+    return
+  }
+
+  // インタラクティブモードの処理
+  let finalType = type
+  let finalNumber = number
+
+  if (!finalNumber) {
+    try {
+      const result = await handleInteractiveMode()
+      finalType = result.type
+      finalNumber = result.number
+    } catch (error) {
+      if (error instanceof Error && error.message === 'INTERACTIVE_COMMENT_COMPLETE') {
+        return // コメント処理完了
+      }
+      throw error
+    }
+  }
+
+  // typeの自動判定
+  if (finalType === 'checkout' || !finalType) {
+    finalType = await detectType(finalNumber!)
+  }
+
+  await processWorktreeCreation(
+    finalType as 'pr' | 'issue',
+    finalNumber!,
+    options,
+    config,
+    gitManager
+  )
+}
+
+// ====== メインコマンド ======
 
 export const githubCommand = new Command('github')
   .alias('gh')
@@ -104,374 +556,16 @@ export const githubCommand = new Command('github')
     const spinner = ora('オーケストレーション！').start()
 
     try {
-      // gh CLIがインストールされているか確認
-      try {
-        await execa('gh', ['--version'])
-      } catch {
-        spinner.fail('GitHub CLI (gh) がインストールされていません')
-        console.log(chalk.yellow('\nインストール方法:'))
-        console.log('  brew install gh')
-        console.log('  または https://cli.github.com/')
-        process.exit(1)
-      }
+      // 引数を解析
+      const args = parseArguments(type, number)
 
-      // 認証状態を確認
-      try {
-        await execa('gh', ['auth', 'status'])
-      } catch {
-        spinner.fail('GitHub CLIが認証されていません')
-        console.log(chalk.yellow('\n認証方法:'))
-        console.log('  gh auth login')
-        process.exit(1)
-      }
+      // 初期化
+      spinner.text = '初期化中...'
+      const { gitManager, config } = await initialize()
+      spinner.stop()
 
-      const gitManager = new GitWorktreeManager()
-      const configManager = new ConfigManager()
-      await configManager.loadProjectConfig()
-      const config = configManager.getAll()
-
-      // Gitリポジトリかチェック
-      const isGitRepo = await gitManager.isGitRepository()
-      if (!isGitRepo) {
-        spinner.fail('このディレクトリはGitリポジトリではありません')
-        process.exit(1)
-      }
-
-      // commentサブコマンドの処理
-      if (type === 'comment') {
-        if (!number) {
-          throw new GithubCommandError('PR/Issue番号を指定してください')
-        }
-
-        spinner.text = 'PR/Issueを確認中...'
-        const targetType = await detectType(number)
-        spinner.stop()
-
-        // コメント処理
-        if (options.message) {
-          await addComment(number, options.message, targetType)
-        } else {
-          // インタラクティブにコメントを入力
-          const { comment } = await inquirer.prompt([
-            {
-              type: 'input',
-              name: 'comment',
-              message: 'コメント内容:',
-              validate: input => input.trim().length > 0 || 'コメントを入力してください',
-            },
-          ])
-          await addComment(number, comment, targetType)
-        }
-
-        // 状態変更オプション
-        if (options.reopen) {
-          await changeState(number, 'reopen', targetType)
-        } else if (options.close) {
-          await changeState(number, 'close', targetType)
-        }
-
-        return
-      }
-
-      // typeとnumberの処理
-      if (!type || type === 'checkout') {
-        // checkout または引数なしの場合
-        if (!number && type === 'checkout') {
-          console.error(chalk.red('PR/Issue番号を指定してください'))
-          console.log(chalk.gray('使い方: maestro github checkout <number>'))
-          process.exit(1)
-        }
-
-        // typeが番号の場合（maestro github 123）
-        if (type && !isNaN(parseInt(type))) {
-          number = type
-          type = 'checkout'
-        }
-      }
-
-      if (!number) {
-        spinner.stop()
-
-        // インタラクティブモード
-        const { selectType } = await inquirer.prompt([
-          {
-            type: 'list',
-            name: 'selectType',
-            message: '何から演奏者を招集しますか？',
-            choices: [
-              { name: 'Pull Request', value: 'pr' },
-              { name: 'Issue', value: 'issue' },
-              { name: 'コメントを追加', value: 'comment' },
-            ],
-          },
-        ])
-        type = selectType
-
-        // コメントの場合は番号を入力
-        if (type === 'comment') {
-          const { inputNumber } = await inquirer.prompt([
-            {
-              type: 'input',
-              name: 'inputNumber',
-              message: 'PR/Issue番号:',
-              validate: input => {
-                const num = parseInt(input)
-                return (!isNaN(num) && num > 0) || '有効な番号を入力してください'
-              },
-            },
-          ])
-          number = inputNumber
-
-          spinner.start('PR/Issueを確認中...')
-          if (!number) {
-            throw new GithubCommandError('PR/Issue番号が指定されていません')
-          }
-          const targetType = await detectType(number)
-          spinner.stop()
-
-          const { comment } = await inquirer.prompt([
-            {
-              type: 'input',
-              name: 'comment',
-              message: 'コメント内容:',
-              validate: input => input.trim().length > 0 || 'コメントを入力してください',
-            },
-          ])
-
-          await addComment(number, comment, targetType)
-          return
-        }
-
-        // PR/Issue一覧を取得
-        spinner.start(`${type === 'pr' ? 'Pull Request' : 'Issue'}一覧を取得中...`)
-
-        let items: Array<{
-          number: number
-          title: string
-          author: { login: string }
-          draft?: boolean
-        }> = []
-        try {
-          if (type === 'pr') {
-            const result = await execa('gh', [
-              'pr',
-              'list',
-              '--json',
-              'number,title,author,draft',
-              '--limit',
-              '20',
-            ])
-            items = JSON.parse(result.stdout)
-          } else {
-            const result = await execa('gh', [
-              'issue',
-              'list',
-              '--json',
-              'number,title,author',
-              '--limit',
-              '20',
-            ])
-            items = JSON.parse(result.stdout)
-          }
-        } catch (error) {
-          spinner.fail('一覧の取得に失敗しました')
-          console.error(error)
-          process.exit(1)
-        }
-
-        spinner.stop()
-
-        if (items.length === 0) {
-          console.log(
-            chalk.yellow(`開いている${type === 'pr' ? 'Pull Request' : 'Issue'}がありません`)
-          )
-          process.exit(0)
-        }
-
-        const { selectedNumber } = await inquirer.prompt([
-          {
-            type: 'list',
-            name: 'selectedNumber',
-            message: `${type === 'pr' ? 'Pull Request' : 'Issue'}を選択:`,
-            choices: items.map(item => ({
-              name: `#${item.number} ${item.title} ${chalk.gray(`by ${item.author.login}`)}${item.draft ? chalk.yellow(' [draft]') : ''}`,
-              value: item.number.toString(),
-            })),
-            pageSize: 15,
-          },
-        ])
-        number = selectedNumber
-      }
-
-      spinner.start('情報を取得中...')
-
-      // PR/Issueの情報を取得
-      let branchName: string
-      let title: string
-
-      try {
-        if (type === 'pr' || type === 'checkout') {
-          // まずPRとして試す
-          try {
-            const prInfo = await execa('gh', [
-              'pr',
-              'view',
-              number || '',
-              '--json',
-              'number,title,headRefName',
-            ])
-            const pr = JSON.parse(prInfo.stdout)
-            title = pr.title
-            type = 'pr'
-
-            // ブランチ命名規則を適用
-            const prTemplate = config.github?.branchNaming?.prTemplate || 'pr-{number}'
-            branchName = generateBranchName(prTemplate, number || '', title, 'pr')
-          } catch {
-            // PRでなければIssueとして試す
-            const issueInfo = await execa('gh', [
-              'issue',
-              'view',
-              number || '',
-              '--json',
-              'number,title',
-            ])
-            const issue = JSON.parse(issueInfo.stdout)
-            title = issue.title
-            type = 'issue'
-
-            // ブランチ命名規則を適用
-            const issueTemplate = config.github?.branchNaming?.issueTemplate || 'issue-{number}'
-            branchName = generateBranchName(issueTemplate, number || '', title, 'issue')
-          }
-        } else if (type === 'issue') {
-          const issueInfo = await execa('gh', [
-            'issue',
-            'view',
-            number || '',
-            '--json',
-            'number,title',
-          ])
-          const issue = JSON.parse(issueInfo.stdout)
-          title = issue.title
-
-          // ブランチ命名規則を適用
-          const issueTemplate = config.github?.branchNaming?.issueTemplate || 'issue-{number}'
-          branchName = generateBranchName(issueTemplate, number || '', title, 'issue')
-        } else {
-          throw new Error(`不明なタイプ: ${type}`)
-        }
-      } catch (error) {
-        spinner.fail(`${type} #${number} の情報取得に失敗しました`)
-        console.error(error)
-        process.exit(1)
-      }
-
-      spinner.succeed(`${type === 'pr' ? 'PR' : 'Issue'} #${number}: ${title}`)
-
-      // ブランチ名にプレフィックスを追加
-      if (config.worktrees?.branchPrefix && !branchName.startsWith(config.worktrees.branchPrefix)) {
-        branchName = config.worktrees.branchPrefix + branchName
-      }
-
-      // 確認
-      const { confirmCreate } = await inquirer.prompt([
-        {
-          type: 'confirm',
-          name: 'confirmCreate',
-          message: `ブランチ '${chalk.cyan(branchName)}' で演奏者を招集しますか？`,
-          default: true,
-        },
-      ])
-
-      if (!confirmCreate) {
-        console.log(chalk.gray('キャンセルされました'))
-        return
-      }
-
-      spinner.start('演奏者を招集中...')
-
-      let worktreePath: string
-
-      if (type === 'pr') {
-        // PRの場合はgh pr checkoutを使用
-        const tempBranch = `pr-${number}-checkout`
-
-        // 一時的にcheckout
-        await execa('gh', ['pr', 'checkout', number || '', '-b', tempBranch])
-
-        // worktreeを作成
-        worktreePath = await gitManager.attachWorktree(branchName)
-
-        // 元のブランチに戻る
-        await execa('git', ['checkout', '-'])
-
-        // 一時ブランチを削除
-        await execa('git', ['branch', '-D', tempBranch])
-      } else {
-        // Issueの場合は新規ブランチを作成
-        worktreePath = await gitManager.createWorktree(branchName)
-      }
-
-      spinner.succeed(
-        `演奏者 '${chalk.cyan(branchName)}' を招集しました！\n` +
-          `  📁 ${chalk.gray(worktreePath)}\n` +
-          `  🔗 ${chalk.blue(`${type === 'pr' ? 'PR' : 'Issue'} #${number}`)}`
-      )
-
-      // 環境セットアップ
-      if (options?.setup || (options?.setup === undefined && config.development?.autoSetup)) {
-        const setupSpinner = ora('環境をセットアップ中...').start()
-
-        try {
-          await execa('npm', ['install'], { cwd: worktreePath })
-          setupSpinner.succeed('npm install 完了')
-        } catch {
-          setupSpinner.warn('npm install をスキップ')
-        }
-
-        // 同期ファイルのコピー
-        if (config.development?.syncFiles) {
-          for (const file of config.development.syncFiles) {
-            try {
-              const sourcePath = path.join(process.cwd(), file)
-              const destPath = path.join(worktreePath, file)
-              await fs.copyFile(sourcePath, destPath)
-              setupSpinner.succeed(`${file} をコピーしました`)
-            } catch {
-              // ファイルが存在しない場合はスキップ
-            }
-          }
-        }
-      }
-
-      // エディタで開く
-      if (
-        options?.open ||
-        (options?.open === undefined && config.development?.defaultEditor !== 'none')
-      ) {
-        const openSpinner = ora('エディタで開いています...').start()
-        const editor = config.development?.defaultEditor || 'cursor'
-
-        try {
-          if (editor === 'cursor') {
-            await execa('cursor', [worktreePath])
-            openSpinner.succeed('Cursorで開きました')
-          } else if (editor === 'vscode') {
-            await execa('code', [worktreePath])
-            openSpinner.succeed('VSCodeで開きました')
-          } else if (editor) {
-            // カスタムエディタコマンドのサポート
-            await execa(editor, [worktreePath])
-            openSpinner.succeed(`${editor}で開きました`)
-          }
-        } catch {
-          openSpinner.warn(`${editor}が見つかりません`)
-        }
-      }
-
-      console.log(chalk.green('\n✨ GitHub統合による演奏者の招集が完了しました！'))
-      console.log(chalk.gray(`\ncd ${worktreePath} で移動できます`))
+      // メイン処理を実行
+      await executeGithubCommand(args.type, args.number, options, gitManager, config)
     } catch (error) {
       spinner.fail('エラーが発生しました')
       if (error instanceof GithubCommandError) {

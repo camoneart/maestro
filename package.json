@@ -1,7 +1,7 @@
 {
   "name": "@hashiramaendure/maestro",
   "version": "2.0.0",
-  "description": "Git Worktreeオーケストレーションで、Claude Codeとパラレル開発を実現するツール",
+  "description": "Git Worktreeを活用した「オーケストラ開発」で、Claude Codeとのパラレル開発を飛躍的に効率化するCLIツール",
   "type": "module",
   "bin": {
     "maestro": "./dist/cli.js",
@@ -12,7 +12,7 @@
     "build": "tsup",
     "start": "node dist/cli.js",
     "lint": "eslint src --ext .ts",
-    "lint:ci": "eslint src --ext .ts --max-warnings 54",
+    "lint:ci": "eslint src --ext .ts --max-warnings 22",
     "format": "prettier --write 'src/**/*.ts'",
     "prettier:check": "prettier --check 'src/**/*.ts'",
     "test": "vitest",

@@ -139,12 +139,13 @@ describe('github command', () => {
 
       await program.parseAsync(['node', 'test', 'github', 'checkout', '123'])
 
+      // author fieldを含むJSON取得のコール
       expect(mockExeca).toHaveBeenCalledWith('gh', [
         'pr',
         'view',
         '123',
         '--json',
-        'number,title,headRefName',
+        'number,title,headRefName,author',
       ])
       expect(mockGitWorktreeManagerInstance.attachWorktree).toHaveBeenCalledWith('pr-123')
     })
@@ -236,12 +237,13 @@ describe('github command', () => {
 
       await program.parseAsync(['node', 'test', 'github', 'issue', '456'])
 
+      // author fieldを含むJSON取得のコール
       expect(mockExeca).toHaveBeenCalledWith('gh', [
         'issue',
         'view',
         '456',
         '--json',
-        'number,title',
+        'number,title,author',
       ])
       expect(mockGitWorktreeManagerInstance.createWorktree).toHaveBeenCalledWith('issue-456')
     })
