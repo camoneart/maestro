@@ -136,8 +136,7 @@ async function selectTargetWorktrees(
     })
 
     if (!target) {
-      console.error(chalk.red(`演奏者 '${branchName}' が見つかりません`))
-      process.exit(1)
+      throw new Error(`演奏者 '${branchName}' が見つかりません`)
     }
 
     return [target]

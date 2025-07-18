@@ -8,6 +8,7 @@ import inquirer from 'inquirer'
 import ora from 'ora'
 import cliProgress from 'cli-progress'
 import { syncCommand } from '../../commands/sync'
+import chalk from 'chalk'
 import {
   createMockWorktree,
   createMockWorktrees,
@@ -85,37 +86,39 @@ describe('sync command', () => {
     vi.mocked(spawn).mockReturnValue(mockFzfProcess)
 
     // execaのデフォルトモック
-    vi.mocked(execa).mockImplementation(async (cmd: string, args: string[]) => {
-      if (cmd === 'git') {
-        if (args[0] === 'symbolic-ref' && args[1] === 'refs/remotes/origin/HEAD') {
+    vi.mocked(execa).mockImplementation(async (cmd: string | URL, args?: readonly string[]) => {
+      const command = typeof cmd === 'string' ? cmd : cmd.toString()
+      const cmdArgs = args || []
+      if (command === 'git') {
+        if (cmdArgs[0] === 'symbolic-ref' && cmdArgs[1] === 'refs/remotes/origin/HEAD') {
           return createMockExecaResponse('refs/remotes/origin/main')
         }
         if (
-          args[0] === 'branch' &&
-          args[1] === '--list' &&
-          args[2] === '--format=%(refname:short)'
+          cmdArgs[0] === 'branch' &&
+          cmdArgs[1] === '--list' &&
+          cmdArgs[2] === '--format=%(refname:short)'
         ) {
           return createMockExecaResponse('main\nfeature-a\nfeature-b')
         }
-        if (args[0] === 'fetch') {
+        if (cmdArgs[0] === 'fetch') {
           return createMockExecaResponse('From origin...')
         }
-        if (args[0] === 'checkout') {
+        if (cmdArgs[0] === 'checkout') {
           return createMockExecaResponse('Switched to branch...')
         }
-        if (args[0] === 'pull') {
+        if (cmdArgs[0] === 'pull') {
           return createMockExecaResponse('Already up to date.')
         }
-        if (args[0] === 'status' && args[1] === '--porcelain') {
+        if (cmdArgs[0] === 'status' && cmdArgs[1] === '--porcelain') {
           return createMockExecaResponse('') // クリーンな状態
         }
-        if (args[0] === 'rev-list' && args[1] === '--count') {
+        if (cmdArgs[0] === 'rev-list' && cmdArgs[1] === '--count') {
           return createMockExecaResponse('5') // 5コミット遅れ
         }
-        if (args[0] === 'merge' || args[0] === 'rebase') {
+        if (cmdArgs[0] === 'merge' || cmdArgs[0] === 'rebase') {
           return createMockExecaResponse('Successfully merged')
         }
-        if (args[0] === 'push') {
+        if (cmdArgs[0] === 'push') {
           return createMockExecaResponse('Everything up-to-date')
         }
       }
@@ -207,7 +210,10 @@ describe('sync command', () => {
         'process.exit called with code 1'
       )
 
-      expect(mockSpinner.fail).toHaveBeenCalledWith("演奏者 'non-existent' が見つかりません")
+      expect(mockSpinner.fail).toHaveBeenCalledWith('同期に失敗しました')
+      expect(console.error).toHaveBeenCalledWith(
+        chalk.red("演奏者 'non-existent' が見つかりません")
+      )
     })
   })
 
@@ -348,8 +354,10 @@ describe('sync command', () => {
 
   describe('同期状態の処理', () => {
     it('未コミットの変更がある場合はスキップする', async () => {
-      vi.mocked(execa).mockImplementation(async (cmd: string, args: string[]) => {
-        if (cmd === 'git' && args[0] === 'status' && args[1] === '--porcelain') {
+      vi.mocked(execa).mockImplementation(async (cmd: string | URL, args?: readonly string[]) => {
+        const command = typeof cmd === 'string' ? cmd : cmd.toString()
+        const cmdArgs = args || []
+        if (command === 'git' && cmdArgs[0] === 'status' && cmdArgs[1] === '--porcelain') {
           return createMockExecaResponse('M src/file.ts\n?? new-file.txt')
         }
         return createMockExecaResponse()
@@ -367,8 +375,10 @@ describe('sync command', () => {
     })
 
     it('既に最新の場合はup-to-dateとして表示', async () => {
-      vi.mocked(execa).mockImplementation(async (cmd: string, args: string[]) => {
-        if (cmd === 'git' && args[0] === 'rev-list' && args[1] === '--count') {
+      vi.mocked(execa).mockImplementation(async (cmd: string | URL, args?: readonly string[]) => {
+        const command = typeof cmd === 'string' ? cmd : cmd.toString()
+        const cmdArgs = args || []
+        if (command === 'git' && cmdArgs[0] === 'rev-list' && cmdArgs[1] === '--count') {
           return createMockExecaResponse('0')
         }
         return createMockExecaResponse('')
@@ -385,8 +395,10 @@ describe('sync command', () => {
     })
 
     it('同期エラーを適切に処理する', async () => {
-      vi.mocked(execa).mockImplementation(async (cmd: string, args: string[]) => {
-        if (cmd === 'git' && args[0] === 'merge') {
+      vi.mocked(execa).mockImplementation(async (cmd: string | URL, args?: readonly string[]) => {
+        const command = typeof cmd === 'string' ? cmd : cmd.toString()
+        const cmdArgs = args || []
+        if (command === 'git' && cmdArgs[0] === 'merge') {
           throw new Error('Merge conflict')
         }
         return createMockExecaResponse()
@@ -411,7 +423,7 @@ describe('sync command', () => {
       expect(console.log).toHaveBeenCalledWith(
         expect.stringContaining('🔧 環境変数・設定ファイルの同期')
       )
-      expect(mockSpinner.succeed).toHaveBeenCalledWith(expect.stringContaining('ファイル同期完了'))
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('✨ ファイル同期完了'))
     })
 
     it('--presetオプションでプリセットを使用する', async () => {
@@ -464,8 +476,8 @@ describe('sync command', () => {
       await syncCommand.parseAsync(['node', 'test', 'feature-a', '--files'])
 
       // エラーが発生してもコマンドは正常に完了する
-      expect(mockSpinner.succeed).toHaveBeenCalledWith(
-        expect.stringContaining('ファイル同期完了: 0件成功')
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringContaining('✨ ファイル同期完了: 0件成功')
       )
     })
   })
@@ -482,11 +494,13 @@ describe('sync command', () => {
     })
 
     it('メインブランチの検出に失敗した場合はフォールバックする', async () => {
-      vi.mocked(execa).mockImplementation(async (cmd: string, args: string[]) => {
-        if (cmd === 'git' && args[0] === 'symbolic-ref') {
+      vi.mocked(execa).mockImplementation(async (cmd: string | URL, args?: readonly string[]) => {
+        const command = typeof cmd === 'string' ? cmd : cmd.toString()
+        const cmdArgs = args || []
+        if (command === 'git' && cmdArgs[0] === 'symbolic-ref') {
           throw new Error('Not found')
         }
-        if (cmd === 'git' && args[0] === 'branch' && args[1] === '--list') {
+        if (command === 'git' && cmdArgs[0] === 'branch' && cmdArgs[1] === '--list') {
           return createMockExecaResponse('main\nfeature-a\nfeature-b')
         }
         return createMockExecaResponse()
@@ -499,11 +513,13 @@ describe('sync command', () => {
     })
 
     it('masterブランチが存在する場合はmasterを使用', async () => {
-      vi.mocked(execa).mockImplementation(async (cmd: string, args: string[]) => {
-        if (cmd === 'git' && args[0] === 'symbolic-ref') {
+      vi.mocked(execa).mockImplementation(async (cmd: string | URL, args?: readonly string[]) => {
+        const command = typeof cmd === 'string' ? cmd : cmd.toString()
+        const cmdArgs = args || []
+        if (command === 'git' && cmdArgs[0] === 'symbolic-ref') {
           throw new Error('Not found')
         }
-        if (cmd === 'git' && args[0] === 'branch' && args[1] === '--list') {
+        if (command === 'git' && cmdArgs[0] === 'branch' && cmdArgs[1] === '--list') {
           return createMockExecaResponse('master\nfeature-a\nfeature-b')
         }
         return createMockExecaResponse()
