@@ -68,13 +68,18 @@ program.addCommand(snapshotCommand)
 // エラーハンドリング
 program.exitOverride()
 
+interface CommanderError extends Error {
+  code?: string
+  exitCode?: number
+}
+
 try {
   await program.parseAsync(process.argv)
 } catch (error) {
   if (error instanceof Error) {
     // Commander の --version や --help はCommanderErrorをthrowするが、これは正常な終了
     if (error.name === 'CommanderError') {
-      const commanderError = error as any
+      const commanderError = error as CommanderError
       if (
         commanderError.code === 'commander.version' ||
         commanderError.code === 'commander.helpDisplayed'
