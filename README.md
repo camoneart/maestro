@@ -1,16 +1,15 @@
 # Maestro
 
-**English** | **[日本語](/README.ja.md)**
-
 [![Node.js >=20.0.0](https://img.shields.io/badge/Node.js-%3E%3D20.0.0-45CC11?labelColor=555555&style=flat&logoColor=FFFFFF)](https://nodejs.org/)
 [![npm version](https://img.shields.io/npm/v/@hashiramaendure/maestro?color=007EC5&labelColor=555555&style=flat&logoColor=FFFFFF)](https://www.npmjs.com/package/@hashiramaendure/maestro)
 [![License MIT](https://img.shields.io/badge/License-MIT-yellow?labelColor=555555&style=flat)](https://opensource.org/licenses/MIT)
 
 ![maestro](public/image/logo/maestro-logo.png)
-
 **A CLI tool that “conducts” Git Worktrees like an orchestra and turbo-charges parallel development with Claude Code**
 
 ![Demo Animation]()
+
+**English** | **[日本語](/README.ja.md)**
 
 ## Table of Contents
 
