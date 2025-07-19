@@ -1,172 +1,174 @@
 # Maestro
 
+**English** | **[日本語](/README.ja.md)**
+
 [![Node.js >=20.0.0](https://img.shields.io/badge/Node.js-%3E%3D20.0.0-45CC11?labelColor=555555&style=flat&logoColor=FFFFFF)](https://nodejs.org/)
 [![npm version](https://img.shields.io/npm/v/@hashiramaendure/maestro?color=007EC5&labelColor=555555&style=flat&logoColor=FFFFFF)](https://www.npmjs.com/package/@hashiramaendure/maestro)
 [![License MIT](https://img.shields.io/badge/License-MIT-yellow?labelColor=555555&style=flat)](https://opensource.org/licenses/MIT)
 
 ![maestro](public/image/logo/maestro-logo.png)
-**Git Worktreeを“オーケストラ”のように操り、Claude Codeとの並列開発を加速するCLIツール**
+
+**A CLI tool that “conducts” Git Worktrees like an orchestra and turbo-charges parallel development with Claude Code**
 
 ![Demo Animation]()
 
-**[English](/README.en.md)** | **日本語**
+## Table of Contents
 
-## 目次
+- [Overview](#overview)
+- [Key Features](#key-features)
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+- [Command Reference](#command-reference)
+- [Advanced Features](#advanced-features)
+- [Configuration](#configuration)
+- [Troubleshooting](#troubleshooting)
+- [Contributing](#contributing)
+- [License](#license)
 
-- [概要](#概要)
-- [主な特徴](#主な特徴)
-- [インストール](#インストール)
-- [クイックスタート](#クイックスタート)
-- [コマンドリファレンス](#コマンドリファレンス)
-- [高度な機能](#高度な機能)
-- [設定](#設定)
-- [トラブルシューティング](#トラブルシューティング)
-- [貢献](#貢献)
+## Overview
 
-## 概要
+Maestro is a CLI that makes Git Worktree management intuitive. When working on multiple branches in parallel you can treat each branch as an independent “orchestra member” without changing directories.
 
-Maestroは、Git Worktreeをより直感的に管理できるCLIツールです。複数のブランチで並行作業を行う際に、ディレクトリを切り替えることなく、各ブランチを独立した「オーケストラメンバー」として扱うことができます。
+### Why Maestro?
 
-### なぜ Maestro？
+| Pain Point                                                                                      | Maestro’s Approach                                                           | Benefit                                               |
+| ----------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- | ----------------------------------------------------- |
+| **Inefficient parallel development**<br>Frequent branch switches, stashes and context switching | **Automatic Worktree management**<br>Each feature lives in its own directory | Zero branch-switch cost, smooth multitasking          |
+| **Hard to keep track of tasks**                                                                 | **Dashboard & CLI list**<br>Visualise all performers (worktrees)             | Instantly know where you are and the current progress |
+| **Heavy review / merge workload**                                                               | **Claude Code integration**<br>AI diff reviews & automated PR flow           | Drastically reduces review time                       |
 
-| 課題                                                                         | Maestro のアプローチ                                               | 得られるメリット                     |
-| ---------------------------------------------------------------------------- | ------------------------------------------------------------------ | ------------------------------------ |
-| **並列開発の非効率**<br/>ブランチ切り替え・stash・コンテキストスイッチが多発 | **Worktree を自動管理**<br/>各機能を独立したディレクトリで同時開発 | ブランチ移動ゼロでマルチタスクが快適 |
-| **タスク管理が煩雑**<br/>複数機能の状態把握が難しい                          | **ダッシュボード & CLI 一覧**<br/>演奏者（worktree）の状態を可視化 | 迷わず現在地と進捗を把握             |
-| **レビュー・マージ作業の負荷**                                               | **Claude Code 連携**<br/>AI による差分レビューと自動 PR フロー     | レビュー時間を大幅短縮               |
+## Key Features
 
-## 特徴
+| Feature                   | Description                                         |
+| ------------------------- | --------------------------------------------------- |
+| 🎼 **Orchestra UI**       | Operate worktrees as performers in an intuitive way |
+| 🤖 **Claude AI**          | AI diff reviews & code suggestions                  |
+| 🔗 **GitHub integration** | Generate worktrees from Issues / PRs                |
+| 🎯 **tmux / fzf**         | Keyboard-only, lightning-fast switching             |
+| 📊 **Dashboard**          | Visualise everything in a Web UI                    |
+| 🔄 **Auto Sync**          | Propagate file changes in real time                 |
+| 📸 **Snapshot**           | Save / restore any state with one command           |
+| 🏥 **Health Check**       | Detect & auto-fix orphaned / conflicting branches   |
 
-| 機能                    | 説明                               |
-| ----------------------- | ---------------------------------- |
-| 🎼 **オーケストラUI**   | Worktree を演奏者として直感操作    |
-| 🤖 **Claude AI 連携**   | AI による差分レビュー & コード提案 |
-| 🔗 **GitHub 連携**      | Issue / PR からワークツリーを生成  |
-| 🎯 **tmux / fzf**       | キーボードだけで高速セッション切替 |
-| 📊 **ダッシュボード**   | 全演奏者の状態を Web で可視化      |
-| 🔄 **自動同期**         | 変更をリアルタイムで全演奏者へ反映 |
-| 📸 **スナップショット** | 任意の状態を保存・ワンクリック復元 |
-| 🏥 **ヘルスチェック**   | 孤立ブランチや競合を検出・自動修復 |
+## Installation
 
-## インストール
-
-#### Homebrew を使用 (推奨)
+### Homebrew (recommended)
 
 ```bash
 brew install hashiramaendure/tap/maestro
 ```
 
-※ Homebrew でインストールすると、zsh / fish / Bash すべての補完スクリプトが自動で配置されます。<br>
-※ Bash で利用する場合は `brew install bash-completion@2` が必要です。詳細は [シェル補完](#シェル補完) セクションを参照してください。
+> Homebrew installs completion scripts for **zsh / fish / bash** automatically.<br>
+> For bash you also need `brew install bash-completion@2`. See [Shell Completion](#shell-completion).
 
-#### npm を使用
+### npm
 
 ```bash
 npm install -g @hashiramaendure/maestro
 ```
 
-#### pnpm を使用
+### pnpm
 
 ```bash
-# pnpm が入っていない場合は最初に: npm install -g pnpm
+# If pnpm is not installed yet
+npm install -g pnpm
+
 pnpm add -g @hashiramaendure/maestro
 ```
 
-## クイックスタート
+## Quick Start
 
 ```bash
-# 1. インストール  ※Homebrew 例
+# 1. Install (Homebrew example)
 brew install hashiramaendure/tap/maestro
 
-# 2. Git プロジェクトに移動
+# 2. Move to your Git project
 cd ~/path/to/your-repo
 
-# 3. 新機能用 worktree を作成 & シェルに入る
+# 3. Create a worktree and drop into its shell
 mst create feature/awesome-feature --shell
 ```
 
-#### ポイント
+#### Tips
 
-- `--shell` を付けると作成後すぐ該当 worktree に入れます。
-- `--tmux --claude` を併用すれば tmux 窓と Claude Code セッションも自動起動。
+- `--shell` drops you into the performer immediately.
+- Combine `--tmux --claude` to launch a tmux window and a Claude Code session automatically.
 
-### 基本的な使用例
+### Basic Usage Examples
 
-| 目的                                    | コマンド例                                                                   |
-| --------------------------------------- | ---------------------------------------------------------------------------- |
-| **並列開発** 新機能とバグ修正を同時進行 | `mst create feature/auth --tmux --claude`<br>`mst create bugfix/login-issue` |
-| **状態確認** 演奏者一覧を表示           | `mst list --details`                                                         |
-| **高速切替** tmux セッションへ          | `mst tmux`                                                                   |
-| **GitHub Issue から作成**               | `mst create 123`                                                             |
-| **GitHub PR から作成**                  | `mst github pr 456`                                                          |
-| **ドラフト PR を自動作成**              | `mst create feature/new-ui --draft-pr`                                       |
-| **AI レビュー** 差分レビューを生成      | `mst suggest --review`                                                       |
-| **自動レビュー & マージ**               | `mst review --auto-flow`                                                     |
+| Goal                              | Command Example                                                              |
+| --------------------------------- | ---------------------------------------------------------------------------- |
+| **Parallel dev** Feature + bugfix | `mst create feature/auth --tmux --claude`<br>`mst create bugfix/login-issue` |
+| **List performers**               | `mst list --details`                                                         |
+| **Fast switch** via tmux          | `mst tmux`                                                                   |
+| **Create from GitHub Issue**      | `mst create 123`                                                             |
+| **Create from PR**                | `mst github pr 456`                                                          |
+| **Auto draft PR**                 | `mst create feature/new-ui --draft-pr`                                       |
+| **AI diff review**                | `mst suggest --review`                                                       |
+| **Auto review & merge**           | `mst review --auto-flow`                                                     |
 
-## コマンドリファレンス
+## Command Reference
 
-詳細は [コマンドリファレンス](./docs/COMMANDS.md) を参照してください。
+See the full [Command Reference](./docs/COMMANDS.md).
 
-### 主要コマンド
+### Main Commands
 
-| コマンド    | 説明                       | ショート例                     |
-| ----------- | -------------------------- | ------------------------------ |
-| `create`    | 新しい worktree を作成     | `mst create feature/login`     |
-| `list`      | worktree を一覧表示        | `mst list --details`           |
-| `delete`    | worktree を削除            | `mst delete feature/old --fzf` |
-| `tmux`      | tmux セッションで開く      | `mst tmux`                     |
-| `sync`      | ファイルをリアルタイム同期 | `mst sync --auto`              |
-| `suggest`   | Claude 提案/レビュー       | `mst suggest --review`         |
-| `github`    | Issue / PR 連携            | `mst github pr 123`            |
-| `dashboard` | Web ダッシュボード起動     | `mst dashboard --open`         |
-| `health`    | worktree 健全性チェック    | `mst health --fix`             |
-| `where`     | 現在位置確認               | `mst where --verbose`          |
+| Command     | Description                  | Example                        |
+| ----------- | ---------------------------- | ------------------------------ |
+| `create`    | Create a new worktree        | `mst create feature/login`     |
+| `list`      | List worktrees               | `mst list --details`           |
+| `delete`    | Delete worktree              | `mst delete feature/old --fzf` |
+| `tmux`      | Open in tmux                 | `mst tmux`                     |
+| `sync`      | Real-time file sync          | `mst sync --auto`              |
+| `suggest`   | Claude suggestions / reviews | `mst suggest --review`         |
+| `github`    | GitHub integration           | `mst github pr 123`            |
+| `dashboard` | Launch Web dashboard         | `mst dashboard --open`         |
+| `health`    | Health check                 | `mst health --fix`             |
+| `where`     | Show current performer       | `mst where --verbose`          |
 
-すべてのサブコマンドと詳細オプションは [コマンドリファレンス](./docs/COMMANDS.md) を参照してください。
+All sub-commands and options are documented in the [Command Reference](./docs/COMMANDS.md).
 
-#### ワンラインチートシート
+#### One-line Cheat Sheet
 
 ```bash
-# 代表的な操作
-mst create feature/my-ui --tmux --claude   # 作成 + AI + tmux
-mst list                                   # 一覧
-mst tmux                                   # fzf で切替
-mst suggest --branch                       # AI 提案
-mst review --auto-flow                     # 自動レビュー〜マージ
+mst create feature/my-ui --tmux --claude   # create + AI + tmux
+mst list                                   # list performers
+mst tmux                                   # switch via fzf
+mst suggest --branch                       # AI suggestions
+mst review --auto-flow                     # auto review & merge
 ```
 
-## 高度な機能
+## Advanced Features
 
-Maestro が提供する “もう一歩進んだ” 機能を一覧で把握できます。<br>
-各コマンドは **1 行** で実行でき、煩雑な作業をまるごと自動化します。
+Maestro ships with **power commands** that automate tedious tasks in a single line.
 
-| 機能                         | コマンド例                                                     | やってくれること                                                                 |
-| ---------------------------- | -------------------------------------------------------------- | -------------------------------------------------------------------------------- |
-| **自動レビュー & マージ 🚀** | `mst review --auto-flow`                                       | fetch → rebase → AI レビュー → Conventional Commit → PR 作成をワンコマンドで実行 |
-| **統合ダッシュボード 📊**    | `mst dashboard` <br>`mst dashboard --port 3000`                | Web UI で worktree 状態・GitHub 連携・ヘルスをリアルタイム可視化                 |
-| **スナップショット 📸**      | `mst snapshot -m "前の状態"` <br>`mst snapshot --restore <id>` | 任意時点の状態を保存し、いつでも復元                                             |
-| **健全性チェック 🏥**        | `mst health` <br>`mst health --fix`                            | stale / orphaned / conflict などを検出し、自動修復                               |
+| Feature                     | Command Example                                                       | What It Automates                                                           |
+| --------------------------- | --------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| **Auto Review & Merge 🚀**  | `mst review --auto-flow`                                              | Fetch → rebase → AI review → Conventional Commit → open PR — all in one go  |
+| **Integrated Dashboard 📊** | `mst dashboard` <br>`mst dashboard --port 3000`                       | Real-time Web UI showing worktree state, GitHub status, health metrics      |
+| **Snapshot 📸**             | `mst snapshot -m "before-refactor"` <br>`mst snapshot --restore <id>` | Save / restore any working state instantly                                  |
+| **Health Check 🏥**         | `mst health` <br>`mst health --fix`                                   | Detects stale / orphaned / conflicted branches and fixes them automatically |
 
-さらに詳しいオプションは `mst <command> --help` で確認できます。
+Need more? Run `mst <command> --help`.
 
-## 設定
+## Configuration
 
-### 📁 プロジェクト設定 `.maestro.json`
+### 📁 Project Configuration `.maestro.json`
 
-Maestro は **リポジトリ直下の `.maestro.json`** を読み取り、動作をカスタマイズできます。<br>
-よく使うキーを以下の表にまとめ、完全なサンプルは表に続くコードブロックで確認できます。
+Maestro reads **`.maestro.json` at the project root** to customise behaviour.<br>
+Key settings are summarised below; a full example follows.
 
-| カテゴリ    | 主なキー       | 役割                                    | 例 / デフォルト                     |
-| ----------- | -------------- | --------------------------------------- | ----------------------------------- |
-| worktrees   | `path`         | worktree（演奏者）の格納先              | `.git/orchestra-members`            |
-|             | `branchPrefix` | 作成時のブランチ接頭辞                  | `feature/`                          |
-| development | `autoSetup`    | 作成直後に `npm install` などを自動実行 | `true`                              |
-|             | `syncFiles`    | 共有したいファイルの配列                | `[".env", ".env.local"]`            |
-| hooks       | `afterCreate`  | 作成後に実行する任意コマンド            | `npm install`                       |
-|             | `beforeDelete` | 削除前フック                            | `echo "Deleting $ORCHESTRA_MEMBER"` |
-| claude      | `autoStart`    | worktree 入室時に Claude Code を起動    | `true`                              |
+| Category    | Key            | Purpose                               | Default / Example                   |
+| ----------- | -------------- | ------------------------------------- | ----------------------------------- |
+| worktrees   | `path`         | Where to store performers             | `.git/orchestra-members`            |
+|             | `branchPrefix` | Prefix for new branches               | `feature/`                          |
+| development | `autoSetup`    | Auto-run `npm install` after `create` | `true`                              |
+|             | `syncFiles`    | Files to sync across worktrees        | `[".env", ".env.local"]`            |
+| hooks       | `afterCreate`  | Command after creation                | `npm install`                       |
+|             | `beforeDelete` | Command before deletion               | `echo "Deleting $ORCHESTRA_MEMBER"` |
+| claude      | `autoStart`    | Start Claude Code on enter            | `true`                              |
 
-#### 完全なサンプル
+#### Full Example
 
 ```json
 {
@@ -181,7 +183,7 @@ Maestro は **リポジトリ直下の `.maestro.json`** を読み取り、動�
   },
   "hooks": {
     "afterCreate": "npm install",
-    "beforeDelete": "echo \"演奏者を削除します: $ORCHESTRA_MEMBER\""
+    "beforeDelete": "echo \"Deleting performer: $ORCHESTRA_MEMBER\""
   },
   "claude": {
     "autoStart": true,
@@ -191,9 +193,9 @@ Maestro は **リポジトリ直下の `.maestro.json`** を読み取り、動�
 }
 ```
 
-### 🤖 MCP統合設定
+### 🤖 MCP Integration Setup
 
-Claude Codeの設定（`.claude/mcp_settings.json`）に追加:
+Add the following to your Claude Code config (`.claude/mcp_settings.json`):
 
 ```json
 {
@@ -206,83 +208,80 @@ Claude Codeの設定（`.claude/mcp_settings.json`）に追加:
 }
 ```
 
-### シェル補完
+### 🐚 Shell Completion
 
-Maestro は **Bash / zsh / fish** の補完スクリプトを提供します。
+Maestro provides completion scripts for **bash / zsh / fish**.
 
-| インストール方法 | Bash                                    | Zsh / Fish  |
-| ---------------- | --------------------------------------- | ----------- |
-| Homebrew         | 自動 (※ bash は bash-completion@2 必須) | 自動        |
-| npm / pnpm       | 手動 (下記)                             | 手動 (下記) |
+| Install Method | bash                                     | zsh / fish     |
+| -------------- | ---------------------------------------- | -------------- |
+| Homebrew       | Auto (bash requires `bash-completion@2`) | Auto           |
+| npm / pnpm     | Manual (below)                           | Manual (below) |
 
-#### Bash で手動設定 (npm 版など)
+#### bash manual setup (npm / pnpm installs)
 
 ```bash
-# 前提: bash-completion v2 をインストール済み
-brew install bash-completion@2   # macOS の例
+brew install bash-completion@2  # if not installed
 
-# .bashrc または .bash_profile に追記
-eval "$(mst completion bash)"
+echo 'eval "$(mst completion bash)"' >> ~/.bashrc
+source ~/.bashrc
 ```
 
-#### zsh で手動設定
+#### zsh manual setup
 
 ```bash
 mkdir -p ~/.zsh/completions
 mst completion zsh > ~/.zsh/completions/_mst
-autoload -U compinit && compinit  # 設定済みであれば不要
+autoload -U compinit && compinit
 ```
 
-#### fish で手動設定
+#### fish manual setup
 
 ```bash
 mst completion fish > ~/.config/fish/completions/mst.fish
 ```
 
-## トラブルシューティング
+## Troubleshooting
 
-### ❓ よくあるエラーと対処法
+### ❓ Common Errors and Fixes
 
-| エラー内容                         | 主な原因                         | ワンライン解決策                  |
-| ----------------------------------------- | -------------------------------- | --------------------------------- |
-| **Git が古い**<br>`fatal: unknown option` | Git バージョン < 2.22            | `brew install git`                |
-| **fzf が見つからない**                    | fzf 未インストール               | `brew install fzf`                |
-| **tmux が見つからない**                   | tmux 未インストール              | `brew install tmux`               |
-| **Claude Code が起動しない**              | MCP サーバー未起動 or ポート競合 | `mst mcp status` → `mst mcp stop` |
+| Error                                          | Likely Cause                            | One-line Fix                      |
+| ---------------------------------------------- | --------------------------------------- | --------------------------------- |
+| **Git is too old** <br>`fatal: unknown option` | Git < 2.22                              | `brew install git`                |
+| **fzf not found**                              | fzf not installed                       | `brew install fzf`                |
+| **tmux not found**                             | tmux not installed                      | `brew install tmux`               |
+| **Claude Code won't start**                    | MCP server not running or port conflict | `mst mcp status` → `mst mcp stop` |
 
+### Other error codes
 
+| Code         | Cause                  | Fix                                     |
+| ------------ | ---------------------- | --------------------------------------- |
+| `EADDRINUSE` | MCP server port in use | `mst mcp stop` to kill previous process |
+| `ENOENT`     | Git binary not found   | Check PATH or reinstall Git             |
 
-### その他のエラーコード例
+If the issue persists, search or open a new ticket in the [Issues](https://github.com/hashiramaendure/maestro/issues).
 
-| エラーコード | 原因                           | 解決策                              |
-| ------------ | ------------------------------ | ----------------------------------- |
-| `EADDRINUSE` | MCP サーバーのポート競合       | `mst mcp stop` で既存プロセスを停止 |
-| `ENOENT`     | Git 実行ファイルが見つからない | Git の PATH を確認、再インストール  |
-
-上記で解決しない場合は [Issues](https://github.com/hashiramaendure/maestro/issues) で検索または新規 Issue を作成してください。
-
-### 🔍 デバッグモード
+### 🔍 Debug Mode
 
 ```bash
-# すべての内部ログを表示
+# Verbose logs to console
 DEBUG=mst:* mst create feature/debug
 
-# 詳細なログをファイルに保存
+# Save detailed logs to a file
 DEBUG=mst:* mst review --auto-flow &> maestro-debug.log
 ```
 
-## 貢献
+## Contributing
 
-### 🤝 コントリビューションの流れ
+### 🤝 Contribution Workflow
 
-1. [**Issue**](https://github.com/hashiramaendure/maestro/issues) でバグ報告・機能提案を送る
-2. このリポジトリを **Fork** し、`feat/your-topic` などのブランチを作成
-3. 開発後 `pnpm lint && pnpm test` でスタイルとテストを通過させる
-4. **Conventional Commits** 形式でコミット
-5. Pull Request を作成し、レビューテンプレに沿って概要を記入
+1. Open an [Issue](https://github.com/hashiramaendure/maestro/issues) for bugs or feature requests.
+2. Fork the repo and create a branch like `feat/your-topic`.
+3. Run `pnpm lint && pnpm test` and make sure everything passes.
+4. Commit with **Conventional Commits**.
+5. Open a Pull Request and fill out the template.
 
-詳細は [Contributing Guide](/CONTRIBUTING.md) と [Code of Conduct](/CODE_OF_CONDUCT.md) を参照してください。
+See the [Contributing Guide](/CONTRIBUTING.md) and [Code of Conduct](/CODE_OF_CONDUCT.md) for details.
 
-## ライセンス
+## License
 
 Licensed under the [MIT License](./LICENSE).
