@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.0.1
+
+### Patch Changes
+
+- Fix Homebrew installation by including shell completion files in npm package
+
 ## 2.0.0
 
 ### Major Changes
