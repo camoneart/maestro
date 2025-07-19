@@ -107,3 +107,7 @@ _articles/
 
 # Generated completion files
 completion/
+
+# tmux log files
+tmux-*.log
+*.tmux.log
