@@ -1,21 +1,18 @@
-# 🎼 Maestro
+# Maestro
 
 **English** | **[日本語](/README.md)**
 
-_Parallel Development CLI powered by Git Worktree Orchestration & Claude AI_
-
-[![npm version](https://badge.fury.io/js/maestro.svg)](https://www.npmjs.com/package/maestro)
-[![CI](https://github.com/hashiramaendure/maestro/actions/workflows/ci.yml/badge.svg)](https://github.com/hashiramaendure/maestro/actions/workflows/ci.yml)
-[![codecov](https://codecov.io/gh/hashiramaendure/maestro/branch/main/graph/badge.svg)](https://codecov.io/gh/hashiramaendure/maestro)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-
-**Git Worktree Orchestration CLI Tool for Parallel Development with Claude Code**
+[![Node.js >=20.0.0](https://img.shields.io/badge/Node.js-%3E%3D20.0.0-45CC11?labelColor=555555&style=flat&logoColor=FFFFFF)](https://nodejs.org/)
+[![npm version](https://img.shields.io/npm/v/@hashiramaendure/maestro?color=007EC5&labelColor=555555&style=flat&logoColor=FFFFFF)](https://www.npmjs.com/package/@hashiramaendure/maestro)
+[![License MIT](https://img.shields.io/badge/License-MIT-yellow?labelColor=555555&style=flat)](https://opensource.org/licenses/MIT)
 
 ![maestro](public/image/logo/maestro-logo.png)
 
-![Demo Animation](https://via.placeholder.com/800x400/1a1a1a/00ff00?text=maestro+demo)
+**A CLI tool that “conducts” Git Worktrees like an orchestra and turbo-charges parallel development with Claude Code**
 
-## 📋 Table of Contents
+![Demo Animation]()
+
+## Table of Contents
 
 - [Overview](#overview)
 - [Key Features](#key-features)
@@ -26,256 +23,152 @@ _Parallel Development CLI powered by Git Worktree Orchestration & Claude AI_
 - [Configuration](#configuration)
 - [Troubleshooting](#troubleshooting)
 - [Contributing](#contributing)
+- [License](#license)
 
 ## Overview
 
-Maestro is a CLI tool that makes Git Worktree management more intuitive. When working on multiple branches in parallel, you can treat each branch as an independent "orchestra member" without switching directories.
+Maestro is a CLI that makes Git Worktree management intuitive. When working on multiple branches in parallel you can treat each branch as an independent “orchestra member” without changing directories.
 
 ### Why Maestro?
 
-**Pain**: Traditional Git workflows involve frequent branch switching, stashing, and context switching when developing multiple features in parallel, significantly reducing development efficiency.
-
-**Solution**: Maestro leverages Git Worktree to create each branch as an independent "performer", enabling complete parallel development and AI integration.
-
-**Benefit**: Developers can work on multiple features simultaneously, with AI-driven development through Claude Code integration and perfect workflow efficiency through tmux/fzf integration.
+| Pain Point                                                                                      | Maestro’s Approach                                                           | Benefit                                               |
+| ----------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- | ----------------------------------------------------- |
+| **Inefficient parallel development**<br>Frequent branch switches, stashes and context switching | **Automatic Worktree management**<br>Each feature lives in its own directory | Zero branch-switch cost, smooth multitasking          |
+| **Hard to keep track of tasks**                                                                 | **Dashboard & CLI list**<br>Visualise all performers (worktrees)             | Instantly know where you are and the current progress |
+| **Heavy review / merge workload**                                                               | **Claude Code integration**<br>AI diff reviews & automated PR flow           | Drastically reduces review time                       |
 
 ## Key Features
 
-| Feature | Description |
-|---------|-------------|
-| 🎼 **Conductor Theme** | Intuitive interface treating Worktrees as "orchestra members" |
-| 🤖 **Claude Code Integration** | AI development assistance via MCP (Model Context Protocol) |
-| 🔗 **GitHub Integration** | Create performers directly from PR/Issues |
-| 🎯 **tmux/fzf Integration** | Efficient workflow |
-| 🎨 **Interactive UI** | Beautiful and user-friendly CLI experience |
-| 📊 **Dashboard** | Visualize everything with Web UI |
-| 🔄 **Auto Sync** | Detect file changes and auto-sync |
-| 📸 **Snapshot** | Save and restore work states |
+| Feature                   | Description                                         |
+| ------------------------- | --------------------------------------------------- |
+| 🎼 **Orchestra UI**       | Operate worktrees as performers in an intuitive way |
+| 🤖 **Claude AI**          | AI diff reviews & code suggestions                  |
+| 🔗 **GitHub integration** | Generate worktrees from Issues / PRs                |
+| 🎯 **tmux / fzf**         | Keyboard-only, lightning-fast switching             |
+| 📊 **Dashboard**          | Visualise everything in a Web UI                    |
+| 🔄 **Auto Sync**          | Propagate file changes in real time                 |
+| 📸 **Snapshot**           | Save / restore any state with one command           |
+| 🏥 **Health Check**       | Detect & auto-fix orphaned / conflicting branches   |
 
 ## Installation
 
-### Prerequisites
-
-- **Node.js** >= 20.0.0
-- **Git** >= 2.22.0
-- **npm** or **pnpm** (recommended)
-
-### Installation Methods
-
-#### 🌟 Global Installation (Recommended)
+### Homebrew (recommended)
 
 ```bash
-# pnpm (recommended)
-pnpm add -g maestro
-
-# npm
-npm install -g maestro
-
-# yarn
-yarn global add maestro
+brew install hashiramaendure/tap/maestro
 ```
 
-#### ⚡ One-shot Execution
+> Homebrew installs completion scripts for **zsh / fish / bash** automatically.<br>
+> For bash you also need `brew install bash-completion@2`. See [Shell Completion](#shell-completion).
+
+### npm
 
 ```bash
-# For trying out
-npx maestro create feature/my-feature
-
-# pnpm dlx also available
-pnpm dlx maestro create feature/my-feature --tmux --claude --open
+npm install -g @hashiramaendure/maestro
 ```
 
-#### 🍺 Homebrew (macOS/Linux)
+### pnpm
 
 ```bash
-brew tap hashiramaendure/tap
-brew install maestro
-```
+# If pnpm is not installed yet
+npm install -g pnpm
 
-#### 🪟 Scoop (Windows)
-
-```powershell
-scoop bucket add hashiramaendure https://github.com/hashiramaendure/scoop-bucket
-scoop install maestro
-```
-
-#### 📂 Install from Source
-
-```bash
-git clone https://github.com/hashiramaendure/maestro.git
-cd maestro
-pnpm install
-pnpm run build
-pnpm link
+pnpm add -g @hashiramaendure/maestro
 ```
 
 ## Quick Start
 
-### 🚀 Get Started in 3 Steps
-
 ```bash
-# 1. Navigate to your project directory
-cd your-git-project
+# 1. Install (Homebrew example)
+brew install hashiramaendure/tap/maestro
 
-# 2. Create a new performer (worktree)
-mst create feature/awesome-feature
+# 2. Move to your Git project
+cd ~/path/to/your-repo
 
-# 3. Start working in the created performer
-mst shell feature/awesome-feature
+# 3. Create a worktree and drop into its shell
+mst create feature/awesome-feature --shell
 ```
 
-### 📚 Basic Usage Examples
+#### Tips
 
-#### Parallel Development of Multiple Features
+- `--shell` drops you into the performer immediately.
+- Combine `--tmux --claude` to launch a tmux window and a Claude Code session automatically.
 
-```bash
-# Develop authentication feature (with Claude Code integration)
-mst create feature/auth --tmux --claude
+### Basic Usage Examples
 
-# Work on bug fixes in parallel
-mst create bugfix/login-issue
-
-# Check list of performers
-mst list
-
-# Quickly switch between performers
-mst tmux
-```
-
-#### GitHub Integration
-
-```bash
-# Create Worktree from Issue
-mst create 123  # Created as issue-123
-
-# Create performer from PR
-mst github pr 456
-
-# Auto-create Draft PR
-mst create feature/new-ui --draft-pr
-```
-
-#### Claude Code Integration
-
-```bash
-# Start development with Claude Code
-mst create feature/ai-integration --tmux --claude
-
-# Run AI diff review
-mst suggest --review
-
-# Auto review & merge flow
-mst review --auto-flow
-```
+| Goal                              | Command Example                                                              |
+| --------------------------------- | ---------------------------------------------------------------------------- |
+| **Parallel dev** Feature + bugfix | `mst create feature/auth --tmux --claude`<br>`mst create bugfix/login-issue` |
+| **List performers**               | `mst list --details`                                                         |
+| **Fast switch** via tmux          | `mst tmux`                                                                   |
+| **Create from GitHub Issue**      | `mst create 123`                                                             |
+| **Create from PR**                | `mst github pr 456`                                                          |
+| **Auto draft PR**                 | `mst create feature/new-ui --draft-pr`                                       |
+| **AI diff review**                | `mst suggest --review`                                                       |
+| **Auto review & merge**           | `mst review --auto-flow`                                                     |
 
 ## Command Reference
 
-For detailed command documentation, see [docs/COMMANDS.md](./docs/COMMANDS.md).
+See the full [Command Reference](./docs/COMMANDS.md).
 
-### 📊 Main Commands (Top 10)
+### Main Commands
 
-| Command | Description | Example |
-|---------|-------------|---------|
-| `create` | Create new performer | `mst create feature/new --tmux --claude --open` |
-| `list` | List performers | `mst list --details` |
-| `delete` | Delete performer | `mst delete feature/old --fzf` |
-| `tmux` | Open in tmux session | `mst tmux feature/new` |
-| `sync` | File synchronization | `mst sync --auto` |
-| `suggest` | AI suggestion feature | `mst suggest --branch --description "new feature"` |
-| `github` | GitHub integration | `mst github --issue 123` |
-| `dashboard` | Launch Web UI | `mst dashboard --open` |
-| `health` | Health check | `mst health --fix` |
-| `where` | Check current location | `mst where --verbose` |
+| Command     | Description                  | Example                        |
+| ----------- | ---------------------------- | ------------------------------ |
+| `create`    | Create a new worktree        | `mst create feature/login`     |
+| `list`      | List worktrees               | `mst list --details`           |
+| `delete`    | Delete worktree              | `mst delete feature/old --fzf` |
+| `tmux`      | Open in tmux                 | `mst tmux`                     |
+| `sync`      | Real-time file sync          | `mst sync --auto`              |
+| `suggest`   | Claude suggestions / reviews | `mst suggest --review`         |
+| `github`    | GitHub integration           | `mst github pr 123`            |
+| `dashboard` | Launch Web dashboard         | `mst dashboard --open`         |
+| `health`    | Health check                 | `mst health --fix`             |
+| `where`     | Show current performer       | `mst where --verbose`          |
 
-### 🎯 Quick Reference
+All sub-commands and options are documented in the [Command Reference](./docs/COMMANDS.md).
+
+#### One-line Cheat Sheet
 
 ```bash
-# Basic usage
-mst create feature/awesome-feature
-mst list
-mst tmux feature/awesome-feature
-
-# Full setup
-mst create feature/full-setup --tmux --claude --open --setup
-
-# AI suggestions
-mst suggest --branch --description "user authentication feature"
-mst suggest --commit --diff
-
-# GitHub integration
-mst github --issue 123
-mst github --create-pr
+mst create feature/my-ui --tmux --claude   # create + AI + tmux
+mst list                                   # list performers
+mst tmux                                   # switch via fzf
+mst suggest --branch                       # AI suggestions
+mst review --auto-flow                     # auto review & merge
 ```
 
 ## Advanced Features
 
-### 🚀 Auto Review & Merge Flow
+Maestro ships with **power commands** that automate tedious tasks in a single line.
 
-```bash
-# Run auto flow
-mst review --auto-flow
-```
+| Feature                     | Command Example                                                       | What It Automates                                                           |
+| --------------------------- | --------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| **Auto Review & Merge 🚀**  | `mst review --auto-flow`                                              | Fetch → rebase → AI review → Conventional Commit → open PR — all in one go  |
+| **Integrated Dashboard 📊** | `mst dashboard` <br>`mst dashboard --port 3000`                       | Real-time Web UI showing worktree state, GitHub status, health metrics      |
+| **Snapshot 📸**             | `mst snapshot -m "before-refactor"` <br>`mst snapshot --restore <id>` | Save / restore any working state instantly                                  |
+| **Health Check 🏥**         | `mst health` <br>`mst health --fix`                                   | Detects stale / orphaned / conflicted branches and fixes them automatically |
 
-**Executed processes:**
-1. ✅ `git fetch origin main && git rebase origin/main`
-2. 🔧 On conflict: launch Claude Code with `claude /resolve-conflict`
-3. 📝 Execute code review with `claude /review --diff origin/main`
-4. 💬 Auto-generate Conventional Commit messages
-5. 🚀 Create GitHub PR
-
-### 📊 Integrated Dashboard
-
-```bash
-# Launch dashboard
-mst dashboard
-
-# Launch on custom port
-mst dashboard --port 3000
-```
-
-**Dashboard features:**
-- List all worktree states
-- Visualize GitHub integration status
-- Display health status
-- Real-time updates (every 30 seconds)
-
-### 📸 Snapshot Feature
-
-```bash
-# Create snapshot
-mst snapshot -m "State before refactoring"
-
-# Snapshot all worktrees
-mst snapshot --all
-
-# Restore from snapshot
-mst snapshot --restore snapshot-xxxxx
-```
-
-### 🏥 Worktree Health Check
-
-```bash
-# Check health
-mst health
-
-# Auto-fix
-mst health --fix
-
-# Remove old worktrees (30+ days)
-mst health --prune --days 30
-```
-
-**Detected issues:**
-- 🕰️ `stale`: Not updated for long time
-- 👻 `orphaned`: Remote branch doesn't exist
-- 🌊 `diverged`: Significantly diverged from main branch
-- 📝 `uncommitted`: Uncommitted changes
-- ⚔️ `conflict`: Unresolved merge conflicts
-- ❌ `missing`: Directory doesn't exist
+Need more? Run `mst <command> --help`.
 
 ## Configuration
 
-### 📁 Project Configuration (.maestro.json)
+### 📁 Project Configuration `.maestro.json`
+
+Maestro reads **`.maestro.json` at the project root** to customise behaviour.<br>
+Key settings are summarised below; a full example follows.
+
+| Category    | Key            | Purpose                               | Default / Example                   |
+| ----------- | -------------- | ------------------------------------- | ----------------------------------- |
+| worktrees   | `path`         | Where to store performers             | `.git/orchestra-members`            |
+|             | `branchPrefix` | Prefix for new branches               | `feature/`                          |
+| development | `autoSetup`    | Auto-run `npm install` after `create` | `true`                              |
+|             | `syncFiles`    | Files to sync across worktrees        | `[".env", ".env.local"]`            |
+| hooks       | `afterCreate`  | Command after creation                | `npm install`                       |
+|             | `beforeDelete` | Command before deletion               | `echo "Deleting $ORCHESTRA_MEMBER"` |
+| claude      | `autoStart`    | Start Claude Code on enter            | `true`                              |
+
+#### Full Example
 
 ```json
 {
@@ -302,7 +195,7 @@ mst health --prune --days 30
 
 ### 🤖 MCP Integration Setup
 
-Add to Claude Code configuration (`.claude/mcp_settings.json`):
+Add the following to your Claude Code config (`.claude/mcp_settings.json`):
 
 ```json
 {
@@ -317,24 +210,31 @@ Add to Claude Code configuration (`.claude/mcp_settings.json`):
 
 ### 🐚 Shell Completion
 
-#### Bash
+Maestro provides completion scripts for **bash / zsh / fish**.
+
+| Install Method | bash                                     | zsh / fish     |
+| -------------- | ---------------------------------------- | -------------- |
+| Homebrew       | Auto (bash requires `bash-completion@2`) | Auto           |
+| npm / pnpm     | Manual (below)                           | Manual (below) |
+
+#### bash manual setup (npm / pnpm installs)
 
 ```bash
-mst completion bash >> ~/.bashrc
+brew install bash-completion@2  # if not installed
+
+echo 'eval "$(mst completion bash)"' >> ~/.bashrc
 source ~/.bashrc
 ```
 
-#### Zsh
+#### zsh manual setup
 
 ```bash
 mkdir -p ~/.zsh/completions
 mst completion zsh > ~/.zsh/completions/_mst
-echo 'fpath=(~/.zsh/completions $fpath)' >> ~/.zshrc
-echo 'autoload -U compinit && compinit' >> ~/.zshrc
-source ~/.zshrc
+autoload -U compinit && compinit
 ```
 
-#### Fish
+#### fish manual setup
 
 ```bash
 mst completion fish > ~/.config/fish/completions/mst.fish
@@ -342,59 +242,45 @@ mst completion fish > ~/.config/fish/completions/mst.fish
 
 ## Troubleshooting
 
-### ❓ Common Issues and Solutions
+### ❓ Common Errors and Fixes
 
-| Issue | Solution |
-|-------|----------|
-| Git version error | Update Git to 2.22.0 or later: `brew install git` |
-| fzf not found | Install fzf: `brew install fzf` |
-| tmux not found | Install tmux: `brew install tmux` |
-| Claude Code not starting | Check MCP server configuration |
+| Error                                          | Likely Cause                            | One-line Fix                      |
+| ---------------------------------------------- | --------------------------------------- | --------------------------------- |
+| **Git is too old** <br>`fatal: unknown option` | Git < 2.22                              | `brew install git`                |
+| **fzf not found**                              | fzf not installed                       | `brew install fzf`                |
+| **tmux not found**                             | tmux not installed                      | `brew install tmux`               |
+| **Claude Code won't start**                    | MCP server not running or port conflict | `mst mcp status` → `mst mcp stop` |
+
+### Other error codes
+
+| Code         | Cause                  | Fix                                     |
+| ------------ | ---------------------- | --------------------------------------- |
+| `EADDRINUSE` | MCP server port in use | `mst mcp stop` to kill previous process |
+| `ENOENT`     | Git binary not found   | Check PATH or reinstall Git             |
+
+If the issue persists, search or open a new ticket in the [Issues](https://github.com/hashiramaendure/maestro/issues).
 
 ### 🔍 Debug Mode
 
 ```bash
-# Show debug information
+# Verbose logs to console
 DEBUG=mst:* mst create feature/debug
 
-# Output detailed logs
-mst --verbose create feature/test
+# Save detailed logs to a file
+DEBUG=mst:* mst review --auto-flow &> maestro-debug.log
 ```
 
 ## Contributing
 
-### 🤝 Contribution
+### 🤝 Contribution Workflow
 
-Please report bugs and feature requests to [GitHub Issues](https://github.com/hashiramaendure/maestro/issues).
+1. Open an [Issue](https://github.com/hashiramaendure/maestro/issues) for bugs or feature requests.
+2. Fork the repo and create a branch like `feat/your-topic`.
+3. Run `pnpm lint && pnpm test` and make sure everything passes.
+4. Commit with **Conventional Commits**.
+5. Open a Pull Request and fill out the template.
 
-Pull requests are welcome!
-
-### 📚 Related Documentation
-
-- [Contributing Guidelines](./CONTRIBUTING.md)
-- [Code of Conduct](./CODE_OF_CONDUCT.md)
-- [Changelog](./CHANGELOG.md)
-- [License](./LICENSE)
-
-### 🛠️ Development
-
-```bash
-# Clone repository
-git clone https://github.com/hashiramaendure/maestro.git
-cd maestro
-
-# Install dependencies
-pnpm install
-
-# Run in development mode
-pnpm dev
-
-# Run tests
-pnpm test
-
-# Build
-pnpm build
-```
+See the [Contributing Guide](/CONTRIBUTING.md) and [Code of Conduct](/CODE_OF_CONDUCT.md) for details.
 
 ## License
 
