@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 import { Command } from 'commander'
 import chalk from 'chalk'
 import { readFileSync } from 'fs'
@@ -36,8 +35,9 @@ const program = new Command()
 
 program
   .name('maestro')
-  .description('🎼 Maestro - Git Worktreeオーケストレーションで Claude Codeとパラレル開発')
+  .description('🎼 Maestro - Git WorktreeオーケストレーションでClaude Codeとパラレル開発')
   .version(packageJson.version)
+  .allowUnknownOption()
 
 // サブコマンドを追加
 program.addCommand(createCommand)
@@ -77,15 +77,16 @@ try {
   await program.parseAsync(process.argv)
 } catch (error) {
   if (error instanceof Error) {
-    // Commander の --version や --help はCommanderErrorをthrowするが、これは正常な終了
-    if (error.name === 'CommanderError') {
-      const commanderError = error as CommanderError
-      if (
-        commanderError.code === 'commander.version' ||
-        commanderError.code === 'commander.helpDisplayed'
-      ) {
-        process.exit(0)
-      }
+    const cmdErr = error as CommanderError
+    if (
+      cmdErr.exitCode === 0 ||
+      cmdErr.code === 'commander.version' ||
+      cmdErr.code === 'commander.helpDisplayed'
+    ) {
+      process.exit(0)
+    }
+    if (cmdErr.message === '(outputHelp)') {
+      process.exit(0)
     }
     console.error(chalk.red('エラー:'), error.message)
   }
