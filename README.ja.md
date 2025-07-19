@@ -82,14 +82,21 @@ brew install hashiramaendure/tap/maestro
 # 2. Git プロジェクトに移動
 cd ~/path/to/your-repo
 
-# 3. 新機能用 worktree を作成 & シェルに入る
-mst create feature/awesome-feature --shell
+# 3. 新しい worktree (演奏者) を作成
+mst create feature/awesome-feature            # まず作成だけ
+
+# 4. その演奏者のシェルに入る
+mst shell feature/awesome-feature             # シェルへ入室
+
+# ── ワンライナー (tmux + Claude) ──
+# 作成と同時に tmux セッション & Claude Code を起動
+mst create feature/awesome-feature --tmux --claude
 ```
 
 #### ポイント
 
-- `--shell` を付けると作成後すぐ該当 worktree に入れます。
-- `--tmux --claude` を併用すれば tmux 窓と Claude Code セッションも自動起動。
+- `mst shell <ブランチ名>` でいつでも演奏者に入れます（省略すると fzf で選択）。
+- `--tmux` を付けると作成した演奏者を専用 tmux セッションで開き、`--claude` を併用すると Claude Code も自動起動します。
 
 ### 基本的な使用例
 
@@ -244,14 +251,12 @@ mst completion fish > ~/.config/fish/completions/mst.fish
 
 ### ❓ よくあるエラーと対処法
 
-| エラー内容                         | 主な原因                         | ワンライン解決策                  |
+| エラー内容                                | 主な原因                         | ワンライン解決策                  |
 | ----------------------------------------- | -------------------------------- | --------------------------------- |
 | **Git が古い**<br>`fatal: unknown option` | Git バージョン < 2.22            | `brew install git`                |
 | **fzf が見つからない**                    | fzf 未インストール               | `brew install fzf`                |
 | **tmux が見つからない**                   | tmux 未インストール              | `brew install tmux`               |
 | **Claude Code が起動しない**              | MCP サーバー未起動 or ポート競合 | `mst mcp status` → `mst mcp stop` |
-
-
 
 ### その他のエラーコード例
 

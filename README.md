@@ -84,14 +84,21 @@ brew install hashiramaendure/tap/maestro
 # 2. Move to your Git project
 cd ~/path/to/your-repo
 
-# 3. Create a worktree and drop into its shell
-mst create feature/awesome-feature --shell
+# 3. Create a performer (worktree)
+mst create feature/awesome-feature            # create only
+
+# 4. Jump into the performer’s shell
+mst shell feature/awesome-feature             # open a shell inside
+
+# ── one-liner (tmux + Claude) ──
+# Create the worktree and open a tmux session with Claude Code running
+mst create feature/awesome-feature --tmux --claude
 ```
 
 #### Tips
 
-- `--shell` drops you into the performer immediately.
-- Combine `--tmux --claude` to launch a tmux window and a Claude Code session automatically.
+- `mst shell <branch>` lets you enter any performer after creation (fzf prompt when omitted).
+- `--tmux` opens the performer in a dedicated tmux session; combine with `--claude` to auto-start Claude Code.
 
 ### Basic Usage Examples
 
