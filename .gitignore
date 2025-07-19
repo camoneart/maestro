@@ -104,3 +104,6 @@ _features/
 
 # article
 _articles/
+
+# Generated completion files
+completion/

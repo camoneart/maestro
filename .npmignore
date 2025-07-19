@@ -56,6 +56,10 @@ examples/
 
 # Scripts (development only)
 scripts/
+!scripts/generate-completions.js
 
 # Scoop manifest
 scoop/
+
+# Include completion files
+!completion/
