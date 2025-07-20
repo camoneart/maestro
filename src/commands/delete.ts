@@ -184,6 +184,203 @@ export async function executeWorktreeDeletion(
   }
 }
 
+// fzfを使用してワークツリーを選択
+async function selectWorktreesWithFzf(filteredWorktrees: Worktree[]): Promise<Worktree[]> {
+  const fzfInput = filteredWorktrees
+    .map(w => {
+      const status = []
+      if (w.locked) status.push(chalk.red('ロック'))
+      if (w.prunable) status.push(chalk.yellow('削除可能'))
+
+      const statusStr = status.length > 0 ? ` [${status.join(', ')}]` : ''
+      const branch = w.branch?.replace('refs/heads/', '') || w.branch
+      return `${branch}${statusStr} | ${w.path}`
+    })
+    .join('\n')
+
+  const fzfProcess = spawn(
+    'fzf',
+    [
+      '--ansi',
+      '--multi',
+      '--header=解散する演奏者を選択 (Tab で複数選択, Ctrl-C でキャンセル)',
+      '--preview',
+      'echo {} | cut -d"|" -f2 | xargs ls -la',
+      '--preview-window=right:50%:wrap',
+    ],
+    {
+      stdio: ['pipe', 'pipe', 'inherit'],
+    }
+  )
+
+  fzfProcess.stdin.write(fzfInput)
+  fzfProcess.stdin.end()
+
+  let selected = ''
+  fzfProcess.stdout.on('data', data => {
+    selected += data.toString()
+  })
+
+  return new Promise<Worktree[]>((resolve, reject) => {
+    fzfProcess.on('close', code => {
+      if (code !== 0 || !selected.trim()) {
+        reject(new DeleteCommandError('キャンセルされました'))
+        return
+      }
+
+      const selectedBranches = selected
+        .trim()
+        .split('\n')
+        .map(line =>
+          line
+            .split('|')[0]
+            ?.trim()
+            .replace(/\[.*\]/, '')
+            .trim()
+        )
+        .filter(Boolean)
+
+      const targetWorktrees = filteredWorktrees.filter((wt: Worktree) => {
+        const branch = wt.branch?.replace('refs/heads/', '')
+        return selectedBranches.includes(branch)
+      })
+
+      resolve(targetWorktrees)
+    })
+  })
+}
+
+// 削除対象のワークツリーを決定
+async function determineTargetWorktrees(
+  filteredWorktrees: Worktree[],
+  needsInteractiveSelection: boolean,
+  branchName?: string,
+  options: { fzf?: boolean } = {}
+): Promise<Worktree[]> {
+  if (!needsInteractiveSelection) {
+    return filteredWorktrees
+  }
+
+  if (options.fzf && !branchName) {
+    return selectWorktreesWithFzf(filteredWorktrees)
+  }
+
+  if (branchName) {
+    if (branchName.includes('*')) {
+      if (filteredWorktrees.length === 0) {
+        throw new DeleteCommandError('指定されたパターンに一致する演奏者が見つかりません')
+      }
+      return filteredWorktrees
+    } else {
+      const targetWorktree = filteredWorktrees.find(wt => {
+        const branch = wt.branch?.replace('refs/heads/', '')
+        return branch === branchName || wt.branch === branchName
+      })
+
+      if (!targetWorktree) {
+        const similarBranches = filteredWorktrees
+          .filter(wt => wt.branch && wt.branch.includes(branchName))
+          .map(wt => wt.branch?.replace('refs/heads/', '') || wt.branch)
+
+        if (similarBranches.length > 0) {
+          console.log(chalk.yellow('\n類似した演奏者:'))
+          similarBranches.forEach(branch => {
+            console.log(`  - ${chalk.cyan(branch)}`)
+          })
+        }
+
+        throw new DeleteCommandError('指定された演奏者が見つかりません')
+      }
+
+      return [targetWorktree]
+    }
+  }
+
+  throw new DeleteCommandError('削除対象を指定してください')
+}
+
+// 削除対象の詳細を表示
+async function displayDeletionDetails(targetWorktrees: Worktree[]): Promise<void> {
+  console.log(chalk.bold('\n🗑️  解散対象の演奏者:\n'))
+
+  const deletionDetails = await Promise.all(
+    targetWorktrees.map(async wt => {
+      const branch = wt.branch?.replace('refs/heads/', '') || wt.branch
+      const size = await getDirectorySize(wt.path)
+      return { worktree: wt, branch, size }
+    })
+  )
+
+  deletionDetails.forEach(({ branch, size, worktree }) => {
+    console.log(
+      `  ${chalk.cyan(branch || 'unknown')} ${chalk.gray(`(${size})`)} - ${chalk.gray(
+        worktree.path
+      )}`
+    )
+    if (worktree.locked) {
+      console.log(
+        `    ${chalk.red('⚠️  ロックされています')}: ${worktree.reason || '理由不明'}`
+      )
+    }
+  })
+
+  console.log(chalk.gray(`\n合計: ${targetWorktrees.length} 名の演奏者`))
+}
+
+// 削除実行
+async function executeWorktreesDeletion(
+  targetWorktrees: Worktree[],
+  gitManager: GitWorktreeManager,
+  options: { force?: boolean; removeRemote?: boolean } = {}
+): Promise<void> {
+  const results: { branch: string; status: 'success' | 'failed'; error?: string }[] = []
+
+  for (const worktree of targetWorktrees) {
+    const branch = worktree.branch?.replace('refs/heads/', '') || worktree.branch || 'unknown'
+    const deleteSpinner = ora(`演奏者 '${chalk.cyan(branch)}' を解散中...`).start()
+
+    try {
+      await gitManager.deleteWorktree(worktree.branch || '', options.force)
+      deleteSpinner.succeed(`演奏者 '${chalk.cyan(branch)}' を解散しました`)
+
+      if (options.removeRemote && worktree.branch) {
+        await deleteRemoteBranch(worktree.branch.replace('refs/heads/', ''))
+      }
+
+      results.push({ branch, status: 'success' })
+    } catch (error) {
+      deleteSpinner.fail(`演奏者 '${chalk.cyan(branch)}' の解散に失敗しました`)
+      results.push({
+        branch,
+        status: 'failed',
+        error: error instanceof Error ? error.message : '不明なエラー',
+      })
+    }
+  }
+
+  // 結果サマリー
+  console.log(chalk.bold('\n🎼 解散結果:\n'))
+
+  const successCount = results.filter(r => r.status === 'success').length
+  const failedCount = results.filter(r => r.status === 'failed').length
+
+  results.forEach(result => {
+    const icon = result.status === 'success' ? '✅' : '❌'
+    const statusText = result.status === 'success' ? chalk.green('成功') : chalk.red('失敗')
+
+    console.log(`${icon} ${chalk.cyan(result.branch)} - ${statusText}`)
+    if (result.error) {
+      console.log(`   ${chalk.red(result.error)}`)
+    }
+  })
+
+  console.log(chalk.gray(`\n合計: ${successCount} 成功, ${failedCount} 失敗`))
+
+  if (successCount > 0) {
+    console.log(chalk.green('\n✨ 演奏者の解散が完了しました！'))
+  }
+}
+
 export const deleteCommand = new Command('delete')
   .alias('rm')
   .description('演奏者（worktree）を解散')
@@ -221,145 +418,24 @@ export const deleteCommand = new Command('delete')
           return
         }
 
-        let targetWorktrees: Worktree[] = []
-
-        // インタラクティブ選択が必要でない場合はそのまま使用
-        if (!needsInteractiveSelection) {
-          targetWorktrees = filteredWorktrees
-        } else if (options.fzf && !branchName) {
+        if (options.fzf && !branchName) {
           spinner.stop()
+        }
 
-          const fzfInput = filteredWorktrees
-            .map(w => {
-              const status = []
-              if (w.locked) status.push(chalk.red('ロック'))
-              if (w.prunable) status.push(chalk.yellow('削除可能'))
+        const targetWorktrees = await determineTargetWorktrees(
+          filteredWorktrees,
+          needsInteractiveSelection,
+          branchName,
+          options
+        )
 
-              const statusStr = status.length > 0 ? ` [${status.join(', ')}]` : ''
-              const branch = w.branch?.replace('refs/heads/', '') || w.branch
-              return `${branch}${statusStr} | ${w.path}`
-            })
-            .join('\n')
-
-          const fzfProcess = spawn(
-            'fzf',
-            [
-              '--ansi',
-              '--multi',
-              '--header=解散する演奏者を選択 (Tab で複数選択, Ctrl-C でキャンセル)',
-              '--preview',
-              'echo {} | cut -d"|" -f2 | xargs ls -la',
-              '--preview-window=right:50%:wrap',
-            ],
-            {
-              stdio: ['pipe', 'pipe', 'inherit'],
-            }
-          )
-
-          fzfProcess.stdin.write(fzfInput)
-          fzfProcess.stdin.end()
-
-          let selected = ''
-          fzfProcess.stdout.on('data', data => {
-            selected += data.toString()
-          })
-
-          await new Promise<void>((resolve, reject) => {
-            fzfProcess.on('close', code => {
-              if (code !== 0 || !selected.trim()) {
-                reject(new DeleteCommandError('キャンセルされました'))
-                return
-              }
-
-              const selectedBranches = selected
-                .trim()
-                .split('\n')
-                .map(line =>
-                  line
-                    .split('|')[0]
-                    ?.trim()
-                    .replace(/\[.*\]/, '')
-                    .trim()
-                )
-                .filter(Boolean)
-
-              targetWorktrees = filteredWorktrees.filter((wt: Worktree) => {
-                const branch = wt.branch?.replace('refs/heads/', '')
-                return selectedBranches.includes(branch)
-              })
-
-              resolve()
-            })
-          })
-
+        if (options.fzf && !branchName) {
           spinner.start()
-        } else if (branchName) {
-          // ワイルドカードパターンの場合は既にフィルタリング済み
-          if (branchName.includes('*')) {
-            targetWorktrees = filteredWorktrees
-            
-            if (targetWorktrees.length === 0) {
-              spinner.fail(`パターン '${branchName}' に一致する演奏者が見つかりません`)
-              throw new DeleteCommandError('指定されたパターンに一致する演奏者が見つかりません')
-            }
-          } else {
-            // 単一のブランチを指定
-            const targetWorktree = filteredWorktrees.find(wt => {
-              const branch = wt.branch?.replace('refs/heads/', '')
-              return branch === branchName || wt.branch === branchName
-            })
-
-            if (!targetWorktree) {
-              spinner.fail(`演奏者 '${branchName}' が見つかりません`)
-
-              // 類似した名前を提案
-              const similarBranches = filteredWorktrees
-                .filter(wt => wt.branch && wt.branch.includes(branchName))
-                .map(wt => wt.branch?.replace('refs/heads/', '') || wt.branch)
-
-              if (similarBranches.length > 0) {
-                console.log(chalk.yellow('\n類似した演奏者:'))
-                similarBranches.forEach(branch => {
-                  console.log(`  - ${chalk.cyan(branch)}`)
-                })
-              }
-
-              throw new DeleteCommandError('指定された演奏者が見つかりません')
-            }
-
-            targetWorktrees = [targetWorktree]
-          }
-        } else {
-          throw new DeleteCommandError('削除対象を指定してください')
         }
 
         spinner.stop()
 
-        // 削除対象の詳細表示
-        console.log(chalk.bold('\n🗑️  解散対象の演奏者:\n'))
-
-        const deletionDetails = await Promise.all(
-          targetWorktrees.map(async wt => {
-            const branch = wt.branch?.replace('refs/heads/', '') || wt.branch
-            const size = await getDirectorySize(wt.path)
-            return { worktree: wt, branch, size }
-          })
-        )
-
-        deletionDetails.forEach(({ branch, size, worktree }) => {
-          console.log(
-            `  ${chalk.cyan(branch || 'unknown')} ${chalk.gray(`(${size})`)} - ${chalk.gray(
-              worktree.path
-            )}`
-          )
-          if (worktree.locked) {
-            console.log(
-              `    ${chalk.red('⚠️  ロックされています')}: ${worktree.reason || '理由不明'}`
-            )
-          }
-        })
-
-        console.log(chalk.gray(`\n合計: ${targetWorktrees.length} 名の演奏者`))
+        await displayDeletionDetails(targetWorktrees)
 
         // 削除確認
         if (!options.force) {
@@ -378,56 +454,8 @@ export const deleteCommand = new Command('delete')
           }
         }
 
-        // 削除実行
         console.log()
-        const results: { branch: string; status: 'success' | 'failed'; error?: string }[] = []
-
-        for (const worktree of targetWorktrees) {
-          const branch = worktree.branch?.replace('refs/heads/', '') || worktree.branch || 'unknown'
-          const deleteSpinner = ora(`演奏者 '${chalk.cyan(branch)}' を解散中...`).start()
-
-          try {
-            // ワークツリーを削除
-            await gitManager.deleteWorktree(worktree.branch || '', options.force)
-            deleteSpinner.succeed(`演奏者 '${chalk.cyan(branch)}' を解散しました`)
-
-            // リモートブランチも削除
-            if (options.removeRemote && worktree.branch) {
-              await deleteRemoteBranch(worktree.branch.replace('refs/heads/', ''))
-            }
-
-            results.push({ branch, status: 'success' })
-          } catch (error) {
-            deleteSpinner.fail(`演奏者 '${chalk.cyan(branch)}' の解散に失敗しました`)
-            results.push({
-              branch,
-              status: 'failed',
-              error: error instanceof Error ? error.message : '不明なエラー',
-            })
-          }
-        }
-
-        // 結果サマリー
-        console.log(chalk.bold('\n🎼 解散結果:\n'))
-
-        const successCount = results.filter(r => r.status === 'success').length
-        const failedCount = results.filter(r => r.status === 'failed').length
-
-        results.forEach(result => {
-          const icon = result.status === 'success' ? '✅' : '❌'
-          const statusText = result.status === 'success' ? chalk.green('成功') : chalk.red('失敗')
-
-          console.log(`${icon} ${chalk.cyan(result.branch)} - ${statusText}`)
-          if (result.error) {
-            console.log(`   ${chalk.red(result.error)}`)
-          }
-        })
-
-        console.log(chalk.gray(`\n合計: ${successCount} 成功, ${failedCount} 失敗`))
-
-        if (successCount > 0) {
-          console.log(chalk.green('\n✨ 演奏者の解散が完了しました！'))
-        }
+        await executeWorktreesDeletion(targetWorktrees, gitManager, options)
       } catch (error) {
         spinner.fail('エラーが発生しました')
         if (error instanceof DeleteCommandError) {
