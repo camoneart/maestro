@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.0.2
+
+### Patch Changes
+
+- Fix command execution by adding shebang to cli.ts
+
 ## 2.0.1
 
 ### Patch Changes
