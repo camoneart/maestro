@@ -1,6 +1,6 @@
 import { Command } from 'commander'
 import chalk from 'chalk'
-import ora from 'ora'
+import ora, { Ora } from 'ora'
 import inquirer from 'inquirer'
 import { GitWorktreeManager } from '../core/git.js'
 import { execa } from 'execa'
@@ -184,6 +184,173 @@ async function fixIssue(issue: HealthIssue, mainBranch: string): Promise<boolean
   }
 }
 
+// メインブランチを特定
+async function determineMainBranch(): Promise<string> {
+  let mainBranch = 'main'
+  try {
+    const { stdout } = await execa('git', ['symbolic-ref', 'refs/remotes/origin/HEAD'])
+    mainBranch = stdout.replace('refs/remotes/origin/', '')
+  } catch {
+    try {
+      await execa('git', ['rev-parse', 'origin/master'])
+      mainBranch = 'master'
+    } catch {
+      // デフォルトのmainを使用
+    }
+  }
+  return mainBranch
+}
+
+// オーケストラメンバーを取得
+async function getOrchestraMembers(gitManager: GitWorktreeManager, spinner: Ora): Promise<Worktree[]> {
+  const worktrees = await gitManager.listWorktrees()
+  const orchestraMembers = worktrees.filter(wt => !wt.path.endsWith('.'))
+
+  if (orchestraMembers.length === 0) {
+    spinner.succeed('演奏者が存在しません')
+    process.exit(0)
+  }
+
+  return orchestraMembers
+}
+
+// すべてのworktreeをチェック
+async function checkAllWorktrees(
+  orchestraMembers: Worktree[],
+  mainBranch: string,
+  days: string | undefined,
+  spinner: Ora
+): Promise<HealthIssue[]> {
+  spinner.text = '各worktreeの状態を分析中...'
+
+  const allIssues: HealthIssue[] = []
+  const daysThreshold = parseInt(days?.toString() || '30')
+
+  for (const worktree of orchestraMembers) {
+    const issues = await checkWorktreeHealth(worktree, mainBranch, daysThreshold)
+    allIssues.push(...issues)
+  }
+
+  return allIssues
+}
+
+// JSON形式でレポートを出力
+function outputJsonReport(allIssues: HealthIssue[]): void {
+  const jsonOutput = {
+    summary: {
+      total: allIssues.length,
+      critical: allIssues.filter(i => i.severity === 'critical').length,
+      warning: allIssues.filter(i => i.severity === 'warning').length,
+      info: allIssues.filter(i => i.severity === 'info').length,
+    },
+    issues: allIssues.map(issue => ({
+      worktree: {
+        branch: issue.worktree.branch?.replace('refs/heads/', '') || issue.worktree.branch,
+        path: issue.worktree.path,
+      },
+      type: issue.type,
+      severity: issue.severity,
+      message: issue.message,
+      fixable: issue.fixable,
+    })),
+    checkedAt: new Date().toISOString(),
+  }
+  console.log(JSON.stringify(jsonOutput, null, 2))
+}
+
+// 修正オプションを処理
+async function handleFixOption(allIssues: HealthIssue[], mainBranch: string): Promise<void> {
+  if (!allIssues.some(i => i.fixable)) return
+
+  const fixableIssues = allIssues.filter(i => i.fixable)
+  console.log(chalk.bold(`\n🔧 ${fixableIssues.length}件の修正可能な問題があります\n`))
+
+  const { confirmFix } = await inquirer.prompt([
+    {
+      type: 'confirm',
+      name: 'confirmFix',
+      message: '自動修正を実行しますか？',
+      default: false,
+    },
+  ])
+
+  if (confirmFix) {
+    const fixSpinner = ora('問題を修正中...').start()
+    let fixedCount = 0
+
+    for (const issue of fixableIssues) {
+      if (await fixIssue(issue, mainBranch)) {
+        fixedCount++
+      }
+    }
+
+    fixSpinner.succeed(`${fixedCount}件の問題を修正しました`)
+  }
+}
+
+// プルーンオプションを処理
+async function handlePruneOption(allIssues: HealthIssue[], gitManager: GitWorktreeManager): Promise<void> {
+  const staleWorktrees = allIssues
+    .filter(i => i.type === 'stale')
+    .map(i => i.worktree)
+    .filter((wt, index, self) => self.findIndex(w => w.path === wt.path) === index)
+
+  if (staleWorktrees.length === 0) return
+
+  console.log(chalk.bold(`\n🗑️  ${staleWorktrees.length}件の古いworktreeがあります\n`))
+
+  staleWorktrees.forEach(wt => {
+    const branch = wt.branch?.replace('refs/heads/', '') || wt.branch
+    console.log(chalk.gray(`  - ${branch} (${wt.path})`))
+  })
+
+  const { confirmPrune } = await inquirer.prompt([
+    {
+      type: 'confirm',
+      name: 'confirmPrune',
+      message: 'これらを削除しますか？',
+      default: false,
+    },
+  ])
+
+  if (confirmPrune) {
+    const pruneSpinner = ora('古いworktreeを削除中...').start()
+    let prunedCount = 0
+
+    for (const worktree of staleWorktrees) {
+      try {
+        await gitManager.deleteWorktree(worktree.branch, true)
+        prunedCount++
+      } catch {
+        // エラーは無視
+      }
+    }
+
+    pruneSpinner.succeed(`${prunedCount}件のworktreeを削除しました`)
+  }
+}
+
+// 推奨事項を表示
+function showRecommendations(allIssues: HealthIssue[], hasFix?: boolean, hasPrune?: boolean): void {
+  if (allIssues.length === 0 || hasFix || hasPrune) return
+
+  console.log(chalk.bold('\n💡 推奨事項:\n'))
+
+  if (allIssues.some(i => i.fixable)) {
+    console.log(chalk.gray('  • --fix オプションで修正可能な問題を自動修正できます'))
+  }
+
+  if (allIssues.some(i => i.type === 'stale')) {
+    console.log(chalk.gray('  • --prune オプションで古いworktreeを削除できます'))
+  }
+
+  if (allIssues.some(i => i.type === 'uncommitted')) {
+    console.log(
+      chalk.gray('  • 未コミットの変更がある場合は手動でコミットまたは破棄してください')
+    )
+  }
+}
+
 // 健全性レポートを表示
 function displayHealthReport(allIssues: HealthIssue[], verbose: boolean): void {
   const criticalCount = allIssues.filter(i => i.severity === 'critical').length
@@ -260,65 +427,15 @@ export const healthCommand = new Command('health')
         process.exit(1)
       }
 
-      // メインブランチを特定
-      let mainBranch = 'main'
-      try {
-        const { stdout } = await execa('git', ['symbolic-ref', 'refs/remotes/origin/HEAD'])
-        mainBranch = stdout.replace('refs/remotes/origin/', '')
-      } catch {
-        // フォールバック
-        try {
-          await execa('git', ['rev-parse', 'origin/master'])
-          mainBranch = 'master'
-        } catch {
-          // デフォルトのmainを使用
-        }
-      }
-
-      // worktreeを取得
-      const worktrees = await gitManager.listWorktrees()
-      const orchestraMembers = worktrees.filter(wt => !wt.path.endsWith('.'))
-
-      if (orchestraMembers.length === 0) {
-        spinner.succeed('演奏者が存在しません')
-        process.exit(0)
-      }
-
-      spinner.text = '各worktreeの状態を分析中...'
-
-      // 各worktreeの健全性をチェック
-      const allIssues: HealthIssue[] = []
-      const daysThreshold = parseInt(options.days?.toString() || '30')
-
-      for (const worktree of orchestraMembers) {
-        const issues = await checkWorktreeHealth(worktree, mainBranch, daysThreshold)
-        allIssues.push(...issues)
-      }
+      const mainBranch = await determineMainBranch()
+      const orchestraMembers = await getOrchestraMembers(gitManager, spinner)
+      const allIssues = await checkAllWorktrees(orchestraMembers, mainBranch, options.days?.toString(), spinner)
 
       spinner.stop()
 
       // JSON出力の場合
       if (options.json) {
-        const jsonOutput = {
-          summary: {
-            total: allIssues.length,
-            critical: allIssues.filter(i => i.severity === 'critical').length,
-            warning: allIssues.filter(i => i.severity === 'warning').length,
-            info: allIssues.filter(i => i.severity === 'info').length,
-          },
-          issues: allIssues.map(issue => ({
-            worktree: {
-              branch: issue.worktree.branch?.replace('refs/heads/', '') || issue.worktree.branch,
-              path: issue.worktree.path,
-            },
-            type: issue.type,
-            severity: issue.severity,
-            message: issue.message,
-            fixable: issue.fixable,
-          })),
-          checkedAt: new Date().toISOString(),
-        }
-        console.log(JSON.stringify(jsonOutput, null, 2))
+        outputJsonReport(allIssues)
         return
       }
 
@@ -326,94 +443,17 @@ export const healthCommand = new Command('health')
       displayHealthReport(allIssues, options.verbose || false)
 
       // 修正オプション
-      if (options.fix && allIssues.some(i => i.fixable)) {
-        const fixableIssues = allIssues.filter(i => i.fixable)
-
-        console.log(chalk.bold(`\n🔧 ${fixableIssues.length}件の修正可能な問題があります\n`))
-
-        const { confirmFix } = await inquirer.prompt([
-          {
-            type: 'confirm',
-            name: 'confirmFix',
-            message: '自動修正を実行しますか？',
-            default: false,
-          },
-        ])
-
-        if (confirmFix) {
-          const fixSpinner = ora('問題を修正中...').start()
-          let fixedCount = 0
-
-          for (const issue of fixableIssues) {
-            if (await fixIssue(issue, mainBranch)) {
-              fixedCount++
-            }
-          }
-
-          fixSpinner.succeed(`${fixedCount}件の問題を修正しました`)
-        }
+      if (options.fix) {
+        await handleFixOption(allIssues, mainBranch)
       }
 
       // 古いworktreeの削除
       if (options.prune) {
-        const staleWorktrees = allIssues
-          .filter(i => i.type === 'stale')
-          .map(i => i.worktree)
-          .filter((wt, index, self) => self.findIndex(w => w.path === wt.path) === index)
-
-        if (staleWorktrees.length > 0) {
-          console.log(chalk.bold(`\n🗑️  ${staleWorktrees.length}件の古いworktreeがあります\n`))
-
-          staleWorktrees.forEach(wt => {
-            const branch = wt.branch?.replace('refs/heads/', '') || wt.branch
-            console.log(chalk.gray(`  - ${branch} (${wt.path})`))
-          })
-
-          const { confirmPrune } = await inquirer.prompt([
-            {
-              type: 'confirm',
-              name: 'confirmPrune',
-              message: 'これらを削除しますか？',
-              default: false,
-            },
-          ])
-
-          if (confirmPrune) {
-            const pruneSpinner = ora('古いworktreeを削除中...').start()
-            let prunedCount = 0
-
-            for (const worktree of staleWorktrees) {
-              try {
-                await gitManager.deleteWorktree(worktree.branch, true)
-                prunedCount++
-              } catch {
-                // エラーは無視
-              }
-            }
-
-            pruneSpinner.succeed(`${prunedCount}件のworktreeを削除しました`)
-          }
-        }
+        await handlePruneOption(allIssues, gitManager)
       }
 
-      // 推奨事項
-      if (allIssues.length > 0 && !options.fix && !options.prune) {
-        console.log(chalk.bold('\n💡 推奨事項:\n'))
-
-        if (allIssues.some(i => i.fixable)) {
-          console.log(chalk.gray('  • --fix オプションで修正可能な問題を自動修正できます'))
-        }
-
-        if (allIssues.some(i => i.type === 'stale')) {
-          console.log(chalk.gray('  • --prune オプションで古いworktreeを削除できます'))
-        }
-
-        if (allIssues.some(i => i.type === 'uncommitted')) {
-          console.log(
-            chalk.gray('  • 未コミットの変更がある場合は手動でコミットまたは破棄してください')
-          )
-        }
-      }
+            // 推奨事項
+      showRecommendations(allIssues, options.fix, options.prune)
     } catch (error) {
       spinner.fail('健全性チェックに失敗しました')
       console.error(chalk.red(error instanceof Error ? error.message : '不明なエラー'))
