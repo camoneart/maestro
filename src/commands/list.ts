@@ -37,15 +37,15 @@ async function formatPath(fullPath: string, gitManager: GitWorktreeManager): Pro
   try {
     // Gitリポジトリのルートディレクトリを取得
     const repoRoot = await gitManager.getRepositoryRoot()
-    
+
     // リポジトリルートからの相対パスを計算
     const relativePath = path.relative(repoRoot, fullPath)
-    
+
     // 現在のディレクトリと同じ場合
     if (relativePath === '' || relativePath === '.') {
       return '.'
     }
-    
+
     return relativePath
   } catch {
     // リポジトリルート取得に失敗した場合はディレクトリ名のみ
@@ -212,11 +212,25 @@ export const listCommand = new Command('list')
         const memberWorktrees = worktrees.filter(wt => wt !== mainWorktree)
 
         if (mainWorktree) {
-          await displayWorktree(mainWorktree, true, gitManager, options.lastCommit, options.metadata, options.fullPath)
+          await displayWorktree(
+            mainWorktree,
+            true,
+            gitManager,
+            options.lastCommit,
+            options.metadata,
+            options.fullPath
+          )
         }
 
         for (const wt of memberWorktrees) {
-          await displayWorktree(wt, false, gitManager, options.lastCommit, options.metadata, options.fullPath)
+          await displayWorktree(
+            wt,
+            false,
+            gitManager,
+            options.lastCommit,
+            options.metadata,
+            options.fullPath
+          )
         }
 
         console.log(chalk.gray(`\n合計: ${worktrees.length} 名の演奏者`))
@@ -298,7 +312,7 @@ async function displayWorktree(
 
   // パス表示の決定
   const displayPath = showFullPath ? worktree.path : await formatPath(worktree.path, gitManager)
-  
+
   let output =
     `${prefix} ${chalk.cyan(branchName.padEnd(30))} ` +
     `${chalk.gray(displayPath)} ` +
