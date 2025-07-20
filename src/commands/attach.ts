@@ -5,6 +5,93 @@ import inquirer from 'inquirer'
 import { GitWorktreeManager } from '../core/git.js'
 import { execa } from 'execa'
 
+// 利用可能なブランチを取得
+async function getAvailableBranches(
+  gitManager: GitWorktreeManager,
+  includeRemote: boolean
+): Promise<string[]> {
+  const branches = await gitManager.getAllBranches()
+  const worktrees = await gitManager.listWorktrees()
+  const attachedBranches = worktrees
+    .map(wt => wt.branch?.replace('refs/heads/', ''))
+    .filter(Boolean)
+
+  let availableBranches = branches.local.filter(b => !attachedBranches.includes(b))
+
+  if (includeRemote) {
+    const remoteAvailable = branches.remote.filter(
+      b => !attachedBranches.includes(b.split('/').slice(1).join('/'))
+    )
+    availableBranches = [...availableBranches, ...remoteAvailable]
+  }
+
+  return availableBranches
+}
+
+// ブランチを選択
+async function selectBranch(availableBranches: string[]): Promise<string> {
+  const { selectedBranch } = await inquirer.prompt([
+    {
+      type: 'list',
+      name: 'selectedBranch',
+      message: 'どのブランチから演奏者を招集しますか？',
+      choices: availableBranches.map(branch => ({
+        name: branch.includes('origin/')
+          ? `${chalk.yellow('[remote]')} ${chalk.cyan(branch)}`
+          : `${chalk.green('[local]')} ${chalk.cyan(branch)}`,
+        value: branch,
+      })),
+      pageSize: 15,
+    },
+  ])
+  return selectedBranch
+}
+
+// ブランチの存在を確認
+function validateBranchExists(branchName: string, availableBranches: string[]): void {
+  if (!availableBranches.includes(branchName)) {
+    console.error(chalk.red(`エラー: ブランチ '${branchName}' が見つかりません`))
+
+    const similarBranches = availableBranches.filter(b => b.includes(branchName))
+    if (similarBranches.length > 0) {
+      console.log(chalk.yellow('\n利用可能なブランチ:'))
+      similarBranches.forEach(branch => {
+        console.log(`  - ${chalk.cyan(branch)}`)
+      })
+    }
+
+    process.exit(1)
+  }
+}
+
+// 環境セットアップを実行
+async function setupEnvironment(worktreePath: string): Promise<void> {
+  const setupSpinner = ora('環境をセットアップ中...').start()
+
+  try {
+    await execa('npm', ['install'], { cwd: worktreePath })
+    setupSpinner.succeed('npm install 完了')
+  } catch {
+    setupSpinner.warn('npm install をスキップ')
+  }
+}
+
+// エディタで開く
+async function openInEditor(worktreePath: string): Promise<void> {
+  const openSpinner = ora('エディタで開いています...').start()
+  try {
+    await execa('cursor', [worktreePath])
+    openSpinner.succeed('Cursorで開きました')
+  } catch {
+    try {
+      await execa('code', [worktreePath])
+      openSpinner.succeed('VSCodeで開きました')
+    } catch {
+      openSpinner.warn('エディタが見つかりません')
+    }
+  }
+}
+
 export const attachCommand = new Command('attach')
   .alias('a')
   .description('既存のブランチから演奏者を招集する')
@@ -30,30 +117,13 @@ export const attachCommand = new Command('attach')
           process.exit(1)
         }
 
-        // fetchオプションが指定されている場合
         if (options?.fetch) {
           spinner.text = 'リモートから最新情報を取得中...'
           await gitManager.fetchAll()
         }
 
         spinner.text = 'ブランチ一覧を取得中...'
-        const branches = await gitManager.getAllBranches()
-
-        // 既存のワークツリーを取得
-        const worktrees = await gitManager.listWorktrees()
-        const attachedBranches = worktrees
-          .map(wt => wt.branch?.replace('refs/heads/', ''))
-          .filter(Boolean)
-
-        // 利用可能なブランチをフィルタリング
-        let availableBranches = branches.local.filter(b => !attachedBranches.includes(b))
-
-        if (options?.remote) {
-          const remoteAvailable = branches.remote.filter(
-            b => !attachedBranches.includes(b.split('/').slice(1).join('/'))
-          )
-          availableBranches = [...availableBranches, ...remoteAvailable]
-        }
+        const availableBranches = await getAvailableBranches(gitManager, options?.remote || false)
 
         if (availableBranches.length === 0) {
           spinner.fail('利用可能なブランチがありません')
@@ -63,37 +133,10 @@ export const attachCommand = new Command('attach')
 
         spinner.stop()
 
-        // ブランチ名が指定されていない場合は選択
         if (!branchName) {
-          const { selectedBranch } = await inquirer.prompt([
-            {
-              type: 'list',
-              name: 'selectedBranch',
-              message: 'どのブランチから演奏者を招集しますか？',
-              choices: availableBranches.map(branch => ({
-                name: branch.includes('origin/')
-                  ? `${chalk.yellow('[remote]')} ${chalk.cyan(branch)}`
-                  : `${chalk.green('[local]')} ${chalk.cyan(branch)}`,
-                value: branch,
-              })),
-              pageSize: 15,
-            },
-          ])
-          branchName = selectedBranch
-        } else if (!availableBranches.includes(branchName)) {
-          // 指定されたブランチが存在するか確認
-          console.error(chalk.red(`エラー: ブランチ '${branchName}' が見つかりません`))
-
-          // 類似した名前を提案
-          const similarBranches = availableBranches.filter(b => b.includes(branchName || ''))
-          if (similarBranches.length > 0) {
-            console.log(chalk.yellow('\n利用可能なブランチ:'))
-            similarBranches.forEach(branch => {
-              console.log(`  - ${chalk.cyan(branch)}`)
-            })
-          }
-
-          process.exit(1)
+          branchName = await selectBranch(availableBranches)
+        } else {
+          validateBranchExists(branchName, availableBranches)
         }
 
         spinner.start(`演奏者を招集中...`)
@@ -106,35 +149,12 @@ export const attachCommand = new Command('attach')
             `  📁 ${chalk.gray(worktreePath)}`
         )
 
-        // 環境セットアップ
         if (options?.setup) {
-          const setupSpinner = ora('環境をセットアップ中...').start()
-
-          // package.jsonが存在する場合はnpm install
-          try {
-            await execa('npm', ['install'], { cwd: worktreePath })
-            setupSpinner.succeed('npm install 完了')
-          } catch {
-            setupSpinner.warn('npm install をスキップ')
-          }
+          await setupEnvironment(worktreePath)
         }
 
-        // エディタで開く
         if (options?.open) {
-          const openSpinner = ora('エディタで開いています...').start()
-          try {
-            // まずCursorを試す
-            await execa('cursor', [worktreePath])
-            openSpinner.succeed('Cursorで開きました')
-          } catch {
-            // 次にVSCodeを試す
-            try {
-              await execa('code', [worktreePath])
-              openSpinner.succeed('VSCodeで開きました')
-            } catch {
-              openSpinner.warn('エディタが見つかりません')
-            }
-          }
+          await openInEditor(worktreePath)
         }
 
         console.log(chalk.green('\n✨ 演奏者の招集が完了しました！'))
