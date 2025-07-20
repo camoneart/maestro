@@ -97,11 +97,30 @@ export function prepareWorktreeSelection(
 
   // ブランチ名が指定されている場合
   if (branchName && !options.fzf) {
-    const targetWorktree = orchestraMembers.find(
-      wt => wt.branch === branchName || wt.branch === `refs/heads/${branchName}`
-    )
-    if (targetWorktree) {
-      return { filteredWorktrees: [targetWorktree], needsInteractiveSelection: false }
+    // ワイルドカードパターンのチェック
+    if (branchName.includes('*')) {
+      // パターンを正規表現に変換
+      const pattern = branchName
+        .replace(/[.+?^${}()|[\]\\]/g, '\\$&') // 特殊文字をエスケープ
+        .replace(/\*/g, '.*') // * を .* に置換
+      const regex = new RegExp(`^(refs/heads/)?${pattern}$`)
+      
+      const matchedWorktrees = orchestraMembers.filter(wt => {
+        const branch = wt.branch || ''
+        return regex.test(branch) || regex.test(branch.replace('refs/heads/', ''))
+      })
+      
+      if (matchedWorktrees.length > 0) {
+        return { filteredWorktrees: matchedWorktrees, needsInteractiveSelection: false }
+      }
+    } else {
+      // 通常の完全一致
+      const targetWorktree = orchestraMembers.find(
+        wt => wt.branch === branchName || wt.branch === `refs/heads/${branchName}`
+      )
+      if (targetWorktree) {
+        return { filteredWorktrees: [targetWorktree], needsInteractiveSelection: false }
+      }
     }
   }
 
@@ -168,7 +187,7 @@ export async function executeWorktreeDeletion(
 export const deleteCommand = new Command('delete')
   .alias('rm')
   .description('演奏者（worktree）を解散')
-  .argument('[branch-name]', '削除するブランチ名')
+  .argument('[branch-name]', '削除するブランチ名（ワイルドカード使用可: feature/demo-*）')
   .option('-f, --force', '強制削除')
   .option('-r, --remove-remote', 'リモートブランチも削除')
   .option('--fzf', 'fzfで選択（複数選択可）')
@@ -275,31 +294,41 @@ export const deleteCommand = new Command('delete')
 
           spinner.start()
         } else if (branchName) {
-          // 単一のブランチを指定
-          const targetWorktree = filteredWorktrees.find(wt => {
-            const branch = wt.branch?.replace('refs/heads/', '')
-            return branch === branchName || wt.branch === branchName
-          })
+          // ワイルドカードパターンの場合は既にフィルタリング済み
+          if (branchName.includes('*')) {
+            targetWorktrees = filteredWorktrees
+            
+            if (targetWorktrees.length === 0) {
+              spinner.fail(`パターン '${branchName}' に一致する演奏者が見つかりません`)
+              throw new DeleteCommandError('指定されたパターンに一致する演奏者が見つかりません')
+            }
+          } else {
+            // 単一のブランチを指定
+            const targetWorktree = filteredWorktrees.find(wt => {
+              const branch = wt.branch?.replace('refs/heads/', '')
+              return branch === branchName || wt.branch === branchName
+            })
 
-          if (!targetWorktree) {
-            spinner.fail(`演奏者 '${branchName}' が見つかりません`)
+            if (!targetWorktree) {
+              spinner.fail(`演奏者 '${branchName}' が見つかりません`)
 
-            // 類似した名前を提案
-            const similarBranches = filteredWorktrees
-              .filter(wt => wt.branch && wt.branch.includes(branchName))
-              .map(wt => wt.branch?.replace('refs/heads/', '') || wt.branch)
+              // 類似した名前を提案
+              const similarBranches = filteredWorktrees
+                .filter(wt => wt.branch && wt.branch.includes(branchName))
+                .map(wt => wt.branch?.replace('refs/heads/', '') || wt.branch)
 
-            if (similarBranches.length > 0) {
-              console.log(chalk.yellow('\n類似した演奏者:'))
-              similarBranches.forEach(branch => {
-                console.log(`  - ${chalk.cyan(branch)}`)
-              })
+              if (similarBranches.length > 0) {
+                console.log(chalk.yellow('\n類似した演奏者:'))
+                similarBranches.forEach(branch => {
+                  console.log(`  - ${chalk.cyan(branch)}`)
+                })
+              }
+
+              throw new DeleteCommandError('指定された演奏者が見つかりません')
             }
 
-            throw new DeleteCommandError('指定された演奏者が見つかりません')
+            targetWorktrees = [targetWorktree]
           }
-
-          targetWorktrees = [targetWorktree]
         } else {
           throw new DeleteCommandError('削除対象を指定してください')
         }
