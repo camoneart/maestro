@@ -5,7 +5,7 @@
 [![License MIT](https://img.shields.io/badge/License-MIT-yellow?labelColor=555555&style=flat)](https://opensource.org/licenses/MIT)
 
 ![maestro](public/image/logo/maestro-logo.png)
-**Git Worktreeを“オーケストラ”のように操り、Claude Codeとの並列開発を加速するCLIツール**
+**Git Worktreeを“オーケストラ”のように操り、Claude Codeとの並列開発を加速するCLIツール。**
 
 ![Demo Animation]()
 

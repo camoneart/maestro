@@ -5,7 +5,7 @@
 [![License MIT](https://img.shields.io/badge/License-MIT-yellow?labelColor=555555&style=flat)](https://opensource.org/licenses/MIT)
 
 ![maestro](public/image/logo/maestro-logo.png)
-**A CLI tool that “conducts” Git Worktrees like an orchestra and turbo-charges parallel development with Claude Code**
+**A CLI tool that “conducts” Git Worktrees like an orchestra and turbo-charges parallel development with Claude Code.**
 
 ![Demo Animation]()
 
