@@ -24,6 +24,8 @@ export interface CreateOptions {
   open?: boolean
   setup?: boolean
   tmux?: boolean
+  tmuxH?: boolean
+  tmuxV?: boolean
   claude?: boolean
   draftPr?: boolean
   yes?: boolean

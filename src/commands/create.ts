@@ -9,6 +9,7 @@ import { getTemplateConfig } from './template.js'
 import { execa } from 'execa'
 import path from 'path'
 import fs from 'fs/promises'
+import { setupTmuxStatusLine } from '../utils/tmux.js'
 
 // GitHubラベル型定義
 interface GithubLabel {
@@ -148,12 +149,54 @@ export async function saveWorktreeMetadata(
 export async function createTmuxSession(
   branchName: string,
   worktreePath: string,
-  config: Config
+  config: Config,
+  options?: CreateOptions
 ): Promise<void> {
   const sessionName = branchName.replace(/[^a-zA-Z0-9_-]/g, '-')
 
   try {
-    // 既存のセッションをチェック
+    // ペイン分割オプションの場合
+    if (options?.tmuxH || options?.tmuxV) {
+      // 現在のtmuxセッション内でペインを分割
+      const splitArgs = ['split-window']
+      
+      if (options.tmuxH) {
+        splitArgs.push('-h') // 水平分割（左右）
+      } else if (options.tmuxV) {
+        splitArgs.push('-v') // 垂直分割（上下）
+      }
+      
+      splitArgs.push('-c', worktreePath)
+      await execa('tmux', splitArgs)
+      
+      // 新しいペインにタイトルを設定
+      await execa('tmux', ['select-pane', '-T', branchName])
+      
+      // tmuxステータスラインを設定
+      await setupTmuxStatusLine()
+      
+      // 新しいペインでClaudeコマンドを実行（オプションが有効な場合）
+      if (options.claude || config.claude?.autoStart) {
+        // Issue番号からの作成の場合、説明を含める
+        let claudeCommand = 'claude'
+        
+        if (branchName.includes('issue-')) {
+          const issueNumber = branchName.match(/issue-(\d+)/)?.[1]
+          if (issueNumber) {
+            claudeCommand = `claude "fix issue ${issueNumber}"`
+          }
+        }
+        
+        // 新しいペインにコマンドを送信
+        await execa('tmux', ['send-keys', '-t', ':.', claudeCommand, 'Enter'])
+      }
+      
+      // 新しいペインでシェルのプロンプトを表示
+      console.log(chalk.green(`✅ tmuxペインを${options.tmuxH ? '水平' : '垂直'}分割しました: ${branchName}`))
+      return
+    }
+
+    // 既存のセッションをチェック（通常のtmuxオプションの場合）
     try {
       await execa('tmux', ['has-session', '-t', sessionName])
       console.log(chalk.yellow(`tmuxセッション '${sessionName}' は既に存在します`))
@@ -504,8 +547,8 @@ export async function executePostCreationTasks(
   }
 
   // tmuxセッション作成
-  if (options.tmux || config.tmux?.enabled) {
-    tasks.push(createTmuxSession(branchName, worktreePath, config))
+  if (options.tmux || options.tmuxH || options.tmuxV || config.tmux?.enabled) {
+    tasks.push(createTmuxSession(branchName, worktreePath, config, options))
   }
 
   // Claude.md処理
@@ -596,6 +639,8 @@ export const createCommand = new Command('create')
   .option('-o, --open', 'VSCode/Cursorで開く')
   .option('-s, --setup', '環境セットアップを実行')
   .option('-t, --tmux', 'tmuxセッションを作成してClaude Codeを起動')
+  .option('--tmux-h', 'tmuxペインを水平分割して作成')
+  .option('--tmux-v', 'tmuxペインを垂直分割して作成')
   .option('-c, --claude', 'Claude Codeを自動起動')
   .option('--template <name>', 'テンプレートを使用')
   .option('-y, --yes', '確認をスキップ')
