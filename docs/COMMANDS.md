@@ -16,7 +16,9 @@ mst create <branch-name> [options]
 - `--base <branch>` - Specify base branch (default: main)
 - `--open` - Automatically open in editor
 - `--setup` - Auto-setup development environment
-- `--tmux` - Create tmux session
+- `--tmux` - Create new tmux window
+- `--tmux-h` - Create in horizontal tmux pane split (side by side)
+- `--tmux-v` - Create in vertical tmux pane split (top and bottom)
 - `--claude` - Create CLAUDE.md for Claude Code
 - `--template <name>` - Use template
 - `--draft-pr` - Auto-create Draft PR
@@ -37,6 +39,10 @@ mst create feature/full-setup --tmux --claude --open --setup
 
 # Create from GitHub Issue
 mst create 123  # Auto-generates branch name from Issue #123
+
+# Create with tmux pane split
+mst create feature/new --tmux-h --claude  # Horizontal split with Claude
+mst create issue-456 --tmux-v --setup     # Vertical split with setup
 ```
 
 ### 📋 list - List Orchestra Members
