@@ -1,5 +1,15 @@
 # Changelog
 
+## 2.1.1
+
+### Patch Changes
+
+- [`ed0a0ff`](https://github.com/hashiramaendure/maestro/commit/ed0a0ff2fc1b97f3e2a8f8a7f0a62a1d5937ecff) Thanks [@hashiramaendure](https://github.com/hashiramaendure)! - feat(list): Add relative path display for better readability
+  - Display worktree paths relative to repository root by default
+  - Add `--full-path` option to show absolute paths when needed
+  - Current directory shows as `.` for clarity
+  - Significantly improves output readability of `mst list` command
+
 ## 2.1.0
 
 ### Minor Changes
