@@ -1,5 +1,18 @@
 # Changelog
 
+## 2.2.0
+
+### Minor Changes
+
+- [`7a3c70d`](https://github.com/hashiramaendure/maestro/commit/7a3c70d6f76aaa5c9ef103b2973622ff7235a89e) Thanks [@hashiramaendure](https://github.com/hashiramaendure)! - feat: Add tmux pane split functionality
+  - Add `--tmux-h` option for horizontal pane split (side by side)
+  - Add `--tmux-v` option for vertical pane split (top and bottom)
+  - Automatically execute Claude commands in new panes when `--claude` is used
+  - Set up tmux status line to show current Git branch
+  - Display branch names as pane titles
+
+  This feature brings a Phantom-like development experience to Maestro, allowing developers to maintain their current context while creating new worktrees in split panes within the same tmux window.
+
 ## 2.1.1
 
 ### Patch Changes
