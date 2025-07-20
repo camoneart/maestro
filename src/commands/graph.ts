@@ -28,7 +28,10 @@ interface BranchRelation {
 import { Worktree } from '../types/index.js'
 
 // ブランチとmainとの関係を取得
-async function getBranchMainRelation(branch: string, worktreePath: string): Promise<{
+async function getBranchMainRelation(
+  branch: string,
+  worktreePath: string
+): Promise<{
   ahead: number
   behind: number
   lastCommit?: { hash: string; date: Date; message: string }

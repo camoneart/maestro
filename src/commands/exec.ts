@@ -67,7 +67,8 @@ async function executeOnSpecificMember(
   command: string,
   silent?: boolean
 ): Promise<void> {
-  const displayBranchName = targetWorktree.branch?.replace('refs/heads/', '') || targetWorktree.branch
+  const displayBranchName =
+    targetWorktree.branch?.replace('refs/heads/', '') || targetWorktree.branch
 
   if (!silent) {
     console.log(chalk.green(`\n🎼 演奏者 '${chalk.cyan(displayBranchName)}' でコマンドを実行`))

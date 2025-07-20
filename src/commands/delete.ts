@@ -104,12 +104,12 @@ export function prepareWorktreeSelection(
         .replace(/[.+?^${}()|[\]\\]/g, '\\$&') // 特殊文字をエスケープ
         .replace(/\*/g, '.*') // * を .* に置換
       const regex = new RegExp(`^(refs/heads/)?${pattern}$`)
-      
+
       const matchedWorktrees = orchestraMembers.filter(wt => {
         const branch = wt.branch || ''
         return regex.test(branch) || regex.test(branch.replace('refs/heads/', ''))
       })
-      
+
       if (matchedWorktrees.length > 0) {
         return { filteredWorktrees: matchedWorktrees, needsInteractiveSelection: false }
       }
@@ -318,9 +318,7 @@ async function displayDeletionDetails(targetWorktrees: Worktree[]): Promise<void
       )}`
     )
     if (worktree.locked) {
-      console.log(
-        `    ${chalk.red('⚠️  ロックされています')}: ${worktree.reason || '理由不明'}`
-      )
+      console.log(`    ${chalk.red('⚠️  ロックされています')}: ${worktree.reason || '理由不明'}`)
     }
   })
 

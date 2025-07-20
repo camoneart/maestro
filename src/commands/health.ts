@@ -202,7 +202,10 @@ async function determineMainBranch(): Promise<string> {
 }
 
 // オーケストラメンバーを取得
-async function getOrchestraMembers(gitManager: GitWorktreeManager, spinner: Ora): Promise<Worktree[]> {
+async function getOrchestraMembers(
+  gitManager: GitWorktreeManager,
+  spinner: Ora
+): Promise<Worktree[]> {
   const worktrees = await gitManager.listWorktrees()
   const orchestraMembers = worktrees.filter(wt => !wt.path.endsWith('.'))
 
@@ -289,7 +292,10 @@ async function handleFixOption(allIssues: HealthIssue[], mainBranch: string): Pr
 }
 
 // プルーンオプションを処理
-async function handlePruneOption(allIssues: HealthIssue[], gitManager: GitWorktreeManager): Promise<void> {
+async function handlePruneOption(
+  allIssues: HealthIssue[],
+  gitManager: GitWorktreeManager
+): Promise<void> {
   const staleWorktrees = allIssues
     .filter(i => i.type === 'stale')
     .map(i => i.worktree)
@@ -345,9 +351,7 @@ function showRecommendations(allIssues: HealthIssue[], hasFix?: boolean, hasPrun
   }
 
   if (allIssues.some(i => i.type === 'uncommitted')) {
-    console.log(
-      chalk.gray('  • 未コミットの変更がある場合は手動でコミットまたは破棄してください')
-    )
+    console.log(chalk.gray('  • 未コミットの変更がある場合は手動でコミットまたは破棄してください'))
   }
 }
 
@@ -429,7 +433,12 @@ export const healthCommand = new Command('health')
 
       const mainBranch = await determineMainBranch()
       const orchestraMembers = await getOrchestraMembers(gitManager, spinner)
-      const allIssues = await checkAllWorktrees(orchestraMembers, mainBranch, options.days?.toString(), spinner)
+      const allIssues = await checkAllWorktrees(
+        orchestraMembers,
+        mainBranch,
+        options.days?.toString(),
+        spinner
+      )
 
       spinner.stop()
 
@@ -452,7 +461,7 @@ export const healthCommand = new Command('health')
         await handlePruneOption(allIssues, gitManager)
       }
 
-            // 推奨事項
+      // 推奨事項
       showRecommendations(allIssues, options.fix, options.prune)
     } catch (error) {
       spinner.fail('健全性チェックに失敗しました')
