@@ -27,6 +27,78 @@ interface BranchRelation {
 // ブランチの関係性を分析
 import { Worktree } from '../types/index.js'
 
+// ブランチとmainとの関係を取得
+async function getBranchMainRelation(branch: string, worktreePath: string): Promise<{
+  ahead: number
+  behind: number
+  lastCommit?: { hash: string; date: Date; message: string }
+} | null> {
+  try {
+    await execa('git', ['merge-base', branch, 'main'], { cwd: worktreePath })
+
+    const { stdout: ahead } = await execa('git', ['rev-list', '--count', `main..${branch}`], {
+      cwd: worktreePath,
+    })
+
+    const { stdout: behind } = await execa('git', ['rev-list', '--count', `${branch}..main`], {
+      cwd: worktreePath,
+    })
+
+    const { stdout: lastCommitInfo } = await execa(
+      'git',
+      ['log', '-1', '--format=%H|%ai|%s', branch],
+      { cwd: worktreePath }
+    )
+
+    const [hash, date, message] = lastCommitInfo.split('|')
+
+    return {
+      ahead: parseInt(ahead),
+      behind: parseInt(behind),
+      lastCommit: {
+        hash: hash?.substring(0, 7) || '',
+        date: new Date(date || ''),
+        message: message?.substring(0, 50) || '',
+      },
+    }
+  } catch {
+    return null
+  }
+}
+
+// より正確な親ブランチを検出
+async function findBetterParent(
+  branch: string,
+  worktreePath: string,
+  otherWorktrees: Worktree[]
+): Promise<string> {
+  let parent = 'main'
+
+  for (const otherWorktree of otherWorktrees) {
+    if (!otherWorktree.branch) continue
+
+    const otherBranch = otherWorktree.branch.replace('refs/heads/', '')
+
+    try {
+      await execa('git', ['merge-base', branch, otherBranch], { cwd: worktreePath })
+
+      const { stdout: isParent } = await execa(
+        'git',
+        ['rev-list', '--count', `${otherBranch}..${branch}`],
+        { cwd: worktreePath }
+      )
+
+      if (parseInt(isParent) > 0 && parent === 'main') {
+        parent = otherBranch
+      }
+    } catch {
+      // エラーは無視
+    }
+  }
+
+  return parent
+}
+
 async function analyzeBranchRelations(worktrees: Worktree[]): Promise<BranchRelation[]> {
   const relations: BranchRelation[] = []
 
@@ -34,72 +106,20 @@ async function analyzeBranchRelations(worktrees: Worktree[]): Promise<BranchRela
     if (!worktree.branch) continue
 
     const branch = worktree.branch.replace('refs/heads/', '')
+    const branchRelation = await getBranchMainRelation(branch, worktree.path)
 
-    try {
-      // ブランチの親を特定（merge-baseを使用）
-      await execa('git', ['merge-base', branch, 'main'], { cwd: worktree.path })
+    if (!branchRelation) continue
 
-      // mainブランチとの関係を確認
-      const { stdout: ahead } = await execa('git', ['rev-list', '--count', `main..${branch}`], {
-        cwd: worktree.path,
-      })
+    const otherWorktrees = worktrees.filter(wt => wt !== worktree)
+    const parent = await findBetterParent(branch, worktree.path, otherWorktrees)
 
-      const { stdout: behind } = await execa('git', ['rev-list', '--count', `${branch}..main`], {
-        cwd: worktree.path,
-      })
-
-      // 最新コミット情報を取得
-      const { stdout: lastCommitInfo } = await execa(
-        'git',
-        ['log', '-1', '--format=%H|%ai|%s', branch],
-        { cwd: worktree.path }
-      )
-
-      const [hash, date, message] = lastCommitInfo.split('|')
-
-      relations.push({
-        branch,
-        parent: 'main', // 簡略化のため、全てmainから派生と仮定
-        ahead: parseInt(ahead),
-        behind: parseInt(behind),
-        lastCommit: {
-          hash: hash?.substring(0, 7) || '',
-          date: new Date(date || ''),
-          message: message?.substring(0, 50) || '',
-        },
-      })
-
-      // 他のブランチとの関係も検出
-      for (const otherWorktree of worktrees) {
-        if (otherWorktree === worktree || !otherWorktree.branch) continue
-
-        const otherBranch = otherWorktree.branch.replace('refs/heads/', '')
-
-        try {
-          // 共通の祖先を確認
-          await execa('git', ['merge-base', branch, otherBranch], { cwd: worktree.path })
-
-          // otherBranchがこのブランチの親である可能性をチェック
-          const { stdout: isParent } = await execa(
-            'git',
-            ['rev-list', '--count', `${otherBranch}..${branch}`],
-            { cwd: worktree.path }
-          )
-
-          if (parseInt(isParent) > 0) {
-            // より正確な親を更新
-            const existingRelation = relations.find(r => r.branch === branch)
-            if (existingRelation && existingRelation.parent === 'main') {
-              existingRelation.parent = otherBranch
-            }
-          }
-        } catch {
-          // エラーは無視
-        }
-      }
-    } catch {
-      // ブランチ分析エラーは無視
-    }
+    relations.push({
+      branch,
+      parent,
+      ahead: branchRelation.ahead,
+      behind: branchRelation.behind,
+      lastCommit: branchRelation.lastCommit,
+    })
   }
 
   return relations
