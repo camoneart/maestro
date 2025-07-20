@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.2.1
+
+### Patch Changes
+
+- [`4280a19`](https://github.com/hashiramaendure/maestro/commit/4280a19) Thanks [@hashiramaendure](https://github.com/hashiramaendure)! - fix: resolve worktree branch name matching in delete command
+
+  Fixed an issue where the `mst delete` command would fail with "ワークツリー 'refs/heads/branch-name' が見つかりません" error. The issue occurred because the delete command was passing branch names with the `refs/heads/` prefix to the GitWorktreeManager, which expects clean branch names.
+
 ## 2.2.0
 
 ### Minor Changes
