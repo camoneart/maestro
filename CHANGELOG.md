@@ -1,5 +1,15 @@
 # Changelog
 
+## 2.1.0
+
+### Minor Changes
+
+- Add wildcard support to delete command
+  - Enable pattern matching with `*` in branch names (e.g., `mst delete "feature/demo-*"`)
+  - Support bulk deletion of multiple worktrees matching a pattern
+  - Update help text to indicate wildcard support
+  - Useful for cleaning up multiple demo or temporary branches at once
+
 ## 2.0.2
 
 ### Patch Changes
