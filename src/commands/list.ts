@@ -32,6 +32,27 @@ interface WorktreeMetadata {
   template?: string
 }
 
+// パスを短縮表示する関数（リポジトリルートからの相対パス）
+async function formatPath(fullPath: string, gitManager: GitWorktreeManager): Promise<string> {
+  try {
+    // Gitリポジトリのルートディレクトリを取得
+    const repoRoot = await gitManager.getRepositoryRoot()
+    
+    // リポジトリルートからの相対パスを計算
+    const relativePath = path.relative(repoRoot, fullPath)
+    
+    // 現在のディレクトリと同じ場合
+    if (relativePath === '' || relativePath === '.') {
+      return '.'
+    }
+    
+    return relativePath
+  } catch {
+    // リポジトリルート取得に失敗した場合はディレクトリ名のみ
+    return path.basename(fullPath)
+  }
+}
+
 export const listCommand = new Command('list')
   .alias('ls')
   .description('オーケストラ編成（worktree）の一覧を表示')
@@ -41,6 +62,7 @@ export const listCommand = new Command('list')
   .option('--sort <field>', 'ソート順 (branch|age|size)', 'branch')
   .option('--last-commit', '最終コミット情報を表示')
   .option('--metadata', 'メタデータ情報を表示')
+  .option('--full-path', '完全パスを表示')
   .action(
     async (
       options: {
@@ -50,6 +72,7 @@ export const listCommand = new Command('list')
         sort?: string
         lastCommit?: boolean
         metadata?: boolean
+        fullPath?: boolean
       } = {}
     ) => {
       try {
@@ -123,17 +146,19 @@ export const listCommand = new Command('list')
 
         // fzfで選択
         if (options?.fzf) {
-          const fzfInput = worktrees
-            .map(w => {
+          const fzfEntries = await Promise.all(
+            worktrees.map(async w => {
               const status = []
               if (w.isCurrentDirectory) status.push(chalk.green('現在'))
               if (w.locked) status.push(chalk.red('ロック'))
               if (w.prunable) status.push(chalk.yellow('削除可能'))
 
               const statusStr = status.length > 0 ? ` [${status.join(', ')}]` : ''
-              return `${w.branch}${statusStr} | ${w.path}`
+              const displayPath = options.fullPath ? w.path : await formatPath(w.path, gitManager)
+              return `${w.branch}${statusStr} | ${displayPath}`
             })
-            .join('\n')
+          )
+          const fzfInput = fzfEntries.join('\n')
 
           const fzfProcess = spawn(
             'fzf',
@@ -187,12 +212,12 @@ export const listCommand = new Command('list')
         const memberWorktrees = worktrees.filter(wt => wt !== mainWorktree)
 
         if (mainWorktree) {
-          displayWorktree(mainWorktree, true, options.lastCommit, options.metadata)
+          await displayWorktree(mainWorktree, true, gitManager, options.lastCommit, options.metadata, options.fullPath)
         }
 
-        memberWorktrees.forEach(wt =>
-          displayWorktree(wt, false, options.lastCommit, options.metadata)
-        )
+        for (const wt of memberWorktrees) {
+          await displayWorktree(wt, false, gitManager, options.lastCommit, options.metadata, options.fullPath)
+        }
 
         console.log(chalk.gray(`\n合計: ${worktrees.length} 名の演奏者`))
       } catch (error) {
@@ -235,11 +260,13 @@ async function sortWorktrees(worktrees: Worktree[], sortBy: string): Promise<voi
   }
 }
 
-function displayWorktree(
+async function displayWorktree(
   worktree: Worktree,
   isMain: boolean,
+  gitManager: GitWorktreeManager,
   showLastCommit?: boolean,
-  showMetadata?: boolean
+  showMetadata?: boolean,
+  showFullPath?: boolean
 ) {
   const prefix = isMain ? '📍' : '🎼'
   const branchName = worktree.branch || '(detached)'
@@ -269,9 +296,12 @@ function displayWorktree(
     status.push(chalk.magenta(`[${metadata.template}]`))
   }
 
+  // パス表示の決定
+  const displayPath = showFullPath ? worktree.path : await formatPath(worktree.path, gitManager)
+  
   let output =
     `${prefix} ${chalk.cyan(branchName.padEnd(30))} ` +
-    `${chalk.gray(worktree.path)} ` +
+    `${chalk.gray(displayPath)} ` +
     `${status.join(' ')}`
 
   if (showLastCommit && (worktree as EnhancedWorktree).lastCommit) {

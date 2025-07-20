@@ -146,4 +146,13 @@ export class GitWorktreeManager {
       return null
     }
   }
+
+  async getRepositoryRoot(): Promise<string> {
+    try {
+      const output = await this.git.raw(['rev-parse', '--show-toplevel'])
+      return output.trim()
+    } catch {
+      throw new Error('リポジトリルートの取得に失敗しました')
+    }
+  }
 }
