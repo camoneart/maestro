@@ -1,54 +1,74 @@
 # mst list
 
-作成した演奏者（Git Worktree）の一覧を表示するコマンドです。各演奏者の状態、メタデータ、GitHubとの連携状況などを確認できます。
+Command to display a list of created orchestra members (Git Worktrees). You can check the status, metadata, and GitHub integration status of each orchestra member.
 
-## 概要
+## Overview
 
 ```bash
 mst list [options]
-mst ls [options]  # エイリアス
+mst ls [options]  # alias
 ```
 
-## 使用例
+## Usage Examples
 
-### 基本的な使用方法
+### Basic Usage
 
 ```bash
-# 演奏者の一覧を表示
+# Display list of orchestra members
 mst list
 
-# JSON形式で出力
+# Output in JSON format
 mst list --json
 
-# メタデータを含めて表示
+# Display with metadata
 mst list --metadata
 
-# fzfで選択（選択したブランチ名を出力）
+# Select with fzf (outputs selected branch name)
 mst list --fzf
+
+# Display full paths
+mst list --full-path
 ```
 
-## オプション
+## Options
 
-| オプション   | 短縮形 | 説明                   | デフォルト |
-| ------------ | ------ | ---------------------- | ---------- |
-| `--json`     | `-j`   | JSON形式で出力         | `false`    |
-| `--metadata` | `-m`   | メタデータを含めて表示 | `false`    |
-| `--fzf`      | `-f`   | fzfで選択モード        | `false`    |
+| Option         | Short  | Description                            | Default  |
+| -------------- | ------ | -------------------------------------- | -------- |
+| `--json`       | `-j`   | Output in JSON format                  | `false`  |
+| `--metadata`   | `-m`   | Display with metadata                  | `false`  |
+| `--fzf`        | `-f`   | Select mode with fzf                   | `false`  |
+| `--filter`     |        | Filter by branch name or path          | `""`     |
+| `--sort`       |        | Sort by field (branch, age, size)      | `branch` |
+| `--last-commit`|        | Show last commit information           | `false`  |
+| `--full-path`  |        | Show full paths instead of relative    | `false`  |
 
-## 出力形式
+## Output Formats
 
-### 通常の出力
+### Normal Output
+
+By default, paths are shown relative to the repository root:
 
 ```
-🎼 Orchestra Members (Worktrees):
+🎼 Orchestra Members:
 
-* main               /Users/user/project (HEAD)
-  feature/auth       /Users/user/project/.git/orchestra-members/feature-auth (ahead 3)
-  bugfix/login      /Users/user/project/.git/orchestra-members/bugfix-login (behind 2, ahead 1)
-  issue-123         /Users/user/project/.git/orchestra-members/issue-123 (issue: #123)
+📍 refs/heads/main                . 
+🎼 feature/auth                   .git/orchestrations/feature-auth 
+🎼 bugfix/login                   .git/orchestrations/bugfix-login 
+🎼 issue-123                      .git/orchestrations/issue-123
 ```
 
-### JSON出力（`--json`）
+### Full Path Output (`--full-path`)
+
+```
+🎼 Orchestra Members:
+
+📍 refs/heads/main                /Users/user/project 
+🎼 feature/auth                   /Users/user/project/.git/orchestrations/feature-auth 
+🎼 bugfix/login                   /Users/user/project/.git/orchestrations/bugfix-login 
+🎼 issue-123                      /Users/user/project/.git/orchestrations/issue-123
+```
+
+### JSON Output (`--json`)
 
 ```json
 {
@@ -64,7 +84,7 @@ mst list --fzf
     },
     {
       "branch": "feature/auth",
-      "path": "/Users/user/project/.git/orchestra-members/feature-auth",
+      "path": "/Users/user/project/.git/orchestrations/feature-auth",
       "HEAD": "def456ghi",
       "isMain": false,
       "tracking": "origin/feature/auth",
@@ -79,7 +99,7 @@ mst list --fzf
     },
     {
       "branch": "issue-123",
-      "path": "/Users/user/project/.git/orchestra-members/issue-123",
+      "path": "/Users/user/project/.git/orchestrations/issue-123",
       "HEAD": "ghi789jkl",
       "isMain": false,
       "tracking": "origin/issue-123",
@@ -90,7 +110,7 @@ mst list --fzf
         "createdBy": "mst",
         "githubIssue": {
           "number": 123,
-          "title": "認証機能の実装",
+          "title": "Implement authentication",
           "state": "open",
           "labels": ["enhancement", "backend"],
           "assignees": ["user123"],
@@ -108,102 +128,117 @@ mst list --fzf
 }
 ```
 
-### メタデータ付き出力（`--metadata`）
+### Output with Metadata (`--metadata`)
 
 ```
-🎼 Orchestra Members (Worktrees):
+🎼 Orchestra Members:
 
-* main               /Users/user/project (HEAD)
+📍 refs/heads/main                .
 
-  feature/auth       /Users/user/project/.git/orchestra-members/feature-auth
-    Status: ahead 3
-    Created: 2025-01-15 10:30:00
-    Template: feature
-
-  issue-123         /Users/user/project/.git/orchestra-members/issue-123
-    Status: ahead 1
-    Created: 2025-01-16 14:00:00
-    Issue: #123 - 認証機能の実装
+🎼 feature/auth                   .git/orchestrations/feature-auth
+    GitHub: PR #45 - Add authentication module
     Labels: enhancement, backend
     Assignees: user123
+    Created: 2025-01-15 10:30:00
+
+🎼 issue-123                      .git/orchestrations/issue-123
+    GitHub: Issue #123 - Implement authentication
+    Labels: enhancement, backend
+    Assignees: user123
+    Created: 2025-01-16 14:00:00
 ```
 
-## fzf統合
+### Output with Last Commit (`--last-commit`)
 
-`--fzf` オプションを使用すると、インタラクティブに演奏者を選択できます：
+```
+🎼 Orchestra Members:
+
+📍 refs/heads/main                .
+    Last commit: 2025-01-20 14:23:45 abc1234: Update README
+
+🎼 feature/auth                   .git/orchestrations/feature-auth
+    Last commit: 2025-01-19 10:15:30 def5678: Add login endpoint
+```
+
+## fzf Integration
+
+Using the `--fzf` option allows interactive selection of orchestra members:
 
 ```bash
-# 選択した演奏者のブランチ名を出力
+# Output selected orchestra member's branch name
 BRANCH=$(mst list --fzf)
 
-# 選択した演奏者に移動
+# Navigate to selected orchestra member
 cd $(mst where $(mst list --fzf))
 
-# 選択した演奏者でコマンドを実行
+# Execute command on selected orchestra member
 mst exec $(mst list --fzf) npm test
 ```
 
-## 状態の見方
+## Understanding Statuses
 
-- **HEAD**: 現在チェックアウトしている演奏者
-- **ahead X**: リモートブランチよりX個のコミットが進んでいる
-- **behind X**: リモートブランチよりX個のコミットが遅れている
-- **issue: #X**: GitHub Issue番号Xと関連付けられている
-- **pr: #X**: GitHub PR番号Xと関連付けられている
+- **📍**: Current worktree (HEAD)
+- **🎼**: Regular orchestra member
+- **🔒 Locked**: Worktree is locked
+- **⚠️ Prunable**: Can be deleted
+- **ahead X**: X commits ahead of remote branch
+- **behind X**: X commits behind remote branch
+- **Issue #X**: Associated with GitHub Issue #X
+- **PR #X**: Associated with GitHub PR #X
 
-## CI/CD連携
+## CI/CD Integration
 
-JSON出力を使用することで、CI/CDパイプラインとの連携が容易になります：
+JSON output makes it easy to integrate with CI/CD pipelines:
 
 ```bash
-# 全ての演奏者でテストを実行
+# Run tests on all orchestra members
 mst list --json | jq -r '.worktrees[].branch' | while read branch; do
   echo "Testing $branch..."
   mst exec "$branch" npm test
 done
 
-# アクティブな演奏者の数を取得
+# Get number of active orchestra members
 ACTIVE_COUNT=$(mst list --json | jq '.summary.active')
 
-# Issue関連の演奏者のみ取得
+# Get only Issue-related orchestra members
 mst list --json | jq '.worktrees[] | select(.metadata.githubIssue != null)'
 ```
 
-## フィルタリング例
+## Filtering Examples
 
-jqコマンドと組み合わせて、様々なフィルタリングが可能です：
+Combine with jq command for various filtering options:
 
 ```bash
-# ahead状態の演奏者のみ表示
+# Show only orchestra members that are ahead
 mst list --json | jq '.worktrees[] | select(.ahead > 0)'
 
-# 特定のテンプレートを使用した演奏者
+# Orchestra members using specific template
 mst list --json | jq '.worktrees[] | select(.metadata.template == "feature")'
 
-# 1週間以上古い演奏者
+# Orchestra members older than 1 week
 mst list --json | jq '.worktrees[] | select(.metadata.createdAt < (now - 604800 | strftime("%Y-%m-%dT%H:%M:%SZ")))'
 ```
 
 ## Tips & Tricks
 
-### 1. エイリアスの活用
+### 1. Using Aliases
 
 ```bash
-# ~/.bashrc または ~/.zshrc に追加
+# Add to ~/.bashrc or ~/.zshrc
 alias mstl='mst list'
 alias mstlj='mst list --json | jq'
 
-# 使用例
-mstl                    # 通常の一覧
-mstlj '.summary'        # サマリー情報のみ
-mstlj '.worktrees[0]'   # 最初の演奏者の詳細
+# Usage examples
+mstl                    # Normal list
+mstlj '.summary'        # Summary info only
+mstlj '.worktrees[0]'   # Details of first orchestra member
 ```
 
-### 2. ステータス確認スクリプト
+### 2. Status Check Script
 
 ```bash
 #!/bin/bash
-# 全演奏者のGitステータスを確認
+# Check Git status of all orchestra members
 mst list --json | jq -r '.worktrees[].branch' | while read branch; do
   echo "=== $branch ==="
   mst exec "$branch" git status --short
@@ -211,23 +246,23 @@ mst list --json | jq -r '.worktrees[].branch' | while read branch; do
 done
 ```
 
-### 3. 定期的なクリーンアップ
+### 3. Regular Cleanup
 
 ```bash
-# 30日以上更新されていない演奏者を検出
+# Detect orchestra members not updated for 30+ days
 mst list --json | jq -r '
   .worktrees[] |
   select(.metadata.createdAt < (now - 2592000 | strftime("%Y-%m-%dT%H:%M:%SZ"))) |
   .branch
 ' | while read branch; do
   echo "Old worktree: $branch"
-  # mst delete "$branch"  # 実際に削除する場合はコメントを外す
+  # mst delete "$branch"  # Uncomment to actually delete
 done
 ```
 
-## 関連コマンド
+## Related Commands
 
-- [`mst create`](./create.md) - 新しい演奏者を作成
-- [`mst delete`](./delete.md) - 演奏者を削除
-- [`mst where`](./where.md) - 演奏者のパスを表示
-- [`mst health`](./health.md) - 演奏者の健全性をチェック
+- [`mst create`](./create.md) - Create new orchestra member
+- [`mst delete`](./delete.md) - Delete orchestra member
+- [`mst where`](./where.md) - Show orchestra member path
+- [`mst health`](./health.md) - Check orchestra member health

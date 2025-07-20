@@ -1,597 +1,669 @@
-# 📚 コマンドリファレンス
+# 📚 Command Reference
 
-maestro (mst) の全コマンドの詳細な使用方法を説明します。
+Detailed usage of all maestro (mst) commands.
 
-## 基本コマンド
+## Basic Commands
 
-### 🎼 create - 演奏者の作成
+### 🎼 create - Create Orchestra Member
 
-新しい演奏者（worktree）を作成します。
+Create a new orchestra member (worktree).
 
 ```bash
 mst create <branch-name> [options]
 ```
 
-#### オプション
-- `--base <branch>` - ベースとなるブランチを指定（デフォルト: main）
-- `--open` - エディタで自動的に開く
-- `--setup` - 開発環境の自動セットアップ
-- `--tmux` - tmuxセッションを作成
-- `--claude` - Claude Code用のCLAUDE.mdを作成
-- `--template <name>` - テンプレートを使用
-- `--draft-pr` - Draft PRを自動作成
-- `-y, --yes` - 確認をスキップ
+#### Options
+- `--base <branch>` - Specify base branch (default: main)
+- `--open` - Automatically open in editor
+- `--setup` - Auto-setup development environment
+- `--tmux` - Create tmux session
+- `--claude` - Create CLAUDE.md for Claude Code
+- `--template <name>` - Use template
+- `--draft-pr` - Auto-create Draft PR
+- `--no-push` - Create branch without pushing to remote
+- `--from-pr` - Create from PR
+- `--from-issue` - Create from Issue
+- `--fzf` - Select PR/Issue with fzf
+- `--sync-files` - Sync specific files from main branch
+- `-y, --yes` - Skip confirmations
 
-#### 例
+#### Examples
 ```bash
-# 基本的な使用
+# Basic usage
 mst create feature/awesome-feature
 
-# 完全セットアップ
+# Full setup
 mst create feature/full-setup --tmux --claude --open --setup
 
-# GitHub Issueから作成
-mst create 123  # Issue #123 から自動でブランチ名を生成
+# Create from GitHub Issue
+mst create 123  # Auto-generates branch name from Issue #123
 ```
 
-### 📋 list - 演奏者の一覧表示
+### 📋 list - List Orchestra Members
 
-すべての演奏者を一覧表示します。
+Display all orchestra members.
 
 ```bash
 mst list [options]
 ```
 
-#### オプション
-- `--json` - JSON形式で出力
-- `--sort <field>` - ソート基準（branch, path, size）
-- `--filter <pattern>` - フィルタリング
-- `--details` - 詳細情報を表示
+#### Options
+- `--json` - Output in JSON format
+- `--sort <field>` - Sort by field (branch, age, size)
+- `--filter <pattern>` - Filter by pattern
+- `--last-commit` - Show last commit info
+- `--metadata` - Show metadata info
+- `--full-path` - Show full paths instead of relative paths
+- `--fzf` - Select with fzf (outputs selected branch name)
 
-#### 例
+#### Examples
 ```bash
-# 基本的な一覧表示
+# Basic list
 mst list
 
-# 詳細情報付き
-mst list --details
+# Show with details
+mst list --last-commit --metadata
 
-# サイズ順でソート
+# Sort by size
 mst list --sort size
+
+# Show full paths
+mst list --full-path
 ```
 
-### 🗑️ delete - 演奏者の削除
+### 🗑️ delete - Delete Orchestra Member
 
-演奏者を削除します。
+Delete orchestra members.
 
 ```bash
 mst delete [branch-name] [options]
 ```
 
-#### オプション
-- `--force` - 強制削除
-- `--remove-remote` - リモートブランチも削除
-- `--fzf` - fzfで選択（複数選択可）
-- `--current` - 現在のworktreeを削除
+#### Options
+- `--force` - Force delete
+- `--remove-remote` - Also delete remote branch
+- `--fzf` - Select with fzf (multiple selection)
+- `--current` - Delete current worktree
 
-#### 例
+#### Features
+- **Wildcard support**: Use patterns like `"feature/old-*"` to delete multiple branches
+
+#### Examples
 ```bash
-# 基本的な削除
+# Basic delete
 mst delete feature/old-feature
 
-# 強制削除（未コミット変更があっても削除）
+# Force delete (even with uncommitted changes)
 mst delete feature/broken --force
 
-# fzfで複数選択削除
+# Delete with wildcards
+mst delete "feature/old-*"
+
+# Select multiple with fzf
 mst delete --fzf
 ```
 
-### 🔄 sync - 演奏者の同期
+### 🔄 sync - Sync Orchestra Members
 
-演奏者間でファイルを同期します。
+Sync files between orchestra members.
 
 ```bash
 mst sync [options]
 ```
 
-#### オプション
-- `--files <pattern>` - 同期するファイルパターン
-- `--from <branch>` - 同期元のブランチ
-- `--to <branch>` - 同期先のブランチ
-- `--dry-run` - 実際には同期せずに確認のみ
-- `--auto` - 自動同期モード
+#### Options
+- `--files <pattern>` - File pattern to sync
+- `--from <branch>` - Source branch
+- `--to <branch>` - Target branch
+- `--dry-run` - Preview only, don't sync
+- `--auto` - Auto sync mode
+- `-c, --concurrency <number>` - Number of parallel executions (default: 5)
 
-#### 例
+#### Examples
 ```bash
-# 基本的な同期
+# Basic sync
 mst sync
 
-# 特定のファイルのみ同期
+# Sync specific files
 mst sync --files "*.env"
 
-# ドライランモード
+# Dry run mode
 mst sync --dry-run
 ```
 
-## 統合コマンド
+### 🐚 shell - Enter Orchestra Member Shell
 
-### 🤖 suggest - AI提案
+Enter the shell of an orchestra member.
 
-Claude Codeを使用して各種提案を行います。
+```bash
+mst shell [branch-name] [options]
+mst sh [branch-name] [options]  # alias
+```
+
+#### Options
+- `--fzf` - Select with fzf
+- `--cmd <command>` - Execute command and exit
+- `--tmux` - Attach to tmux session (create if doesn't exist)
+
+#### Examples
+```bash
+# Enter shell
+mst shell feature/awesome
+
+# Select with fzf
+mst shell --fzf
+
+# Execute command
+mst shell feature/test --cmd "npm test"
+```
+
+## Integration Commands
+
+### 🤖 suggest - AI Suggestions
+
+Use Claude Code to provide various suggestions.
 
 ```bash
 mst suggest [options]
 ```
 
-#### オプション
-- `--branch` - ブランチ名の提案
-- `--commit` - コミットメッセージの提案
-- `--issue` - Issueタイトルの提案
-- `--pr` - PRタイトル/説明の提案
-- `--review` - レビューコメントの提案
-- `--description <text>` - 説明文を指定
-- `--diff` - 差分を含める
+#### Options
+- `--branch` - Suggest branch name
+- `--commit` - Suggest commit message
+- `--issue` - Suggest issue title
+- `--pr` - Suggest PR title/description
+- `--review` - Suggest review comments
+- `--description <text>` - Specify description
+- `--diff` - Include diff
 
-#### 例
+#### Examples
 ```bash
-# ブランチ名の提案
-mst suggest --branch --description "ユーザー認証機能の追加"
+# Suggest branch name
+mst suggest --branch --description "Add user authentication"
 
-# コミットメッセージの提案
+# Suggest commit message
 mst suggest --commit --diff
 
-# PR説明の提案
-mst suggest --pr --description "ログイン機能の実装"
+# Suggest PR description
+mst suggest --pr --description "Implement login feature"
 ```
 
-### 🔗 github - GitHub統合
+### 🔗 github - GitHub Integration
 
-GitHubとの統合機能を提供します。
+Provides GitHub integration features.
 
 ```bash
 mst github [options]
 ```
 
-#### オプション
-- `--issue <number>` - Issue番号から演奏者を作成
-- `--pr <number>` - PR番号から演奏者を作成
-- `--create-pr` - PRを作成
-- `--draft` - Draft PRとして作成
-- `--branch <name>` - ブランチ名を指定
+#### Options
+- `--issue <number>` - Create orchestra member from issue
+- `--pr <number>` - Create orchestra member from PR
+- `--create-pr` - Create PR
+- `--draft` - Create as Draft PR
+- `--branch <name>` - Specify branch name
+- `-o, --open` - Open in editor
+- `-s, --setup` - Execute environment setup
+- `-m, --message <message>` - Comment message
+- `--reopen` - Reopen PR/Issue
+- `--close` - Close PR/Issue
 
-#### 例
+#### Examples
 ```bash
-# Issue #123 から演奏者を作成
+# Create from Issue #123
 mst github --issue 123
 
-# PR #456 から演奏者を作成
+# Create from PR #456
 mst github --pr 456
 
-# 現在のブランチからPRを作成
+# Create PR from current branch
 mst github --create-pr
 ```
 
-### 🖥️ tmux - tmux統合
+### 🖥️ tmux - tmux Integration
 
-tmuxセッションで演奏者を管理します。
+Manage orchestra members with tmux sessions.
 
 ```bash
 mst tmux [branch-name] [options]
 ```
 
-#### オプション
-- `--detach` - デタッチモードで起動
-- `--kill` - セッションを終了
-- `--list` - アクティブなセッションを一覧表示
-- `--editor` - エディタを起動
+#### Options
+- `--detach` - Start in detached mode
+- `--kill` - Kill session
+- `--list` - List active sessions
+- `--editor` - Launch editor
+- `-n, --new-window` - Open in new window
+- `-p, --split-pane` - Split current pane
+- `-v, --vertical` - Vertical split (use with -p)
+- `-e, --editor <editor>` - Auto-launch editor (nvim, vim, code, emacs)
+- `-d, --detach` - Only create session (don't attach)
 
-#### 例
+#### Examples
 ```bash
-# 演奏者をtmuxで開く
+# Open in tmux
 mst tmux feature/awesome
 
-# fzfで選択
+# Select with fzf
 mst tmux
 
-# デタッチモードで起動
+# Start in detached mode
 mst tmux feature/background --detach
 ```
 
-## 高度な機能
+## Advanced Features
 
-### 📊 dashboard - ダッシュボード
+### 📊 dashboard - Dashboard
 
-Web UIダッシュボードを起動します。
+Launch Web UI dashboard.
 
 ```bash
 mst dashboard [options]
 ```
 
-#### オプション
-- `--port <number>` - ポート番号を指定（デフォルト: 3000）
-- `--open` - ブラウザで自動的に開く
-- `--host <address>` - ホストアドレスを指定
+#### Options
+- `-p, --port <number>` - Port number (default: 8765)
+- `--no-open` - Don't auto-open browser
+- `--host <address>` - Host address
 
-#### 例
+#### Examples
 ```bash
-# ダッシュボードを起動
+# Launch dashboard
 mst dashboard
 
-# ポート8080で起動
-mst dashboard --port 8080 --open
+# Launch on port 8080
+mst dashboard --port 8080
 ```
 
-### 🩺 health - ヘルスチェック
+### 🩺 health - Health Check
 
-演奏者の健康状態をチェックします。
+Check health status of orchestra members.
 
 ```bash
 mst health [options]
 ```
 
-#### オプション
-- `--fix` - 問題を自動修正
-- `--json` - JSON形式で出力
-- `--verbose` - 詳細な診断情報
+#### Options
+- `--fix` - Auto-fix issues
+- `--json` - Output in JSON format
+- `--verbose` - Detailed diagnostic info
+- `-p, --prune` - Delete old worktrees
+- `-d, --days <number>` - Days to determine "old" (default: 30)
 
-#### 例
+#### Examples
 ```bash
-# 基本的なヘルスチェック
+# Basic health check
 mst health
 
-# 問題を自動修正
+# Auto-fix issues
 mst health --fix
 
-# 詳細な診断
-mst health --verbose
+# Prune old worktrees
+mst health --prune --days 60
 ```
 
-### 📸 snapshot - スナップショット
+### 📸 snapshot - Snapshots
 
-作業状態のスナップショットを管理します。
+Manage work state snapshots.
 
 ```bash
-mst snapshot <command> [options]
+mst snapshot [options]
 ```
 
-#### サブコマンド
-- `create <name>` - スナップショットを作成
-- `list` - スナップショット一覧
-- `restore <name>` - スナップショットを復元
-- `delete <name>` - スナップショットを削除
+#### Options
+- `-m, --message <message>` - Snapshot message
+- `-s, --stash` - Save changes to stash
+- `-a, --all` - Create snapshots for all worktrees
+- `-l, --list` - Show list of snapshots
+- `-r, --restore <id>` - Restore a snapshot
+- `-d, --delete <id>` - Delete a snapshot
+- `-j, --json` - Output in JSON format
 
-#### 例
+#### Examples
 ```bash
-# スナップショットを作成
-mst snapshot create before-refactor
+# Create snapshot
+mst snapshot -m "before refactoring"
 
-# スナップショット一覧
-mst snapshot list
+# List snapshots
+mst snapshot --list
 
-# スナップショットを復元
-mst snapshot restore before-refactor
+# Restore snapshot
+mst snapshot --restore <snapshot-id>
 ```
 
-### 👁️ watch - ファイル監視
+### 👁️ watch - File Watch
 
-ファイル変更を監視して自動同期します。
+Watch file changes and auto-sync.
 
 ```bash
 mst watch [options]
 ```
 
-#### オプション
-- `--files <pattern>` - 監視するファイルパターン
-- `--ignore <pattern>` - 除外するファイルパターン
-- `--auto` - 確認なしで自動同期
-- `--dry` - ドライランモード
+#### Options
+- `--files <pattern>` - File pattern to watch
+- `--ignore <pattern>` - Pattern to ignore
+- `--auto` - Auto-sync without confirmation
+- `--dry` - Dry run mode
 
-#### 例
+#### Examples
 ```bash
-# 基本的な監視
+# Basic watch
 mst watch
 
-# 特定のファイルのみ監視
+# Watch specific files
 mst watch --files "src/**/*.ts"
 
-# 自動同期モード
+# Auto-sync mode
 mst watch --auto
 ```
 
-## ユーティリティコマンド
+## Utility Commands
 
-### 🔧 config - 設定管理
+### 🔧 config - Configuration Management
 
-設定を管理します。
+Manage configuration.
 
 ```bash
 mst config <command> [options]
 ```
 
-#### サブコマンド
-- `get <key>` - 設定値を取得
-- `set <key> <value>` - 設定値を設定
-- `list` - 全設定を一覧表示
-- `reset` - 設定をリセット
+#### Subcommands
+- `get <key>` - Get config value
+- `set <key> <value>` - Set config value
+- `list` - List all configs
+- `reset` - Reset config
 
-#### 例
+#### Examples
 ```bash
-# 設定を確認
+# List configs
 mst config list
 
-# エディタを設定
+# Set editor
 mst config set development.defaultEditor cursor
 
-# 設定を取得
+# Get config
 mst config get worktrees.root
 ```
 
-### 📍 where - 現在位置確認
+### 📍 where - Current Location
 
-現在のworktreeの位置を確認します。
+Check current worktree location.
 
 ```bash
 mst where [options]
 ```
 
-#### オプション
-- `--json` - JSON形式で出力
-- `--verbose` - 詳細情報を表示
+#### Options
+- `--json` - Output in JSON format
+- `--verbose` - Show detailed info
 
-#### 例
+#### Examples
 ```bash
-# 現在位置を確認
+# Check location
 mst where
 
-# 詳細情報付き
+# With details
 mst where --verbose
 ```
 
-### 🔗 exec - コマンド実行
+### 🔗 exec - Execute Commands
 
-全ての演奏者で同じコマンドを実行します。
+Execute same command in all orchestra members.
 
 ```bash
 mst exec <command> [options]
 ```
 
-#### オプション
-- `--parallel` - 並列実行
-- `--continue-on-error` - エラー時も継続
-- `--dry-run` - 実際には実行せずに確認のみ
+#### Options
+- `--parallel` - Execute in parallel
+- `--continue-on-error` - Continue on error
+- `--dry-run` - Preview only
+- `-s, --silent` - Suppress output
+- `-a, --all` - Execute on all orchestra members
 
-#### 例
+#### Examples
 ```bash
-# 全ての演奏者でテストを実行
+# Run tests in all
 mst exec "npm test"
 
-# 並列実行
+# Parallel execution
 mst exec "npm run lint" --parallel
 ```
 
-### 🔄 batch - バッチ処理
+### 🔄 batch - Batch Processing
 
-複数の演奏者を一括処理します。
+Batch process multiple orchestra members.
 
 ```bash
 mst batch <command> [options]
 ```
 
-#### サブコマンド
-- `create <pattern>` - パターンに基づいて複数作成
-- `delete <pattern>` - パターンに基づいて複数削除
-- `sync` - 全ての演奏者を同期
+#### Options
+- `-c, --concurrency <number>` - Number of parallel executions (default: 5)
 
-#### 例
+#### Subcommands
+- `create <pattern>` - Create multiple based on pattern
+- `delete <pattern>` - Delete multiple based on pattern
+- `sync` - Sync all orchestra members
+
+#### Examples
 ```bash
-# 複数の演奏者を作成
+# Create multiple
 mst batch create feature/task-{1..5}
 
-# パターンに基づいて削除
+# Delete by pattern
 mst batch delete "feature/old-*"
 ```
 
-### 📋 template - テンプレート管理
+### 📋 template - Template Management
 
-プロジェクトテンプレートを管理します。
+Manage project templates.
 
 ```bash
 mst template <command> [options]
 ```
 
-#### サブコマンド
-- `list` - テンプレート一覧
-- `create <name>` - テンプレートを作成
-- `apply <name>` - テンプレートを適用
-- `delete <name>` - テンプレートを削除
+#### Subcommands
+- `list` - List templates
+- `create <name>` - Create template
+- `apply <name>` - Apply template
+- `delete <name>` - Delete template
 
-#### 例
+#### Examples
 ```bash
-# テンプレート一覧
+# List templates
 mst template list
 
-# テンプレートを作成
+# Create template
 mst template create react-component
 
-# テンプレートを適用
+# Apply template
 mst template apply react-component
 ```
 
-### 🔍 mcp - MCP サーバー
+### 🔍 mcp - MCP Server
 
-MCPサーバーを管理します。
+Manage MCP server.
 
 ```bash
 mst mcp <command> [options]
 ```
 
-#### サブコマンド
-- `start` - MCPサーバーを起動
-- `stop` - MCPサーバーを停止
-- `status` - MCPサーバーの状態を確認
-- `restart` - MCPサーバーを再起動
+#### Subcommands
+- `start` - Start MCP server
+- `stop` - Stop MCP server
+- `status` - Check server status
+- `restart` - Restart server
 
-#### 例
+#### Examples
 ```bash
-# MCPサーバーを起動
+# Start server
 mst mcp start
 
-# サーバーの状態を確認
+# Check status
 mst mcp status
 ```
 
-### 🎯 attach - セッション接続
+### 🎯 attach - Session Attach
 
-既存のtmuxセッションに接続します。
+Attach to existing branch.
 
 ```bash
-mst attach [session-name] [options]
+mst attach [branch-name] [options]
 ```
 
-#### オプション
-- `--create` - セッションが存在しない場合は作成
-- `--detach-others` - 他のクライアントをデタッチ
+#### Options
+- `-r, --remote` - Include remote branches
+- `-f, --fetch` - Execute fetch first
+- `-o, --open` - Open in editor
+- `-s, --setup` - Execute environment setup
 
-#### 例
+#### Examples
 ```bash
-# セッションに接続
+# Attach to branch
 mst attach feature-awesome
 
-# セッションを作成して接続
-mst attach new-session --create
+# With fetch and setup
+mst attach --fetch --setup
 ```
 
-### 📈 graph - 関係図表示
+### 📈 graph - Relationship Graph
 
-演奏者の関係図を表示します。
+Display orchestra member relationships.
 
 ```bash
 mst graph [options]
 ```
 
-#### オプション
-- `--format <type>` - 出力形式（text, json, mermaid）
-- `--depth <number>` - 表示する階層の深さ
+#### Options
+- `--format <type>` - Output format (text, mermaid, dot)
+- `--output <file>` - Output file
+- `--show-commits` - Show latest commits
+- `--show-dates` - Show last update dates
+- `-d, --depth <number>` - Display depth (default: 3)
 
-#### 例
+#### Examples
 ```bash
-# 関係図を表示
+# Display graph
 mst graph
 
-# Mermaid形式で出力
-mst graph --format mermaid
+# Output as Mermaid
+mst graph --format mermaid --output graph.md
 ```
 
-### 📚 history - 履歴表示
+### 📚 history - History
 
-演奏者の操作履歴を表示します。
+Display operation history.
 
 ```bash
 mst history [options]
 ```
 
-#### オプション
-- `--limit <number>` - 表示する履歴の数
-- `--json` - JSON形式で出力
-- `--filter <pattern>` - フィルタリング
+#### Options
+- `--limit <number>` - Number of history entries
+- `--json` - Output in JSON format
+- `--filter <pattern>` - Filter pattern
 
-#### 例
+#### Examples
 ```bash
-# 履歴を表示
+# Show history
 mst history
 
-# 最新10件のみ表示
+# Latest 10 entries
 mst history --limit 10
 ```
 
-### 🔍 issue - Issue管理
+### 🔍 issue - Issue Management
 
-GitHub Issueと連携します。
+GitHub Issue integration.
 
 ```bash
 mst issue <command> [options]
 ```
 
-#### サブコマンド
-- `create` - Issueを作成
-- `list` - Issue一覧を表示
-- `view <number>` - Issueを表示
-- `close <number>` - Issueを閉じる
+#### Subcommands
+- `create` - Create issue
+- `list` - List issues
+- `view <number>` - View issue
+- `close <number>` - Close issue
 
-#### 例
+#### Examples
 ```bash
-# Issueを作成
+# Create issue
 mst issue create
 
-# Issue一覧を表示
+# List issues
 mst issue list
 
-# Issue #123 を表示
+# View Issue #123
 mst issue view 123
 ```
 
-### 🔍 review - レビュー管理
+### 🔍 review - Review Management
 
-Pull Requestのレビューを管理します。
+Manage Pull Request reviews.
 
 ```bash
 mst review <command> [options]
 ```
 
-#### サブコマンド
-- `create` - レビューを作成
-- `list` - レビュー一覧を表示
-- `approve <number>` - PRを承認
-- `request-changes <number>` - 変更を要求
+#### Options
+- `--auto-flow` - Execute automatic review & merge flow
 
-#### 例
+#### Subcommands
+- `create` - Create review
+- `list` - List reviews
+- `approve <number>` - Approve PR
+- `request-changes <number>` - Request changes
+
+#### Examples
 ```bash
-# レビューを作成
+# Create review
 mst review create
 
-# PRを承認
+# Approve PR
 mst review approve 123
 
-# 変更を要求
+# Request changes
 mst review request-changes 123
 ```
 
-### 🔄 completion - 自動補完
+### 🔄 completion - Auto Completion
 
-シェルの自動補完を設定します。
+Set up shell auto-completion.
 
 ```bash
 mst completion <shell>
 ```
 
-#### 対応シェル
-- `bash` - Bash用補完
-- `zsh` - Zsh用補完
-- `fish` - Fish用補完
+#### Supported Shells
+- `bash` - Bash completion
+- `zsh` - Zsh completion
+- `fish` - Fish completion
 
-#### 例
+#### Examples
 ```bash
-# Zsh用補完を設定
+# Set up Zsh completion
 mst completion zsh > ~/.zsh/completions/_mst
 
-# Bash用補完を設定
+# Set up Bash completion
 mst completion bash > /etc/bash_completion.d/mst
 ```
 
-## グローバルオプション
+## Global Options
 
-すべてのコマンドで使用可能なオプション：
+Options available for all commands:
 
-- `--help, -h` - ヘルプを表示
-- `--version, -V` - バージョンを表示
-- `--verbose, -v` - 詳細な出力
-- `--quiet, -q` - 静寂モード
-- `--config <path>` - 設定ファイルのパスを指定
-- `--no-color` - 色を無効化
+- `--help, -h` - Show help
+- `--version, -V` - Show version
+- `--verbose, -v` - Verbose output
+- `--quiet, -q` - Quiet mode
+- `--config <path>` - Config file path
+- `--no-color` - Disable colors
 
-## 設定ファイル
+## Configuration File
 
-`mst.config.json` で設定をカスタマイズできます：
+Customize settings with `mst.config.json`:
 
 ```json
 {
@@ -631,37 +703,37 @@ mst completion bash > /etc/bash_completion.d/mst
 }
 ```
 
-## 環境変数
+## Environment Variables
 
-- `MST_CONFIG_PATH` - 設定ファイルのパス
-- `MST_WORKTREES_ROOT` - Worktreeのルートディレクトリ
-- `MST_DEFAULT_EDITOR` - デフォルトエディタ
-- `MST_GITHUB_TOKEN` - GitHub API トークン
-- `MST_CLAUDE_ENABLED` - Claude Code統合の有効/無効
-- `DEBUG` - デバッグモード (`DEBUG=mst:*`)
+- `MST_CONFIG_PATH` - Config file path
+- `MST_WORKTREES_ROOT` - Worktrees root directory
+- `MST_DEFAULT_EDITOR` - Default editor
+- `MST_GITHUB_TOKEN` - GitHub API token
+- `MST_CLAUDE_ENABLED` - Enable/disable Claude Code integration
+- `DEBUG` - Debug mode (`DEBUG=mst:*`)
 
-## エラーハンドリング
+## Error Handling
 
-maestroは以下のエラーを適切に処理します：
+maestro properly handles the following errors:
 
-- Git関連エラー
-- ファイルシステムエラー
-- ネットワークエラー
-- 権限エラー
-- 設定エラー
+- Git-related errors
+- File system errors
+- Network errors
+- Permission errors
+- Configuration errors
 
-エラーが発生した場合は、`--verbose` オプションを使用して詳細な情報を確認してください。
+If an error occurs, use the `--verbose` option for detailed information.
 
-## より詳細な情報
+## More Information
 
-各コマンドの詳細な使用方法については、以下のドキュメントを参照してください：
+For detailed usage of each command, see the following documentation:
 
-- [作成コマンド詳細](./commands/create.md)
-- [削除コマンド詳細](./commands/delete.md)
-- [同期コマンド詳細](./commands/sync.md)
-- [GitHub統合詳細](./commands/github.md)
-- [ヘルスチェック詳細](./commands/health.md)
-- [スナップショット詳細](./commands/snapshot.md)
-- [バッチ処理詳細](./commands/batch.md)
-- [履歴管理詳細](./commands/history.md)
-- [一覧表示詳細](./commands/list.md)
+- [Create Command Details](./commands/create.md)
+- [Delete Command Details](./commands/delete.md)
+- [Sync Command Details](./commands/sync.md)
+- [GitHub Integration Details](./commands/github.md)
+- [Health Check Details](./commands/health.md)
+- [Snapshot Details](./commands/snapshot.md)
+- [Batch Processing Details](./commands/batch.md)
+- [History Management Details](./commands/history.md)
+- [List Display Details](./commands/list.md)
