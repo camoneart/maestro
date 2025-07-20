@@ -338,7 +338,7 @@ async function executeWorktreesDeletion(
     const deleteSpinner = ora(`演奏者 '${chalk.cyan(branch)}' を解散中...`).start()
 
     try {
-      await gitManager.deleteWorktree(worktree.branch || '', options.force)
+      await gitManager.deleteWorktree(worktree.branch?.replace('refs/heads/', '') || '', options.force)
       deleteSpinner.succeed(`演奏者 '${chalk.cyan(branch)}' を解散しました`)
 
       if (options.removeRemote && worktree.branch) {
