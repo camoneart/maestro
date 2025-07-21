@@ -5,7 +5,7 @@ This directory contains the Scoop manifest for installing maestro on Windows.
 ## Installation
 
 ```powershell
-scoop bucket add hashiramaendure https://github.com/hashiramaendure/scoop-bucket
+scoop bucket add camoneart https://github.com/camoneart/scoop-bucket
 scoop install maestro
 ```
 

@@ -1,7 +1,7 @@
 # Maestro
 
 [![Node.js >=20.0.0](https://img.shields.io/badge/Node.js-%3E%3D20.0.0-45CC11?labelColor=555555&style=flat&logoColor=FFFFFF)](https://nodejs.org/)
-[![npm version](https://img.shields.io/npm/v/@hashiramaendure/maestro?color=007EC5&labelColor=555555&style=flat&logoColor=FFFFFF)](https://www.npmjs.com/package/@hashiramaendure/maestro)
+[![npm version](https://img.shields.io/npm/v/@camoneart/maestro?color=007EC5&labelColor=555555&style=flat&logoColor=FFFFFF)](https://www.npmjs.com/package/@camoneart/maestro)
 [![License MIT](https://img.shields.io/badge/License-MIT-yellow?labelColor=555555&style=flat)](https://opensource.org/licenses/MIT)
 
 ![maestro](public/image/logo/maestro-logo.png)
@@ -54,7 +54,7 @@ Maestro is a CLI that makes Git Worktree management intuitive. When working on m
 ### Homebrew (recommended)
 
 ```bash
-brew install hashiramaendure/tap/maestro
+brew install camoneart/tap/maestro
 ```
 
 * Homebrew installs completion scripts for **zsh / fish / bash** automatically.<br>
@@ -63,7 +63,7 @@ brew install hashiramaendure/tap/maestro
 ### npm
 
 ```bash
-npm install -g @hashiramaendure/maestro
+npm install -g @camoneart/maestro
 ```
 
 ### pnpm
@@ -72,14 +72,14 @@ npm install -g @hashiramaendure/maestro
 # If pnpm is not installed yet
 npm install -g pnpm
 
-pnpm add -g @hashiramaendure/maestro
+pnpm add -g @camoneart/maestro
 ```
 
 ## Quick Start
 
 ```bash
 # 1. Install (Homebrew example)
-brew install hashiramaendure/tap/maestro
+brew install camoneart/tap/maestro
 
 # 2. Move to your Git project
 cd ~/path/to/your-repo
@@ -264,7 +264,7 @@ mst completion fish > ~/.config/fish/completions/mst.fish
 | `EADDRINUSE` | MCP server port in use | `mst mcp stop` to kill previous process |
 | `ENOENT`     | Git binary not found   | Check PATH or reinstall Git             |
 
-If the issue persists, search or open a new ticket in the [Issues](https://github.com/hashiramaendure/maestro/issues).
+If the issue persists, search or open a new ticket in the [Issues](https://github.com/camoneart/maestro/issues).
 
 ### 🔍 Debug Mode
 
@@ -280,7 +280,7 @@ DEBUG=mst:* mst review --auto-flow &> maestro-debug.log
 
 ### 🤝 Contribution Workflow
 
-1. Open an [Issue](https://github.com/hashiramaendure/maestro/issues) for bugs or feature requests.
+1. Open an [Issue](https://github.com/camoneart/maestro/issues) for bugs or feature requests.
 2. Fork the repo and create a branch like `feat/your-topic`.
 3. Run `pnpm lint && pnpm test` and make sure everything passes.
 4. Commit with **Conventional Commits**.

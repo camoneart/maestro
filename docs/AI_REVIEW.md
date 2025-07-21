@@ -90,7 +90,7 @@ This project uses Codecov for test coverage reporting. The coverage reports are 
 ## Setup for Repository Maintainers
 
 1. **Visit Codecov**:
-   - Go to [https://app.codecov.io/github/hashiramaendure/maestro](https://app.codecov.io/github/hashiramaendure/maestro)
+   - Go to [https://app.codecov.io/github/camoneart/maestro](https://app.codecov.io/github/camoneart/maestro)
    - Sign in with GitHub account
 
 2. **Get Upload Token**:

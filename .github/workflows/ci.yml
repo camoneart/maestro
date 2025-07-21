@@ -110,7 +110,7 @@ jobs:
         run: |
           echo "⚠️  Codecov token not available - skipping coverage upload"
           echo "To enable coverage reporting, add CODECOV_TOKEN to repository secrets"
-          echo "Visit: https://app.codecov.io/github/hashiramaendure/maestro"
+          echo "Visit: https://app.codecov.io/github/camoneart/maestro"
 
       - name: Upload coverage reports
         if: matrix.os == 'ubuntu-latest' && matrix.node-version == '20' && github.event_name == 'push'

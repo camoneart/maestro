@@ -1,5 +1,5 @@
 {
-  "name": "@hashiramaendure/maestro",
+  "name": "@camoneart/maestro",
   "version": "2.5.0",
   "description": "Git Worktreeを活用した「オーケストラ開発」で、Claude Codeとのパラレル開発を飛躍的に効率化するCLIツール",
   "type": "module",
@@ -33,15 +33,15 @@
     "claude",
     "development-tools"
   ],
-  "author": "hashiramaendure",
+  "author": "camoneart",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/hashiramaendure/maestro.git"
+    "url": "git+https://github.com/camoneart/maestro.git"
   },
-  "homepage": "https://github.com/hashiramaendure/maestro#readme",
+  "homepage": "https://github.com/camoneart/maestro#readme",
   "bugs": {
-    "url": "https://github.com/hashiramaendure/maestro/issues"
+    "url": "https://github.com/camoneart/maestro/issues"
   },
   "packageManager": "pnpm@10.13.1",
   "engines": {

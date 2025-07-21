@@ -23,7 +23,7 @@ This project and everyone participating in it is governed by our Code of Conduct
 
 1. Fork the repository
 2. Clone your fork: `git clone https://github.com/YOUR_USERNAME/maestro.git`
-3. Add upstream remote: `git remote add upstream https://github.com/hashiramaendure/maestro.git`
+3. Add upstream remote: `git remote add upstream https://github.com/camoneart/maestro.git`
 4. Create a new branch: `git checkout -b feature/your-feature-name`
 
 ## Development Setup
