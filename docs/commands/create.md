@@ -52,6 +52,9 @@ mst create feature/new-feature --base main --open --setup --tmux --claude --draf
 | `--claude` | `-c` | Auto-start Claude Code | `false` |
 | `--draft-pr` | `-d` | Auto-create GitHub Draft PR | `false` |
 | `--template <name>` | | Use template | none |
+| `--copy-file <file>` | | Copy files from current worktree (including gitignored files) | none |
+| `--shell` | | Enter shell after creation | `false` |
+| `--exec <command>` | | Execute command after creation | none |
 
 ## Creating from Issue Number
 
@@ -121,9 +124,26 @@ Executed processes:
 3. Claude Code startup
 4. Initial command execution (if specified in configuration)
 
+## Copying Files Feature
+
+Using the `--copy-file` option allows you to copy files from the current worktree to the new one, including gitignored files:
+
+```bash
+# Copy environment files
+mst create feature/api --copy-file .env --copy-file .env.local
+
+# Multiple files can be specified
+mst create feature/new --copy-file .env --copy-file config/local.json --copy-file .npmrc
+```
+
+Features:
+- **Gitignore detection**: Automatically detects and can copy gitignored files
+- **Multiple files**: Can specify multiple files by using the option multiple times
+- **Preserves directory structure**: Maintains the original directory structure when copying
+
 ## Configuration File Integration
 
-Settings from `.mst.json` are automatically applied:
+Settings from `.maestro.json` are automatically applied:
 
 ```json
 {
@@ -135,10 +155,32 @@ Settings from `.mst.json` are automatically applied:
     "autoSetup": true,
     "defaultEditor": "cursor"
   },
+  "postCreate": {
+    "copyFiles": [".env", ".env.local"],
+    "commands": ["pnpm install", "pnpm run dev"]
+  },
   "hooks": {
-    "afterCreate": "npm install"
+    "afterCreate": ["npm install", "npm run setup"]
   }
 }
+```
+
+### postCreate Configuration
+
+The `postCreate` section allows automatic execution of file copying and commands after worktree creation:
+
+- **copyFiles**: Array of files to copy automatically (including gitignored files)
+- **commands**: Array of commands to execute in the new worktree
+
+### hooks.afterCreate
+
+The `afterCreate` hook supports both string and array formats:
+```json
+// String format (backward compatible)
+"afterCreate": "npm install"
+
+// Array format (for multiple commands)
+"afterCreate": ["npm install", "npm run setup", "npm run test"]
 ```
 
 ## Tips & Tricks

@@ -78,13 +78,23 @@ export const ConfigSchema = z.object({
     })
     .optional(),
 
-  // カスタムコマンド
+  // カスタムコマンドとファイルコピー設定
   hooks: z
     .object({
-      // worktree作成後に実行
-      afterCreate: z.string().optional(),
+      // worktree作成後に実行（文字列または配列）
+      afterCreate: z.union([z.string(), z.array(z.string())]).optional(),
       // worktree削除前に実行
       beforeDelete: z.string().optional(),
+    })
+    .optional(),
+
+  // worktree作成時の処理
+  postCreate: z
+    .object({
+      // コピーするファイル（gitignoreファイルも含む）
+      copyFiles: z.array(z.string()).optional(),
+      // 実行するコマンド
+      commands: z.array(z.string()).optional(),
     })
     .optional(),
 })
@@ -225,6 +235,10 @@ export class ConfigManager {
       hooks: {
         afterCreate: 'npm install',
         beforeDelete: 'echo "オーケストラメンバーを解散します: $MAESTRO_BRANCH"',
+      },
+      postCreate: {
+        copyFiles: ['.env', '.env.local'],
+        commands: ['pnpm install', 'pnpm run dev'],
       },
     }
 

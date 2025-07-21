@@ -27,6 +27,7 @@ mst create <branch-name> [options]
 - `--from-issue` - Create from Issue
 - `--fzf` - Select PR/Issue with fzf
 - `--sync-files` - Sync specific files from main branch
+- `--copy-file <file>` - Copy files from current worktree (including gitignored files)
 - `-y, --yes` - Skip confirmations
 
 #### Examples
@@ -43,6 +44,9 @@ mst create 123  # Auto-generates branch name from Issue #123
 # Create with tmux pane split
 mst create feature/new --tmux-h --claude  # Horizontal split with Claude
 mst create issue-456 --tmux-v --setup     # Vertical split with setup
+
+# Copy environment files to new worktree
+mst create feature/api --copy-file .env --copy-file .env.local
 ```
 
 ### 📋 list - List Orchestra Members
@@ -669,6 +673,40 @@ mst review approve 123
 mst review request-changes 123
 ```
 
+### 🤖 claude - Claude Code Management
+
+Manage Claude Code instances for each orchestra member.
+
+```bash
+mst claude <command> [options]
+```
+
+#### Subcommands
+- `list` - List running Claude Code instances
+- `start <branch-name>` - Start Claude Code for specific worktree
+- `stop <branch-name>` - Stop Claude Code for specific worktree
+
+#### Options
+- `--all` - Apply to all orchestra members (for start/stop)
+
+#### Examples
+```bash
+# List running instances
+mst claude list
+
+# Start Claude Code for a branch
+mst claude start feature/awesome
+
+# Start Claude Code for all branches
+mst claude start --all
+
+# Stop Claude Code
+mst claude stop feature/awesome
+
+# Stop all Claude Code instances
+mst claude stop --all
+```
+
 ### 🔄 completion - Auto Completion
 
 Set up shell auto-completion.
@@ -716,11 +754,15 @@ Customize settings with `mst.config.json`:
   "development": {
     "defaultEditor": "cursor",
     "autoSetup": true,
-    "syncFiles": [".env", ".env.local"],
-    "hooks": {
-      "preCreate": ["npm install"],
-      "postCreate": ["npm run setup"]
-    }
+    "syncFiles": [".env", ".env.local"]
+  },
+  "postCreate": {
+    "copyFiles": [".env", ".env.local"],
+    "commands": ["pnpm install", "pnpm run dev"]
+  },
+  "hooks": {
+    "afterCreate": ["npm install", "npm run setup"],
+    "beforeDelete": "echo 'Cleaning up worktree'"
   },
   "integrations": {
     "claude": {
@@ -778,3 +820,6 @@ For detailed usage of each command, see the following documentation:
 - [Batch Processing Details](./commands/batch.md)
 - [History Management Details](./commands/history.md)
 - [List Display Details](./commands/list.md)
+- [Claude Code Management Details](./commands/claude.md)
+- [Shell Command Details](./commands/shell.md)
+- [Exec Command Details](./commands/exec.md)
