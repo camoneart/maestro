@@ -21,7 +21,7 @@ describe('fzf utils', () => {
           }
         }),
       })
-      
+
       const { spawn } = await import('child_process')
       vi.mocked(spawn).mockImplementation(mockSpawn)
 
@@ -37,7 +37,7 @@ describe('fzf utils', () => {
           }
         }),
       })
-      
+
       const { spawn } = await import('child_process')
       vi.mocked(spawn).mockImplementation(mockSpawn)
 
@@ -53,7 +53,7 @@ describe('fzf utils', () => {
           }
         }),
       })
-      
+
       const { spawn } = await import('child_process')
       vi.mocked(spawn).mockImplementation(mockSpawn)
 
@@ -95,7 +95,7 @@ describe('fzf utils', () => {
         write: vi.fn(),
         end: vi.fn(),
       }
-      
+
       const mockStdout = {
         on: vi.fn((event, callback) => {
           if (event === 'data') {
@@ -113,18 +113,19 @@ describe('fzf utils', () => {
           }
         }),
       })
-      
+
       const { spawn } = await import('child_process')
       vi.mocked(spawn).mockImplementation(mockSpawn)
 
       const result = await selectWorktreeWithFzf(mockWorktrees, 'Test header')
-      
+
       expect(result).toBe('feature-auth')
       expect(mockSpawn).toHaveBeenCalledWith(
         'fzf',
         [
           '--ansi',
-          '--header', 'Test header',
+          '--header',
+          'Test header',
           '--preview',
           'echo {} | cut -d"|" -f2 | xargs ls -la',
           '--preview-window=right:50%:wrap',
@@ -138,7 +139,7 @@ describe('fzf utils', () => {
         write: vi.fn(),
         end: vi.fn(),
       }
-      
+
       const mockStdout = {
         on: vi.fn(),
       }
@@ -152,12 +153,12 @@ describe('fzf utils', () => {
           }
         }),
       })
-      
+
       const { spawn } = await import('child_process')
       vi.mocked(spawn).mockImplementation(mockSpawn)
 
       const result = await selectWorktreeWithFzf(mockWorktrees)
-      
+
       expect(result).toBeNull()
     })
 
@@ -166,7 +167,7 @@ describe('fzf utils', () => {
         write: vi.fn(),
         end: vi.fn(),
       }
-      
+
       const mockStdout = {
         on: vi.fn(),
       }
@@ -180,22 +181,18 @@ describe('fzf utils', () => {
           }
         }),
       })
-      
+
       const { spawn } = await import('child_process')
       vi.mocked(spawn).mockImplementation(mockSpawn)
 
       await selectWorktreeWithFzf(mockWorktrees)
-      
+
       // Check that fzf input contains formatted entries
       expect(mockStdin.write).toHaveBeenCalledWith(
         expect.stringContaining('feature-auth | /repo/worktrees/feature-auth')
       )
-      expect(mockStdin.write).toHaveBeenCalledWith(
-        expect.stringContaining('feature-ui')
-      )
-      expect(mockStdin.write).toHaveBeenCalledWith(
-        expect.stringContaining('hotfix')
-      )
+      expect(mockStdin.write).toHaveBeenCalledWith(expect.stringContaining('feature-ui'))
+      expect(mockStdin.write).toHaveBeenCalledWith(expect.stringContaining('hotfix'))
     })
   })
 })

@@ -25,12 +25,12 @@ describe('exec command new options', () => {
       const options = execCommand.options
       const optionLongs = options.map(opt => opt.long)
       const optionFlags = options.map(opt => opt.flags)
-      
+
       expect(optionLongs).toContain('--silent')
-      expect(optionLongs).toContain('--all') 
+      expect(optionLongs).toContain('--all')
       expect(optionLongs).toContain('--fzf')
       expect(optionLongs).toContain('--tmux')
-      
+
       // Commanderでは複数フラグは.flagsに含まれる
       expect(optionFlags.some(flag => flag && flag.includes('--tmux-vertical'))).toBe(true)
       expect(optionFlags.some(flag => flag && flag.includes('--tmux-horizontal'))).toBe(true)
@@ -38,7 +38,7 @@ describe('exec command new options', () => {
 
     it('should have correct option flags and descriptions', () => {
       const options = execCommand.options
-      
+
       const fzfOption = options.find(opt => opt.long === '--fzf')
       expect(fzfOption?.description).toBe('fzfで演奏者を選択')
 
@@ -47,10 +47,14 @@ describe('exec command new options', () => {
       expect(tmuxOption?.short).toBe('-t')
 
       // 複数フラグをもつオプションをflagsで検索
-      const tmuxVerticalOption = options.find(opt => opt.flags && opt.flags.includes('--tmux-vertical'))
+      const tmuxVerticalOption = options.find(
+        opt => opt.flags && opt.flags.includes('--tmux-vertical')
+      )
       expect(tmuxVerticalOption?.description).toBe('tmuxの縦分割ペインで実行')
 
-      const tmuxHorizontalOption = options.find(opt => opt.flags && opt.flags.includes('--tmux-horizontal')) 
+      const tmuxHorizontalOption = options.find(
+        opt => opt.flags && opt.flags.includes('--tmux-horizontal')
+      )
       expect(tmuxHorizontalOption?.description).toBe('tmuxの横分割ペインで実行')
     })
   })
@@ -59,7 +63,7 @@ describe('exec command new options', () => {
     it('should have optional branch name argument', () => {
       const args = execCommand._args
       expect(args).toHaveLength(2)
-      
+
       const branchArg = args[0]
       expect(branchArg.name()).toBe('branch-name')
       expect(branchArg.required).toBe(false) // optional argument
@@ -69,7 +73,7 @@ describe('exec command new options', () => {
     it('should have variadic command arguments', () => {
       const args = execCommand._args
       const commandArg = args[1]
-      
+
       expect(commandArg.name()).toBe('command')
       expect(commandArg.variadic).toBe(true)
       expect(commandArg.required).toBe(false)
@@ -82,10 +86,8 @@ describe('exec command new options', () => {
       // This test verifies that the command definition allows for
       // multiple tmux options, even though runtime logic prevents
       // using them simultaneously
-      const tmuxOptions = execCommand.options.filter(opt => 
-        opt.long?.includes('tmux')
-      )
-      
+      const tmuxOptions = execCommand.options.filter(opt => opt.long?.includes('tmux'))
+
       expect(tmuxOptions).toHaveLength(3) // --tmux, --tmux-vertical, --tmux-horizontal
     })
 
@@ -100,7 +102,7 @@ describe('exec command new options', () => {
     it('should maintain backward compatibility with existing options', () => {
       const options = execCommand.options
       const existingOptions = ['--silent', '--all']
-      
+
       for (const optionFlag of existingOptions) {
         const option = options.find(opt => opt.long === optionFlag)
         expect(option).toBeDefined()

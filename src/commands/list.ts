@@ -150,7 +150,7 @@ export const listCommand = new Command('list')
         if (options?.names) {
           // メインブランチを除外した演奏者のブランチ名のみを出力
           const orchestraMembers = worktrees.filter((wt: Worktree) => !wt.path.endsWith('.'))
-          
+
           for (const wt of orchestraMembers) {
             const branchName = wt.branch?.replace('refs/heads/', '') || wt.branch || ''
             if (branchName) {

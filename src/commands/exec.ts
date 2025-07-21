@@ -131,11 +131,7 @@ export const execCommand = new Command('exec')
   .option('--tmux-vertical, --tmux-v', 'tmuxの縦分割ペインで実行')
   .option('--tmux-horizontal, --tmux-h', 'tmuxの横分割ペインで実行')
   .action(
-    async (
-      branchName: string | undefined,
-      commandParts: string[],
-      options: ExecOptions = {}
-    ) => {
+    async (branchName: string | undefined, commandParts: string[], options: ExecOptions = {}) => {
       try {
         const gitManager = new GitWorktreeManager()
 
@@ -169,7 +165,11 @@ export const execCommand = new Command('exec')
         }
 
         // tmuxオプションの検証
-        const tmuxOptionsCount = [options.tmux, options.tmuxVertical, options.tmuxHorizontal].filter(Boolean).length
+        const tmuxOptionsCount = [
+          options.tmux,
+          options.tmuxVertical,
+          options.tmuxHorizontal,
+        ].filter(Boolean).length
         if (tmuxOptionsCount > 1) {
           console.error(chalk.red('エラー: tmuxオプションは一つだけ指定してください'))
           process.exit(1)
@@ -177,7 +177,9 @@ export const execCommand = new Command('exec')
 
         const isUsingTmux = options.tmux || options.tmuxVertical || options.tmuxHorizontal
         if (isUsingTmux && !(await isInTmuxSession())) {
-          console.error(chalk.red('エラー: tmuxオプションを使用するにはtmuxセッション内にいる必要があります'))
+          console.error(
+            chalk.red('エラー: tmuxオプションを使用するにはtmuxセッション内にいる必要があります')
+          )
           process.exit(1)
         }
 
@@ -202,7 +204,9 @@ export const execCommand = new Command('exec')
 
             branchName = selectedBranch
           } else {
-            console.error(chalk.red('エラー: ブランチ名を指定するか --fzf オプションを使用してください'))
+            console.error(
+              chalk.red('エラー: ブランチ名を指定するか --fzf オプションを使用してください')
+            )
             process.exit(1)
           }
         }
@@ -220,13 +224,18 @@ export const execCommand = new Command('exec')
 
         // tmuxでの実行
         if (isUsingTmux) {
-          const displayBranchName = targetWorktree.branch?.replace('refs/heads/', '') || targetWorktree.branch
+          const displayBranchName =
+            targetWorktree.branch?.replace('refs/heads/', '') || targetWorktree.branch
 
           let paneType: TmuxPaneType = 'new-window'
           if (options.tmuxVertical) paneType = 'vertical-split'
           if (options.tmuxHorizontal) paneType = 'horizontal-split'
 
-          console.log(chalk.green(`\n🎼 演奏者 '${chalk.cyan(displayBranchName)}' でtmux ${paneType}コマンドを実行`))
+          console.log(
+            chalk.green(
+              `\n🎼 演奏者 '${chalk.cyan(displayBranchName)}' でtmux ${paneType}コマンドを実行`
+            )
+          )
           console.log(chalk.gray(`📁 ${targetWorktree.path}`))
           console.log(chalk.gray(`$ ${command}\n`))
 

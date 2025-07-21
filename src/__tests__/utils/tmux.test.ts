@@ -32,14 +32,14 @@ describe('tmux utils', () => {
 
   describe('executeTmuxCommand', () => {
     it('should throw error if not in tmux session', async () => {
-      await expect(
-        executeTmuxCommand(['echo', 'test'])
-      ).rejects.toThrow('tmuxオプションを使用するにはtmuxセッション内にいる必要があります')
+      await expect(executeTmuxCommand(['echo', 'test'])).rejects.toThrow(
+        'tmuxオプションを使用するにはtmuxセッション内にいる必要があります'
+      )
     })
 
     it('should create new window command when in tmux session', async () => {
       process.env.TMUX = '/tmp/tmux-1000/default,1234,0'
-      
+
       const mockSpawn = vi.fn().mockReturnValue({
         on: vi.fn((event, callback) => {
           if (event === 'exit') {
@@ -47,7 +47,7 @@ describe('tmux utils', () => {
           }
         }),
       })
-      
+
       const { spawn } = await import('child_process')
       vi.mocked(spawn).mockImplementation(mockSpawn)
 
@@ -67,7 +67,7 @@ describe('tmux utils', () => {
 
     it('should create vertical split command', async () => {
       process.env.TMUX = '/tmp/tmux-1000/default,1234,0'
-      
+
       const mockSpawn = vi.fn().mockReturnValue({
         on: vi.fn((event, callback) => {
           if (event === 'exit') {
@@ -75,7 +75,7 @@ describe('tmux utils', () => {
           }
         }),
       })
-      
+
       const { spawn } = await import('child_process')
       vi.mocked(spawn).mockImplementation(mockSpawn)
 
@@ -95,7 +95,7 @@ describe('tmux utils', () => {
 
     it('should create horizontal split command', async () => {
       process.env.TMUX = '/tmp/tmux-1000/default,1234,0'
-      
+
       const mockSpawn = vi.fn().mockReturnValue({
         on: vi.fn((event, callback) => {
           if (event === 'exit') {
@@ -103,7 +103,7 @@ describe('tmux utils', () => {
           }
         }),
       })
-      
+
       const { spawn } = await import('child_process')
       vi.mocked(spawn).mockImplementation(mockSpawn)
 
@@ -125,7 +125,7 @@ describe('tmux utils', () => {
     it('should start shell with correct environment variables', async () => {
       process.env.TMUX = '/tmp/tmux-1000/default,1234,0'
       process.env.SHELL = '/bin/zsh'
-      
+
       const mockSpawn = vi.fn().mockReturnValue({
         on: vi.fn((event, callback) => {
           if (event === 'exit') {
@@ -133,7 +133,7 @@ describe('tmux utils', () => {
           }
         }),
       })
-      
+
       const { spawn } = await import('child_process')
       vi.mocked(spawn).mockImplementation(mockSpawn)
 
@@ -145,7 +145,14 @@ describe('tmux utils', () => {
 
       expect(mockSpawn).toHaveBeenCalledWith(
         'tmux',
-        expect.arrayContaining(['new-window', '-n', 'feature-test', '-c', '/test/path', '/bin/zsh']),
+        expect.arrayContaining([
+          'new-window',
+          '-n',
+          'feature-test',
+          '-c',
+          '/test/path',
+          '/bin/zsh',
+        ]),
         expect.objectContaining({
           stdio: 'inherit',
           env: expect.objectContaining({
@@ -161,7 +168,7 @@ describe('tmux utils', () => {
   describe('executeTmuxCommandInPane', () => {
     it('should execute command in pane with correct environment', async () => {
       process.env.TMUX = '/tmp/tmux-1000/default,1234,0'
-      
+
       const mockSpawn = vi.fn().mockReturnValue({
         on: vi.fn((event, callback) => {
           if (event === 'exit') {
@@ -169,7 +176,7 @@ describe('tmux utils', () => {
           }
         }),
       })
-      
+
       const { spawn } = await import('child_process')
       vi.mocked(spawn).mockImplementation(mockSpawn)
 

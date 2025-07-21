@@ -101,7 +101,9 @@ export async function executeTmuxCommand(
       })
     })
   } catch (error) {
-    throw new Error(`Failed to execute tmux command: ${error instanceof Error ? error.message : 'Unknown error'}`)
+    throw new Error(
+      `Failed to execute tmux command: ${error instanceof Error ? error.message : 'Unknown error'}`
+    )
   }
 }
 
@@ -125,7 +127,7 @@ export async function startTmuxShell(
   }
 
   const shell = process.env.SHELL || '/bin/bash'
-  
+
   await executeTmuxCommand([shell], {
     cwd,
     env,

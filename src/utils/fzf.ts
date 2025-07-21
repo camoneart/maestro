@@ -25,7 +25,8 @@ export async function selectWorktreeWithFzf(
     'fzf',
     [
       '--ansi',
-      '--header', header,
+      '--header',
+      header,
       '--preview',
       'echo {} | cut -d"|" -f2 | xargs ls -la',
       '--preview-window=right:50%:wrap',

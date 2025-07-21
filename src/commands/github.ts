@@ -480,7 +480,9 @@ async function processWorktreeCreation(
   gitManager: GitWorktreeManager
 ): Promise<void> {
   // tmuxオプションの検証
-  const tmuxOptionsCount = [options.tmux, options.tmuxVertical, options.tmuxHorizontal].filter(Boolean).length
+  const tmuxOptionsCount = [options.tmux, options.tmuxVertical, options.tmuxHorizontal].filter(
+    Boolean
+  ).length
   if (tmuxOptionsCount > 1) {
     console.error(chalk.red('エラー: tmuxオプションは一つだけ指定してください'))
     process.exit(1)
@@ -488,7 +490,9 @@ async function processWorktreeCreation(
 
   const isUsingTmux = options.tmux || options.tmuxVertical || options.tmuxHorizontal
   if (isUsingTmux && !(await isInTmuxSession())) {
-    console.error(chalk.red('エラー: tmuxオプションを使用するにはtmuxセッション内にいる必要があります'))
+    console.error(
+      chalk.red('エラー: tmuxオプションを使用するにはtmuxセッション内にいる必要があります')
+    )
     process.exit(1)
   }
 
@@ -527,7 +531,8 @@ async function processWorktreeCreation(
       console.log(chalk.yellow('エディタでのオープンに進みます...'))
       // tmuxが失敗した場合はエディタオープンにフォールバック
       const shouldOpen =
-        options?.open || (options?.open === undefined && config.development?.defaultEditor !== 'none')
+        options?.open ||
+        (options?.open === undefined && config.development?.defaultEditor !== 'none')
       await openInEditor(worktreePath, config, !!shouldOpen)
     }
   } else {
