@@ -1,84 +1,84 @@
 # mst github
 
-GitHub のIssueやPull Requestから直接演奏者（Git Worktree）を作成するコマンドです。GitHub CLIと連携して、開発フローをシームレスに統合します。
+Command to directly create orchestra members (Git Worktrees) from GitHub Issues or Pull Requests. Integrates with GitHub CLI to seamlessly integrate development workflows.
 
-## 概要
+## Overview
 
 ```bash
 mst github [pr|issue] [number] [options]
-mst gh [pr|issue] [number] [options]  # エイリアス
+mst gh [pr|issue] [number] [options]  # alias
 ```
 
-## 使用例
+## Usage Examples
 
-### 基本的な使用方法
+### Basic Usage
 
 ```bash
-# Pull Requestから演奏者を作成
+# Create orchestra member from Pull Request
 mst github pr 123
 
-# Issueから演奏者を作成
+# Create orchestra member from Issue
 mst github issue 456
 
-# インタラクティブに選択
+# Interactive selection
 mst github
 ```
 
-### 高度な使用方法
+### Advanced Usage
 
 ```bash
-# PR作成と同時にClaude Codeを起動
+# Create PR and auto-start Claude Code
 mst github pr 123 --tmux --claude
 
-# 複数選択して一括作成
+# Multiple selection for batch creation
 mst github --multiple
 
-# フィルタリングして選択
+# Filtering for selection
 mst github issue --filter "label:bug"
 
-# 自分にアサインされたものだけ表示
+# Show only assigned to me
 mst github --assignee @me
 ```
 
-## オプション
+## Options
 
-| オプション | 短縮形 | 説明 | デフォルト |
-|-----------|--------|------|-----------|
-| `--tmux` | `-t` | tmuxセッション/ウィンドウを作成 | `false` |
-| `--claude` | `-c` | Claude Codeを自動起動 | `false` |
-| `--multiple` | `-m` | 複数選択モード | `false` |
-| `--filter <query>` | `-f` | GitHub CLIのフィルタクエリ | なし |
-| `--assignee <user>` | `-a` | 担当者でフィルタ（@meで自分） | なし |
-| `--limit <n>` | `-l` | 表示件数の上限 | `30` |
+| Option | Short | Description | Default |
+|--------|-------|-------------|---------|
+| `--tmux` | `-t` | Create tmux session/window | `false` |
+| `--claude` | `-c` | Auto-start Claude Code | `false` |
+| `--multiple` | `-m` | Multiple selection mode | `false` |
+| `--filter <query>` | `-f` | GitHub CLI filter query | none |
+| `--assignee <user>` | `-a` | Filter by assignee (@me for self) | none |
+| `--limit <n>` | `-l` | Limit of items to display | `30` |
 
-## Pull Requestからの作成
+## Creating from Pull Request
 
-### 基本フロー
+### Basic Flow
 
 ```bash
-# 1. PR一覧を確認
+# 1. Check PR list
 gh pr list
 
-# 2. PRから演奏者を作成
+# 2. Create orchestra member from PR
 mst github pr 123
 
-# 3. 作成された演奏者で作業
+# 3. Work in created orchestra member
 mst shell pr-123
 ```
 
-### 自動取得される情報
+### Automatically Retrieved Information
 
-- PRタイトル
-- PR説明文
-- 作成者情報
-- レビュアー
-- ラベル
-- マイルストーン
-- 関連Issue
-- ベースブランチ
-- マージ可能状態
+- PR title
+- PR description
+- Author information
+- Reviewers
+- Labels
+- Milestone
+- Related Issues
+- Base branch
+- Mergeable state
 
-### メタデータの保存
+### Metadata Storage
 
 ```json
 {
@@ -97,24 +97,24 @@ mst shell pr-123
 }
 ```
 
-## Issueからの作成
+## Creating from Issue
 
-### 基本フロー
+### Basic Flow
 
 ```bash
-# 1. Issue一覧を確認
+# 1. Check Issue list
 gh issue list
 
-# 2. Issueから演奏者を作成
+# 2. Create orchestra member from Issue
 mst github issue 456
 
-# 3. ブランチ名は自動生成
-# issue-456 として作成される
+# 3. Branch name is auto-generated
+# Created as issue-456
 ```
 
-### Issue番号の形式
+### Issue Number Formats
 
-以下のいずれの形式でも同じ結果になります：
+All of the following formats produce the same result:
 
 ```bash
 mst github issue 456
@@ -122,25 +122,25 @@ mst github issue #456
 mst github issue issue-456
 ```
 
-### 自動取得される情報
+### Automatically Retrieved Information
 
-- Issueタイトル
-- Issue本文
-- 作成者
-- 担当者
-- ラベル
-- マイルストーン
-- プロジェクト
-- 関連PR
+- Issue title
+- Issue body
+- Author
+- Assignees
+- Labels
+- Milestone
+- Projects
+- Related PRs
 
-## インタラクティブモード
+## Interactive Mode
 
 ```bash
-# メニューから選択
+# Select from menu
 mst github
 ```
 
-表示されるメニュー：
+Displayed menu:
 ```
 ? What would you like to create a worktree from?
 ❯ Pull Request
@@ -148,7 +148,7 @@ mst github
   Cancel
 ```
 
-その後、一覧から選択：
+Then select from list:
 ```
 ? Select a Pull Request:
 ❯ #125 feat: Add dark mode support (enhancement, ui)
@@ -157,47 +157,47 @@ mst github
   #122 refactor: Improve database queries (performance)
 ```
 
-## フィルタリング
+## Filtering
 
-GitHub CLIのフィルタ構文を使用できます：
+You can use GitHub CLI filter syntax:
 
-### Pull Requestのフィルタ
+### Pull Request Filters
 
 ```bash
-# ラベルでフィルタ
+# Filter by label
 mst github pr --filter "label:bug"
 
-# 状態でフィルタ
+# Filter by state
 mst github pr --filter "state:open draft:false"
 
-# 作成者でフィルタ
+# Filter by author
 mst github pr --filter "author:username"
 
-# 複合条件
+# Complex conditions
 mst github pr --filter "label:bug,critical state:open"
 ```
 
-### Issueのフィルタ
+### Issue Filters
 
 ```bash
-# 自分にアサインされたIssue
+# Issues assigned to me
 mst github issue --assignee @me
 
-# 特定のマイルストーン
+# Specific milestone
 mst github issue --filter "milestone:v2.0"
 
-# 最近更新されたもの
+# Recently updated
 mst github issue --filter "sort:updated-desc"
 ```
 
-## 複数選択モード
+## Multiple Selection Mode
 
 ```bash
-# 複数のPRを選択して一括作成
+# Select multiple PRs for batch creation
 mst github pr --multiple
 ```
 
-選択画面：
+Selection screen:
 ```
 ? Select Pull Requests: (Press <space> to select, <a> to toggle all)
  ◉ #125 feat: Add dark mode support
@@ -205,41 +205,41 @@ mst github pr --multiple
  ◉ #123 docs: Update API documentation
 ```
 
-## 統合ワークフロー
+## Integrated Workflows
 
-### レビューフロー
+### Review Flow
 
 ```bash
-# 1. レビュー待ちのPRを確認
+# 1. Check PRs awaiting review
 mst github pr --filter "review:required"
 
-# 2. PRから演奏者を作成してレビュー
+# 2. Create orchestra member from PR for review
 mst github pr 125 --tmux --claude
 
-# 3. AI差分レビューを実行
+# 3. Execute AI diff review
 mst suggest --review
 
-# 4. レビューコメントを投稿
+# 4. Post review comments
 gh pr review 125 --comment -b "LGTM with minor suggestions"
 ```
 
-### Issue駆動開発
+### Issue-Driven Development
 
 ```bash
-# 1. 優先度の高いIssueを選択
+# 1. Select high-priority Issues
 mst github issue --filter "label:priority:high"
 
-# 2. 演奏者を作成して開発開始
+# 2. Create orchestra member and start development
 mst github issue 456 --tmux --claude
 
-# 3. 開発完了後、PRを作成
+# 3. Create PR after development completion
 gh pr create --title "Fix #456: Authentication bug" --body "Closes #456"
 ```
 
-## CI/CD連携
+## CI/CD Integration
 
 ```bash
-# CIが失敗しているPRをローカルで検証
+# Verify failed PRs locally
 FAILED_PRS=$(gh pr list --json number,statusCheckRollup -q '.[] | select(.statusCheckRollup | length > 0) | select(.statusCheckRollup[0].state == "FAILURE") | .number')
 
 for pr in $FAILED_PRS; do
@@ -249,34 +249,34 @@ for pr in $FAILED_PRS; do
 done
 ```
 
-## エラーハンドリング
+## Error Handling
 
-### よくあるエラー
+### Common Errors
 
-1. **GitHub認証エラー**
+1. **GitHub authentication error**
    ```
    Error: GitHub authentication failed
    ```
-   解決方法: `gh auth login` でGitHub CLIの認証を行う
+   Solution: Authenticate GitHub CLI with `gh auth login`
 
-2. **PR/Issueが見つからない**
+2. **PR/Issue not found**
    ```
    Error: Pull request #999 not found
    ```
-   解決方法: 正しい番号を確認するか、リポジトリが正しいか確認
+   Solution: Check the correct number or verify the repository
 
-3. **既に演奏者が存在する**
+3. **Orchestra member already exists**
    ```
    Error: Worktree for PR #123 already exists
    ```
-   解決方法: 既存の演奏者を使用するか、削除してから再作成
+   Solution: Use existing orchestra member or delete and recreate
 
-## ベストプラクティス
+## Best Practices
 
-### 1. PR/Issue テンプレートの活用
+### 1. Utilizing PR/Issue Templates
 
 ```bash
-# PRテンプレートに基づいて自動的に開発環境を構築
+# Automatically build development environment based on PR template
 if [[ $(gh pr view 123 --json body -q '.body' | grep -c "Requires: tmux") -gt 0 ]]; then
   mst github pr 123 --tmux --claude
 else
@@ -284,10 +284,10 @@ else
 fi
 ```
 
-### 2. ラベルベースの自動化
+### 2. Label-Based Automation
 
 ```bash
-# ラベルに基づいて適切なテンプレートを使用
+# Use appropriate template based on labels
 PR_LABELS=$(gh pr view 123 --json labels -q '.labels[].name' | paste -sd,)
 
 if [[ $PR_LABELS == *"bug"* ]]; then
@@ -299,10 +299,10 @@ else
 fi
 ```
 
-### 3. 定期的な同期
+### 3. Regular Synchronization
 
 ```bash
-# 開いているPR/Issueの演奏者を最新状態に保つ
+# Keep orchestra members for open PR/Issues up to date
 mst list --json | jq -r '.worktrees[] | select(.metadata.githubPR != null) | .branch' | while read branch; do
   PR_NUM=$(echo $branch | grep -oE '[0-9]+')
   if [[ $(gh pr view $PR_NUM --json state -q '.state') == "OPEN" ]]; then
@@ -313,38 +313,38 @@ done
 
 ## Tips & Tricks
 
-### GitHub CLIエイリアス
+### GitHub CLI Aliases
 
 ```bash
-# ~/.config/gh/config.yml に追加
+# Add to ~/.config/gh/config.yml
 aliases:
   pr-worktree: "!mst github pr"
   issue-worktree: "!mst github issue"
 
-# 使用例
+# Usage examples
 gh pr-worktree 123
 gh issue-worktree 456
 ```
 
-### 自動ラベリング
+### Automatic Labeling
 
 ```bash
-# Issueから作成した演奏者にラベルを反映
+# Reflect labels from Issue to created orchestra member
 create_issue_worktree() {
   local issue=$1
   
-  # 演奏者を作成
+  # Create orchestra member
   mst github issue "$issue"
   
-  # Issueのラベルを取得してコミットメッセージに反映
+  # Get Issue labels and reflect in commit message
   LABELS=$(gh issue view "$issue" --json labels -q '.labels[].name' | paste -sd,)
   mst exec "issue-$issue" git commit --allow-empty -m "chore: start work on issue #$issue [$LABELS]"
 }
 ```
 
-## 関連コマンド
+## Related Commands
 
-- [`mst create`](./create.md) - 手動で演奏者を作成
-- [`mst batch`](./batch.md) - 複数のIssue/PRから一括作成
-- [`mst suggest`](./suggest.md) - PR作成時のメッセージ提案
-- [`mst review`](./review.md) - PRレビューフロー
+- [`mst create`](./create.md) - Manually create orchestra members
+- [`mst batch`](./batch.md) - Batch create from multiple Issues/PRs
+- [`mst suggest`](./suggest.md) - Message suggestions for PR creation
+- [`mst review`](./review.md) - PR review flow

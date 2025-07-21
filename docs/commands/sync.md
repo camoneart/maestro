@@ -1,91 +1,91 @@
 # mst sync
 
-演奏者（Git Worktree）間でコードや設定ファイルを同期するコマンドです。メインブランチの変更を他の演奏者に反映したり、環境設定ファイルを共有したりできます。
+Command to synchronize code and configuration files between orchestra members (Git Worktrees). Sync changes from main branch to other orchestra members or share configuration files.
 
-## 概要
+## Overview
 
 ```bash
 mst sync [branch-name] [options]
-mst s [branch-name] [options]  # エイリアス
+mst s [branch-name] [options]  # alias
 ```
 
-## 使用例
+## Usage Examples
 
-### 基本的な使用方法
+### Basic Usage
 
 ```bash
-# メインブランチの変更を特定の演奏者に同期
+# Sync main branch changes to specific orchestra member
 mst sync feature-branch
 
-# 全ての演奏者に同期
+# Sync to all orchestra members
 mst sync --all
 
-# インタラクティブに選択
+# Interactive selection
 mst sync
 
-# rebaseで同期（デフォルトはmerge）
+# Sync with rebase (default is merge)
 mst sync --rebase
 ```
 
-### ファイル同期
+### File Synchronization
 
 ```bash
-# 環境変数・設定ファイルを同期
+# Sync environment/config files
 mst sync --files
 
-# プリセットを使用してファイル同期
-mst sync --preset env     # .env系ファイルのみ
-mst sync --preset config  # 設定ファイルのみ
-mst sync --preset all     # 全ての設定ファイル
+# Use preset for file sync
+mst sync --preset env     # .env files only
+mst sync --preset config  # config files only
+mst sync --preset all     # all config files
 
-# カスタムファイルを指定して同期
+# Sync custom specified files
 mst sync --files --custom .env.local,config/app.json
 
-# インタラクティブにファイルを選択
+# Interactive file selection
 mst sync --interactive
 ```
 
-## オプション
+## Options
 
-| オプション | 短縮形 | 説明 | デフォルト |
-|-----------|--------|------|-----------|
-| `--all` | `-a` | 全ての演奏者に同期 | `false` |
-| `--rebase` | `-r` | rebaseで同期（デフォルトはmerge） | `false` |
-| `--files` | `-f` | ファイル同期モード | `false` |
-| `--preset <name>` | `-p` | プリセットを使用 | なし |
-| `--custom <files>` | `-c` | カスタムファイルリスト（カンマ区切り） | なし |
-| `--interactive` | `-i` | インタラクティブモード | `false` |
-| `--force` | | 競合を無視して強制同期 | `false` |
-| `--dry-run` | `-n` | 実際には同期せず、変更内容を表示 | `false` |
+| Option | Short | Description | Default |
+|--------|-------|-------------|---------|
+| `--all` | `-a` | Sync to all orchestra members | `false` |
+| `--rebase` | `-r` | Sync with rebase (default is merge) | `false` |
+| `--files` | `-f` | File sync mode | `false` |
+| `--preset <name>` | `-p` | Use preset | none |
+| `--custom <files>` | `-c` | Custom file list (comma-separated) | none |
+| `--interactive` | `-i` | Interactive mode | `false` |
+| `--force` | | Force sync ignoring conflicts | `false` |
+| `--dry-run` | `-n` | Show changes without actually syncing | `false` |
 
-## 同期モード
+## Sync Modes
 
-### コード同期（デフォルト）
+### Code Sync (Default)
 
-メインブランチ（または指定したベースブランチ）の最新の変更を演奏者に取り込みます：
+Incorporates latest changes from main branch (or specified base branch) into orchestra members:
 
 ```bash
-# merge方式（デフォルト）
+# merge method (default)
 mst sync feature-branch
-# 実行内容: git merge origin/main
+# Executes: git merge origin/main
 
-# rebase方式
+# rebase method
 mst sync feature-branch --rebase
-# 実行内容: git rebase origin/main
+# Executes: git rebase origin/main
 
-# 全演奏者に適用
+# Apply to all orchestra members
 mst sync --all --rebase
 ```
 
-### ファイル同期
+### File Sync
 
-設定ファイルや環境変数ファイルを演奏者間で共有します：
+Share configuration files and environment variable files between orchestra members:
 
 ```bash
-# 基本的なファイル同期
+# Basic file sync
 mst sync --files
 
-# 同期されるファイル（デフォルト）:
+# Files synced by default:
 # - .env
 # - .env.local
 # - .env.development
@@ -94,31 +94,31 @@ mst sync --files
 # - config/*.yml
 ```
 
-## プリセット
+## Presets
 
-### env プリセット
+### env Preset
 
-環境変数ファイルのみを同期：
+Sync environment variable files only:
 
 ```bash
 mst sync --preset env
 ```
 
-同期対象:
+Sync targets:
 - `.env`
 - `.env.*`
 - `config/.env`
 - `config/.env.*`
 
-### config プリセット
+### config Preset
 
-設定ファイルのみを同期：
+Sync configuration files only:
 
 ```bash
 mst sync --preset config
 ```
 
-同期対象:
+Sync targets:
 - `config/*.json`
 - `config/*.yml`
 - `config/*.yaml`
@@ -126,31 +126,31 @@ mst sync --preset config
 - `.prettierrc*`
 - `tsconfig*.json`
 
-### all プリセット
+### all Preset
 
-全ての設定ファイルを同期：
+Sync all configuration files:
 
 ```bash
 mst sync --preset all
 ```
 
-同期対象:
-- envプリセットの全ファイル
-- configプリセットの全ファイル
+Sync targets:
+- All files from env preset
+- All files from config preset
 - `package.json`
 - `package-lock.json`
 - `pnpm-lock.yaml`
 - `yarn.lock`
 
-## インタラクティブモード
+## Interactive Mode
 
-ファイルを個別に選択して同期：
+Select and sync files individually:
 
 ```bash
 mst sync --interactive
 ```
 
-表示例：
+Example display:
 ```
 ? Select files to sync: (Press <space> to select, <a> to toggle all)
  ◉ .env
@@ -160,63 +160,63 @@ mst sync --interactive
  ◉ tsconfig.json
 ```
 
-## 同期の流れ
+## Sync Flow
 
-### コード同期の詳細
+### Code Sync Details
 
-1. **事前確認**
+1. **Pre-check**
    ```bash
-   # ドライランで確認
+   # Check with dry run
    mst sync feature-branch --dry-run
    ```
 
-2. **同期実行**
+2. **Execute sync**
    ```bash
-   # 実際に同期
+   # Actually sync
    mst sync feature-branch
    ```
 
-3. **競合解決**
+3. **Conflict resolution**
    ```bash
-   # 競合が発生した場合
-   # 1. 手動で解決
+   # When conflicts occur
+   # 1. Resolve manually
    mst shell feature-branch
-   # エディタで競合を解決
+   # Resolve conflicts in editor
    
-   # 2. 解決をコミット
+   # 2. Commit resolution
    git add .
    git commit -m "resolve: merge conflicts"
    ```
 
-### ファイル同期の詳細
+### File Sync Details
 
-1. **差分確認**
+1. **Check differences**
    ```bash
-   # どのファイルが同期されるか確認
+   # Check which files will be synced
    mst sync --files --dry-run
    ```
 
-2. **同期実行**
+2. **Execute sync**
    ```bash
-   # メインブランチから全演奏者へ
+   # From main branch to all orchestra members
    mst sync --all --files
    ```
 
-3. **カスタム同期**
+3. **Custom sync**
    ```bash
-   # 特定のファイルのみ
+   # Specific files only
    mst sync --files --custom .env.production,config/secrets.json
    ```
 
-## 高度な使用例
+## Advanced Usage Examples
 
-### CI/CD設定の同期
+### CI/CD Configuration Sync
 
 ```bash
-# CI設定を全演奏者に反映
+# Apply CI config to all orchestra members
 mst sync --all --files --custom .github/workflows/ci.yml,.gitlab-ci.yml
 
-# または専用スクリプト
+# Or dedicated script
 cat > sync-ci.sh << 'EOF'
 #!/bin/bash
 CI_FILES=".github/workflows/*.yml,.gitlab-ci.yml,Jenkinsfile"
@@ -225,48 +225,48 @@ EOF
 chmod +x sync-ci.sh
 ```
 
-### 選択的同期
+### Selective Sync
 
 ```bash
-# 特定のパターンに一致する演奏者のみ同期
+# Sync only orchestra members matching specific pattern
 mst list --json | jq -r '.worktrees[] | select(.branch | startswith("feature/")) | .branch' | while read branch; do
   echo "Syncing $branch..."
   mst sync "$branch" --rebase
 done
 ```
 
-### 同期状態の確認
+### Check Sync Status
 
 ```bash
-# 各演奏者の同期状態を確認
+# Check sync status of each orchestra member
 mst list --json | jq -r '.worktrees[] | "\(.branch): \(.behind) commits behind"' | grep -v ": 0 commits"
 ```
 
-## エラーハンドリング
+## Error Handling
 
-### よくあるエラー
+### Common Errors
 
-1. **マージ競合**
+1. **Merge conflicts**
    ```
    Error: Merge conflict in files: src/index.js, src/utils.js
    ```
-   解決方法: 演奏者に移動して手動で競合を解決
+   Solution: Move to orchestra member and resolve conflicts manually
 
-2. **未コミットの変更**
+2. **Uncommitted changes**
    ```
    Error: Worktree has uncommitted changes
    ```
-   解決方法: 変更をコミットまたはスタッシュしてから再実行
+   Solution: Commit or stash changes before re-executing
 
-3. **ファイルが見つからない**
+3. **File not found**
    ```
    Warning: File '.env.local' not found in source worktree
    ```
-   対処方法: ファイルが存在することを確認するか、別のファイルを指定
+   Solution: Verify file exists or specify different file
 
-## ベストプラクティス
+## Best Practices
 
-### 1. 定期的な同期
+### 1. Regular Sync
 
 ```bash
 #!/bin/bash
@@ -274,29 +274,29 @@ mst list --json | jq -r '.worktrees[] | "\(.branch): \(.behind) commits behind"'
 
 echo "🔄 Daily sync starting..."
 
-# 1. 最新のmainを取得
+# 1. Fetch latest main
 git fetch origin main
 
-# 2. 全演奏者をrebaseで同期
+# 2. Sync all orchestra members with rebase
 mst sync --all --rebase
 
-# 3. 環境ファイルも同期
+# 3. Sync environment files too
 mst sync --all --preset env
 
 echo "✅ Sync completed"
 ```
 
-### 2. 同期前のバックアップ
+### 2. Backup Before Sync
 
 ```bash
-# スナップショットを作成してから同期
+# Create snapshot before sync
 mst snapshot --all -m "Before sync"
 mst sync --all --rebase
 ```
 
-### 3. プロジェクト固有の設定
+### 3. Project-specific Configuration
 
-`.maestro.json` で同期設定をカスタマイズ：
+Customize sync settings in `.maestro.json`:
 
 ```json
 {
@@ -316,23 +316,23 @@ mst sync --all --rebase
 
 ## Tips & Tricks
 
-### 同期エイリアス
+### Sync Aliases
 
 ```bash
-# ~/.bashrc または ~/.zshrc に追加
+# Add to ~/.bashrc or ~/.zshrc
 alias mst-sync-all='mst sync --all --rebase'
 alias mst-sync-env='mst sync --all --preset env'
 alias mst-sync-safe='mst sync --dry-run'
 
-# 使用例
-mst-sync-all    # 全演奏者をrebase同期
-mst-sync-env    # 環境ファイルを同期
+# Usage examples
+mst-sync-all    # Rebase sync all orchestra members
+mst-sync-env    # Sync environment files
 ```
 
-### 条件付き同期
+### Conditional Sync
 
 ```bash
-# テストが通った場合のみ同期
+# Sync only if tests pass
 sync_if_tests_pass() {
   local branch=$1
   
@@ -343,13 +343,13 @@ sync_if_tests_pass() {
   fi
 }
 
-# 使用例
+# Usage example
 sync_if_tests_pass feature-branch
 ```
 
-## 関連コマンド
+## Related Commands
 
-- [`mst list`](./list.md) - 同期が必要な演奏者を確認
-- [`mst health`](./health.md) - 同期状態の健全性をチェック
-- [`mst snapshot`](./snapshot.md) - 同期前にスナップショットを作成
-- [`mst watch`](./watch.md) - ファイル変更を自動同期
+- [`mst list`](./list.md) - Check orchestra members needing sync
+- [`mst health`](./health.md) - Check sync status health
+- [`mst snapshot`](./snapshot.md) - Create snapshot before sync
+- [`mst watch`](./watch.md) - Auto-sync file changes

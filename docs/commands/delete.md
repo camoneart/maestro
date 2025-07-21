@@ -1,56 +1,56 @@
 # mst delete
 
-演奏者（Git Worktree）を削除するコマンドです。不要になった演奏者をクリーンアップし、ディスク容量を解放します。
+Command to delete orchestra members (Git Worktrees). Cleans up unnecessary orchestra members and frees up disk space.
 
-## 概要
+## Overview
 
 ```bash
 mst delete <branch-name> [options]
-mst rm <branch-name> [options]  # エイリアス
+mst rm <branch-name> [options]  # alias
 ```
 
-## 使用例
+## Usage Examples
 
-### 基本的な使用方法
+### Basic Usage
 
 ```bash
-# 演奏者を削除
+# Delete an orchestra member
 mst delete feature/old-feature
 
-# 強制削除（未コミットの変更があっても削除）
+# Force delete (delete even with uncommitted changes)
 mst delete feature/old-feature --force
 
-# fzfで選択して削除
+# Select and delete using fzf
 mst delete --fzf
 ```
 
-### 一括削除
+### Batch Deletion
 
 ```bash
-# マージ済みの演奏者を一括削除
+# Delete merged orchestra members in batch
 mst delete --merged
 
-# 30日以上古い演奏者を削除
+# Delete orchestra members older than 30 days
 mst delete --older-than 30
 
-# ドライラン（実際には削除しない）
+# Dry run (don't actually delete)
 mst delete --merged --dry-run
 ```
 
-## オプション
+## Options
 
-| オプション | 短縮形 | 説明 | デフォルト |
-|-----------|--------|------|-----------|
-| `--force` | `-f` | 強制削除（未コミットの変更を無視） | `false` |
-| `--fzf` | | fzfで選択して削除 | `false` |
-| `--merged` | `-m` | マージ済みの演奏者を削除 | `false` |
-| `--older-than <days>` | `-o` | 指定日数以上古い演奏者を削除 | なし |
-| `--dry-run` | `-n` | 実際には削除せず、削除対象を表示 | `false` |
-| `--yes` | `-y` | 確認プロンプトをスキップ | `false` |
+| Option | Short | Description | Default |
+|--------|-------|-------------|---------|
+| `--force` | `-f` | Force delete (ignore uncommitted changes) | `false` |
+| `--fzf` | | Select and delete using fzf | `false` |
+| `--merged` | `-m` | Delete merged orchestra members | `false` |
+| `--older-than <days>` | `-o` | Delete orchestra members older than specified days | none |
+| `--dry-run` | `-n` | Show deletion targets without actually deleting | `false` |
+| `--yes` | `-y` | Skip confirmation prompts | `false` |
 
-## 削除時の確認
+## Deletion Confirmation
 
-通常、削除前に確認プロンプトが表示されます：
+Normally, a confirmation prompt is displayed before deletion:
 
 ```
 🗑️  Are you sure you want to delete worktree 'feature/old-feature'?
@@ -63,71 +63,71 @@ mst delete --merged --dry-run
 ? Delete worktree? (y/N)
 ```
 
-## 安全な削除
+## Safe Deletion
 
-### 未コミットの変更がある場合
+### When There Are Uncommitted Changes
 
 ```bash
-# 通常の削除は失敗する
+# Normal deletion will fail
 mst delete feature/work-in-progress
 # Error: Worktree has uncommitted changes. Use --force to delete anyway.
 
-# 変更を確認
+# Check changes
 mst exec feature/work-in-progress git status
 
-# 変更を保存してから削除
+# Save changes before deletion
 mst exec feature/work-in-progress git stash
 mst delete feature/work-in-progress
 
-# または強制削除
+# Or force delete
 mst delete feature/work-in-progress --force
 ```
 
-### マージ済みブランチの確認
+### Checking Merged Branches
 
 ```bash
-# マージ済みの演奏者を確認
+# Check merged orchestra members
 mst delete --merged --dry-run
 
-# 出力例：
+# Example output:
 # Would delete the following merged worktrees:
 # - feature/completed-feature (merged to main)
 # - bugfix/fixed-bug (merged to main)
 # - feature/old-feature (merged to develop)
 
-# 実際に削除
+# Actually delete
 mst delete --merged --yes
 ```
 
-## 一括削除の活用
+## Utilizing Batch Deletion
 
-### 古い演奏者のクリーンアップ
+### Cleanup Old Orchestra Members
 
 ```bash
-# 60日以上更新されていない演奏者を確認
+# Check orchestra members not updated for 60+ days
 mst delete --older-than 60 --dry-run
 
-# 確認して削除
+# Confirm and delete
 mst delete --older-than 60
 ```
 
-### カスタム条件での削除
+### Deletion with Custom Conditions
 
 ```bash
-# 特定のプレフィックスを持つ演奏者を削除
+# Delete orchestra members with specific prefix
 mst list --json | jq -r '.worktrees[] | select(.branch | startswith("experiment/")) | .branch' | while read branch; do
   mst delete "$branch" --yes
 done
 
-# PR関連の演奏者でクローズ済みのものを削除
+# Delete PR-related orchestra members that are closed
 mst list --json | jq -r '.worktrees[] | select(.metadata.githubPR.state == "closed") | .branch' | while read branch; do
   mst delete "$branch"
 done
 ```
 
-## フック機能
+## Hook Feature
 
-`.mst.json` で削除前後のフックを設定できます：
+You can set hooks before and after deletion in `.mst.json`:
 
 ```json
 {
@@ -138,31 +138,31 @@ done
 }
 ```
 
-## エラーハンドリング
+## Error Handling
 
-### よくあるエラー
+### Common Errors
 
-1. **演奏者が見つからない場合**
+1. **Orchestra member not found**
    ```
    Error: Worktree 'feature/non-existent' not found
    ```
-   解決方法: `mst list` で正しいブランチ名を確認してください
+   Solution: Check the correct branch name with `mst list`
 
-2. **現在の演奏者を削除しようとした場合**
+2. **Attempting to delete current orchestra member**
    ```
    Error: Cannot delete the current worktree
    ```
-   解決方法: 別の演奏者に移動してから削除してください
+   Solution: Switch to another orchestra member before deletion
 
-3. **リモートブランチが残っている場合**
+3. **Remote branch still exists**
    ```
    Warning: Remote branch 'origin/feature/old-feature' still exists
    ```
-   対処方法: `git push origin --delete feature/old-feature` でリモートブランチも削除
+   Solution: Delete remote branch with `git push origin --delete feature/old-feature`
 
-## ベストプラクティス
+## Best Practices
 
-### 1. 定期的なクリーンアップ
+### 1. Regular Cleanup
 
 ```bash
 #!/bin/bash
@@ -170,84 +170,84 @@ done
 
 echo "🧹 Cleaning up worktrees..."
 
-# マージ済みを削除
+# Delete merged ones
 mst delete --merged --yes
 
-# 90日以上古いものを削除
+# Delete ones older than 90 days
 mst delete --older-than 90 --yes
 
-# 統計を表示
+# Display statistics
 echo "Remaining worktrees:"
 mst list | grep -c "^  "
 ```
 
-### 2. 削除前の確認フロー
+### 2. Pre-deletion Confirmation Flow
 
 ```bash
-# 削除対象の確認
+# Check deletion target
 BRANCH="feature/to-delete"
 
-# 1. 状態を確認
+# 1. Check status
 mst exec "$BRANCH" git status
 
-# 2. 最新のコミットを確認
+# 2. Check latest commits
 mst exec "$BRANCH" git log --oneline -5
 
-# 3. リモートとの差分を確認
+# 3. Check difference with remote
 mst exec "$BRANCH" git log origin/main..HEAD --oneline
 
-# 4. 問題なければ削除
+# 4. Delete if no issues
 mst delete "$BRANCH"
 ```
 
-### 3. 安全な削除エイリアス
+### 3. Safe Deletion Aliases
 
 ```bash
-# ~/.bashrc または ~/.zshrc に追加
+# Add to ~/.bashrc or ~/.zshrc
 alias mst-safe-delete='mst delete --dry-run'
 alias mst-cleanup='mst delete --merged --older-than 30'
 
-# 使用例
-mst-safe-delete feature/old  # 削除対象を確認
-mst-cleanup --yes            # 古い演奏者をクリーンアップ
+# Usage examples
+mst-safe-delete feature/old  # Check deletion targets
+mst-cleanup --yes            # Cleanup old orchestra members
 ```
 
 ## Tips & Tricks
 
-### リモートブランチも同時に削除
+### Delete Remote Branch Simultaneously
 
 ```bash
-# ローカルとリモートの両方を削除する関数
+# Function to delete both local and remote
 delete_worktree_and_remote() {
   local branch=$1
   
-  # ローカルの演奏者を削除
+  # Delete local orchestra member
   mst delete "$branch" --yes
   
-  # リモートブランチも削除
+  # Delete remote branch too
   git push origin --delete "$branch" 2>/dev/null || echo "Remote branch not found"
 }
 
-# 使用例
+# Usage example
 delete_worktree_and_remote feature/old-feature
 ```
 
-### 削除履歴の記録
+### Record Deletion History
 
 ```bash
-# 削除前に情報を記録
+# Record information before deletion
 mst list --json > worktrees-backup-$(date +%Y%m%d).json
 
-# 削除実行
+# Execute deletion
 mst delete feature/old-feature
 
-# 必要に応じて復元用の情報を参照
+# Reference restoration information if needed
 cat worktrees-backup-*.json | jq '.worktrees[] | select(.branch == "feature/old-feature")'
 ```
 
-## 関連コマンド
+## Related Commands
 
-- [`mst list`](./list.md) - 演奏者の一覧を表示
-- [`mst create`](./create.md) - 新しい演奏者を作成
-- [`mst health`](./health.md) - 演奏者の健全性をチェック
-- [`mst snapshot`](./snapshot.md) - 削除前にスナップショットを作成
+- [`mst list`](./list.md) - Display list of orchestra members
+- [`mst create`](./create.md) - Create new orchestra members
+- [`mst health`](./health.md) - Check orchestra member health
+- [`mst snapshot`](./snapshot.md) - Create snapshot before deletion
