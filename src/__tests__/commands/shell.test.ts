@@ -10,12 +10,16 @@ import {
   createMockExecaResponse,
 } from '../utils/test-helpers'
 import { EventEmitter } from 'events'
+import * as tmuxUtils from '../../utils/tmux'
+import * as fzfUtils from '../../utils/fzf'
 
 // モック設定
 vi.mock('../../core/git')
 vi.mock('child_process')
 vi.mock('inquirer')
 vi.mock('execa')
+vi.mock('../../utils/tmux')
+vi.mock('../../utils/fzf')
 
 describe('shell command', () => {
   let mockGitManager: any
@@ -72,6 +76,14 @@ describe('shell command', () => {
 
     // process.envのモック
     process.env.SHELL = '/bin/zsh'
+
+    // tmux utilsのモック
+    vi.mocked(tmuxUtils.isInTmuxSession).mockResolvedValue(true)
+    vi.mocked(tmuxUtils.startTmuxShell).mockResolvedValue()
+
+    // fzf utilsのモック
+    vi.mocked(fzfUtils.isFzfAvailable).mockResolvedValue(true)
+    vi.mocked(fzfUtils.selectWorktreeWithFzf).mockResolvedValue('feature-a')
 
     // consoleのモック
     vi.spyOn(console, 'log').mockImplementation(() => {})
@@ -169,55 +181,27 @@ describe('shell command', () => {
     })
 
     it('--fzfオプションでfzfを使用して選択できる', async () => {
-      // fzf選択をシミュレート
-      const fzfPromise = new Promise<void>(resolve => {
-        setTimeout(() => {
-          mockFzfProcess.stdout.emit('data', 'feature-a | /repo/worktree-1\n')
-          mockFzfProcess.emit('close', 0)
-          resolve()
-        }, 50)
-      })
+      // fzfUtils.selectWorktreeWithFzf は既にモックされているので直接実行
+      await shellCommand.parseAsync(['node', 'test', '--fzf'])
 
-      const commandPromise = shellCommand.parseAsync(['node', 'test', '--fzf'])
-
-      await fzfPromise
-      await commandPromise
-
-      expect(spawn).toHaveBeenCalledWith(
-        'fzf',
-        expect.arrayContaining([
-          '--ansi',
-          '--header=演奏者を選択してシェルに入る (Ctrl-C でキャンセル)',
-        ]),
-        expect.any(Object)
+      expect(fzfUtils.isFzfAvailable).toHaveBeenCalled()
+      expect(fzfUtils.selectWorktreeWithFzf).toHaveBeenCalledWith(
+        expect.any(Array),
+        'シェルに入る演奏者を選択 (Ctrl-C でキャンセル)'
       )
-      expect(mockFzfProcess.stdin.write).toHaveBeenCalled()
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringContaining("🎼 演奏者 'feature-a' に入ります...")
+      )
     })
 
     it('fzfでキャンセルした場合は終了する', async () => {
+      // fzf選択がキャンセルされた場合のモック
+      vi.mocked(fzfUtils.selectWorktreeWithFzf).mockResolvedValue(null)
+
       // process.exitをモックして例外を投げないように
       const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => {
         // 何もしない
         return undefined as never
-      })
-
-      // fzfプロセスのモック
-      const canceledFzfProcess = new EventEmitter() as any
-      canceledFzfProcess.stdin = {
-        write: vi.fn(),
-        end: vi.fn(),
-      }
-      canceledFzfProcess.stdout = new EventEmitter()
-
-      vi.mocked(spawn).mockImplementation((command: string) => {
-        if (command === 'fzf') {
-          // 少し遅延してからcloseイベントを発火
-          setTimeout(() => {
-            canceledFzfProcess.emit('close', 1)
-          }, 10)
-          return canceledFzfProcess
-        }
-        return mockShellProcess
       })
 
       // コマンドを実行
@@ -229,7 +213,7 @@ describe('shell command', () => {
 
       // exitSpyをリストア
       exitSpy.mockRestore()
-    }, 15000)
+    })
   })
 
   describe('コマンド実行オプション', () => {
