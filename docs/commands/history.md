@@ -1,68 +1,68 @@
 # mst history
 
-Claude Code の会話履歴を管理するコマンドです。各演奏者（Git Worktree）での開発履歴を保存、検索、エクスポートできます。
+Command to manage Claude Code conversation history. You can save, search, and export development history for each orchestra member (Git Worktree).
 
-## 概要
+## Overview
 
 ```bash
 mst history [options]
-mst h [options]  # エイリアス
+mst h [options]  # alias
 ```
 
-## 使用例
+## Usage Examples
 
-### 基本的な使用方法
+### Basic Usage
 
 ```bash
-# 全ての履歴を一覧表示
+# List all histories
 mst history --list
 
-# 特定ブランチの履歴を表示
+# Show history for specific branch
 mst history --show feature-auth
 
-# 履歴をエクスポート
+# Export histories
 mst history --export all-histories.json
 mst history --export all-histories.md
 
-# 全履歴を1ファイルにマージ
+# Merge all histories into one file
 mst history --merge merged-history.md
 ```
 
-### 履歴管理
+### History Management
 
 ```bash
-# 不要な履歴をクリーンアップ
+# Cleanup unnecessary histories
 mst history --cleanup
 
-# 履歴パスを同期
+# Sync history paths
 mst history --sync
 
-# 履歴を検索
+# Search histories
 mst history --search "authentication"
 
-# JSON形式で出力
+# Output in JSON format
 mst history --list --json
 ```
 
-## オプション
+## Options
 
-| オプション         | 短縮形 | 説明                       | デフォルト |
-| ------------------ | ------ | -------------------------- | ---------- |
-| `--list`           | `-l`   | 履歴一覧を表示             | `false`    |
-| `--show <branch>`  | `-s`   | 特定ブランチの履歴を表示   | なし       |
-| `--export <file>`  | `-e`   | 履歴をエクスポート         | なし       |
-| `--merge <file>`   | `-m`   | 全履歴を1ファイルにマージ  | なし       |
-| `--cleanup`        | `-c`   | 不要な履歴をクリーンアップ | `false`    |
-| `--sync`           |        | 履歴パスを同期             | `false`    |
-| `--search <query>` |        | 履歴を検索                 | なし       |
-| `--json`           | `-j`   | JSON形式で出力             | `false`    |
-| `--days <n>`       | `-d`   | 指定日数以内の履歴のみ     | なし       |
+| Option | Short | Description | Default |
+|--------|-------|-------------|---------|
+| `--list` | `-l` | Display history list | `false` |
+| `--show <branch>` | `-s` | Show history for specific branch | none |
+| `--export <file>` | `-e` | Export histories | none |
+| `--merge <file>` | `-m` | Merge all histories into one file | none |
+| `--cleanup` | `-c` | Cleanup unnecessary histories | `false` |
+| `--sync` | | Sync history paths | `false` |
+| `--search <query>` | | Search histories | none |
+| `--json` | `-j` | Output in JSON format | `false` |
+| `--days <n>` | `-d` | Only histories within specified days | none |
 
-## 履歴の保存形式
+## History Storage Format
 
-Claude Code の履歴は以下の形式で保存されます：
+Claude Code histories are saved in the following format:
 
-### ディレクトリ構造
+### Directory Structure
 
 ```
 ~/.claude/history/
@@ -72,7 +72,7 @@ Claude Code の履歴は以下の形式で保存されます：
 └── main.md
 ```
 
-### 履歴ファイルの内容
+### History File Content
 
 ```markdown
 # Claude Code History - feature/auth
@@ -81,11 +81,11 @@ Claude Code の履歴は以下の形式で保存されます：
 
 ### Human
 
-認証機能を実装してください。JWTを使用してください。
+Please implement authentication functionality. Use JWT.
 
 ### Assistant
 
-認証機能をJWTで実装します。まず必要なパッケージをインストールしましょう...
+I'll implement authentication functionality with JWT. First, let's install the necessary packages...
 
 ---
 
@@ -93,22 +93,22 @@ Claude Code の履歴は以下の形式で保存されます：
 
 ### Human
 
-テストを追加してください。
+Please add tests.
 
 ### Assistant
 
-認証機能のテストを追加します...
+I'll add tests for the authentication functionality...
 ```
 
-## 履歴一覧の表示
+## History List Display
 
-### 通常の出力
+### Normal Output
 
 ```bash
 mst history --list
 ```
 
-出力例：
+Example output:
 
 ```
 📚 Claude Code Histories:
@@ -134,7 +134,7 @@ Summary:
 - Total tokens used: 43,700
 ```
 
-### JSON出力（`--json`）
+### JSON Output (`--json`)
 
 ```json
 {
@@ -161,52 +161,52 @@ Summary:
 }
 ```
 
-## 履歴の検索
+## History Search
 
-### キーワード検索
+### Keyword Search
 
 ```bash
-# 特定のキーワードを含む履歴を検索
+# Search for histories containing specific keywords
 mst history --search "authentication"
 ```
 
-出力例：
+Example output:
 
 ```
 🔍 Search results for "authentication":
 
 feature/auth - Session 2025-01-20 10:30:00
-  Line 15: "認証機能を実装してください。JWTを使用してください。"
-  Line 20: "認証機能をJWTで実装します..."
+  Line 15: "Please implement authentication functionality. Use JWT."
+  Line 20: "I'll implement authentication functionality with JWT..."
 
 feature/api - Session 2025-01-19 15:00:00
-  Line 45: "APIの認証をOAuth2.0に変更..."
+  Line 45: "Change API authentication to OAuth2.0..."
 
 Found 2 matches in 2 worktrees
 ```
 
-### 高度な検索
+### Advanced Search
 
 ```bash
-# 正規表現を使用
+# Use regular expressions
 mst history --search "auth(entication|orization)" --regex
 
-# 期間を指定
+# Specify time period
 mst history --search "bug" --days 7
 
-# 特定のブランチ内で検索
+# Search within specific branch
 mst history --show feature-auth --search "JWT"
 ```
 
-## エクスポート機能
+## Export Feature
 
-### Markdown形式でエクスポート
+### Export to Markdown
 
 ```bash
 mst history --export all-histories.md
 ```
 
-生成されるファイル：
+Generated file:
 
 ```markdown
 # Maestro - Claude Code History Export
@@ -228,83 +228,83 @@ Export date: 2025-01-20 16:00:00
 ...
 ```
 
-### JSON形式でエクスポート
+### Export to JSON
 
 ```bash
 mst history --export all-histories.json
 ```
 
-### 特定期間のエクスポート
+### Export Specific Period
 
 ```bash
-# 過去7日間の履歴のみエクスポート
+# Export only last 7 days
 mst history --export recent-history.md --days 7
 
-# 特定のブランチのみエクスポート
+# Export specific branch only
 mst history --show feature-auth --export feature-auth-history.md
 ```
 
-## マージ機能
+## Merge Feature
 
-複数の履歴ファイルを時系列で1つにマージ：
+Merge multiple history files chronologically into one:
 
 ```bash
 mst history --merge complete-history.md
 ```
 
-マージオプション：
+Merge options:
 
 ```bash
-# 重複を除外
+# Remove duplicates
 mst history --merge complete-history.md --dedupe
 
-# タイムスタンプでソート
+# Sort by timestamp
 mst history --merge complete-history.md --sort-by-time
 
-# トークン数でソート（コスト分析用）
+# Sort by token count (for cost analysis)
 mst history --merge complete-history.md --sort-by-tokens
 ```
 
-## クリーンアップ
+## Cleanup
 
-### 古い履歴の削除
+### Delete Old Histories
 
 ```bash
-# 30日以上古い履歴を削除
+# Delete histories older than 30 days
 mst history --cleanup --days 30
 
-# 削除対象を確認（ドライラン）
+# Check deletion targets (dry run)
 mst history --cleanup --days 30 --dry-run
 ```
 
-### 孤立した履歴の削除
+### Delete Orphaned Histories
 
 ```bash
-# Worktreeが存在しない履歴を削除
+# Delete histories without existing Worktrees
 mst history --cleanup --orphaned
 ```
 
-## 履歴の同期
+## History Synchronization
 
-### パスの同期
+### Path Synchronization
 
 ```bash
-# 履歴ファイルのパスを現在の設定に同期
+# Sync history file paths to current configuration
 mst history --sync
 ```
 
-これにより、設定ファイルで履歴パスを変更した場合でも、既存の履歴を新しい場所に移動できます。
+This allows moving existing histories to new locations when you change history paths in configuration files.
 
-## 統計とレポート
+## Statistics and Reports
 
-### コスト分析
+### Cost Analysis
 
 ```bash
-# トークン使用量のレポート
+# Token usage report
 mst history --stats
 ```
 
-出力例：
+Example output:
 
 ```
 📊 Token Usage Report
@@ -324,16 +324,16 @@ Model Usage:
 - Claude 3 Sonnet: 13,700 tokens
 ```
 
-### 生産性分析
+### Productivity Analysis
 
 ```bash
-# セッション時間と頻度の分析
+# Analyze session time and frequency
 mst history --analyze
 ```
 
-## 設定
+## Configuration
 
-`.mst.json` で履歴管理をカスタマイズ：
+Customize history management in `.mst.json`:
 
 ```json
 {
@@ -348,26 +348,26 @@ mst history --analyze
 }
 ```
 
-## 高度な使用例
+## Advanced Usage Examples
 
-### 履歴からの学習
+### Learning from History
 
 ```bash
-# よく使うコマンドを抽出
+# Extract frequently used commands
 mst history --export - | grep -E "^### Human" -A1 | grep -v "^--" | sort | uniq -c | sort -nr | head -20
 ```
 
-### チーム共有
+### Team Sharing
 
 ```bash
-# 履歴を匿名化してエクスポート
+# Export anonymized history for sharing
 mst history --export team-history.md --anonymize
 
-# 特定のセッションのみ共有
+# Share specific session only
 mst history --show feature-auth --session 2025-01-20 --export session.md
 ```
 
-### バックアップスクリプト
+### Backup Script
 
 ```bash
 #!/bin/bash
@@ -376,23 +376,23 @@ mst history --show feature-auth --session 2025-01-20 --export session.md
 BACKUP_DIR="./history-backups/$(date +%Y%m%d)"
 mkdir -p "$BACKUP_DIR"
 
-# 全履歴をバックアップ
+# Backup all histories
 mst history --export "$BACKUP_DIR/all-histories.json"
 mst history --merge "$BACKUP_DIR/merged-history.md"
 
-# 圧縮
+# Compress
 tar -czf "$BACKUP_DIR.tar.gz" "$BACKUP_DIR"
 rm -rf "$BACKUP_DIR"
 
 echo "Backup created: $BACKUP_DIR.tar.gz"
 ```
 
-## ベストプラクティス
+## Best Practices
 
-### 1. セッション管理
+### 1. Session Management
 
 ```bash
-# 新しいセッションを開始する前に履歴を確認
+# Check history before starting new session
 before_claude() {
   local branch=$(git branch --show-current)
   echo "📚 Previous sessions for $branch:"
@@ -400,10 +400,10 @@ before_claude() {
 }
 ```
 
-### 2. コスト最適化
+### 2. Cost Optimization
 
 ```bash
-# 高コストのセッションを特定
+# Identify high-cost sessions
 mst history --list --json | jq -r '
   .histories[] |
   select(.stats.tokens > 10000) |
@@ -411,10 +411,10 @@ mst history --list --json | jq -r '
 '
 ```
 
-### 3. 知識の継承
+### 3. Knowledge Inheritance
 
 ```bash
-# 有用なセッションをドキュメント化
+# Document useful sessions
 mst history --show feature-auth --export docs/auth-implementation.md
 echo "## Key Learnings" >> docs/auth-implementation.md
 echo "- JWT implementation details..." >> docs/auth-implementation.md
@@ -422,24 +422,24 @@ echo "- JWT implementation details..." >> docs/auth-implementation.md
 
 ## Tips & Tricks
 
-### 履歴エイリアス
+### History Aliases
 
 ```bash
-# ~/.bashrc または ~/.zshrc に追加
+# Add to ~/.bashrc or ~/.zshrc
 alias mst-history='mst history --list'
 alias mst-history-search='mst history --search'
 alias mst-history-export='mst history --export "histories-$(date +%Y%m%d).md"'
 
-# 使用例
-mst-history              # 履歴一覧
-mst-history-search bug   # バグ関連の履歴を検索
-mst-history-export       # 日付付きでエクスポート
+# Usage examples
+mst-history              # History list
+mst-history-search bug   # Search bug-related histories
+mst-history-export       # Export with date
 ```
 
-### インテグレーション
+### Integration
 
 ```bash
-# Git フックで自動エクスポート
+# Auto-export with Git hooks
 cat > .git/hooks/pre-push << 'EOF'
 #!/bin/bash
 echo "Exporting Claude Code history..."
@@ -450,9 +450,9 @@ EOF
 chmod +x .git/hooks/pre-push
 ```
 
-## 関連コマンド
+## Related Commands
 
-- [`mst create`](./create.md) - 新しい演奏者と履歴を開始
-- [`mst suggest`](./suggest.md) - 履歴を基にした提案
-- [`mst snapshot`](./snapshot.md) - 履歴と併せてスナップショット管理
-- [`mst health`](./health.md) - 履歴ファイルの健全性チェック
+- [`mst create`](./create.md) - Start new orchestra member and history
+- [`mst suggest`](./suggest.md) - Suggestions based on history
+- [`mst snapshot`](./snapshot.md) - Snapshot management alongside history
+- [`mst health`](./health.md) - Health check for history files

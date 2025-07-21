@@ -1,54 +1,54 @@
 # mst batch
 
-複数の演奏者（Git Worktree）を一括で作成・管理するコマンドです。GitHub Issues、ファイル入力、対話形式など、様々な方法で効率的に複数のWorktreeを作成できます。
+Command to batch create and manage multiple orchestra members (Git Worktrees). You can efficiently create multiple Worktrees through various methods including GitHub Issues, file input, and interactive mode.
 
-## 概要
+## Overview
 
 ```bash
 mst batch [options]
-mst b [options]  # エイリアス
+mst b [options]  # alias
 ```
 
-## 使用例
+## Usage Examples
 
-### 基本的な使用方法
+### Basic Usage
 
 ```bash
-# GitHub Issuesから複数選択して一括作成
+# Batch create by selecting multiple GitHub Issues
 mst batch
 
-# ファイルから一括作成
+# Batch create from file
 mst batch --from-file worktrees.txt
 
-# インタラクティブに複数入力
+# Interactive multiple input
 mst batch --interactive
 
-# オプションを付けて一括作成
-mst batch -o -s -b develop  # 作成後に開く、セットアップ実行、ベースはdevelop
+# Batch create with options
+mst batch -o -s -b develop  # Open after creation, run setup, base is develop
 ```
 
-## オプション
+## Options
 
-| オプション | 短縮形 | 説明 | デフォルト |
-|-----------|--------|------|-----------|
-| `--from-file <file>` | `-f` | バッチファイルから読み込み | なし |
-| `--interactive` | `-i` | インタラクティブ入力モード | `false` |
-| `--open` | `-o` | 作成後にエディタで開く | `false` |
-| `--setup` | `-s` | 環境セットアップを実行 | `false` |
-| `--base <branch>` | `-b` | ベースブランチを指定 | `main` |
-| `--template <name>` | `-t` | 使用するテンプレート | なし |
-| `--parallel <n>` | `-p` | 並列実行数 | `4` |
-| `--dry-run` | `-n` | 実際には作成せず、計画を表示 | `false` |
+| Option | Short | Description | Default |
+|--------|-------|-------------|---------|
+| `--from-file <file>` | `-f` | Read from batch file | none |
+| `--interactive` | `-i` | Interactive input mode | `false` |
+| `--open` | `-o` | Open in editor after creation | `false` |
+| `--setup` | `-s` | Run environment setup | `false` |
+| `--base <branch>` | `-b` | Specify base branch | `main` |
+| `--template <name>` | `-t` | Template to use | none |
+| `--parallel <n>` | `-p` | Number of parallel executions | `4` |
+| `--dry-run` | `-n` | Show plan without actually creating | `false` |
 
-## GitHub Issuesモード（デフォルト）
+## GitHub Issues Mode (Default)
 
-引数なしで実行すると、GitHub Issuesから複数選択できます：
+When run without arguments, you can select multiple issues from GitHub:
 
 ```bash
 mst batch
 ```
 
-選択画面：
+Selection screen:
 ```
 ? Select issues to create worktrees from: (Press <space> to select, <a> to toggle all)
  ◉ #125 feat: Add authentication system (enhancement)
@@ -58,7 +58,7 @@ mst batch
  ◉ #121 feat: Dark mode support (ui, enhancement)
 ```
 
-実行結果：
+Execution result:
 ```
 Creating 3 worktrees...
 
@@ -69,111 +69,111 @@ Creating 3 worktrees...
 Summary: 3 successful, 0 failed
 ```
 
-## ファイル入力モード
+## File Input Mode
 
-### バッチファイルフォーマット
+### Batch File Format
 
 ```bash
 # worktrees.txt
-# フォーマット: branch-name | description | issue/pr番号（オプション）
+# Format: branch-name | description | issue/pr number (optional)
 
-feature-auth | 認証機能の実装 | #125
-bugfix-login | ログインバグの修正 | pr-45
-refactor-api | APIのリファクタリング
-docs-update | ドキュメントの更新 | issue-123
+feature-auth | Implement authentication | #125
+bugfix-login | Fix login bug | pr-45
+refactor-api | API refactoring
+docs-update | Update documentation | issue-123
 
-# コメント行は無視されます
-# 空行も無視されます
+# Comment lines are ignored
+# Empty lines are also ignored
 ```
 
-### 実行
+### Execution
 
 ```bash
 mst batch --from-file worktrees.txt
 ```
 
-### CSVフォーマットもサポート
+### CSV Format Support
 
 ```csv
 branch,description,issue
-feature-auth,"認証機能の実装",125
-bugfix-login,"ログインバグの修正",pr-45
-refactor-api,"APIのリファクタリング",
-docs-update,"ドキュメントの更新",issue-123
+feature-auth,"Implement authentication",125
+bugfix-login,"Fix login bug",pr-45
+refactor-api,"API refactoring",
+docs-update,"Update documentation",issue-123
 ```
 
-## インタラクティブモード
+## Interactive Mode
 
 ```bash
 mst batch --interactive
 ```
 
-プロンプト表示：
+Prompt display:
 ```
 Enter worktree details (branch-name | description | issue/pr)
 Press Enter twice to finish
 
-> feature-auth | 認証機能の実装 | #125
-> bugfix-login | ログインバグの修正
-> refactor-api | APIのリファクタリング
+> feature-auth | Implement authentication | #125
+> bugfix-login | Fix login bug
+> refactor-api | API refactoring
 > 
 
 Creating 3 worktrees...
 ```
 
-## 並列実行
+## Parallel Execution
 
-デフォルトでは4つまで並列で作成されます：
+By default, up to 4 worktrees are created in parallel:
 
 ```bash
-# 並列数を変更
+# Change parallel count
 mst batch --parallel 8
 
-# 逐次実行（デバッグ用）
+# Sequential execution (for debugging)
 mst batch --parallel 1
 ```
 
-## 実行計画の確認
+## Execution Plan Confirmation
 
 ```bash
-# ドライランで計画を確認
+# Dry run to check plan
 mst batch --from-file worktrees.txt --dry-run
 ```
 
-出力例：
+Example output:
 ```
 Batch execution plan:
 1. feature-auth (base: main, template: none)
-   - Description: 認証機能の実装
+   - Description: Implement authentication
    - GitHub Issue: #125
 2. bugfix-login (base: main, template: none)
-   - Description: ログインバグの修正
+   - Description: Fix login bug
    - GitHub PR: #45
 3. refactor-api (base: main, template: none)
-   - Description: APIのリファクタリング
+   - Description: API refactoring
 
 Total: 3 worktrees to create
 Options: --open --setup
 ```
 
-## テンプレートの使用
+## Template Usage
 
 ```bash
-# 全てにfeatureテンプレートを適用
+# Apply feature template to all
 mst batch --template feature
 
-# ファイルで個別指定
+# Individual specification in file
 # worktrees-with-template.txt
-feature-auth | 認証機能 | #125 | template:feature
-bugfix-login | バグ修正 | | template:bugfix
-experiment-ml | 機械学習実験 | | template:experiment
+feature-auth | Authentication | #125 | template:feature
+bugfix-login | Bug fix | | template:bugfix
+experiment-ml | ML experiment | | template:experiment
 ```
 
-## エラーハンドリング
+## Error Handling
 
-### 部分的な失敗
+### Partial Failures
 
-一部の作成が失敗しても、他は継続されます：
+If some creations fail, others continue:
 
 ```
 Creating 5 worktrees...
@@ -191,75 +191,75 @@ Failed worktrees:
 - feature-ui: Invalid branch name
 ```
 
-### リトライ機能
+### Retry Feature
 
 ```bash
-# 失敗したものだけ再実行
+# Re-run only failed ones
 mst batch --retry-failed
 
-# または失敗リストをファイルに保存
+# Or save failed list to file
 mst batch --save-failed failed.txt
 ```
 
-## 高度な使用例
+## Advanced Usage Examples
 
-### プロジェクト初期設定
+### Project Initial Setup
 
 ```bash
 # setup-project.txt
-feature-auth | 認証システム | #10
-feature-api | REST API実装 | #11
-feature-ui | フロントエンドUI | #12
-docs-api | APIドキュメント | #13
-test-integration | 統合テスト | #14
+feature-auth | Authentication system | #10
+feature-api | REST API implementation | #11
+feature-ui | Frontend UI | #12
+docs-api | API documentation | #13
+test-integration | Integration tests | #14
 
-# 一括作成してセットアップ
+# Batch create and setup
 mst batch --from-file setup-project.txt --setup --open
 ```
 
-### チーム開発での利用
+### Team Development Usage
 
 ```bash
-# チームメンバーごとにIssueを割り当て
+# Assign issues per team member
 ASSIGNED_ISSUES=$(gh issue list --assignee @me --json number -q '.[].number')
 
-# 自分の担当分だけ演奏者を作成
+# Create orchestra members for assigned issues only
 echo "$ASSIGNED_ISSUES" | while read issue; do
   echo "issue-$issue | Issue #$issue | #$issue"
 done | mst batch --from-file -
 ```
 
-### CI/CDでの自動化
+### CI/CD Automation
 
 ```bash
 #!/bin/bash
 # auto-create-worktrees.sh
 
-# ラベルが"ready-for-dev"のIssueを取得
+# Get issues with "ready-for-dev" label
 gh issue list --label ready-for-dev --json number,title | \
   jq -r '.[] | "issue-\(.number) | \(.title) | #\(.number)"' | \
   mst batch --from-file - --setup
 
-# 作成完了後、ラベルを更新
+# Update labels after creation
 gh issue list --label ready-for-dev --json number -q '.[].number' | \
   while read issue; do
     gh issue edit "$issue" --remove-label ready-for-dev --add-label in-progress
   done
 ```
 
-## バッチ操作のベストプラクティス
+## Batch Operations Best Practices
 
-### 1. 命名規則の統一
+### 1. Unified Naming Convention
 
 ```bash
 # naming-convention.txt
-feature/auth-system | 認証システム | #125
-feature/user-profile | ユーザープロフィール | #126
-bugfix/auth-timeout | 認証タイムアウト修正 | #127
-docs/auth-api | 認証APIドキュメント | #128
+feature/auth-system | Authentication system | #125
+feature/user-profile | User profile | #126
+bugfix/auth-timeout | Fix authentication timeout | #127
+docs/auth-api | Authentication API docs | #128
 ```
 
-### 2. 段階的な作成
+### 2. Staged Creation
 
 ```bash
 # Phase 1: Core features
@@ -272,19 +272,19 @@ mst batch --from-file phase2-features.txt
 mst batch --from-file phase3-docs.txt --template docs
 ```
 
-### 3. 進捗管理
+### 3. Progress Management
 
 ```bash
-# バッチ実行結果をログに保存
+# Save batch execution results to log
 mst batch --from-file worktrees.txt | tee batch-$(date +%Y%m%d-%H%M%S).log
 
-# 作成済みの演奏者を確認
+# Check created orchestra members
 mst list --json | jq '.summary'
 ```
 
-## 設定ファイルとの連携
+## Configuration File Integration
 
-`.mst.json` でバッチ処理のデフォルトを設定：
+Set batch processing defaults in `.mst.json`:
 
 ```json
 {
@@ -303,7 +303,7 @@ mst list --json | jq '.summary'
 
 ## Tips & Tricks
 
-### スクリプト化
+### Scripting
 
 ```bash
 #!/bin/bash
@@ -317,14 +317,14 @@ echo "$ISSUES" | jq -r '.[] | "sprint23-\(.number) | \(.title) | #\(.number)"' >
 mst batch --from-file sprint23.txt --base develop --setup --parallel 8
 ```
 
-### 進捗バー付き実行
+### Progress Bar Execution
 
 ```bash
-# バッチファイルの行数を取得
+# Get line count from batch file
 TOTAL=$(wc -l < worktrees.txt)
 CURRENT=0
 
-# 進捗を表示しながら実行
+# Execute with progress display
 while IFS='|' read -r branch desc issue; do
   ((CURRENT++))
   echo "[$CURRENT/$TOTAL] Creating $branch..."
@@ -332,9 +332,9 @@ while IFS='|' read -r branch desc issue; do
 done < worktrees.txt
 ```
 
-## 関連コマンド
+## Related Commands
 
-- [`mst create`](./create.md) - 単一の演奏者を作成
-- [`mst github`](./github.md) - GitHub連携での作成
-- [`mst list`](./list.md) - 作成した演奏者の確認
-- [`mst health`](./health.md) - 大量作成後の健全性チェック
+- [`mst create`](./create.md) - Create single orchestra member
+- [`mst github`](./github.md) - Create from GitHub integration
+- [`mst list`](./list.md) - Check created orchestra members
+- [`mst health`](./health.md) - Health check after bulk creation
