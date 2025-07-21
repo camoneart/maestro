@@ -1,168 +1,142 @@
 import { Command } from 'commander'
 import chalk from 'chalk'
 import ora from 'ora'
-import inquirer from 'inquirer'
 import { GitWorktreeManager } from '../core/git.js'
+import { spawn } from 'child_process'
 import { execa } from 'execa'
 
-// 利用可能なブランチを取得
-async function getAvailableBranches(
-  gitManager: GitWorktreeManager,
-  includeRemote: boolean
-): Promise<string[]> {
-  const branches = await gitManager.getAllBranches()
-  const worktrees = await gitManager.listWorktrees()
-  const attachedBranches = worktrees
-    .map(wt => wt.branch?.replace('refs/heads/', ''))
-    .filter(Boolean)
+interface AttachOptions {
+  shell?: boolean
+  exec?: string
+}
 
-  let availableBranches = branches.local.filter(b => !attachedBranches.includes(b))
-
-  if (includeRemote) {
-    const remoteAvailable = branches.remote.filter(
-      b => !attachedBranches.includes(b.split('/').slice(1).join('/'))
-    )
-    availableBranches = [...availableBranches, ...remoteAvailable]
+// シェルに入る処理
+async function enterShell(worktreePath: string, branchName: string): Promise<void> {
+  console.log(chalk.cyan(`\n🎼 演奏者 '${branchName}' のシェルに入ります...`))
+  
+  // 環境変数を設定
+  const env = {
+    ...process.env,
+    MAESTRO: '1',
+    MAESTRO_NAME: branchName,
+    MAESTRO_PATH: worktreePath
   }
 
-  return availableBranches
+  // シェルを起動
+  const shell = process.env.SHELL || '/bin/bash'
+  const shellProcess = spawn(shell, [], {
+    cwd: worktreePath,
+    stdio: 'inherit',
+    env
+  })
+
+  // プロセスの終了を待つ
+  return new Promise((resolve) => {
+    shellProcess.on('exit', () => {
+      console.log(chalk.gray('\n🎼 シェルを終了しました'))
+      resolve()
+    })
+  })
 }
 
-// ブランチを選択
-async function selectBranch(availableBranches: string[]): Promise<string> {
-  const { selectedBranch } = await inquirer.prompt([
-    {
-      type: 'list',
-      name: 'selectedBranch',
-      message: 'どのブランチから演奏者を招集しますか？',
-      choices: availableBranches.map(branch => ({
-        name: branch.includes('origin/')
-          ? `${chalk.yellow('[remote]')} ${chalk.cyan(branch)}`
-          : `${chalk.green('[local]')} ${chalk.cyan(branch)}`,
-        value: branch,
-      })),
-      pageSize: 15,
-    },
-  ])
-  return selectedBranch
-}
+// コマンド実行処理
+async function executeCommandInWorktree(worktreePath: string, command: string): Promise<void> {
+  const spinner = ora(`コマンドを実行中: ${command}`).start()
 
-// ブランチの存在を確認
-function validateBranchExists(branchName: string, availableBranches: string[]): void {
-  if (!availableBranches.includes(branchName)) {
-    console.error(chalk.red(`エラー: ブランチ '${branchName}' が見つかりません`))
+  try {
+    const result = await execa(command, [], {
+      cwd: worktreePath,
+      shell: true
+    })
 
-    const similarBranches = availableBranches.filter(b => b.includes(branchName))
-    if (similarBranches.length > 0) {
-      console.log(chalk.yellow('\n利用可能なブランチ:'))
-      similarBranches.forEach(branch => {
-        console.log(`  - ${chalk.cyan(branch)}`)
-      })
+    spinner.succeed(chalk.green('✨ コマンドが正常に実行されました'))
+    
+    if (result.stdout) {
+      console.log(chalk.gray('\n出力:'))
+      console.log(result.stdout)
     }
-
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : '不明なエラー'
+    spinner.fail(chalk.red(`コマンドの実行に失敗しました: ${errorMessage}`))
+    
+    if (error && typeof error === 'object' && 'stderr' in error && error.stderr) {
+      console.error(chalk.red('\nエラー出力:'))
+      console.error(error.stderr)
+    }
+    
     process.exit(1)
   }
 }
 
-// 環境セットアップを実行
-async function setupEnvironment(worktreePath: string): Promise<void> {
-  const setupSpinner = ora('環境をセットアップ中...').start()
-
-  try {
-    await execa('npm', ['install'], { cwd: worktreePath })
-    setupSpinner.succeed('npm install 完了')
-  } catch {
-    setupSpinner.warn('npm install をスキップ')
-  }
-}
-
-// エディタで開く
-async function openInEditor(worktreePath: string): Promise<void> {
-  const openSpinner = ora('エディタで開いています...').start()
-  try {
-    await execa('cursor', [worktreePath])
-    openSpinner.succeed('Cursorで開きました')
-  } catch {
-    try {
-      await execa('code', [worktreePath])
-      openSpinner.succeed('VSCodeで開きました')
-    } catch {
-      openSpinner.warn('エディタが見つかりません')
-    }
-  }
-}
-
 export const attachCommand = new Command('attach')
-  .alias('a')
-  .description('既存のブランチから演奏者を招集する')
-  .argument('[branch-name]', 'ブランチ名（省略時は選択）')
-  .option('-r, --remote', 'リモートブランチも含める')
-  .option('-f, --fetch', '最初にfetchを実行')
-  .option('-o, --open', 'VSCode/Cursorで開く')
-  .option('-s, --setup', '環境セットアップを実行')
-  .action(
-    async (
-      branchName?: string,
-      options: { remote?: boolean; fetch?: boolean; open?: boolean; setup?: boolean } = {}
-    ) => {
-      const spinner = ora('オーケストレーション！').start()
+  .description('既存の演奏者（ブランチ）にworktreeを割り当てる')
+  .argument('<branch-name>', 'アタッチするブランチ名')
+  .option('--shell', 'アタッチ後にシェルに入る')
+  .option('--exec <command>', 'アタッチ後にコマンドを実行')
+  .action(async (branchName: string, options: AttachOptions) => {
+    const spinner = ora('ブランチを確認中...').start()
 
-      try {
-        const gitManager = new GitWorktreeManager()
+    try {
+      const gitManager = new GitWorktreeManager()
 
-        // Gitリポジトリかチェック
-        const isGitRepo = await gitManager.isGitRepository()
-        if (!isGitRepo) {
-          spinner.fail('このディレクトリはGitリポジトリではありません')
-          process.exit(1)
+      // Gitリポジトリかチェック
+      const isGitRepo = await gitManager.isGitRepository()
+      if (!isGitRepo) {
+        throw new Error('このディレクトリはGitリポジトリではありません')
+      }
+
+      // ブランチの存在確認
+      const branches = await gitManager.listLocalBranches()
+      const branchExists = branches.includes(branchName) || branches.includes(`refs/heads/${branchName}`)
+      
+      if (!branchExists) {
+        spinner.fail(chalk.red(`ブランチ '${branchName}' が見つかりません`))
+        
+        // 類似のブランチを提案
+        const similarBranches = branches.filter(b => b.includes(branchName))
+        if (similarBranches.length > 0) {
+          console.log(chalk.yellow('\n類似したブランチ:'))
+          similarBranches.forEach(b => {
+            console.log(`  - ${chalk.cyan(b.replace('refs/heads/', ''))}`)
+          })
         }
-
-        if (options?.fetch) {
-          spinner.text = 'リモートから最新情報を取得中...'
-          await gitManager.fetchAll()
-        }
-
-        spinner.text = 'ブランチ一覧を取得中...'
-        const availableBranches = await getAvailableBranches(gitManager, options?.remote || false)
-
-        if (availableBranches.length === 0) {
-          spinner.fail('利用可能なブランチがありません')
-          console.log(chalk.yellow('すべてのブランチは既に演奏者として存在します'))
-          process.exit(0)
-        }
-
-        spinner.stop()
-
-        if (!branchName) {
-          branchName = await selectBranch(availableBranches)
-        } else {
-          validateBranchExists(branchName, availableBranches)
-        }
-
-        spinner.start(`演奏者を招集中...`)
-
-        // ワークツリーを作成
-        const worktreePath = await gitManager.attachWorktree(branchName || '')
-
-        spinner.succeed(
-          `演奏者 '${chalk.cyan(branchName)}' を招集しました！\n` +
-            `  📁 ${chalk.gray(worktreePath)}`
-        )
-
-        if (options?.setup) {
-          await setupEnvironment(worktreePath)
-        }
-
-        if (options?.open) {
-          await openInEditor(worktreePath)
-        }
-
-        console.log(chalk.green('\n✨ 演奏者の招集が完了しました！'))
-        console.log(chalk.gray(`\ncd ${worktreePath} で移動できます`))
-      } catch (error) {
-        spinner.fail('演奏者を招集できませんでした')
-        console.error(chalk.red(error instanceof Error ? error.message : '不明なエラー'))
+        
         process.exit(1)
       }
+
+      // 既存のworktreeがないか確認
+      const worktrees = await gitManager.listWorktrees()
+      const existingWorktree = worktrees.find(wt => 
+        wt.branch === branchName || wt.branch === `refs/heads/${branchName}`
+      )
+
+      if (existingWorktree) {
+        spinner.fail(chalk.yellow(`ブランチ '${branchName}' は既にworktreeが存在します`))
+        console.log(chalk.gray(`場所: ${existingWorktree.path}`))
+        process.exit(1)
+      }
+
+      spinner.text = 'worktreeを作成中...'
+
+      // worktreeを作成（既存のブランチ用）
+      const worktreePath = await gitManager.attachWorktree(branchName)
+      
+      spinner.succeed(chalk.green(`✨ 演奏者 '${branchName}' をアタッチしました`))
+      console.log(chalk.gray(`場所: ${worktreePath}`))
+
+      // シェルに入る処理
+      if (options.shell) {
+        await enterShell(worktreePath, branchName)
+      }
+
+      // コマンド実行処理
+      if (options.exec) {
+        await executeCommandInWorktree(worktreePath, options.exec)
+      }
+
+    } catch (error) {
+      spinner.fail(chalk.red('エラーが発生しました'))
+      console.error(chalk.red(error instanceof Error ? error.message : '不明なエラー'))
+      process.exit(1)
     }
-  )
+  })

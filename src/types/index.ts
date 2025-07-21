@@ -29,6 +29,9 @@ export interface CreateOptions {
   claude?: boolean
   draftPr?: boolean
   yes?: boolean
+  shell?: boolean
+  exec?: string
+  copyFile?: string[]
 }
 
 export interface DeleteOptions {
