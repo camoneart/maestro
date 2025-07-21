@@ -30,8 +30,11 @@ jobs:
         with:
           version: 10.13.1
 
+      - name: Clear pnpm cache (force)
+        run: pnpm store prune --force
+
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile --no-optional
 
       - name: Debug environment
         run: |
@@ -68,8 +71,11 @@ jobs:
         with:
           version: 10.13.1
 
+      - name: Clear pnpm cache (force)
+        run: pnpm store prune --force
+
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile --no-optional
 
       - name: Debug TypeScript environment
         run: |
@@ -102,8 +108,11 @@ jobs:
         with:
           version: 10.13.1
 
+      - name: Clear pnpm cache (force)
+        run: pnpm store prune --force
+
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile --no-optional
 
       - name: Debug test environment
         run: |
@@ -178,8 +187,11 @@ jobs:
         with:
           version: 10.13.1
 
+      - name: Clear pnpm cache (force)
+        run: pnpm store prune --force
+
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile --no-optional
 
       - name: Build project
         run: pnpm run build
