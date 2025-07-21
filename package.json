@@ -1,6 +1,6 @@
 {
   "name": "@hashiramaendure/maestro",
-  "version": "2.2.1",
+  "version": "2.3.0",
   "description": "Git Worktreeを活用した「オーケストラ開発」で、Claude Codeとのパラレル開発を飛躍的に効率化するCLIツール",
   "type": "module",
   "bin": {
