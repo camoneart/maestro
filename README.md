@@ -105,7 +105,7 @@ mst create feature/awesome-feature --tmux --claude
 | Goal                              | Command Example                                                              |
 | --------------------------------- | ---------------------------------------------------------------------------- |
 | **Parallel dev** Feature + bugfix | `mst create feature/auth --tmux --claude`<br>`mst create bugfix/login-issue` |
-| **List performers**               | `mst list --details`                                                         |
+| **List performers**               | `mst list`                                                         |
 | **Fast switch** via tmux          | `mst tmux`                                                                   |
 | **Create from GitHub Issue**      | `mst create 123`                                                             |
 | **Create from PR**                | `mst github pr 456`                                                          |
@@ -122,7 +122,7 @@ See the full [Command Reference](./docs/COMMANDS.md).
 | Command     | Description                  | Example                        |
 | ----------- | ---------------------------- | ------------------------------ |
 | `create`    | Create a new worktree        | `mst create feature/login`     |
-| `list`      | List worktrees               | `mst list --details`           |
+| `list`      | List worktrees               | `mst list`           |
 | `delete`    | Delete worktree              | `mst delete feature/old --fzf` |
 | `tmux`      | Open in tmux                 | `mst tmux`                     |
 | `sync`      | Real-time file sync          | `mst sync --auto`              |
@@ -291,3 +291,4 @@ See the [Contributing Guide](/CONTRIBUTING.md) and [Code of Conduct](/CODE_OF_CO
 ## License
 
 Licensed under the [MIT License](./LICENSE).
+
