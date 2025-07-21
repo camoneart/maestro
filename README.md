@@ -105,10 +105,10 @@ mst create feature/awesome-feature --tmux --claude
 | Goal                              | Command Example                                                              |
 | --------------------------------- | ---------------------------------------------------------------------------- |
 | **Parallel dev** Feature + bugfix | `mst create feature/auth --tmux --claude`<br>`mst create bugfix/login-issue` |
-| **List performers**               | `mst list --details`                                                         |
+| **List performers**               | `mst list`                                                                   |
 | **Fast switch** via tmux          | `mst tmux`                                                                   |
 | **Create from GitHub Issue**      | `mst create 123`                                                             |
-| **Create from PR**                | `mst github pr 456`                                                          |
+| **Create from PR**                | `mst github checkout 456`                                                    |
 | **Auto draft PR**                 | `mst create feature/new-ui --draft-pr`                                       |
 | **AI diff review**                | `mst suggest --review`                                                       |
 | **Auto review & merge**           | `mst review --auto-flow`                                                     |
@@ -119,18 +119,18 @@ See the full [Command Reference](./docs/COMMANDS.md).
 
 ### Main Commands
 
-| Command     | Description                  | Example                        |
-| ----------- | ---------------------------- | ------------------------------ |
-| `create`    | Create a new worktree        | `mst create feature/login`     |
-| `list`      | List worktrees               | `mst list --details`           |
-| `delete`    | Delete worktree              | `mst delete feature/old --fzf` |
-| `tmux`      | Open in tmux                 | `mst tmux`                     |
-| `sync`      | Real-time file sync          | `mst sync --auto`              |
-| `suggest`   | Claude suggestions / reviews | `mst suggest --review`         |
-| `github`    | GitHub integration           | `mst github pr 123`            |
-| `dashboard` | Launch Web dashboard         | `mst dashboard --open`         |
-| `health`    | Health check                 | `mst health --fix`             |
-| `where`     | Show current performer       | `mst where --verbose`          |
+| Command     | Description                  | Example                         |
+| ----------- | ---------------------------- | ------------------------------- |
+| `create`    | Create a new worktree        | `mst create feature/login`      |
+| `list`      | List worktrees               | `mst list`                      |
+| `delete`    | Delete worktree              | `mst delete feature/old --fzf`  |
+| `tmux`      | Open in tmux                 | `mst tmux`                      |
+| `sync`      | Real-time file sync          | `mst sync --auto`               |
+| `suggest`   | Claude suggestions / reviews | `mst suggest --review`          |
+| `github`    | GitHub integration           | `mst github checkout 123`       |
+| `dashboard` | Launch Web dashboard         | `mst dashboard --open`          |
+| `health`    | Health check                 | `mst health --fix`              |
+| `where`     | Show current performer       | `mst where`                     |
 
 All sub-commands and options are documented in the [Command Reference](./docs/COMMANDS.md).
 
