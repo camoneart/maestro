@@ -103,10 +103,10 @@ mst create feature/awesome-feature --tmux --claude
 | 目的                                    | コマンド例                                                                   |
 | --------------------------------------- | ---------------------------------------------------------------------------- |
 | **並列開発** 新機能とバグ修正を同時進行 | `mst create feature/auth --tmux --claude`<br>`mst create bugfix/login-issue` |
-| **状態確認** 演奏者一覧を表示           | `mst list --details`                                                         |
+| **状態確認** 演奏者一覧を表示           | `mst list`                                                                   |
 | **高速切替** tmux セッションへ          | `mst tmux`                                                                   |
 | **GitHub Issue から作成**               | `mst create 123`                                                             |
-| **GitHub PR から作成**                  | `mst github pr 456`                                                          |
+| **GitHub PR から作成**                  | `mst github checkout 456`                                                    |
 | **ドラフト PR を自動作成**              | `mst create feature/new-ui --draft-pr`                                       |
 | **AI レビュー** 差分レビューを生成      | `mst suggest --review`                                                       |
 | **自動レビュー & マージ**               | `mst review --auto-flow`                                                     |
@@ -120,15 +120,15 @@ mst create feature/awesome-feature --tmux --claude
 | コマンド    | 説明                       | ショート例                     |
 | ----------- | -------------------------- | ------------------------------ |
 | `create`    | 新しい worktree を作成     | `mst create feature/login`     |
-| `list`      | worktree を一覧表示        | `mst list --details`           |
+| `list`      | worktree を一覧表示        | `mst list`                     |
 | `delete`    | worktree を削除            | `mst delete feature/old --fzf` |
 | `tmux`      | tmux セッションで開く      | `mst tmux`                     |
 | `sync`      | ファイルをリアルタイム同期 | `mst sync --auto`              |
 | `suggest`   | Claude 提案/レビュー       | `mst suggest --review`         |
-| `github`    | Issue / PR 連携            | `mst github pr 123`            |
+| `github`    | Issue / PR 連携            | `mst github checkout 123`      |
 | `dashboard` | Web ダッシュボード起動     | `mst dashboard --open`         |
 | `health`    | worktree 健全性チェック    | `mst health --fix`             |
-| `where`     | 現在位置確認               | `mst where --verbose`          |
+| `where`     | 現在位置確認               | `mst where`                    |
 
 すべてのサブコマンドと詳細オプションは [コマンドリファレンス](./docs/COMMANDS.md) を参照してください。
 
