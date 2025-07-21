@@ -10,9 +10,9 @@ export async function setupTmuxStatusLine(): Promise<void> {
       'set-option',
       '-g',
       'status-right',
-      '#[fg=yellow]#{?client_prefix,#[reverse]<Prefix>#[noreverse] ,}#[fg=cyan]#(cd #{pane_current_path} && git branch --show-current 2>/dev/null || echo "no branch") #[fg=white]| %H:%M'
+      '#[fg=yellow]#{?client_prefix,#[reverse]<Prefix>#[noreverse] ,}#[fg=cyan]#(cd #{pane_current_path} && git branch --show-current 2>/dev/null || echo "no branch") #[fg=white]| %H:%M',
     ])
-    
+
     // ペインボーダーにタイトルを表示
     await execa('tmux', ['set-option', '-g', 'pane-border-status', 'top'])
     await execa('tmux', ['set-option', '-g', 'pane-border-format', ' #{pane_title} '])

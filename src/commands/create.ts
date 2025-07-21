@@ -160,40 +160,42 @@ export async function createTmuxSession(
     if (options?.tmuxH || options?.tmuxV) {
       // 現在のtmuxセッション内でペインを分割
       const splitArgs = ['split-window']
-      
+
       if (options.tmuxH) {
         splitArgs.push('-h') // 水平分割（左右）
       } else if (options.tmuxV) {
         splitArgs.push('-v') // 垂直分割（上下）
       }
-      
+
       splitArgs.push('-c', worktreePath)
       await execa('tmux', splitArgs)
-      
+
       // 新しいペインにタイトルを設定
       await execa('tmux', ['select-pane', '-T', branchName])
-      
+
       // tmuxステータスラインを設定
       await setupTmuxStatusLine()
-      
+
       // 新しいペインでClaudeコマンドを実行（オプションが有効な場合）
       if (options.claude || config.claude?.autoStart) {
         // Issue番号からの作成の場合、説明を含める
         let claudeCommand = 'claude'
-        
+
         if (branchName.includes('issue-')) {
           const issueNumber = branchName.match(/issue-(\d+)/)?.[1]
           if (issueNumber) {
             claudeCommand = `claude "fix issue ${issueNumber}"`
           }
         }
-        
+
         // 新しいペインにコマンドを送信
         await execa('tmux', ['send-keys', '-t', ':.', claudeCommand, 'Enter'])
       }
-      
+
       // 新しいペインでシェルのプロンプトを表示
-      console.log(chalk.green(`✅ tmuxペインを${options.tmuxH ? '水平' : '垂直'}分割しました: ${branchName}`))
+      console.log(
+        chalk.green(`✅ tmuxペインを${options.tmuxH ? '水平' : '垂直'}分割しました: ${branchName}`)
+      )
       return
     }
 
