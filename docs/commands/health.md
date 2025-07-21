@@ -1,48 +1,48 @@
 # mst health
 
-演奏者（Git Worktree）の健全性をチェックし、問題を検出・修正するコマンドです。古い演奏者の検出、未コミット変更の確認、リモートブランチとの同期状態などを総合的に診断します。
+Command to check the health of orchestra members (Git Worktrees) and detect/fix issues. Comprehensively diagnoses old orchestra members detection, uncommitted changes verification, synchronization status with remote branches, and more.
 
-## 概要
+## Overview
 
 ```bash
 mst health [options]
-mst check [options]  # エイリアス
+mst check [options]  # alias
 ```
 
-## 使用例
+## Usage Examples
 
-### 基本的な使用方法
+### Basic Usage
 
 ```bash
-# 全ての演奏者の健全性をチェック
+# Check health of all orchestra members
 mst health
 
-# 修正可能な問題を自動修正
+# Auto-fix fixable issues
 mst health --fix
 
-# 古い演奏者を削除（デフォルト: 30日以上）
+# Delete old orchestra members (default: 30+ days)
 mst health --prune
 
-# 詳細情報を表示
+# Display detailed information
 mst health --verbose
 ```
 
-## オプション
+## Options
 
-| オプション   | 短縮形 | 説明                         | デフォルト |
-| ------------ | ------ | ---------------------------- | ---------- |
-| `--fix`      | `-f`   | 修正可能な問題を自動修正     | `false`    |
-| `--prune`    | `-p`   | 古い演奏者を削除             | `false`    |
-| `--days <n>` | `-d`   | 古いと判定する日数           | `30`       |
-| `--verbose`  | `-v`   | 詳細情報を表示               | `false`    |
-| `--json`     | `-j`   | JSON形式で出力               | `false`    |
-| `--dry-run`  | `-n`   | 実際には修正せず、結果を表示 | `false`    |
+| Option | Short | Description | Default |
+|--------|-------|-------------|---------|
+| `--fix` | `-f` | Auto-fix fixable issues | `false` |
+| `--prune` | `-p` | Delete old orchestra members | `false` |
+| `--days <n>` | `-d` | Number of days to consider old | `30` |
+| `--verbose` | `-v` | Display detailed information | `false` |
+| `--json` | `-j` | Output in JSON format | `false` |
+| `--dry-run` | `-n` | Show results without actually fixing | `false` |
 
-## 検出される問題
+## Detected Issues
 
-### stale（古い演奏者）
+### stale (Old Orchestra Members)
 
-長期間更新されていない演奏者：
+Orchestra members not updated for a long time:
 
 ```
 ⚠️  stale: feature/old-feature
@@ -50,9 +50,9 @@ mst health --verbose
    Recommendation: Review and delete if no longer needed
 ```
 
-### orphaned（孤立した演奏者）
+### orphaned (Orphaned Orchestra Members)
 
-リモートブランチが存在しない演奏者：
+Orchestra members without remote branches:
 
 ```
 ❌ orphaned: feature/deleted-remote
@@ -60,9 +60,9 @@ mst health --verbose
    Recommendation: Delete worktree or push to remote
 ```
 
-### diverged（大きく乖離）
+### diverged (Heavily Diverged)
 
-メインブランチから大きく乖離した演奏者：
+Orchestra members heavily diverged from main branch:
 
 ```
 ⚠️  diverged: feature/long-running
@@ -71,9 +71,9 @@ mst health --verbose
    Recommendation: Rebase or merge with main branch
 ```
 
-### uncommitted（未コミット変更）
+### uncommitted (Uncommitted Changes)
 
-未コミットの変更がある演奏者：
+Orchestra members with uncommitted changes:
 
 ```
 ⚠️  uncommitted: feature/work-in-progress
@@ -82,9 +82,9 @@ mst health --verbose
    Recommendation: Commit or stash changes
 ```
 
-### conflict（マージ競合）
+### conflict (Merge Conflicts)
 
-マージ競合が未解決の演奏者：
+Orchestra members with unresolved merge conflicts:
 
 ```
 ❌ conflict: feature/merge-conflict
@@ -92,9 +92,9 @@ mst health --verbose
    Recommendation: Resolve conflicts and commit
 ```
 
-### missing（ディレクトリ不在）
+### missing (Directory Missing)
 
-ディレクトリが存在しない演奏者：
+Orchestra members with missing directories:
 
 ```
 ❌ missing: feature/moved-worktree
@@ -102,9 +102,9 @@ mst health --verbose
    Recommendation: Remove worktree entry
 ```
 
-## 出力形式
+## Output Formats
 
-### 通常の出力
+### Normal Output
 
 ```
 🏥 Orchestra Health Check
@@ -130,7 +130,7 @@ Run 'mst health --fix' to auto-fix some issues
 Run 'mst health --prune' to remove stale worktrees
 ```
 
-### JSON出力（`--json`）
+### JSON Output (`--json`)
 
 ```json
 {
@@ -186,47 +186,47 @@ Run 'mst health --prune' to remove stale worktrees
 }
 ```
 
-## 自動修正機能
+## Auto-Fix Feature
 
-`--fix` オプションで以下の問題を自動修正できます：
+The `--fix` option can automatically fix the following issues:
 
-### orphaned（孤立）の修正
+### Fixing orphaned Issues
 
 ```bash
 mst health --fix
 ```
 
-実行内容：
+Execution details:
 
-- リモートブランチが削除されている場合、ローカルのトラッキング情報を削除
-- 必要に応じて新しいリモートブランチを作成するか確認
+- Remove local tracking information when remote branch is deleted
+- Confirm whether to create new remote branch if needed
 
-### missing（ディレクトリ不在）の修正
+### Fixing missing (Directory Missing)
 
-自動的にWorktreeエントリを削除：
+Automatically remove Worktree entries:
 
 ```bash
 git worktree prune
 ```
 
-### 設定の不整合を修正
+### Fix Configuration Inconsistencies
 
-Worktree設定の不整合を検出して修正
+Detect and fix Worktree configuration inconsistencies
 
-## プルーニング（古い演奏者の削除）
+## Pruning (Deleting Old Orchestra Members)
 
 ```bash
-# 30日以上古い演奏者を確認
+# Check orchestra members older than 30 days
 mst health --prune --dry-run
 
-# 実際に削除
+# Actually delete
 mst health --prune
 
-# 60日以上に変更
+# Change to 60+ days
 mst health --prune --days 60
 ```
 
-プルーニング時の確認：
+Confirmation during pruning:
 
 ```
 The following stale worktrees will be deleted:
@@ -237,19 +237,19 @@ The following stale worktrees will be deleted:
 ? Proceed with deletion? (y/N)
 ```
 
-## 定期メンテナンス
+## Regular Maintenance
 
-### Cronジョブの設定
+### Cron Job Setup
 
 ```bash
-# 毎日午前9時に健全性チェック
+# Daily health check at 9 AM
 0 9 * * * cd /path/to/project && mst health --json > /tmp/mst-health.json
 
-# 週次で古い演奏者をクリーンアップ
+# Weekly cleanup of old orchestra members
 0 10 * * 1 cd /path/to/project && mst health --prune --days 30 --yes
 ```
 
-### CI/CDでの活用
+### CI/CD Usage
 
 ```yaml
 # .github/workflows/health-check.yml
@@ -257,7 +257,7 @@ name: Worktree Health Check
 
 on:
   schedule:
-    - cron: '0 0 * * *' # 毎日実行
+    - cron: '0 0 * * *' # Run daily
 
 jobs:
   health-check:
@@ -275,9 +275,9 @@ jobs:
           fi
 ```
 
-## カスタムチェック
+## Custom Checks
 
-### 健全性レポートの生成
+### Generating Health Reports
 
 ```bash
 #!/bin/bash
@@ -286,7 +286,7 @@ jobs:
 echo "# Worktree Health Report - $(date)"
 echo
 
-# 基本情報
+# Basic information
 echo "## Summary"
 mst health --json | jq -r '
   "- Total worktrees: \(.summary.total)",
@@ -297,7 +297,7 @@ mst health --json | jq -r '
 echo
 echo "## Detailed Issues"
 
-# 問題のある演奏者の詳細
+# Details of problematic orchestra members
 mst health --json | jq -r '
   .worktrees[] |
   select(.status != "healthy") |
@@ -308,24 +308,24 @@ mst health --json | jq -r '
 '
 ```
 
-### 問題別の対処
+### Handling by Issue Type
 
 ```bash
-# 未コミット変更がある演奏者を一括処理
+# Batch process orchestra members with uncommitted changes
 mst health --json | jq -r '.worktrees[] | select(.issues[].type == "uncommitted") | .branch' | while read branch; do
   echo "Processing $branch..."
   mst exec "$branch" git stash push -m "Auto-stash by health check"
 done
 
-# 孤立した演奏者を削除
+# Delete orphaned orchestra members
 mst health --json | jq -r '.worktrees[] | select(.issues[].type == "orphaned") | .branch' | while read branch; do
   mst delete "$branch" --force
 done
 ```
 
-## しきい値の設定
+## Setting Thresholds
 
-`.mst.json` で健全性チェックのしきい値を設定：
+Set health check thresholds in `.mst.json`:
 
 ```json
 {
@@ -347,26 +347,26 @@ done
 
 ## Tips & Tricks
 
-### 健全性スコアの算出
+### Calculating Health Score
 
 ```bash
-# 健全性スコアを計算（100点満点）
+# Calculate health score (out of 100)
 SCORE=$(mst health --json | jq '
   .summary.healthy / .summary.total * 100 | floor
 ')
 
 echo "Worktree health score: $SCORE/100"
 
-# 80点未満なら警告
+# Warn if below 80
 if [ $SCORE -lt 80 ]; then
   echo "⚠️  Health score is low. Run 'mst health --fix' to improve."
 fi
 ```
 
-### 問題の自動通知
+### Automatic Issue Notifications
 
 ```bash
-# Slack通知の例
+# Slack notification example
 ISSUES=$(mst health --json | jq '.summary.error + .summary.warning')
 
 if [ $ISSUES -gt 0 ]; then
@@ -376,10 +376,10 @@ if [ $ISSUES -gt 0 ]; then
 fi
 ```
 
-### インタラクティブ修正
+### Interactive Fixing
 
 ```bash
-# 問題を一つずつ確認して修正
+# Check and fix issues one by one
 mst health --json | jq -r '.worktrees[] | select(.status != "healthy") | .branch' | while read branch; do
   echo "=== $branch ==="
   mst health --verbose | grep -A5 "$branch"
@@ -387,15 +387,15 @@ mst health --json | jq -r '.worktrees[] | select(.status != "healthy") | .branch
   read -p "Fix this issue? (y/n) " -n 1 -r
   echo
   if [[ $REPLY =~ ^[Yy]$ ]]; then
-    # ここに修正ロジックを実装
+    # Implement fix logic here
     echo "Fixing $branch..."
   fi
 done
 ```
 
-## 関連コマンド
+## Related Commands
 
-- [`mst list`](./list.md) - 演奏者の一覧と状態を表示
-- [`mst delete`](./delete.md) - 問題のある演奏者を削除
-- [`mst sync`](./sync.md) - 乖離した演奏者を同期
-- [`mst snapshot`](./snapshot.md) - 修正前にスナップショットを作成
+- [`mst list`](./list.md) - Display list and status of orchestra members
+- [`mst delete`](./delete.md) - Delete problematic orchestra members
+- [`mst sync`](./sync.md) - Sync diverged orchestra members
+- [`mst snapshot`](./snapshot.md) - Create snapshot before fixing

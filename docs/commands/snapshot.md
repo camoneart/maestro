@@ -1,81 +1,81 @@
 # mst snapshot
 
-演奏者（Git Worktree）の現在の状態をスナップショットとして保存・復元するコマンドです。実験的な変更の前や、重要な作業の節目でバックアップを作成できます。
+Command to save and restore the current state of orchestra members (Git Worktrees) as snapshots. Create backups before experimental changes or at important work milestones.
 
-## 概要
+## Overview
 
 ```bash
 mst snapshot [options]
-mst snap [options]  # エイリアス
+mst snap [options]  # alias
 ```
 
-## 使用例
+## Usage Examples
 
-### 基本的な使用方法
+### Basic Usage
 
 ```bash
-# 現在の演奏者のスナップショットを作成
+# Create snapshot of current orchestra member
 mst snapshot
 
-# メッセージ付きでスナップショット作成
-mst snapshot -m "機能実装前の状態"
+# Create snapshot with message
+mst snapshot -m "State before feature implementation"
 
-# 変更をスタッシュに保存してスナップショット作成
+# Save changes to stash and create snapshot
 mst snapshot --stash
 
-# 全ての演奏者のスナップショットを作成
+# Create snapshots of all orchestra members
 mst snapshot --all
 ```
 
-### スナップショット管理
+### Snapshot Management
 
 ```bash
-# スナップショット一覧を表示
+# Display snapshot list
 mst snapshot --list
 
-# JSON形式で一覧を表示
+# Display list in JSON format
 mst snapshot --list --json
 
-# スナップショットを復元
+# Restore snapshot
 mst snapshot --restore snapshot-20250120-103045
 
-# スナップショットを削除
+# Delete snapshot
 mst snapshot --delete snapshot-20250120-103045
 ```
 
-## オプション
+## Options
 
-| オプション        | 短縮形 | 説明                       | デフォルト |
-| ----------------- | ------ | -------------------------- | ---------- |
-| `--message <msg>` | `-m`   | スナップショットの説明     | なし       |
-| `--stash`         | `-s`   | 未コミット変更をスタッシュ | `false`    |
-| `--all`           | `-a`   | 全演奏者のスナップショット | `false`    |
-| `--list`          | `-l`   | スナップショット一覧を表示 | `false`    |
-| `--restore <id>`  | `-r`   | スナップショットを復元     | なし       |
-| `--delete <id>`   | `-d`   | スナップショットを削除     | なし       |
-| `--json`          | `-j`   | JSON形式で出力             | `false`    |
-| `--force`         | `-f`   | 確認なしで実行             | `false`    |
+| Option | Short | Description | Default |
+|--------|-------|-------------|---------|
+| `--message <msg>` | `-m` | Snapshot description | none |
+| `--stash` | `-s` | Stash uncommitted changes | `false` |
+| `--all` | `-a` | Snapshot all orchestra members | `false` |
+| `--list` | `-l` | Display snapshot list | `false` |
+| `--restore <id>` | `-r` | Restore snapshot | none |
+| `--delete <id>` | `-d` | Delete snapshot | none |
+| `--json` | `-j` | Output in JSON format | `false` |
+| `--force` | `-f` | Execute without confirmation | `false` |
 
-## スナップショットの内容
+## Snapshot Contents
 
-スナップショットには以下の情報が保存されます：
+Snapshots save the following information:
 
-- Git状態（ブランチ、HEAD、トラッキング情報）
-- コミット履歴（最新10件）
-- ステージング済みファイル
-- 変更ファイル
-- 未追跡ファイル
-- Worktreeメタデータ
-- スタッシュ（`--stash` オプション使用時）
+- Git state (branch, HEAD, tracking information)
+- Commit history (latest 10 commits)
+- Staged files
+- Modified files
+- Untracked files
+- Worktree metadata
+- Stash (when using `--stash` option)
 
-### スナップショットファイル形式
+### Snapshot File Format
 
 ```json
 {
   "id": "snapshot-20250120-103045",
   "worktree": "feature/auth",
   "timestamp": "2025-01-20T10:30:45Z",
-  "message": "機能実装前の状態",
+  "message": "State before feature implementation",
   "git": {
     "branch": "feature/auth",
     "head": "abc123def456",
@@ -103,30 +103,30 @@ mst snapshot --delete snapshot-20250120-103045
 }
 ```
 
-## スナップショット一覧
+## Snapshot List
 
-### 通常の出力
+### Normal Output
 
 ```bash
 mst snapshot --list
 ```
 
-出力例：
+Example output:
 
 ```
 📸 Snapshots:
 
 feature/auth:
-  • snapshot-20250120-103045 - "機能実装前の状態" (2 hours ago)
-  • snapshot-20250119-150000 - "バグ修正前" (1 day ago)
+  • snapshot-20250120-103045 - "State before feature implementation" (2 hours ago)
+  • snapshot-20250119-150000 - "Before bug fix" (1 day ago)
 
 bugfix/memory-leak:
-  • snapshot-20250120-090000 - "デバッグ開始前" (4 hours ago)
+  • snapshot-20250120-090000 - "Before debugging" (4 hours ago)
 
 Total: 3 snapshots across 2 worktrees
 ```
 
-### JSON出力（`--json`）
+### JSON Output (`--json`)
 
 ```json
 {
@@ -135,7 +135,7 @@ Total: 3 snapshots across 2 worktrees
       "id": "snapshot-20250120-103045",
       "worktree": "feature/auth",
       "timestamp": "2025-01-20T10:30:45Z",
-      "message": "機能実装前の状態",
+      "message": "State before feature implementation",
       "size": "2.3MB",
       "hasStash": false
     },
@@ -143,7 +143,7 @@ Total: 3 snapshots across 2 worktrees
       "id": "snapshot-20250119-150000",
       "worktree": "feature/auth",
       "timestamp": "2025-01-19T15:00:00Z",
-      "message": "バグ修正前",
+      "message": "Before bug fix",
       "size": "1.8MB",
       "hasStash": true
     }
@@ -156,78 +156,78 @@ Total: 3 snapshots across 2 worktrees
 }
 ```
 
-## スナップショットの復元
+## Snapshot Restoration
 
-### 基本的な復元
+### Basic Restoration
 
 ```bash
-# スナップショットIDを指定して復元
+# Restore by specifying snapshot ID
 mst snapshot --restore snapshot-20250120-103045
 ```
 
-復元プロセス：
+Restoration process:
 
-1. 現在の状態を一時保存
-2. HEADを指定されたコミットに移動
-3. ファイルの変更状態を復元
-4. スタッシュがあれば適用
+1. Temporarily save current state
+2. Move HEAD to specified commit
+3. Restore file change states
+4. Apply stash if exists
 
-### 復元時の確認
+### Restoration Confirmation
 
 ```
 🔄 Restoring snapshot: snapshot-20250120-103045
    Worktree: feature/auth
    Created: 2025-01-20 10:30:45
-   Message: "機能実装前の状態"
+   Message: "State before feature implementation"
 
 Current state will be backed up as: snapshot-20250120-140000-backup
 
 ? Proceed with restoration? (y/N)
 ```
 
-## 高度な使用例
+## Advanced Usage Examples
 
-### 実験的な変更の管理
+### Managing Experimental Changes
 
 ```bash
-# 1. 実験前にスナップショット作成
-mst snapshot -m "実験開始前の安定版"
+# 1. Create snapshot before experiment
+mst snapshot -m "Stable version before experiment"
 
-# 2. 実験的な変更を実施
-# ... コードの変更 ...
+# 2. Implement experimental changes
+# ... code changes ...
 
-# 3. 実験が失敗した場合、元に戻す
-mst snapshot --list  # IDを確認
+# 3. If experiment fails, revert to original
+mst snapshot --list  # Check ID
 mst snapshot --restore snapshot-20250120-103045
 
-# 4. 実験が成功した場合、新しいスナップショット作成
-mst snapshot -m "実験成功 - 新機能完成"
+# 4. If experiment succeeds, create new snapshot
+mst snapshot -m "Experiment successful - new feature complete"
 ```
 
-### 定期的なバックアップ
+### Regular Backups
 
 ```bash
 #!/bin/bash
 # daily-snapshot.sh
 
-# アクティブな演奏者のスナップショットを作成
+# Create snapshots for active orchestra members
 mst list --json | jq -r '.worktrees[] | select(.ahead > 0 or .behind > 0) | .branch' | while read branch; do
   echo "Creating snapshot for $branch..."
   mst exec "$branch" mst snapshot -m "Daily backup - $(date +%Y-%m-%d)"
 done
 ```
 
-### デプロイ前のチェックポイント
+### Pre-deployment Checkpoints
 
 ```bash
-# デプロイ前の状態を保存
+# Save state before deployment
 deploy_with_snapshot() {
   local branch=$1
 
-  # スナップショット作成
+  # Create snapshot
   mst exec "$branch" mst snapshot -m "Pre-deployment snapshot"
 
-  # デプロイ実行
+  # Execute deployment
   if ! deploy_script.sh; then
     echo "Deployment failed! Rolling back..."
     LATEST_SNAPSHOT=$(mst snapshot --list --json | jq -r '.snapshots[0].id')
@@ -239,21 +239,21 @@ deploy_with_snapshot() {
 }
 ```
 
-## スナップショットの管理
+## Snapshot Management
 
-### 古いスナップショットの削除
+### Delete Old Snapshots
 
 ```bash
-# 7日以上古いスナップショットを削除
+# Delete snapshots older than 7 days
 mst snapshot --list --json | jq -r '.snapshots[] | select(.timestamp < (now - 604800 | strftime("%Y-%m-%dT%H:%M:%SZ"))) | .id' | while read snapshot; do
   mst snapshot --delete "$snapshot"
 done
 ```
 
-### スナップショットのエクスポート
+### Export Snapshots
 
 ```bash
-# スナップショットをアーカイブとしてエクスポート
+# Export snapshot as archive
 SNAPSHOT_ID="snapshot-20250120-103045"
 EXPORT_DIR="./snapshot-exports"
 
@@ -261,28 +261,28 @@ mkdir -p "$EXPORT_DIR"
 mst snapshot --export "$SNAPSHOT_ID" --output "$EXPORT_DIR/$SNAPSHOT_ID.tar.gz"
 ```
 
-### スナップショットの比較
+### Compare Snapshots
 
 ```bash
-# 2つのスナップショット間の差分を表示
+# Display diff between two snapshots
 mst snapshot --diff snapshot-20250120-103045 snapshot-20250120-140000
 ```
 
-## ストレージ管理
+## Storage Management
 
-スナップショットは `.git/orchestrations/.snapshots/` に保存されます：
+Snapshots are stored in `.git/orchestrations/.snapshots/`:
 
 ```bash
-# ストレージ使用量を確認
+# Check storage usage
 du -sh .git/orchestrations/.snapshots/
 
-# 大きなスナップショットを検出
+# Detect large snapshots
 find .git/orchestrations/.snapshots/ -type f -size +10M -exec ls -lh {} \;
 ```
 
-## 設定
+## Configuration
 
-`.maestro.json` でスナップショットの動作をカスタマイズ：
+Customize snapshot behavior in `.maestro.json`:
 
 ```json
 {
@@ -296,21 +296,21 @@ find .git/orchestrations/.snapshots/ -type f -size +10M -exec ls -lh {} \;
 }
 ```
 
-## ベストプラクティス
+## Best Practices
 
-### 1. 命名規則
+### 1. Naming Convention
 
 ```bash
-# 一貫性のある命名規則を使用
-mst snapshot -m "feat: 認証機能実装前"
-mst snapshot -m "fix: メモリリーク修正前"
-mst snapshot -m "refactor: API構造変更前"
+# Use consistent naming convention
+mst snapshot -m "feat: before authentication implementation"
+mst snapshot -m "fix: before memory leak fix"
+mst snapshot -m "refactor: before API structure change"
 ```
 
-### 2. 重要な変更前の習慣化
+### 2. Habitualizing Before Important Changes
 
 ```bash
-# Git フックで自動化
+# Automate with Git hooks
 cat > .git/hooks/pre-rebase << 'EOF'
 #!/bin/bash
 echo "Creating snapshot before rebase..."
@@ -319,34 +319,34 @@ EOF
 chmod +x .git/hooks/pre-rebase
 ```
 
-### 3. チーム共有
+### 3. Team Sharing
 
 ```bash
-# スナップショットをチームで共有
+# Share snapshot with team
 mst snapshot --export snapshot-20250120-103045 --share
 
-# 共有されたスナップショットをインポート
+# Import shared snapshot
 mst snapshot --import shared-snapshot-20250120-103045.tar.gz
 ```
 
 ## Tips & Tricks
 
-### スナップショットエイリアス
+### Snapshot Aliases
 
 ```bash
-# ~/.bashrc または ~/.zshrc に追加
+# Add to ~/.bashrc or ~/.zshrc
 alias mst-backup='mst snapshot -m "Quick backup - $(date +%Y-%m-%d_%H:%M)"'
 alias mst-restore-latest='mst snapshot --restore $(mst snapshot --list --json | jq -r ".snapshots[0].id")'
 
-# 使用例
-mst-backup          # 素早くバックアップ
-mst-restore-latest  # 最新のスナップショットに復元
+# Usage examples
+mst-backup          # Quick backup
+mst-restore-latest  # Restore to latest snapshot
 ```
 
-### スナップショット統計
+### Snapshot Statistics
 
 ```bash
-# スナップショット統計を表示
+# Display snapshot statistics
 mst snapshot --list --json | jq '
   {
     total: .summary.total,
@@ -361,9 +361,9 @@ mst snapshot --list --json | jq '
 '
 ```
 
-## 関連コマンド
+## Related Commands
 
-- [`mst list`](./list.md) - スナップショットを作成する演奏者を確認
-- [`mst health`](./health.md) - スナップショット前に健全性をチェック
-- [`mst sync`](./sync.md) - スナップショット後に同期
-- [`mst history`](./history.md) - Claude Code履歴と併せて管理
+- [`mst list`](./list.md) - Check orchestra members to snapshot
+- [`mst health`](./health.md) - Check health before snapshot
+- [`mst sync`](./sync.md) - Sync after snapshot
+- [`mst history`](./history.md) - Manage with Claude Code history
