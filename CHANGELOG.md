@@ -1,5 +1,20 @@
 # Changelog
 
+## 2.5.0
+
+### Minor Changes
+
+- [#44](https://github.com/hashiramaendure/maestro/pull/44) [`2a0dfa2`](https://github.com/hashiramaendure/maestro/commit/2a0dfa22256111665ba219161e20f952e1c06962) Thanks [@hashiramaendure](https://github.com/hashiramaendure)! - Add advanced worktree management features
+  - Add new `mst claude` command for managing multiple Claude Code instances
+    - `list`: Show running Claude Code instances across all worktrees
+    - `start`: Start Claude Code for specific worktree or all worktrees
+    - `stop`: Stop Claude Code for specific worktree or all worktrees
+  - Enhance `--copy-file` option to detect and copy gitignored files
+  - Add `postCreate` configuration for automatic worktree setup
+    - `copyFiles`: Automatically copy files (including gitignored) to new worktrees
+    - `commands`: Execute commands after worktree creation
+  - Support array format for `hooks.afterCreate` (backward compatible)
+
 ## 2.4.0
 
 ### Minor Changes
