@@ -57,8 +57,8 @@ Maestro is a CLI that makes Git Worktree management intuitive. When working on m
 brew install hashiramaendure/tap/maestro
 ```
 
-> Homebrew installs completion scripts for **zsh / fish / bash** automatically.<br>
-> For bash you also need `brew install bash-completion@2`. See [Shell Completion](#shell-completion).
+* Homebrew installs completion scripts for **zsh / fish / bash** automatically.<br>
+* For bash you also need `brew install bash-completion@2`. See [Shell Completion](#shell-completion).
 
 ### npm
 

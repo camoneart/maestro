@@ -51,7 +51,7 @@ Maestroは、Git Worktreeをより直感的に管理できるCLIツールです�
 
 ## インストール
 
-#### Homebrew を使用 (推奨)
+### Homebrew を使用 (推奨)
 
 ```bash
 brew install hashiramaendure/tap/maestro
@@ -60,13 +60,13 @@ brew install hashiramaendure/tap/maestro
 ※ Homebrew でインストールすると、zsh / fish / Bash すべての補完スクリプトが自動で配置されます。<br>
 ※ Bash で利用する場合は `brew install bash-completion@2` が必要です。詳細は [シェル補完](#シェル補完) セクションを参照してください。
 
-#### npm を使用
+### npm を使用
 
 ```bash
 npm install -g @hashiramaendure/maestro
 ```
 
-#### pnpm を使用
+### pnpm を使用
 
 ```bash
 # pnpm が入っていない場合は最初に: npm install -g pnpm
