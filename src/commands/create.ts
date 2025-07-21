@@ -573,7 +573,7 @@ export async function executePostCreationTasks(
     if (config.postCreate.copyFiles && config.postCreate.copyFiles.length > 0) {
       await copyFilesFromCurrentWorktree(worktreePath, config.postCreate.copyFiles)
     }
-    
+
     // commandsの処理
     if (config.postCreate.commands && config.postCreate.commands.length > 0) {
       for (const command of config.postCreate.commands) {
@@ -592,7 +592,7 @@ export async function executePostCreationTasks(
     const commands = Array.isArray(config.hooks.afterCreate)
       ? config.hooks.afterCreate
       : [config.hooks.afterCreate]
-    
+
     for (const command of commands) {
       await executeCommandInWorktree(worktreePath, command)
     }
@@ -688,7 +688,7 @@ export async function copyFilesFromCurrentWorktree(
 
   try {
     const gitManager = new GitWorktreeManager()
-    
+
     for (const file of files) {
       const sourcePath = path.join(currentPath, file)
       const destPath = path.join(worktreePath, file)
@@ -696,19 +696,19 @@ export async function copyFilesFromCurrentWorktree(
       try {
         // ファイルの存在確認
         const stats = await fs.stat(sourcePath)
-        
+
         if (!stats.isFile()) {
           console.warn(chalk.yellow(`\n⚠️  ${file} はファイルではありません`))
           continue
         }
-        
+
         // gitignoreされているかチェック
         const isGitignored = await gitManager.isGitignored(file)
-        
+
         if (isGitignored) {
           gitignoreFiles.push(file)
         }
-        
+
         // ディレクトリが存在しない場合は作成
         const destDir = path.dirname(destPath)
         await fs.mkdir(destDir, { recursive: true })
@@ -723,7 +723,7 @@ export async function copyFilesFromCurrentWorktree(
 
     if (copiedCount > 0) {
       spinner.succeed(chalk.green(`✨ ${copiedCount}個のファイルをコピーしました`))
-      
+
       if (gitignoreFiles.length > 0) {
         console.log(chalk.blue(`   gitignoreファイル: ${gitignoreFiles.join(', ')}`))
       }

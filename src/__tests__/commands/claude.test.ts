@@ -66,9 +66,7 @@ describe('claude command', () => {
       await claudeCommand.parseAsync(['node', 'test', 'list'])
 
       expect(consoleLogSpy).toHaveBeenCalledWith(chalk.bold('\n🤖 Claude Code インスタンス:'))
-      expect(consoleLogSpy).toHaveBeenCalledWith(
-        expect.stringContaining('feature-1')
-      )
+      expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('feature-1'))
     })
 
     it('should handle no running instances', async () => {
@@ -87,9 +85,9 @@ describe('claude command', () => {
           return Promise.reject(new Error('Not running'))
         }
         if (cmd === 'claude') {
-          const mockProcess = { 
+          const mockProcess = {
             pid: 12345,
-            unref: vi.fn()
+            unref: vi.fn(),
           }
           return mockProcess as any
         }
@@ -109,14 +107,14 @@ describe('claude command', () => {
     })
 
     it('should start Claude Code for all branches with --all', async () => {
-      vi.mocked(execa).mockImplementation((cmd) => {
+      vi.mocked(execa).mockImplementation(cmd => {
         if (cmd === 'pgrep') {
           return Promise.reject(new Error('Not running'))
         }
         if (cmd === 'claude') {
-          const mockProcess = { 
+          const mockProcess = {
             pid: 12345,
-            unref: vi.fn()
+            unref: vi.fn(),
           }
           return mockProcess as any
         }
@@ -125,16 +123,12 @@ describe('claude command', () => {
 
       await claudeCommand.parseAsync(['node', 'test', 'start', '--all'])
 
-      expect(execa).toHaveBeenCalledWith(
-        'claude',
-        expect.any(Array),
-        expect.any(Object)
-      )
+      expect(execa).toHaveBeenCalledWith('claude', expect.any(Array), expect.any(Object))
       expect(execa).toHaveBeenCalledTimes(4) // 2 pgrep + 2 claude
     })
 
     it('should not start if already running', async () => {
-      vi.mocked(execa).mockImplementation((cmd) => {
+      vi.mocked(execa).mockImplementation(cmd => {
         if (cmd === 'pgrep') {
           return Promise.resolve({ exitCode: 0 } as any) // Already running
         }
@@ -151,9 +145,11 @@ describe('claude command', () => {
 
   describe('stop subcommand', () => {
     it('should stop Claude Code for a specific branch', async () => {
-      vi.mocked(fs.readFile).mockResolvedValue(JSON.stringify({
-        'feature-1': { worktree: 'feature-1', pid: 12345, status: 'running' }
-      }))
+      vi.mocked(fs.readFile).mockResolvedValue(
+        JSON.stringify({
+          'feature-1': { worktree: 'feature-1', pid: 12345, status: 'running' },
+        })
+      )
       vi.mocked(execa).mockResolvedValue({ exitCode: 0 } as any)
 
       await claudeCommand.parseAsync(['node', 'test', 'stop', 'feature-1'])
@@ -163,10 +159,12 @@ describe('claude command', () => {
     })
 
     it('should stop all Claude Code instances with --all', async () => {
-      vi.mocked(fs.readFile).mockResolvedValue(JSON.stringify({
-        'feature-1': { worktree: 'feature-1', pid: 12345, status: 'running' },
-        'feature-2': { worktree: 'feature-2', pid: 12346, status: 'running' }
-      }))
+      vi.mocked(fs.readFile).mockResolvedValue(
+        JSON.stringify({
+          'feature-1': { worktree: 'feature-1', pid: 12345, status: 'running' },
+          'feature-2': { worktree: 'feature-2', pid: 12346, status: 'running' },
+        })
+      )
       vi.mocked(execa).mockResolvedValue({ exitCode: 0 } as any)
 
       await claudeCommand.parseAsync(['node', 'test', 'stop', '--all'])
@@ -190,9 +188,9 @@ describe('claude command', () => {
     it('should handle non-git repository', async () => {
       mockGitManager.isGitRepository.mockResolvedValue(false)
 
-      await expect(
-        claudeCommand.parseAsync(['node', 'test', 'list'])
-      ).rejects.toThrow('process.exit')
+      await expect(claudeCommand.parseAsync(['node', 'test', 'list'])).rejects.toThrow(
+        'process.exit'
+      )
 
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         chalk.red('エラー: このディレクトリはGitリポジトリではありません')
@@ -200,9 +198,9 @@ describe('claude command', () => {
     })
 
     it('should handle missing branch name for start', async () => {
-      await expect(
-        claudeCommand.parseAsync(['node', 'test', 'start'])
-      ).rejects.toThrow('process.exit')
+      await expect(claudeCommand.parseAsync(['node', 'test', 'start'])).rejects.toThrow(
+        'process.exit'
+      )
 
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         chalk.red('エラー: ブランチ名を指定するか --all オプションを使用してください')
@@ -210,9 +208,9 @@ describe('claude command', () => {
     })
 
     it('should handle missing branch name for stop', async () => {
-      await expect(
-        claudeCommand.parseAsync(['node', 'test', 'stop'])
-      ).rejects.toThrow('process.exit')
+      await expect(claudeCommand.parseAsync(['node', 'test', 'stop'])).rejects.toThrow(
+        'process.exit'
+      )
 
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         chalk.red('エラー: ブランチ名を指定するか --all オプションを使用してください')

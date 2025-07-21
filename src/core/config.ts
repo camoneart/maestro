@@ -87,7 +87,7 @@ export const ConfigSchema = z.object({
       beforeDelete: z.string().optional(),
     })
     .optional(),
-    
+
   // worktree作成時の処理
   postCreate: z
     .object({

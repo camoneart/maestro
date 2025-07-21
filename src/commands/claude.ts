@@ -54,7 +54,7 @@ class ClaudeManager {
 
   async startClaude(worktree: Worktree): Promise<void> {
     const branchName = worktree.branch?.replace('refs/heads/', '') || worktree.branch || ''
-    
+
     // すでに起動している場合はスキップ
     if (await this.isClaudeRunning(worktree.path)) {
       console.log(chalk.yellow(`Claude Code は既に ${branchName} で起動しています`))
@@ -127,14 +127,14 @@ class ClaudeManager {
     for (const worktree of worktrees) {
       const branchName = worktree.branch?.replace('refs/heads/', '') || worktree.branch || ''
       const isRunning = await this.isClaudeRunning(worktree.path)
-      
+
       if (isRunning) {
         hasInstances = true
         const instance = this.instances.get(branchName)
         const startTime = instance?.startedAt
           ? new Date(instance.startedAt).toLocaleString()
           : '不明'
-        
+
         console.log(
           `${chalk.green('●')} ${chalk.cyan(branchName)} - ${chalk.green('実行中')} (開始: ${startTime})`
         )
@@ -199,14 +199,16 @@ const startCommand = new Command('start')
       if (options.all) {
         // すべての演奏者で起動
         console.log(chalk.bold('\n🎼 すべての演奏者でClaude Codeを起動します\n'))
-        
+
         for (const worktree of orchestraMembers) {
           await claudeManager.startClaude(worktree)
         }
       } else {
         // 特定の演奏者で起動
         if (!branchName) {
-          console.error(chalk.red('エラー: ブランチ名を指定するか --all オプションを使用してください'))
+          console.error(
+            chalk.red('エラー: ブランチ名を指定するか --all オプションを使用してください')
+          )
           process.exit(1)
         }
 
@@ -252,14 +254,16 @@ const stopCommand = new Command('stop')
       if (options.all) {
         // すべての演奏者で停止
         console.log(chalk.bold('\n🎼 すべての演奏者のClaude Codeを停止します\n'))
-        
+
         for (const worktree of orchestraMembers) {
           await claudeManager.stopClaude(worktree)
         }
       } else {
         // 特定の演奏者で停止
         if (!branchName) {
-          console.error(chalk.red('エラー: ブランチ名を指定するか --all オプションを使用してください'))
+          console.error(
+            chalk.red('エラー: ブランチ名を指定するか --all オプションを使用してください')
+          )
           process.exit(1)
         }
 
