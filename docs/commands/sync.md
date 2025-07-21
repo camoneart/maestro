@@ -1,6 +1,6 @@
 # mst sync
 
-Command to synchronize code and configuration files between orchestra members (Git Worktrees). Sync changes from main branch to other orchestra members or share configuration files.
+Command to synchronize code and configuration files between orchestra members (Git Worktrees). You can reflect changes from the main branch to other orchestra members or share environment configuration files.
 
 ## Overview
 
@@ -14,7 +14,7 @@ mst s [branch-name] [options]  # alias
 ### Basic Usage
 
 ```bash
-# Sync main branch changes to specific orchestra member
+# Sync changes from main branch to specific orchestra member
 mst sync feature-branch
 
 # Sync to all orchestra members
@@ -30,13 +30,13 @@ mst sync --rebase
 ### File Synchronization
 
 ```bash
-# Sync environment/config files
+# Sync environment variables and configuration files
 mst sync --files
 
-# Use preset for file sync
+# Use presets for file sync
 mst sync --preset env     # .env files only
-mst sync --preset config  # config files only
-mst sync --preset all     # all config files
+mst sync --preset config  # configuration files only
+mst sync --preset all     # all configuration files
 
 # Sync custom specified files
 mst sync --files --custom .env.local,config/app.json
@@ -65,11 +65,11 @@ mst sync --interactive
 Incorporates latest changes from main branch (or specified base branch) into orchestra members:
 
 ```bash
-# merge method (default)
+# Merge method (default)
 mst sync feature-branch
 # Executes: git merge origin/main
 
-# rebase method
+# Rebase method
 mst sync feature-branch --rebase
 # Executes: git rebase origin/main
 
@@ -96,7 +96,7 @@ mst sync --files
 
 ## Presets
 
-### env Preset
+### env preset
 
 Sync environment variable files only:
 
@@ -110,7 +110,7 @@ Sync targets:
 - `config/.env`
 - `config/.env.*`
 
-### config Preset
+### config preset
 
 Sync configuration files only:
 
@@ -126,7 +126,7 @@ Sync targets:
 - `.prettierrc*`
 - `tsconfig*.json`
 
-### all Preset
+### all preset
 
 Sync all configuration files:
 
@@ -144,13 +144,13 @@ Sync targets:
 
 ## Interactive Mode
 
-Select and sync files individually:
+Select files individually for sync:
 
 ```bash
 mst sync --interactive
 ```
 
-Example display:
+Display example:
 ```
 ? Select files to sync: (Press <space> to select, <a> to toggle all)
  ◉ .env
@@ -166,7 +166,7 @@ Example display:
 
 1. **Pre-check**
    ```bash
-   # Check with dry run
+   # Confirm with dry run
    mst sync feature-branch --dry-run
    ```
 
@@ -178,10 +178,10 @@ Example display:
 
 3. **Conflict resolution**
    ```bash
-   # When conflicts occur
+   # If conflicts occur
    # 1. Resolve manually
    mst shell feature-branch
-   # Resolve conflicts in editor
+   # Edit conflicts in editor
    
    # 2. Commit resolution
    git add .
@@ -213,7 +213,7 @@ Example display:
 ### CI/CD Configuration Sync
 
 ```bash
-# Apply CI config to all orchestra members
+# Reflect CI configuration to all orchestra members
 mst sync --all --files --custom .github/workflows/ci.yml,.gitlab-ci.yml
 
 # Or dedicated script
@@ -250,19 +250,19 @@ mst list --json | jq -r '.worktrees[] | "\(.branch): \(.behind) commits behind"'
    ```
    Error: Merge conflict in files: src/index.js, src/utils.js
    ```
-   Solution: Move to orchestra member and resolve conflicts manually
+   Solution: Move to orchestra member and manually resolve conflicts
 
 2. **Uncommitted changes**
    ```
    Error: Worktree has uncommitted changes
    ```
-   Solution: Commit or stash changes before re-executing
+   Solution: Commit or stash changes before re-running
 
 3. **File not found**
    ```
    Warning: File '.env.local' not found in source worktree
    ```
-   Solution: Verify file exists or specify different file
+   Action: Confirm file exists or specify different file
 
 ## Best Practices
 
@@ -280,16 +280,16 @@ git fetch origin main
 # 2. Sync all orchestra members with rebase
 mst sync --all --rebase
 
-# 3. Sync environment files too
+# 3. Also sync environment files
 mst sync --all --preset env
 
 echo "✅ Sync completed"
 ```
 
-### 2. Backup Before Sync
+### 2. Pre-sync Backup
 
 ```bash
-# Create snapshot before sync
+# Create snapshots before sync
 mst snapshot --all -m "Before sync"
 mst sync --all --rebase
 ```
@@ -325,7 +325,7 @@ alias mst-sync-env='mst sync --all --preset env'
 alias mst-sync-safe='mst sync --dry-run'
 
 # Usage examples
-mst-sync-all    # Rebase sync all orchestra members
+mst-sync-all    # Sync all orchestra members with rebase
 mst-sync-env    # Sync environment files
 ```
 
@@ -351,5 +351,5 @@ sync_if_tests_pass feature-branch
 
 - [`mst list`](./list.md) - Check orchestra members needing sync
 - [`mst health`](./health.md) - Check sync status health
-- [`mst snapshot`](./snapshot.md) - Create snapshot before sync
+- [`mst snapshot`](./snapshot.md) - Create snapshots before sync
 - [`mst watch`](./watch.md) - Auto-sync file changes

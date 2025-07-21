@@ -1,6 +1,6 @@
 # mst snapshot
 
-Command to save and restore the current state of orchestra members (Git Worktrees) as snapshots. Create backups before experimental changes or at important work milestones.
+Command to save and restore the current state of orchestra members (Git Worktrees) as snapshots. You can create backups before experimental changes or at important work milestones.
 
 ## Overview
 
@@ -60,7 +60,7 @@ mst snapshot --delete snapshot-20250120-103045
 
 Snapshots save the following information:
 
-- Git state (branch, HEAD, tracking information)
+- Git state (branch, HEAD, tracking info)
 - Commit history (latest 10 commits)
 - Staged files
 - Modified files
@@ -121,7 +121,7 @@ feature/auth:
   • snapshot-20250119-150000 - "Before bug fix" (1 day ago)
 
 bugfix/memory-leak:
-  • snapshot-20250120-090000 - "Before debugging" (4 hours ago)
+  • snapshot-20250120-090000 - "Before debugging start" (4 hours ago)
 
 Total: 3 snapshots across 2 worktrees
 ```
@@ -170,9 +170,9 @@ Restoration process:
 1. Temporarily save current state
 2. Move HEAD to specified commit
 3. Restore file change states
-4. Apply stash if exists
+4. Apply stash if available
 
-### Restoration Confirmation
+### Confirmation During Restoration
 
 ```
 🔄 Restoring snapshot: snapshot-20250120-103045
@@ -193,10 +193,10 @@ Current state will be backed up as: snapshot-20250120-140000-backup
 # 1. Create snapshot before experiment
 mst snapshot -m "Stable version before experiment"
 
-# 2. Implement experimental changes
+# 2. Make experimental changes
 # ... code changes ...
 
-# 3. If experiment fails, revert to original
+# 3. If experiment fails, revert
 mst snapshot --list  # Check ID
 mst snapshot --restore snapshot-20250120-103045
 
@@ -204,7 +204,7 @@ mst snapshot --restore snapshot-20250120-103045
 mst snapshot -m "Experiment successful - new feature complete"
 ```
 
-### Regular Backups
+### Regular Backup
 
 ```bash
 #!/bin/bash
@@ -217,7 +217,7 @@ mst list --json | jq -r '.worktrees[] | select(.ahead > 0 or .behind > 0) | .bra
 done
 ```
 
-### Pre-deployment Checkpoints
+### Pre-deployment Checkpoint
 
 ```bash
 # Save state before deployment
@@ -264,7 +264,7 @@ mst snapshot --export "$SNAPSHOT_ID" --output "$EXPORT_DIR/$SNAPSHOT_ID.tar.gz"
 ### Compare Snapshots
 
 ```bash
-# Display diff between two snapshots
+# Show differences between two snapshots
 mst snapshot --diff snapshot-20250120-103045 snapshot-20250120-140000
 ```
 
@@ -298,16 +298,16 @@ Customize snapshot behavior in `.maestro.json`:
 
 ## Best Practices
 
-### 1. Naming Convention
+### 1. Naming Conventions
 
 ```bash
-# Use consistent naming convention
+# Use consistent naming conventions
 mst snapshot -m "feat: before authentication implementation"
 mst snapshot -m "fix: before memory leak fix"
 mst snapshot -m "refactor: before API structure change"
 ```
 
-### 2. Habitualizing Before Important Changes
+### 2. Habitually Create Before Important Changes
 
 ```bash
 # Automate with Git hooks
@@ -322,7 +322,7 @@ chmod +x .git/hooks/pre-rebase
 ### 3. Team Sharing
 
 ```bash
-# Share snapshot with team
+# Share snapshots with team
 mst snapshot --export snapshot-20250120-103045 --share
 
 # Import shared snapshot
@@ -364,6 +364,6 @@ mst snapshot --list --json | jq '
 ## Related Commands
 
 - [`mst list`](./list.md) - Check orchestra members to snapshot
-- [`mst health`](./health.md) - Check health before snapshot
-- [`mst sync`](./sync.md) - Sync after snapshot
-- [`mst history`](./history.md) - Manage with Claude Code history
+- [`mst health`](./health.md) - Health check before snapshots
+- [`mst sync`](./sync.md) - Sync after snapshots
+- [`mst history`](./history.md) - Manage alongside Claude Code history

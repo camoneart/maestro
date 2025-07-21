@@ -1,6 +1,6 @@
 # mst github
 
-Command to directly create orchestra members (Git Worktrees) from GitHub Issues or Pull Requests. Integrates with GitHub CLI to seamlessly integrate development workflows.
+Command to create orchestra members (Git Worktrees) directly from GitHub Issues or Pull Requests. Integrates with GitHub CLI to seamlessly integrate development workflows.
 
 ## Overview
 
@@ -33,7 +33,7 @@ mst github pr 123 --tmux --claude
 # Multiple selection for batch creation
 mst github --multiple
 
-# Filtering for selection
+# Filter and select
 mst github issue --filter "label:bug"
 
 # Show only assigned to me
@@ -49,9 +49,9 @@ mst github --assignee @me
 | `--multiple` | `-m` | Multiple selection mode | `false` |
 | `--filter <query>` | `-f` | GitHub CLI filter query | none |
 | `--assignee <user>` | `-a` | Filter by assignee (@me for self) | none |
-| `--limit <n>` | `-l` | Limit of items to display | `30` |
+| `--limit <n>` | `-l` | Limit number of displayed items | `30` |
 
-## Creating from Pull Request
+## Creating from Pull Requests
 
 ### Basic Flow
 
@@ -76,7 +76,7 @@ mst shell pr-123
 - Milestone
 - Related Issues
 - Base branch
-- Mergeable state
+- Merge status
 
 ### Metadata Storage
 
@@ -97,7 +97,7 @@ mst shell pr-123
 }
 ```
 
-## Creating from Issue
+## Creating from Issues
 
 ### Basic Flow
 
@@ -114,7 +114,7 @@ mst github issue 456
 
 ### Issue Number Formats
 
-All of the following formats produce the same result:
+All of these formats produce the same result:
 
 ```bash
 mst github issue 456
@@ -130,7 +130,7 @@ mst github issue issue-456
 - Assignees
 - Labels
 - Milestone
-- Projects
+- Project
 - Related PRs
 
 ## Interactive Mode
@@ -210,7 +210,7 @@ Selection screen:
 ### Review Flow
 
 ```bash
-# 1. Check PRs awaiting review
+# 1. Check PRs waiting for review
 mst github pr --filter "review:required"
 
 # 2. Create orchestra member from PR for review
@@ -239,7 +239,7 @@ gh pr create --title "Fix #456: Authentication bug" --body "Closes #456"
 ## CI/CD Integration
 
 ```bash
-# Verify failed PRs locally
+# Locally verify PRs failing CI
 FAILED_PRS=$(gh pr list --json number,statusCheckRollup -q '.[] | select(.statusCheckRollup | length > 0) | select(.statusCheckRollup[0].state == "FAILURE") | .number')
 
 for pr in $FAILED_PRS; do
@@ -263,7 +263,7 @@ done
    ```
    Error: Pull request #999 not found
    ```
-   Solution: Check the correct number or verify the repository
+   Solution: Check correct number or verify repository is correct
 
 3. **Orchestra member already exists**
    ```
@@ -273,7 +273,7 @@ done
 
 ## Best Practices
 
-### 1. Utilizing PR/Issue Templates
+### 1. Utilize PR/Issue Templates
 
 ```bash
 # Automatically build development environment based on PR template
@@ -326,10 +326,10 @@ gh pr-worktree 123
 gh issue-worktree 456
 ```
 
-### Automatic Labeling
+### Auto-labeling
 
 ```bash
-# Reflect labels from Issue to created orchestra member
+# Reflect Issue labels in orchestra members created from Issues
 create_issue_worktree() {
   local issue=$1
   
@@ -346,5 +346,5 @@ create_issue_worktree() {
 
 - [`mst create`](./create.md) - Manually create orchestra members
 - [`mst batch`](./batch.md) - Batch create from multiple Issues/PRs
-- [`mst suggest`](./suggest.md) - Message suggestions for PR creation
+- [`mst suggest`](./suggest.md) - Message suggestions when creating PRs
 - [`mst review`](./review.md) - PR review flow

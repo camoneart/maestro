@@ -1,6 +1,6 @@
 # mst delete
 
-Command to delete orchestra members (Git Worktrees). Cleans up unnecessary orchestra members and frees up disk space.
+Command to delete orchestra members (Git Worktrees). Cleans up unnecessary orchestra members and frees disk space.
 
 ## Overview
 
@@ -14,13 +14,13 @@ mst rm <branch-name> [options]  # alias
 ### Basic Usage
 
 ```bash
-# Delete an orchestra member
+# Delete orchestra member
 mst delete feature/old-feature
 
 # Force delete (delete even with uncommitted changes)
 mst delete feature/old-feature --force
 
-# Select and delete using fzf
+# Select with fzf and delete
 mst delete --fzf
 ```
 
@@ -42,7 +42,7 @@ mst delete --merged --dry-run
 | Option | Short | Description | Default |
 |--------|-------|-------------|---------|
 | `--force` | `-f` | Force delete (ignore uncommitted changes) | `false` |
-| `--fzf` | | Select and delete using fzf | `false` |
+| `--fzf` | | Select with fzf and delete | `false` |
 | `--merged` | `-m` | Delete merged orchestra members | `false` |
 | `--older-than <days>` | `-o` | Delete orchestra members older than specified days | none |
 | `--dry-run` | `-n` | Show deletion targets without actually deleting | `false` |
@@ -68,7 +68,7 @@ Normally, a confirmation prompt is displayed before deletion:
 ### When There Are Uncommitted Changes
 
 ```bash
-# Normal deletion will fail
+# Normal deletion fails
 mst delete feature/work-in-progress
 # Error: Worktree has uncommitted changes. Use --force to delete anyway.
 
@@ -111,7 +111,7 @@ mst delete --older-than 60 --dry-run
 mst delete --older-than 60
 ```
 
-### Deletion with Custom Conditions
+### Custom Condition Deletion
 
 ```bash
 # Delete orchestra members with specific prefix
@@ -152,13 +152,13 @@ You can set hooks before and after deletion in `.mst.json`:
    ```
    Error: Cannot delete the current worktree
    ```
-   Solution: Switch to another orchestra member before deletion
+   Solution: Move to another orchestra member before deletion
 
 3. **Remote branch still exists**
    ```
    Warning: Remote branch 'origin/feature/old-feature' still exists
    ```
-   Solution: Delete remote branch with `git push origin --delete feature/old-feature`
+   Action: Also delete remote branch with `git push origin --delete feature/old-feature`
 
 ## Best Practices
 
@@ -173,7 +173,7 @@ echo "🧹 Cleaning up worktrees..."
 # Delete merged ones
 mst delete --merged --yes
 
-# Delete ones older than 90 days
+# Delete those older than 90 days
 mst delete --older-than 90 --yes
 
 # Display statistics
@@ -193,7 +193,7 @@ mst exec "$BRANCH" git status
 # 2. Check latest commits
 mst exec "$BRANCH" git log --oneline -5
 
-# 3. Check difference with remote
+# 3. Check differences with remote
 mst exec "$BRANCH" git log origin/main..HEAD --oneline
 
 # 4. Delete if no issues
@@ -214,7 +214,7 @@ mst-cleanup --yes            # Cleanup old orchestra members
 
 ## Tips & Tricks
 
-### Delete Remote Branch Simultaneously
+### Delete Both Remote and Local
 
 ```bash
 # Function to delete both local and remote
@@ -224,7 +224,7 @@ delete_worktree_and_remote() {
   # Delete local orchestra member
   mst delete "$branch" --yes
   
-  # Delete remote branch too
+  # Also delete remote branch
   git push origin --delete "$branch" 2>/dev/null || echo "Remote branch not found"
 }
 
@@ -250,4 +250,4 @@ cat worktrees-backup-*.json | jq '.worktrees[] | select(.branch == "feature/old-
 - [`mst list`](./list.md) - Display list of orchestra members
 - [`mst create`](./create.md) - Create new orchestra members
 - [`mst health`](./health.md) - Check orchestra member health
-- [`mst snapshot`](./snapshot.md) - Create snapshot before deletion
+- [`mst snapshot`](./snapshot.md) - Create snapshots before deletion

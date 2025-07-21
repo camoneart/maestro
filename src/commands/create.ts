@@ -9,6 +9,7 @@ import { getTemplateConfig } from './template.js'
 import { execa } from 'execa'
 import path from 'path'
 import fs from 'fs/promises'
+import { spawn } from 'child_process'
 import { setupTmuxStatusLine } from '../utils/tmux.js'
 
 // GitHubラベル型定義
@@ -565,6 +566,21 @@ export async function executePostCreationTasks(
 
   // 並行実行
   await Promise.allSettled(tasks)
+
+  // ファイルコピー処理
+  if (options.copyFile && options.copyFile.length > 0) {
+    await copyFilesFromCurrentWorktree(worktreePath, options.copyFile)
+  }
+
+  // シェルに入る処理
+  if (options.shell) {
+    await enterShell(worktreePath, branchName)
+  }
+
+  // コマンド実行処理
+  if (options.exec) {
+    await executeCommandInWorktree(worktreePath, options.exec)
+  }
 }
 
 // 環境セットアップ
@@ -634,6 +650,72 @@ export async function createDraftPR(branchName: string, worktreePath: string): P
   }
 }
 
+// ファイルコピー処理
+export async function copyFilesFromCurrentWorktree(
+  worktreePath: string,
+  files: string[]
+): Promise<void> {
+  const spinner = ora('ファイルをコピー中...').start()
+  const currentPath = process.cwd()
+  let copiedCount = 0
+
+  try {
+    for (const file of files) {
+      const sourcePath = path.join(currentPath, file)
+      const destPath = path.join(worktreePath, file)
+
+      try {
+        // ディレクトリが存在しない場合は作成
+        const destDir = path.dirname(destPath)
+        await fs.mkdir(destDir, { recursive: true })
+
+        // ファイルをコピー
+        await fs.copyFile(sourcePath, destPath)
+        copiedCount++
+      } catch (error) {
+        console.warn(chalk.yellow(`\n⚠️  ファイル ${file} のコピーに失敗しました: ${error}`))
+      }
+    }
+
+    if (copiedCount > 0) {
+      spinner.succeed(chalk.green(`✨ ${copiedCount}個のファイルをコピーしました`))
+    } else {
+      spinner.warn(chalk.yellow('コピーできたファイルがありませんでした'))
+    }
+  } catch (error) {
+    spinner.fail(chalk.red(`ファイルコピーに失敗しました: ${error}`))
+  }
+}
+
+// シェルに入る処理
+export async function enterShell(worktreePath: string, branchName: string): Promise<void> {
+  console.log(chalk.cyan(`\n🎼 演奏者 '${branchName}' のシェルに入ります...`))
+
+  // 環境変数を設定
+  const env = {
+    ...process.env,
+    MAESTRO: '1',
+    MAESTRO_NAME: branchName,
+    MAESTRO_PATH: worktreePath,
+  }
+
+  // シェルを起動
+  const shell = process.env.SHELL || '/bin/bash'
+  const shellProcess = spawn(shell, [], {
+    cwd: worktreePath,
+    stdio: 'inherit',
+    env,
+  })
+
+  // プロセスの終了を待つ
+  return new Promise(resolve => {
+    shellProcess.on('exit', () => {
+      console.log(chalk.gray('\n🎼 シェルを終了しました'))
+      resolve()
+    })
+  })
+}
+
 export const createCommand = new Command('create')
   .description('新しい演奏者（worktree）を招集する')
   .argument('<branch-name>', 'ブランチ名または Issue# (例: 123, #123, issue-123)')
@@ -647,6 +729,37 @@ export const createCommand = new Command('create')
   .option('--template <name>', 'テンプレートを使用')
   .option('-y, --yes', '確認をスキップ')
   .option('--draft-pr', 'Draft PRを自動作成')
+  .option('--shell', '作成後にシェルに入る')
+  .option('--exec <command>', '作成後にコマンドを実行')
+  .option(
+    '--copy-file <file>',
+    '現在のworktreeからファイルをコピー（複数回使用可）',
+    (value, previous: string[] = []) => [...previous, value]
+  )
   .action(async (branchName: string, options: CreateOptions & { template?: string }) => {
     await executeCreateCommand(branchName, options)
   })
+
+// worktree内でコマンドを実行
+export async function executeCommandInWorktree(
+  worktreePath: string,
+  command: string
+): Promise<void> {
+  console.log(chalk.cyan(`\n🎵 コマンドを実行中: ${command}`))
+
+  try {
+    await execa(command, [], {
+      cwd: worktreePath,
+      shell: true,
+      stdio: 'inherit',
+    })
+    console.log(chalk.green('✨ コマンドが正常に実行されました'))
+  } catch (error) {
+    console.error(
+      chalk.red(
+        `コマンドの実行に失敗しました: ${error instanceof Error ? error.message : '不明なエラー'}`
+      )
+    )
+    throw error
+  }
+}

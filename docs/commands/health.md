@@ -1,6 +1,6 @@
 # mst health
 
-Command to check the health of orchestra members (Git Worktrees) and detect/fix issues. Comprehensively diagnoses old orchestra members detection, uncommitted changes verification, synchronization status with remote branches, and more.
+Command to check the health of orchestra members (Git Worktrees), detect and fix issues. Provides comprehensive diagnosis including detection of old orchestra members, uncommitted changes, and synchronization status with remote branches.
 
 ## Overview
 
@@ -33,7 +33,7 @@ mst health --verbose
 |--------|-------|-------------|---------|
 | `--fix` | `-f` | Auto-fix fixable issues | `false` |
 | `--prune` | `-p` | Delete old orchestra members | `false` |
-| `--days <n>` | `-d` | Number of days to consider old | `30` |
+| `--days <n>` | `-d` | Days to consider as old | `30` |
 | `--verbose` | `-v` | Display detailed information | `false` |
 | `--json` | `-j` | Output in JSON format | `false` |
 | `--dry-run` | `-n` | Show results without actually fixing | `false` |
@@ -60,9 +60,9 @@ Orchestra members without remote branches:
    Recommendation: Delete worktree or push to remote
 ```
 
-### diverged (Heavily Diverged)
+### diverged (Significantly Diverged)
 
-Orchestra members heavily diverged from main branch:
+Orchestra members that have diverged significantly from main branch:
 
 ```
 ⚠️  diverged: feature/long-running
@@ -92,9 +92,9 @@ Orchestra members with unresolved merge conflicts:
    Recommendation: Resolve conflicts and commit
 ```
 
-### missing (Directory Missing)
+### missing (Missing Directory)
 
-Orchestra members with missing directories:
+Orchestra members without existing directories:
 
 ```
 ❌ missing: feature/moved-worktree
@@ -158,22 +158,6 @@ Run 'mst health --prune' to remove stale worktrees
           "recommendation": "Commit or stash changes"
         }
       ]
-    },
-    {
-      "branch": "feature/old-ui",
-      "path": "/Users/user/project/.git/orchestra-members/feature-old-ui",
-      "status": "error",
-      "issues": [
-        {
-          "type": "stale",
-          "severity": "error",
-          "details": {
-            "lastCommitDays": 60,
-            "lastCommitDate": "2023-11-21T15:45:00Z"
-          },
-          "recommendation": "Review and delete if no longer needed"
-        }
-      ]
     }
   ],
   "summary": {
@@ -186,22 +170,22 @@ Run 'mst health --prune' to remove stale worktrees
 }
 ```
 
-## Auto-Fix Feature
+## Auto-fix Feature
 
 The `--fix` option can automatically fix the following issues:
 
-### Fixing orphaned Issues
+### Fix orphaned (Orphaned)
 
 ```bash
 mst health --fix
 ```
 
-Execution details:
+Execution:
 
 - Remove local tracking information when remote branch is deleted
 - Confirm whether to create new remote branch if needed
 
-### Fixing missing (Directory Missing)
+### Fix missing (Missing Directory)
 
 Automatically remove Worktree entries:
 
@@ -213,7 +197,7 @@ git worktree prune
 
 Detect and fix Worktree configuration inconsistencies
 
-## Pruning (Deleting Old Orchestra Members)
+## Pruning (Delete Old Orchestra Members)
 
 ```bash
 # Check orchestra members older than 30 days
@@ -257,7 +241,7 @@ name: Worktree Health Check
 
 on:
   schedule:
-    - cron: '0 0 * * *' # Run daily
+    - cron: '0 0 * * *' # Daily execution
 
 jobs:
   health-check:
@@ -277,7 +261,7 @@ jobs:
 
 ## Custom Checks
 
-### Generating Health Reports
+### Generate Health Report
 
 ```bash
 #!/bin/bash
@@ -308,7 +292,7 @@ mst health --json | jq -r '
 '
 ```
 
-### Handling by Issue Type
+### Issue-specific Handling
 
 ```bash
 # Batch process orchestra members with uncommitted changes
@@ -323,7 +307,7 @@ mst health --json | jq -r '.worktrees[] | select(.issues[].type == "orphaned") |
 done
 ```
 
-## Setting Thresholds
+## Threshold Settings
 
 Set health check thresholds in `.mst.json`:
 
@@ -347,7 +331,7 @@ Set health check thresholds in `.mst.json`:
 
 ## Tips & Tricks
 
-### Calculating Health Score
+### Calculate Health Score
 
 ```bash
 # Calculate health score (out of 100)
@@ -357,13 +341,13 @@ SCORE=$(mst health --json | jq '
 
 echo "Worktree health score: $SCORE/100"
 
-# Warn if below 80
+# Warning if below 80
 if [ $SCORE -lt 80 ]; then
   echo "⚠️  Health score is low. Run 'mst health --fix' to improve."
 fi
 ```
 
-### Automatic Issue Notifications
+### Auto-notification for Issues
 
 ```bash
 # Slack notification example
@@ -387,7 +371,7 @@ mst health --json | jq -r '.worktrees[] | select(.status != "healthy") | .branch
   read -p "Fix this issue? (y/n) " -n 1 -r
   echo
   if [[ $REPLY =~ ^[Yy]$ ]]; then
-    # Implement fix logic here
+    # Implement fixing logic here
     echo "Fixing $branch..."
   fi
 done
@@ -395,7 +379,7 @@ done
 
 ## Related Commands
 
-- [`mst list`](./list.md) - Display list and status of orchestra members
+- [`mst list`](./list.md) - Display orchestra member list and status
 - [`mst delete`](./delete.md) - Delete problematic orchestra members
 - [`mst sync`](./sync.md) - Sync diverged orchestra members
-- [`mst snapshot`](./snapshot.md) - Create snapshot before fixing
+- [`mst snapshot`](./snapshot.md) - Create snapshots before fixing

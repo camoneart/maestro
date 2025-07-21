@@ -4,6 +4,7 @@ import ora from 'ora'
 import inquirer from 'inquirer'
 import { GitWorktreeManager } from '../core/git.js'
 import { execa } from 'execa'
+import { spawn } from 'child_process'
 
 // 利用可能なブランチを取得
 async function getAvailableBranches(
@@ -100,10 +101,19 @@ export const attachCommand = new Command('attach')
   .option('-f, --fetch', '最初にfetchを実行')
   .option('-o, --open', 'VSCode/Cursorで開く')
   .option('-s, --setup', '環境セットアップを実行')
+  .option('--shell', 'アタッチ後にシェルに入る')
+  .option('--exec <command>', 'アタッチ後にコマンドを実行')
   .action(
     async (
       branchName?: string,
-      options: { remote?: boolean; fetch?: boolean; open?: boolean; setup?: boolean } = {}
+      options: {
+        remote?: boolean
+        fetch?: boolean
+        open?: boolean
+        setup?: boolean
+        shell?: boolean
+        exec?: string
+      } = {}
     ) => {
       const spinner = ora('オーケストレーション！').start()
 
@@ -157,8 +167,54 @@ export const attachCommand = new Command('attach')
           await openInEditor(worktreePath)
         }
 
-        console.log(chalk.green('\n✨ 演奏者の招集が完了しました！'))
-        console.log(chalk.gray(`\ncd ${worktreePath} で移動できます`))
+        // --execオプションの処理
+        if (options?.exec) {
+          console.log(chalk.cyan(`\n🎵 コマンドを実行中: ${options.exec}`))
+          try {
+            await execa(options.exec, [], {
+              cwd: worktreePath,
+              shell: true,
+              stdio: 'inherit',
+            })
+          } catch (error) {
+            console.error(
+              chalk.red(
+                `コマンドの実行に失敗しました: ${error instanceof Error ? error.message : '不明なエラー'}`
+              )
+            )
+            process.exit(1)
+          }
+        }
+
+        // --shellオプションの処理
+        if (options?.shell) {
+          console.log(chalk.cyan('\n🎵 シェルに入ります...'))
+          const shell = process.env.SHELL || '/bin/bash'
+          const child = spawn(shell, [], {
+            cwd: worktreePath,
+            stdio: 'inherit',
+            env: {
+              ...process.env,
+              MAESTRO: '1',
+              MAESTRO_NAME: branchName || '',
+              MAESTRO_PATH: worktreePath,
+            },
+          })
+
+          child.on('exit', () => {
+            console.log(chalk.gray('\nシェルから退出しました'))
+          })
+
+          // プロセスが終了するまで待つ
+          await new Promise<void>(resolve => {
+            child.on('exit', resolve)
+          })
+        }
+
+        if (!options?.shell && !options?.exec) {
+          console.log(chalk.green('\n✨ 演奏者の招集が完了しました！'))
+          console.log(chalk.gray(`\ncd ${worktreePath} で移動できます`))
+        }
       } catch (error) {
         spinner.fail('演奏者を招集できませんでした')
         console.error(chalk.red(error instanceof Error ? error.message : '不明なエラー'))

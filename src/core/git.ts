@@ -123,6 +123,11 @@ export class GitWorktreeManager {
     }
   }
 
+  async listLocalBranches(): Promise<string[]> {
+    const localBranches = await this.git.branchLocal()
+    return localBranches.all.filter(b => !b.startsWith('remotes/'))
+  }
+
   async fetchAll(): Promise<void> {
     await this.git.fetch(['--all'])
   }

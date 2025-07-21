@@ -1,6 +1,6 @@
 # mst history
 
-Command to manage Claude Code conversation history. Save, search, and export development history for each orchestra member (Git Worktree).
+Command to manage Claude Code conversation history. You can save, search, and export development history for each orchestra member (Git Worktree).
 
 ## Overview
 
@@ -60,7 +60,7 @@ mst history --list --json
 
 ## History Storage Format
 
-Claude Code history is stored in the following format:
+Claude Code histories are saved in the following format:
 
 ### Directory Structure
 
@@ -81,11 +81,11 @@ Claude Code history is stored in the following format:
 
 ### Human
 
-Please implement authentication feature. Use JWT.
+Please implement authentication functionality. Use JWT.
 
 ### Assistant
 
-I'll implement authentication feature with JWT. First, let's install the required packages...
+I'll implement authentication functionality with JWT. First, let's install the necessary packages...
 
 ---
 
@@ -97,10 +97,10 @@ Please add tests.
 
 ### Assistant
 
-I'll add tests for the authentication feature...
+I'll add tests for the authentication functionality...
 ```
 
-## Displaying History List
+## History List Display
 
 ### Normal Output
 
@@ -161,7 +161,7 @@ Summary:
 }
 ```
 
-## Searching History
+## History Search
 
 ### Keyword Search
 
@@ -176,8 +176,8 @@ Example output:
 🔍 Search results for "authentication":
 
 feature/auth - Session 2025-01-20 10:30:00
-  Line 15: "Please implement authentication feature. Use JWT."
-  Line 20: "I'll implement authentication feature with JWT..."
+  Line 15: "Please implement authentication functionality. Use JWT."
+  Line 20: "I'll implement authentication functionality with JWT..."
 
 feature/api - Session 2025-01-19 15:00:00
   Line 45: "Change API authentication to OAuth2.0..."
@@ -200,7 +200,7 @@ mst history --show feature-auth --search "JWT"
 
 ## Export Feature
 
-### Export in Markdown Format
+### Export to Markdown
 
 ```bash
 mst history --export all-histories.md
@@ -228,7 +228,7 @@ Export date: 2025-01-20 16:00:00
 ...
 ```
 
-### Export in JSON Format
+### Export to JSON
 
 ```bash
 mst history --export all-histories.json
@@ -237,10 +237,10 @@ mst history --export all-histories.json
 ### Export Specific Period
 
 ```bash
-# Export only histories from past 7 days
+# Export only last 7 days
 mst history --export recent-history.md --days 7
 
-# Export only specific branch
+# Export specific branch only
 mst history --show feature-auth --export feature-auth-history.md
 ```
 
@@ -255,7 +255,7 @@ mst history --merge complete-history.md
 Merge options:
 
 ```bash
-# Exclude duplicates
+# Remove duplicates
 mst history --merge complete-history.md --dedupe
 
 # Sort by timestamp
@@ -280,11 +280,11 @@ mst history --cleanup --days 30 --dry-run
 ### Delete Orphaned Histories
 
 ```bash
-# Delete histories for non-existent worktrees
+# Delete histories without existing Worktrees
 mst history --cleanup --orphaned
 ```
 
-## History Sync
+## History Synchronization
 
 ### Path Synchronization
 
@@ -293,7 +293,7 @@ mst history --cleanup --orphaned
 mst history --sync
 ```
 
-This allows moving existing histories to new locations when the history path is changed in configuration files.
+This allows moving existing histories to new locations when you change history paths in configuration files.
 
 ## Statistics and Reports
 
@@ -360,10 +360,10 @@ mst history --export - | grep -E "^### Human" -A1 | grep -v "^--" | sort | uniq 
 ### Team Sharing
 
 ```bash
-# Export history with anonymization
+# Export anonymized history for sharing
 mst history --export team-history.md --anonymize
 
-# Share only specific session
+# Share specific session only
 mst history --show feature-auth --session 2025-01-20 --export session.md
 ```
 
@@ -431,7 +431,7 @@ alias mst-history-search='mst history --search'
 alias mst-history-export='mst history --export "histories-$(date +%Y%m%d).md"'
 
 # Usage examples
-mst-history              # List histories
+mst-history              # History list
 mst-history-search bug   # Search bug-related histories
 mst-history-export       # Export with date
 ```
@@ -454,5 +454,5 @@ chmod +x .git/hooks/pre-push
 
 - [`mst create`](./create.md) - Start new orchestra member and history
 - [`mst suggest`](./suggest.md) - Suggestions based on history
-- [`mst snapshot`](./snapshot.md) - Snapshot management with history
+- [`mst snapshot`](./snapshot.md) - Snapshot management alongside history
 - [`mst health`](./health.md) - Health check for history files
