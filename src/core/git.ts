@@ -160,4 +160,15 @@ export class GitWorktreeManager {
       throw new Error('リポジトリルートの取得に失敗しました')
     }
   }
+
+  async isGitignored(filePath: string): Promise<boolean> {
+    try {
+      // git check-ignore returns 0 if the file is ignored
+      await this.git.raw(['check-ignore', filePath])
+      return true
+    } catch {
+      // Non-zero exit code means the file is not ignored
+      return false
+    }
+  }
 }

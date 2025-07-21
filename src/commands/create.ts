@@ -567,9 +567,35 @@ export async function executePostCreationTasks(
   // 並行実行
   await Promise.allSettled(tasks)
 
-  // ファイルコピー処理
+  // postCreate設定の処理
+  if (config.postCreate) {
+    // copyFilesの処理
+    if (config.postCreate.copyFiles && config.postCreate.copyFiles.length > 0) {
+      await copyFilesFromCurrentWorktree(worktreePath, config.postCreate.copyFiles)
+    }
+    
+    // commandsの処理
+    if (config.postCreate.commands && config.postCreate.commands.length > 0) {
+      for (const command of config.postCreate.commands) {
+        await executeCommandInWorktree(worktreePath, command)
+      }
+    }
+  }
+
+  // ファイルコピー処理（CLIオプション）
   if (options.copyFile && options.copyFile.length > 0) {
     await copyFilesFromCurrentWorktree(worktreePath, options.copyFile)
+  }
+
+  // afterCreateフックの実行（文字列または配列をサポート）
+  if (config.hooks?.afterCreate) {
+    const commands = Array.isArray(config.hooks.afterCreate)
+      ? config.hooks.afterCreate
+      : [config.hooks.afterCreate]
+    
+    for (const command of commands) {
+      await executeCommandInWorktree(worktreePath, command)
+    }
   }
 
   // シェルに入る処理
@@ -650,7 +676,7 @@ export async function createDraftPR(branchName: string, worktreePath: string): P
   }
 }
 
-// ファイルコピー処理
+// ファイルコピー処理（gitignoreファイルも含む）
 export async function copyFilesFromCurrentWorktree(
   worktreePath: string,
   files: string[]
@@ -658,13 +684,31 @@ export async function copyFilesFromCurrentWorktree(
   const spinner = ora('ファイルをコピー中...').start()
   const currentPath = process.cwd()
   let copiedCount = 0
+  const gitignoreFiles: string[] = []
 
   try {
+    const gitManager = new GitWorktreeManager()
+    
     for (const file of files) {
       const sourcePath = path.join(currentPath, file)
       const destPath = path.join(worktreePath, file)
 
       try {
+        // ファイルの存在確認
+        const stats = await fs.stat(sourcePath)
+        
+        if (!stats.isFile()) {
+          console.warn(chalk.yellow(`\n⚠️  ${file} はファイルではありません`))
+          continue
+        }
+        
+        // gitignoreされているかチェック
+        const isGitignored = await gitManager.isGitignored(file)
+        
+        if (isGitignored) {
+          gitignoreFiles.push(file)
+        }
+        
         // ディレクトリが存在しない場合は作成
         const destDir = path.dirname(destPath)
         await fs.mkdir(destDir, { recursive: true })
@@ -679,6 +723,10 @@ export async function copyFilesFromCurrentWorktree(
 
     if (copiedCount > 0) {
       spinner.succeed(chalk.green(`✨ ${copiedCount}個のファイルをコピーしました`))
+      
+      if (gitignoreFiles.length > 0) {
+        console.log(chalk.blue(`   gitignoreファイル: ${gitignoreFiles.join(', ')}`))
+      }
     } else {
       spinner.warn(chalk.yellow('コピーできたファイルがありませんでした'))
     }

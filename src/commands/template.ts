@@ -27,7 +27,7 @@ interface WorktreeTemplate {
     tmux?: boolean
     claude?: boolean
     hooks?: {
-      afterCreate?: string
+      afterCreate?: string | string[]
       beforeDelete?: string
     }
     customFiles?: Array<{
@@ -263,7 +263,7 @@ interface TemplateConfig {
   tmux?: boolean
   claude?: boolean
   hooks?: {
-    afterCreate?: string
+    afterCreate?: string | string[]
     beforeDelete?: string
   }
   customFiles?: Array<{ path: string; content: string }>
