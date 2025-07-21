@@ -711,35 +711,6 @@ export async function enterShell(worktreePath: string, branchName: string): Prom
   })
 }
 
-// コマンド実行処理
-export async function executeCommandInWorktree(worktreePath: string, command: string): Promise<void> {
-  const spinner = ora(`コマンドを実行中: ${command}`).start()
-
-  try {
-    const result = await execa(command, [], {
-      cwd: worktreePath,
-      shell: true
-    })
-
-    spinner.succeed(chalk.green('✨ コマンドが正常に実行されました'))
-    
-    if (result.stdout) {
-      console.log(chalk.gray('\n出力:'))
-      console.log(result.stdout)
-    }
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : '不明なエラー'
-    spinner.fail(chalk.red(`コマンドの実行に失敗しました: ${errorMessage}`))
-    
-    if (error && typeof error === 'object' && 'stderr' in error && error.stderr) {
-      console.error(chalk.red('\nエラー出力:'))
-      console.error(error.stderr)
-    }
-    
-    process.exit(1)
-  }
-}
-
 export const createCommand = new Command('create')
   .description('新しい演奏者（worktree）を招集する')
   .argument('<branch-name>', 'ブランチ名または Issue# (例: 123, #123, issue-123)')
@@ -759,3 +730,20 @@ export const createCommand = new Command('create')
   .action(async (branchName: string, options: CreateOptions & { template?: string }) => {
     await executeCreateCommand(branchName, options)
   })
+
+// worktree内でコマンドを実行
+export async function executeCommandInWorktree(worktreePath: string, command: string): Promise<void> {
+  console.log(chalk.cyan(`\n🎵 コマンドを実行中: ${command}`))
+  
+  try {
+    await execa(command, [], {
+      cwd: worktreePath,
+      shell: true,
+      stdio: 'inherit'
+    })
+    console.log(chalk.green('✨ コマンドが正常に実行されました'))
+  } catch (error) {
+    console.error(chalk.red(`コマンドの実行に失敗しました: ${error instanceof Error ? error.message : '不明なエラー'}`))
+    throw error
+  }
+}

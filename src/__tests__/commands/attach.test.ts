@@ -6,6 +6,7 @@ import inquirer from 'inquirer'
 import ora from 'ora'
 import { execa } from 'execa'
 import chalk from 'chalk'
+import { spawn } from 'child_process'
 
 vi.mock('../../core/git.js', () => ({
   GitWorktreeManager: vi.fn(),
@@ -33,6 +34,10 @@ vi.mock('ora', () => ({
 
 vi.mock('execa', () => ({
   execa: vi.fn(),
+}))
+
+vi.mock('child_process', () => ({
+  spawn: vi.fn(),
 }))
 
 describe('attach command', () => {
@@ -289,6 +294,85 @@ describe('attach command', () => {
       await attachCommand.parseAsync(['node', 'attach', 'feature-1'])
 
       expect(mockGitManager.attachWorktree).toHaveBeenCalledWith('feature-1')
+    })
+  })
+
+  describe('new options', () => {
+    it('should enter shell with --shell option', async () => {
+      const mockSpawn = vi.fn().mockReturnValue({
+        on: vi.fn((event, callback) => {
+          if (event === 'exit') {
+            setTimeout(callback, 0)
+          }
+        }),
+      })
+      ;(spawn as Mock).mockImplementation(mockSpawn)
+      mockGitManager.attachWorktree.mockResolvedValue('/path/to/worktree/feature-1')
+
+      await attachCommand.parseAsync(['node', 'attach', 'feature-1', '--shell'])
+
+      expect(mockGitManager.attachWorktree).toHaveBeenCalledWith('feature-1')
+      expect(mockSpawn).toHaveBeenCalledWith(
+        expect.any(String), // shell
+        [],
+        expect.objectContaining({
+          cwd: '/path/to/worktree/feature-1',
+          stdio: 'inherit',
+          env: expect.objectContaining({
+            MAESTRO: '1',
+            MAESTRO_NAME: 'feature-1',
+            MAESTRO_PATH: '/path/to/worktree/feature-1',
+          }),
+        })
+      )
+    })
+
+    it('should execute command with --exec option', async () => {
+      mockGitManager.attachWorktree.mockResolvedValue('/path/to/worktree/feature-1')
+      ;(execa as Mock).mockResolvedValue({ stdout: 'Command output', stderr: '', exitCode: 0 })
+
+      await attachCommand.parseAsync(['node', 'attach', 'feature-1', '--exec', 'npm test'])
+
+      expect(mockGitManager.attachWorktree).toHaveBeenCalledWith('feature-1')
+      expect(execa).toHaveBeenCalledWith(
+        'npm test',
+        [],
+        expect.objectContaining({
+          cwd: '/path/to/worktree/feature-1',
+          shell: true,
+        })
+      )
+    })
+
+    it('should handle exec command failure', async () => {
+      mockGitManager.attachWorktree.mockResolvedValue('/path/to/worktree/feature-1')
+      ;(execa as Mock).mockRejectedValue(new Error('Command failed'))
+
+      await expect(
+        attachCommand.parseAsync(['node', 'attach', 'feature-1', '--exec', 'invalid-command'])
+      ).rejects.toThrow('Process exited with code 1')
+
+      expect(consoleErrorSpy).toHaveBeenCalledWith(chalk.red('コマンドの実行に失敗しました: Command failed'))
+    })
+
+    it('should execute both --shell and --exec if provided together', async () => {
+      const mockSpawn = vi.fn().mockReturnValue({
+        on: vi.fn((event, callback) => {
+          if (event === 'exit') {
+            setTimeout(callback, 0)
+          }
+        }),
+      })
+      ;(spawn as Mock).mockImplementation(mockSpawn)
+      mockGitManager.attachWorktree.mockResolvedValue('/path/to/worktree/feature-1')
+      ;(execa as Mock).mockResolvedValue({ stdout: 'Command output', stderr: '', exitCode: 0 })
+
+      await attachCommand.parseAsync(['node', 'attach', 'feature-1', '--shell', '--exec', 'npm test'])
+
+      expect(mockGitManager.attachWorktree).toHaveBeenCalledWith('feature-1')
+      // Both exec and shell should be called
+      expect(execa).toHaveBeenCalled()
+      expect(mockSpawn).toHaveBeenCalled()
     })
   })
 })
