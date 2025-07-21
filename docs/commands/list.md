@@ -41,6 +41,7 @@ mst list --full-path
 | `--sort`       |        | Sort by field (branch, age, size)      | `branch` |
 | `--last-commit`|        | Show last commit information           | `false`  |
 | `--full-path`  |        | Show full paths instead of relative    | `false`  |
+| `--names`      |        | Machine-readable output (for scripting)| `false`  |
 
 ## Output Formats
 
@@ -158,6 +159,25 @@ By default, paths are shown relative to the repository root:
 
 🎼 feature/auth                   .git/orchestrations/feature-auth
     Last commit: 2025-01-19 10:15:30 def5678: Add login endpoint
+```
+
+### Names Output (`--names`)
+
+Machine-readable output that prints only branch names, one per line. Perfect for scripting:
+
+```bash
+# Simple output
+$ mst list --names
+main
+feature/auth
+bugfix/login
+issue-123
+
+# Use in scripts
+for branch in $(mst list --names); do
+  echo "Processing $branch..."
+  mst exec "$branch" git status --short
+done
 ```
 
 ## fzf Integration
