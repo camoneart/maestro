@@ -40,12 +40,14 @@ describe('create command new options', () => {
       isGitRepository: vi.fn().mockResolvedValue(true),
       createWorktree: vi.fn().mockResolvedValue('/path/to/worktree'),
       listWorktrees: vi.fn().mockResolvedValue([]),
+      isGitignored: vi.fn().mockResolvedValue(false),
     }
 
     vi.mocked(GitWorktreeManager).mockImplementation(() => mockGitManager)
     vi.mocked(execa).mockResolvedValue({ stdout: '', stderr: '', exitCode: 0 } as any)
     vi.mocked(fs.copyFile).mockResolvedValue(undefined)
     vi.mocked(fs.mkdir).mockResolvedValue(undefined)
+    vi.mocked(fs.stat).mockResolvedValue({ isFile: () => true } as any)
   })
 
   describe('--shell option', () => {
