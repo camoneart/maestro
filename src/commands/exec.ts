@@ -4,6 +4,8 @@ import { GitWorktreeManager } from '../core/git.js'
 import { execa } from 'execa'
 import ora from 'ora'
 import { Worktree } from '../types/index.js'
+import { executeTmuxCommandInPane, isInTmuxSession, TmuxPaneType } from '../utils/tmux.js'
+import { selectWorktreeWithFzf, isFzfAvailable } from '../utils/fzf.js'
 
 // すべての演奏者でコマンドを実行
 async function executeOnAllMembers(
@@ -108,19 +110,28 @@ async function executeOnSpecificMember(
   }
 }
 
+interface ExecOptions {
+  silent?: boolean
+  all?: boolean
+  fzf?: boolean
+  tmux?: boolean
+  tmuxVertical?: boolean
+  tmuxHorizontal?: boolean
+}
+
 export const execCommand = new Command('exec')
   .alias('e')
   .description('演奏者でコマンドを実行')
-  .argument('<branch-name>', 'ブランチ名')
-  .argument('<command...>', '実行するコマンド')
+  .argument('[branch-name]', 'ブランチ名（省略時またはfzfオプション時は選択）')
+  .argument('[command...]', '実行するコマンド')
   .option('-s, --silent', '出力を抑制')
   .option('-a, --all', 'すべての演奏者で実行')
+  .option('--fzf', 'fzfで演奏者を選択')
+  .option('-t, --tmux', 'tmuxの新しいウィンドウで実行')
+  .option('--tmux-vertical, --tmux-v', 'tmuxの縦分割ペインで実行')
+  .option('--tmux-horizontal, --tmux-h', 'tmuxの横分割ペインで実行')
   .action(
-    async (
-      branchName: string,
-      commandParts: string[],
-      options: { silent?: boolean; all?: boolean } = {}
-    ) => {
+    async (branchName: string | undefined, commandParts: string[], options: ExecOptions = {}) => {
       try {
         const gitManager = new GitWorktreeManager()
 
@@ -142,10 +153,62 @@ export const execCommand = new Command('exec')
 
         // コマンドを結合
         const command = commandParts.join(' ')
+        if (!command && !options.all) {
+          console.error(chalk.red('エラー: 実行するコマンドを指定してください'))
+          process.exit(1)
+        }
 
+        // --allオプションの処理
         if (options?.all) {
           await executeOnAllMembers(orchestraMembers, command, options.silent)
           return
+        }
+
+        // tmuxオプションの検証
+        const tmuxOptionsCount = [
+          options.tmux,
+          options.tmuxVertical,
+          options.tmuxHorizontal,
+        ].filter(Boolean).length
+        if (tmuxOptionsCount > 1) {
+          console.error(chalk.red('エラー: tmuxオプションは一つだけ指定してください'))
+          process.exit(1)
+        }
+
+        const isUsingTmux = options.tmux || options.tmuxVertical || options.tmuxHorizontal
+        if (isUsingTmux && !(await isInTmuxSession())) {
+          console.error(
+            chalk.red('エラー: tmuxオプションを使用するにはtmuxセッション内にいる必要があります')
+          )
+          process.exit(1)
+        }
+
+        // ブランチ名が指定されていない場合またはfzfオプションが指定された場合
+        if (!branchName || options?.fzf) {
+          if (options?.fzf) {
+            // fzfの利用可能性をチェック
+            if (!(await isFzfAvailable())) {
+              console.error(chalk.red('エラー: fzfがインストールされていません'))
+              process.exit(1)
+            }
+
+            const selectedBranch = await selectWorktreeWithFzf(
+              orchestraMembers,
+              'コマンドを実行する演奏者を選択 (Ctrl-C でキャンセル)'
+            )
+
+            if (!selectedBranch) {
+              console.log(chalk.gray('キャンセルされました'))
+              process.exit(0)
+            }
+
+            branchName = selectedBranch
+          } else {
+            console.error(
+              chalk.red('エラー: ブランチ名を指定するか --fzf オプションを使用してください')
+            )
+            process.exit(1)
+          }
         }
 
         const targetWorktree = orchestraMembers.find(wt => {
@@ -159,6 +222,34 @@ export const execCommand = new Command('exec')
           process.exit(1)
         }
 
+        // tmuxでの実行
+        if (isUsingTmux) {
+          const displayBranchName =
+            targetWorktree.branch?.replace('refs/heads/', '') || targetWorktree.branch
+
+          let paneType: TmuxPaneType = 'new-window'
+          if (options.tmuxVertical) paneType = 'vertical-split'
+          if (options.tmuxHorizontal) paneType = 'horizontal-split'
+
+          console.log(
+            chalk.green(
+              `\n🎼 演奏者 '${chalk.cyan(displayBranchName)}' でtmux ${paneType}コマンドを実行`
+            )
+          )
+          console.log(chalk.gray(`📁 ${targetWorktree.path}`))
+          console.log(chalk.gray(`$ ${command}\n`))
+
+          await executeTmuxCommandInPane(command, {
+            cwd: targetWorktree.path,
+            branchName: displayBranchName,
+            paneType,
+            sessionName: displayBranchName,
+          })
+
+          return
+        }
+
+        // 通常の実行
         await executeOnSpecificMember(targetWorktree, command, options.silent)
       } catch (error) {
         console.error(chalk.red('エラー:'), error instanceof Error ? error.message : '不明なエラー')
