@@ -33,12 +33,23 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Run ESLint
-        run: pnpm run lint:ci
+      - name: Debug environment
+        run: |
+          echo "Node version: $(node --version)"
+          echo "pnpm version: $(pnpm --version)"
+          echo "Working directory: $(pwd)"
+          echo "Files in src/:"
+          ls -la src/ | head -5
 
+      - name: Run ESLint
+        run: |
+          echo "Running ESLint..."
+          pnpm run lint:ci
 
       - name: Run Prettier check
-        run: pnpm run prettier:check
+        run: |
+          echo "Running Prettier check..."
+          pnpm run prettier:check
 
   typecheck:
     name: Type Check
@@ -60,8 +71,15 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Debug TypeScript environment
+        run: |
+          echo "TypeScript version: $(pnpm exec tsc --version)"
+          echo "Current working directory: $(pwd)"
+
       - name: Run TypeScript type check
-        run: pnpm run typecheck
+        run: |
+          echo "Running TypeScript type checking..."
+          pnpm run typecheck
 
   test:
     name: Test
@@ -87,13 +105,22 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Debug test environment
+        run: |
+          echo "Node: $(node --version), pnpm: $(pnpm --version)"
+          echo "Test environment: ${{ matrix.os }}, Node ${{ matrix.node-version }}"
+          echo "Available test scripts:"
+          pnpm run | grep test || true
+
       - name: Check for skipped tests
         run: |
           # Temporarily disabled while fixing tests
           echo "Skipped test check temporarily disabled"
 
       - name: Run unit tests
-        run: pnpm run test
+        run: |
+          echo "Running unit tests..."
+          pnpm run test
 
       - name: Run tests with coverage
         if: matrix.os == 'ubuntu-latest' && matrix.node-version == '20'
