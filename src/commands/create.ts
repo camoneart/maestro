@@ -651,7 +651,10 @@ export async function createDraftPR(branchName: string, worktreePath: string): P
 }
 
 // ファイルコピー処理
-export async function copyFilesFromCurrentWorktree(worktreePath: string, files: string[]): Promise<void> {
+export async function copyFilesFromCurrentWorktree(
+  worktreePath: string,
+  files: string[]
+): Promise<void> {
   const spinner = ora('ファイルをコピー中...').start()
   const currentPath = process.cwd()
   let copiedCount = 0
@@ -660,12 +663,12 @@ export async function copyFilesFromCurrentWorktree(worktreePath: string, files: 
     for (const file of files) {
       const sourcePath = path.join(currentPath, file)
       const destPath = path.join(worktreePath, file)
-      
+
       try {
         // ディレクトリが存在しない場合は作成
         const destDir = path.dirname(destPath)
         await fs.mkdir(destDir, { recursive: true })
-        
+
         // ファイルをコピー
         await fs.copyFile(sourcePath, destPath)
         copiedCount++
@@ -687,13 +690,13 @@ export async function copyFilesFromCurrentWorktree(worktreePath: string, files: 
 // シェルに入る処理
 export async function enterShell(worktreePath: string, branchName: string): Promise<void> {
   console.log(chalk.cyan(`\n🎼 演奏者 '${branchName}' のシェルに入ります...`))
-  
+
   // 環境変数を設定
   const env = {
     ...process.env,
     MAESTRO: '1',
     MAESTRO_NAME: branchName,
-    MAESTRO_PATH: worktreePath
+    MAESTRO_PATH: worktreePath,
   }
 
   // シェルを起動
@@ -701,11 +704,11 @@ export async function enterShell(worktreePath: string, branchName: string): Prom
   const shellProcess = spawn(shell, [], {
     cwd: worktreePath,
     stdio: 'inherit',
-    env
+    env,
   })
 
   // プロセスの終了を待つ
-  return new Promise((resolve) => {
+  return new Promise(resolve => {
     shellProcess.on('exit', () => {
       console.log(chalk.gray('\n🎼 シェルを終了しました'))
       resolve()
@@ -728,24 +731,35 @@ export const createCommand = new Command('create')
   .option('--draft-pr', 'Draft PRを自動作成')
   .option('--shell', '作成後にシェルに入る')
   .option('--exec <command>', '作成後にコマンドを実行')
-  .option('--copy-file <file>', '現在のworktreeからファイルをコピー（複数回使用可）', (value, previous: string[] = []) => [...previous, value])
+  .option(
+    '--copy-file <file>',
+    '現在のworktreeからファイルをコピー（複数回使用可）',
+    (value, previous: string[] = []) => [...previous, value]
+  )
   .action(async (branchName: string, options: CreateOptions & { template?: string }) => {
     await executeCreateCommand(branchName, options)
   })
 
 // worktree内でコマンドを実行
-export async function executeCommandInWorktree(worktreePath: string, command: string): Promise<void> {
+export async function executeCommandInWorktree(
+  worktreePath: string,
+  command: string
+): Promise<void> {
   console.log(chalk.cyan(`\n🎵 コマンドを実行中: ${command}`))
-  
+
   try {
     await execa(command, [], {
       cwd: worktreePath,
       shell: true,
-      stdio: 'inherit'
+      stdio: 'inherit',
     })
     console.log(chalk.green('✨ コマンドが正常に実行されました'))
   } catch (error) {
-    console.error(chalk.red(`コマンドの実行に失敗しました: ${error instanceof Error ? error.message : '不明なエラー'}`))
+    console.error(
+      chalk.red(
+        `コマンドの実行に失敗しました: ${error instanceof Error ? error.message : '不明なエラー'}`
+      )
+    )
     throw error
   }
 }

@@ -24,10 +24,10 @@ vi.mock('../../core/config.js', () => ({
     getAll: vi.fn().mockReturnValue({
       development: {
         autoSetup: false,
-        syncFiles: []
-      }
-    })
-  }))
+        syncFiles: [],
+      },
+    }),
+  })),
 }))
 
 describe('create command new options', () => {
@@ -35,13 +35,13 @@ describe('create command new options', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
-    
+
     mockGitManager = {
       isGitRepository: vi.fn().mockResolvedValue(true),
       createWorktree: vi.fn().mockResolvedValue('/path/to/worktree'),
       listWorktrees: vi.fn().mockResolvedValue([]),
     }
-    
+
     vi.mocked(GitWorktreeManager).mockImplementation(() => mockGitManager)
     vi.mocked(execa).mockResolvedValue({ stdout: '', stderr: '', exitCode: 0 } as any)
     vi.mocked(fs.copyFile).mockResolvedValue(undefined)

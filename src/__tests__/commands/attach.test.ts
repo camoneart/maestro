@@ -352,7 +352,9 @@ describe('attach command', () => {
         attachCommand.parseAsync(['node', 'attach', 'feature-1', '--exec', 'invalid-command'])
       ).rejects.toThrow('Process exited with code 1')
 
-      expect(consoleErrorSpy).toHaveBeenCalledWith(chalk.red('コマンドの実行に失敗しました: Command failed'))
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        chalk.red('コマンドの実行に失敗しました: Command failed')
+      )
     })
 
     it('should execute both --shell and --exec if provided together', async () => {
@@ -367,7 +369,14 @@ describe('attach command', () => {
       mockGitManager.attachWorktree.mockResolvedValue('/path/to/worktree/feature-1')
       ;(execa as Mock).mockResolvedValue({ stdout: 'Command output', stderr: '', exitCode: 0 })
 
-      await attachCommand.parseAsync(['node', 'attach', 'feature-1', '--shell', '--exec', 'npm test'])
+      await attachCommand.parseAsync([
+        'node',
+        'attach',
+        'feature-1',
+        '--shell',
+        '--exec',
+        'npm test',
+      ])
 
       expect(mockGitManager.attachWorktree).toHaveBeenCalledWith('feature-1')
       // Both exec and shell should be called

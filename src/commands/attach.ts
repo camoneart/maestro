@@ -106,7 +106,14 @@ export const attachCommand = new Command('attach')
   .action(
     async (
       branchName?: string,
-      options: { remote?: boolean; fetch?: boolean; open?: boolean; setup?: boolean; shell?: boolean; exec?: string } = {}
+      options: {
+        remote?: boolean
+        fetch?: boolean
+        open?: boolean
+        setup?: boolean
+        shell?: boolean
+        exec?: string
+      } = {}
     ) => {
       const spinner = ora('オーケストレーション！').start()
 
@@ -167,10 +174,14 @@ export const attachCommand = new Command('attach')
             await execa(options.exec, [], {
               cwd: worktreePath,
               shell: true,
-              stdio: 'inherit'
+              stdio: 'inherit',
             })
           } catch (error) {
-            console.error(chalk.red(`コマンドの実行に失敗しました: ${error instanceof Error ? error.message : '不明なエラー'}`))
+            console.error(
+              chalk.red(
+                `コマンドの実行に失敗しました: ${error instanceof Error ? error.message : '不明なエラー'}`
+              )
+            )
             process.exit(1)
           }
         }
@@ -186,8 +197,8 @@ export const attachCommand = new Command('attach')
               ...process.env,
               MAESTRO: '1',
               MAESTRO_NAME: branchName || '',
-              MAESTRO_PATH: worktreePath
-            }
+              MAESTRO_PATH: worktreePath,
+            },
           })
 
           child.on('exit', () => {
@@ -195,7 +206,7 @@ export const attachCommand = new Command('attach')
           })
 
           // プロセスが終了するまで待つ
-          await new Promise<void>((resolve) => {
+          await new Promise<void>(resolve => {
             child.on('exit', resolve)
           })
         }
