@@ -1,5 +1,17 @@
 # Changelog
 
+## 2.3.0
+
+### Minor Changes
+
+- [#36](https://github.com/hashiramaendure/maestro/pull/36) [`2f43ca5`](https://github.com/hashiramaendure/maestro/commit/2f43ca554aeee7d112779e77e2f814ab92e67006) Thanks [@hashiramaendure](https://github.com/hashiramaendure)! - Add new options to create command and implement attach command
+  - Add `--shell` option to create command: enter shell after creating worktree
+  - Add `--exec <command>` option to create command: execute command after creating worktree
+  - Add `--copy-file <file>` option to create command: copy files from current worktree
+  - Implement new `attach` command: create worktree for existing branches
+  - Add `--shell` and `--exec` options to attach command
+  - Set MAESTRO environment variables when entering shell sessions
+
 ## 2.2.1
 
 ### Patch Changes
