@@ -58,6 +58,7 @@ export const listCommand = new Command('list')
   .description('オーケストラ編成（worktree）の一覧を表示')
   .option('-j, --json', 'JSON形式で出力')
   .option('--fzf', 'fzfで選択し、選択したブランチ名を出力')
+  .option('--names', 'ブランチ名のみを出力（スクリプト用）')
   .option('--filter <keyword>', 'ブランチ名またはパスでフィルタ')
   .option('--sort <field>', 'ソート順 (branch|age|size)', 'branch')
   .option('--last-commit', '最終コミット情報を表示')
@@ -68,6 +69,7 @@ export const listCommand = new Command('list')
       options: {
         json?: boolean
         fzf?: boolean
+        names?: boolean
         filter?: string
         sort?: string
         lastCommit?: boolean
@@ -141,6 +143,20 @@ export const listCommand = new Command('list')
 
         if (worktrees.length === 0) {
           console.log(chalk.yellow('演奏者が存在しません'))
+          return
+        }
+
+        // --namesオプションが指定された場合（スクリプト用）
+        if (options?.names) {
+          // メインブランチを除外した演奏者のブランチ名のみを出力
+          const orchestraMembers = worktrees.filter((wt: Worktree) => !wt.path.endsWith('.'))
+          
+          for (const wt of orchestraMembers) {
+            const branchName = wt.branch?.replace('refs/heads/', '') || wt.branch || ''
+            if (branchName) {
+              console.log(branchName)
+            }
+          }
           return
         }
 

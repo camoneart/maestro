@@ -7,6 +7,7 @@ import { ConfigManager } from '../core/config.js'
 import { execa } from 'execa'
 import path from 'path'
 import fs from 'fs/promises'
+import { startTmuxShell, isInTmuxSession, TmuxPaneType } from '../utils/tmux.js'
 
 // 型定義
 interface GithubOptions {
@@ -15,6 +16,9 @@ interface GithubOptions {
   message?: string
   reopen?: boolean
   close?: boolean
+  tmux?: boolean
+  tmuxVertical?: boolean
+  tmuxHorizontal?: boolean
 }
 
 interface ItemInfo {
@@ -475,6 +479,19 @@ async function processWorktreeCreation(
   config: ProjectConfig,
   gitManager: GitWorktreeManager
 ): Promise<void> {
+  // tmuxオプションの検証
+  const tmuxOptionsCount = [options.tmux, options.tmuxVertical, options.tmuxHorizontal].filter(Boolean).length
+  if (tmuxOptionsCount > 1) {
+    console.error(chalk.red('エラー: tmuxオプションは一つだけ指定してください'))
+    process.exit(1)
+  }
+
+  const isUsingTmux = options.tmux || options.tmuxVertical || options.tmuxHorizontal
+  if (isUsingTmux && !(await isInTmuxSession())) {
+    console.error(chalk.red('エラー: tmuxオプションを使用するにはtmuxセッション内にいる必要があります'))
+    process.exit(1)
+  }
+
   // Worktree作成
   const worktreePath = await createWorktreeFromGithub(type, number, config, gitManager)
 
@@ -483,10 +500,42 @@ async function processWorktreeCreation(
     options?.setup || (options?.setup === undefined && config.development?.autoSetup)
   await setupEnvironment(worktreePath, config, !!shouldSetup)
 
-  // エディタで開く
-  const shouldOpen =
-    options?.open || (options?.open === undefined && config.development?.defaultEditor !== 'none')
-  await openInEditor(worktreePath, config, !!shouldOpen)
+  // tmuxでシェルを開く処理
+  if (isUsingTmux) {
+    let paneType: TmuxPaneType = 'new-window'
+    if (options.tmuxVertical) paneType = 'vertical-split'
+    if (options.tmuxHorizontal) paneType = 'horizontal-split'
+
+    const branchName = path.basename(worktreePath)
+
+    console.log(chalk.green(`\n🎼 GitHub統合による演奏者招集完了！tmux ${paneType}シェルで開始`))
+    console.log(chalk.gray(`📁 ${worktreePath}\n`))
+
+    try {
+      await startTmuxShell({
+        cwd: worktreePath,
+        branchName,
+        paneType,
+        sessionName: branchName,
+      })
+    } catch (error) {
+      console.error(
+        chalk.red(
+          `❌ tmux ${paneType}の起動に失敗: ${error instanceof Error ? error.message : '不明なエラー'}`
+        )
+      )
+      console.log(chalk.yellow('エディタでのオープンに進みます...'))
+      // tmuxが失敗した場合はエディタオープンにフォールバック
+      const shouldOpen =
+        options?.open || (options?.open === undefined && config.development?.defaultEditor !== 'none')
+      await openInEditor(worktreePath, config, !!shouldOpen)
+    }
+  } else {
+    // エディタで開く
+    const shouldOpen =
+      options?.open || (options?.open === undefined && config.development?.defaultEditor !== 'none')
+    await openInEditor(worktreePath, config, !!shouldOpen)
+  }
 
   console.log(chalk.green('\n✨ GitHub統合による演奏者の招集が完了しました！'))
   console.log(chalk.gray(`\ncd ${worktreePath} で移動できます`))
@@ -552,6 +601,9 @@ export const githubCommand = new Command('github')
   .option('-m, --message <message>', 'コメントメッセージ')
   .option('--reopen', 'PR/Issueを再開')
   .option('--close', 'PR/Issueをクローズ')
+  .option('-t, --tmux', 'tmuxの新しいウィンドウで開く')
+  .option('--tmux-vertical, --tmux-v', 'tmuxの縦分割ペインで開く')
+  .option('--tmux-horizontal, --tmux-h', 'tmuxの横分割ペインで開く')
   .action(async (type?: string, number?: string, options: GithubOptions = {}) => {
     const spinner = ora('オーケストレーション！').start()
 
