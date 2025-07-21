@@ -1,7 +1,7 @@
 # Maestro
 
 [![Node.js >=20.0.0](https://img.shields.io/badge/Node.js-%3E%3D20.0.0-45CC11?labelColor=555555&style=flat&logoColor=FFFFFF)](https://nodejs.org/)
-[![npm version](https://img.shields.io/npm/v/@hashiramaendure/maestro?color=007EC5&labelColor=555555&style=flat&logoColor=FFFFFF)](https://www.npmjs.com/package/@hashiramaendure/maestro)
+[![npm version](https://img.shields.io/npm/v/@camoneart/maestro?color=007EC5&labelColor=555555&style=flat&logoColor=FFFFFF)](https://www.npmjs.com/package/@camoneart/maestro)
 [![License MIT](https://img.shields.io/badge/License-MIT-yellow?labelColor=555555&style=flat)](https://opensource.org/licenses/MIT)
 
 ![maestro](public/image/logo/maestro-logo.png)
@@ -54,7 +54,7 @@ Maestroは、Git Worktreeをより直感的に管理できるCLIツールです�
 ### Homebrew を使用 (推奨)
 
 ```bash
-brew install hashiramaendure/tap/maestro
+brew install camoneart/tap/maestro
 ```
 
 ※ Homebrew でインストールすると、zsh / fish / Bash すべての補完スクリプトが自動で配置されます。<br>
@@ -63,21 +63,21 @@ brew install hashiramaendure/tap/maestro
 ### npm を使用
 
 ```bash
-npm install -g @hashiramaendure/maestro
+npm install -g @camoneart/maestro
 ```
 
 ### pnpm を使用
 
 ```bash
 # pnpm が入っていない場合は最初に: npm install -g pnpm
-pnpm add -g @hashiramaendure/maestro
+pnpm add -g @camoneart/maestro
 ```
 
 ## クイックスタート
 
 ```bash
 # 1. インストール  ※Homebrew 例
-brew install hashiramaendure/tap/maestro
+brew install camoneart/tap/maestro
 
 # 2. Git プロジェクトに移動
 cd ~/path/to/your-repo
@@ -265,7 +265,7 @@ mst completion fish > ~/.config/fish/completions/mst.fish
 | `EADDRINUSE` | MCP サーバーのポート競合       | `mst mcp stop` で既存プロセスを停止 |
 | `ENOENT`     | Git 実行ファイルが見つからない | Git の PATH を確認、再インストール  |
 
-上記で解決しない場合は [Issues](https://github.com/hashiramaendure/maestro/issues) で検索または新規 Issue を作成してください。
+上記で解決しない場合は [Issues](https://github.com/camoneart/maestro/issues) で検索または新規 Issue を作成してください。
 
 ### 🔍 デバッグモード
 
@@ -281,7 +281,7 @@ DEBUG=mst:* mst review --auto-flow &> maestro-debug.log
 
 ### 🤝 コントリビューションの流れ
 
-1. [**Issue**](https://github.com/hashiramaendure/maestro/issues) でバグ報告・機能提案を送る
+1. [**Issue**](https://github.com/camoneart/maestro/issues) でバグ報告・機能提案を送る
 2. このリポジトリを **Fork** し、`feat/your-topic` などのブランチを作成
 3. 開発後 `pnpm lint && pnpm test` でスタイルとテストを通過させる
 4. **Conventional Commits** 形式でコミット

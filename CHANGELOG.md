@@ -33,7 +33,7 @@
 
 ### Minor Changes
 
-- [#36](https://github.com/hashiramaendure/maestro/pull/36) [`2f43ca5`](https://github.com/hashiramaendure/maestro/commit/2f43ca554aeee7d112779e77e2f814ab92e67006) Thanks [@hashiramaendure](https://github.com/hashiramaendure)! - Add new options to create command and implement attach command
+- [#36](https://github.com/camoneart/maestro/pull/36) [`2f43ca5`](https://github.com/camoneart/maestro/commit/2f43ca554aeee7d112779e77e2f814ab92e67006) Thanks [@camoneart](https://github.com/camoneart)! - Add new options to create command and implement attach command
   - Add `--shell` option to create command: enter shell after creating worktree
   - Add `--exec <command>` option to create command: execute command after creating worktree
   - Add `--copy-file <file>` option to create command: copy files from current worktree
@@ -45,7 +45,7 @@
 
 ### Patch Changes
 
-- [`4280a19`](https://github.com/hashiramaendure/maestro/commit/4280a19) Thanks [@hashiramaendure](https://github.com/hashiramaendure)! - fix: resolve worktree branch name matching in delete command
+- [`4280a19`](https://github.com/camoneart/maestro/commit/4280a19) Thanks [@camoneart](https://github.com/camoneart)! - fix: resolve worktree branch name matching in delete command
 
   Fixed an issue where the `mst delete` command would fail with "ワークツリー 'refs/heads/branch-name' が見つかりません" error. The issue occurred because the delete command was passing branch names with the `refs/heads/` prefix to the GitWorktreeManager, which expects clean branch names.
 
@@ -53,7 +53,7 @@
 
 ### Minor Changes
 
-- [`7a3c70d`](https://github.com/hashiramaendure/maestro/commit/7a3c70d6f76aaa5c9ef103b2973622ff7235a89e) Thanks [@hashiramaendure](https://github.com/hashiramaendure)! - feat: Add tmux pane split functionality
+- [`7a3c70d`](https://github.com/camoneart/maestro/commit/7a3c70d6f76aaa5c9ef103b2973622ff7235a89e) Thanks [@camoneart](https://github.com/camoneart)! - feat: Add tmux pane split functionality
   - Add `--tmux-h` option for horizontal pane split (side by side)
   - Add `--tmux-v` option for vertical pane split (top and bottom)
   - Automatically execute Claude commands in new panes when `--claude` is used
@@ -66,7 +66,7 @@
 
 ### Patch Changes
 
-- [`ed0a0ff`](https://github.com/hashiramaendure/maestro/commit/ed0a0ff2fc1b97f3e2a8f8a7f0a62a1d5937ecff) Thanks [@hashiramaendure](https://github.com/hashiramaendure)! - feat(list): Add relative path display for better readability
+- [`ed0a0ff`](https://github.com/camoneart/maestro/commit/ed0a0ff2fc1b97f3e2a8f8a7f0a62a1d5937ecff) Thanks [@camoneart](https://github.com/camoneart)! - feat(list): Add relative path display for better readability
   - Display worktree paths relative to repository root by default
   - Add `--full-path` option to show absolute paths when needed
   - Current directory shows as `.` for clarity
@@ -105,7 +105,7 @@
   ## 🚨 Breaking Changes
 
   ### Package & Command Changes
-  - **Package name**: `shadow-clone-jutsu` → `@hashiramaendure/maestro`
+  - **Package name**: `shadow-clone-jutsu` → `@camoneart/maestro`
   - **Command**: `scj` → `maestro` (or `mst` for short)
   - **Configuration file**: `.scj.json` → `.maestro.json`
   - **Default directory**: `.git/shadow-clones` → `.git/orchestrations`
@@ -126,7 +126,7 @@
      ```
   2. **Install new package**:
      ```bash
-     npm install -g @hashiramaendure/maestro
+     npm install -g @camoneart/maestro
      ```
   3. **Update configuration**:
      - Rename `.scj.json` to `.maestro.json`
@@ -147,7 +147,7 @@
 
   ***
 
-  For more details, see the [migration guide](https://github.com/hashiramaendure/maestro/wiki/migration-guide).
+  For more details, see the [migration guide](https://github.com/camoneart/maestro/wiki/migration-guide).
 
 All notable changes to this project will be documented in this file.
 
@@ -159,7 +159,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - **BREAKING**: Rebranded from "shadow-clone-jutsu" to "Maestro" with conductor/orchestra theme
-- **BREAKING**: Changed package name from `shadow-clone-jutsu` to `@hashiramaendure/maestro`
+- **BREAKING**: Changed package name from `shadow-clone-jutsu` to `@camoneart/maestro`
 - **BREAKING**: Changed CLI command from `scj` to `maestro` (alias: `mst`), keeping `scj` for backward compatibility
 - **BREAKING**: Changed configuration file from `.scj.json` to `.maestro.json` (with fallback support)
 - **BREAKING**: Changed default worktree directory from `.git/shadow-clones` to `.git/orchestrations`
@@ -176,7 +176,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Patch Changes
 
-- [`4fcf9d1`](https://github.com/hashiramaendure/maestro/commit/4fcf9d1740864bc7d860cf32650cafde36f742e3) Thanks [@hashiramaendure](https://github.com/hashiramaendure)! - Test automatic versioning and release workflow setup
+- [`4fcf9d1`](https://github.com/camoneart/maestro/commit/4fcf9d1740864bc7d860cf32650cafde36f742e3) Thanks [@camoneart](https://github.com/camoneart)! - Test automatic versioning and release workflow setup
 
 ## [1.0.0] - 2025-07-15
 

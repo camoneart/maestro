@@ -1,7 +1,7 @@
 {
   "version": "0.1.0",
   "description": "Git Worktree management tool with Claude Code integration",
-  "homepage": "https://github.com/hashiramaendure/maestro",
+  "homepage": "https://github.com/camoneart/maestro",
   "license": "MIT",
   "architecture": {
     "64bit": {
@@ -44,6 +44,6 @@
     "  mst --help",
     "",
     "For more information, visit:",
-    "  https://github.com/hashiramaendure/maestro"
+    "  https://github.com/camoneart/maestro"
   ]
 }

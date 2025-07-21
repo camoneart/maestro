@@ -18,7 +18,7 @@ We take the security of maestro seriously. If you believe you have found a secur
 **Please do not report security vulnerabilities through public GitHub issues.**
 
 Instead, please report them via email to:
-- Primary: [Create a security advisory](https://github.com/hashiramaendure/maestro/security/advisories/new) on GitHub
+- Primary: [Create a security advisory](https://github.com/camoneart/maestro/security/advisories/new) on GitHub
 - Alternative: Open an issue with the `security` label (for low-severity issues only)
 
 ### What to Include
