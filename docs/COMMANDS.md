@@ -61,6 +61,7 @@ mst list [options]
 - `--metadata` - Show metadata info
 - `--full-path` - Show full paths instead of relative paths
 - `--fzf` - Select with fzf (outputs selected branch name)
+- `--names` - Machine-readable output (for scripting)
 
 #### Examples
 ```bash
@@ -75,6 +76,11 @@ mst list --sort size
 
 # Show full paths
 mst list --full-path
+
+# For scripting
+for worktree in $(mst list --names); do
+  echo "Processing $worktree"
+done
 ```
 
 ### 🗑️ delete - Delete Orchestra Member
@@ -150,6 +156,8 @@ mst sh [branch-name] [options]  # alias
 - `--fzf` - Select with fzf
 - `--cmd <command>` - Execute command and exit
 - `--tmux` - Attach to tmux session (create if doesn't exist)
+- `--tmux-vertical`, `--tmux-v` - Open shell in vertical split pane
+- `--tmux-horizontal`, `--tmux-h` - Open shell in horizontal split pane
 
 #### Examples
 ```bash
@@ -161,6 +169,12 @@ mst shell --fzf
 
 # Execute command
 mst shell feature/test --cmd "npm test"
+
+# Open in vertical split pane
+mst shell feature/new --tmux-v
+
+# Open in horizontal split pane
+mst shell feature/test --tmux-h
 ```
 
 ## Integration Commands
@@ -199,31 +213,41 @@ mst suggest --pr --description "Implement login feature"
 Provides GitHub integration features.
 
 ```bash
-mst github [options]
+mst github [type] [number] [options]
+mst gh [type] [number] [options]  # alias
 ```
 
+#### Arguments
+- `type` - Type (checkout, pr, issue, comment)
+- `number` - PR/Issue number
+
 #### Options
-- `--issue <number>` - Create orchestra member from issue
-- `--pr <number>` - Create orchestra member from PR
-- `--create-pr` - Create PR
-- `--draft` - Create as Draft PR
-- `--branch <name>` - Specify branch name
 - `-o, --open` - Open in editor
 - `-s, --setup` - Execute environment setup
 - `-m, --message <message>` - Comment message
 - `--reopen` - Reopen PR/Issue
 - `--close` - Close PR/Issue
+- `-t, --tmux` - Open in new tmux window
+- `--tmux-vertical`, `--tmux-v` - Open in vertical split pane
+- `--tmux-horizontal`, `--tmux-h` - Open in horizontal split pane
 
 #### Examples
 ```bash
-# Create from Issue #123
-mst github --issue 123
+# Create from PR #123
+mst github checkout 123
+mst gh 123  # shorthand
 
-# Create from PR #456
-mst github --pr 456
+# Create from Issue #456
+mst github issue 456
 
-# Create PR from current branch
-mst github --create-pr
+# Create and open in tmux
+mst github 123 --tmux
+
+# Create and open in vertical split
+mst github 123 --tmux-v
+
+# Add comment to PR/Issue
+mst github comment 123 -m "LGTM!"
 ```
 
 ### 🖥️ tmux - tmux Integration
@@ -414,26 +438,37 @@ mst where --verbose
 
 ### 🔗 exec - Execute Commands
 
-Execute same command in all orchestra members.
+Execute command in a specific orchestra member or all orchestra members.
 
 ```bash
-mst exec <command> [options]
+mst exec [branch-name] <command> [options]
+mst e [branch-name] <command> [options]  # alias
 ```
 
 #### Options
-- `--parallel` - Execute in parallel
-- `--continue-on-error` - Continue on error
-- `--dry-run` - Preview only
 - `-s, --silent` - Suppress output
 - `-a, --all` - Execute on all orchestra members
+- `--fzf` - Select orchestra member with fzf
+- `-t, --tmux` - Execute in new tmux window
+- `--tmux-vertical`, `--tmux-v` - Execute in vertical split pane
+- `--tmux-horizontal`, `--tmux-h` - Execute in horizontal split pane
 
 #### Examples
 ```bash
-# Run tests in all
-mst exec "npm test"
+# Execute in specific orchestra member
+mst exec feature/test npm test
 
-# Parallel execution
-mst exec "npm run lint" --parallel
+# Execute in all orchestra members
+mst exec --all npm run lint
+
+# Select with fzf
+mst exec --fzf npm run dev
+
+# Execute in tmux
+mst exec feature/api --tmux npm run watch
+
+# Execute in vertical split
+mst exec --fzf --tmux-v npm test
 ```
 
 ### 🔄 batch - Batch Processing

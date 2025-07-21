@@ -5,8 +5,8 @@ Command to create orchestra members (Git Worktrees) directly from GitHub Issues 
 ## Overview
 
 ```bash
-mst github [pr|issue] [number] [options]
-mst gh [pr|issue] [number] [options]  # alias
+mst github [type] [number] [options]
+mst gh [type] [number] [options]  # alias
 ```
 
 ## Usage Examples
@@ -15,41 +15,47 @@ mst gh [pr|issue] [number] [options]  # alias
 
 ```bash
 # Create orchestra member from Pull Request
-mst github pr 123
+mst github checkout 123
+mst gh 123  # shorthand
 
 # Create orchestra member from Issue
 mst github issue 456
 
 # Interactive selection
 mst github
+
+# Add comment to PR/Issue
+mst github comment 123 -m "LGTM!"
 ```
 
 ### Advanced Usage
 
 ```bash
-# Create PR and auto-start Claude Code
-mst github pr 123 --tmux --claude
+# Create and open in tmux
+mst github 123 --tmux
 
-# Multiple selection for batch creation
-mst github --multiple
+# Create and open in vertical split
+mst github 123 --tmux-v
 
-# Filter and select
-mst github issue --filter "label:bug"
+# Create and open in horizontal split
+mst github 123 --tmux-h
 
-# Show only assigned to me
-mst github --assignee @me
+# Create with automatic setup
+mst github 123 --open --setup
 ```
 
 ## Options
 
 | Option | Short | Description | Default |
 |--------|-------|-------------|---------|
-| `--tmux` | `-t` | Create tmux session/window | `false` |
-| `--claude` | `-c` | Auto-start Claude Code | `false` |
-| `--multiple` | `-m` | Multiple selection mode | `false` |
-| `--filter <query>` | `-f` | GitHub CLI filter query | none |
-| `--assignee <user>` | `-a` | Filter by assignee (@me for self) | none |
-| `--limit <n>` | `-l` | Limit number of displayed items | `30` |
+| `--open` | `-o` | Open in editor after creation | `false` |
+| `--setup` | `-s` | Execute environment setup | `false` |
+| `--message <message>` | `-m` | Comment message (for comment subcommand) | none |
+| `--reopen` | | Reopen PR/Issue | `false` |
+| `--close` | | Close PR/Issue | `false` |
+| `--tmux` | `-t` | Open in new tmux window | `false` |
+| `--tmux-vertical` | `--tmux-v` | Open in vertical split pane | `false` |
+| `--tmux-horizontal` | `--tmux-h` | Open in horizontal split pane | `false` |
 
 ## Creating from Pull Requests
 
