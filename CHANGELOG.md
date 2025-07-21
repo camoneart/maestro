@@ -1,5 +1,15 @@
 # Changelog
 
+## 2.4.0
+
+### Minor Changes
+
+- feat: implement new command options for improved workflow
+  - Add --fzf option to exec and shell commands for interactive selection
+  - Add tmux integration options (--tmux, --tmux-v, --tmux-h) to exec, shell, and github commands
+  - Add --names option to list command for scripting-friendly output
+  - Create shared utilities for tmux and fzf operations
+
 ## 2.3.0
 
 ### Minor Changes
