@@ -1,5 +1,24 @@
 # Changelog
 
+## 2.5.0
+
+### Minor Changes
+
+- feat: add advanced worktree management features
+  - Add `claude` command for managing multiple Claude Code instances
+    - `mst claude list` - List running Claude Code instances
+    - `mst claude start [branch]` - Start Claude Code for a worktree
+    - `mst claude stop [branch]` - Stop Claude Code for a worktree
+    - Supports `--all` option to manage all instances at once
+  - Enhance `--copy-file` option to handle gitignored files
+    - Automatically detects and copies gitignored files (like .env)
+    - Shows which files are gitignored in the output
+  - Add automatic setup commands execution from config
+    - New `postCreate` config section in `.maestro.json`
+    - `postCreate.copyFiles` - Files to copy automatically
+    - `postCreate.commands` - Commands to run after creation
+    - Enables workflow automation like dependency installation
+
 ## 2.4.0
 
 ### Minor Changes
