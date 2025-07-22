@@ -747,7 +747,7 @@ export async function copyFilesFromCurrentWorktree(
         // ファイルが存在しない場合は警告レベルを下げる
         if (error instanceof Error && 'code' in error && error.code === 'ENOENT') {
           // .envなど任意のファイルの場合はスキップを通知
-          console.log(chalk.gray(`   ${file} が見つからないためスキップしました`))
+          console.log(chalk.gray(`   ${file} は見つからないためコピーをスキップしました`))
         } else {
           // それ以外のエラーは警告として表示
           const errorMessage = error instanceof Error ? error.message : String(error)
