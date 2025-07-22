@@ -743,8 +743,15 @@ export async function copyFilesFromCurrentWorktree(
         // ファイルをコピー
         await fs.copyFile(sourcePath, destPath)
         copiedCount++
-      } catch (error) {
-        console.warn(chalk.yellow(`\n⚠️  ファイル ${file} のコピーに失敗しました: ${error}`))
+      } catch (error: any) {
+        // ファイルが存在しない場合は警告レベルを下げる
+        if (error.code === 'ENOENT') {
+          // .envなど任意のファイルの場合はスキップを通知
+          console.log(chalk.gray(`   ${file} が見つからないためスキップしました`))
+        } else {
+          // それ以外のエラーは警告として表示
+          console.warn(chalk.yellow(`\n⚠️  ファイル ${file} のコピーに失敗しました: ${error.message}`))
+        }
       }
     }
 
@@ -755,7 +762,8 @@ export async function copyFilesFromCurrentWorktree(
         console.log(chalk.blue(`   gitignoreファイル: ${gitignoreFiles.join(', ')}`))
       }
     } else {
-      spinner.warn(chalk.yellow('コピーできたファイルがありませんでした'))
+      // ファイルが見つからなかった場合は情報として表示
+      spinner.info(chalk.gray('同期対象のファイルが見つかりませんでした'))
     }
   } catch (error) {
     spinner.fail(chalk.red(`ファイルコピーに失敗しました: ${error}`))
