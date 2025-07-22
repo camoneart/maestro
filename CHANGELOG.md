@@ -1,5 +1,17 @@
 # Changelog
 
+## 2.6.0
+
+### Minor Changes
+
+- feat: implement `mst init` command for project setup
+  - Add interactive project setup command with smart detection
+  - Auto-detect project types (React, Next.js, Vue.js, Python, Go)
+  - Auto-detect package managers (pnpm, npm, yarn) from lockfiles
+  - Support multiple execution modes (--minimal, --yes, --package-manager)
+  - Generate appropriate configuration based on project type
+  - Include comprehensive test coverage and documentation
+
 ## 2.5.0
 
 ### Minor Changes
