@@ -38,7 +38,7 @@ describe('GitWorktreeManager - coverage tests', () => {
       // モックでブランチの衝突を回避
       mockGit.branchLocal.mockResolvedValue({ all: ['main'] })
       mockGit.branch.mockResolvedValue({ all: ['remotes/origin/main'] })
-      
+
       const result = await gitManager.createWorktree('feature/new-test', 'main')
 
       expect(mockGit.raw).toHaveBeenCalledWith([
@@ -56,7 +56,7 @@ describe('GitWorktreeManager - coverage tests', () => {
       // モックでブランチの衝突を回避
       mockGit.branchLocal.mockResolvedValue({ all: ['main'] })
       mockGit.branch.mockResolvedValue({ all: ['remotes/origin/main'] })
-      
+
       await gitManager.createWorktree('feature/another-test')
 
       expect(mockGit.status).toHaveBeenCalled()

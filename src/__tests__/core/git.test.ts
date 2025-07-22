@@ -177,7 +177,9 @@ locked reason`
         .mockRejectedValueOnce(new Error('worktree creation failed')) // worktree add fails
       ;(gitManager as any).git.status = vi.fn().mockResolvedValue({ current: 'main' })
 
-      await expect(gitManager.createWorktree(branchName)).rejects.toThrow('worktree creation failed')
+      await expect(gitManager.createWorktree(branchName)).rejects.toThrow(
+        'worktree creation failed'
+      )
     })
   })
 
@@ -384,13 +386,7 @@ locked reason`
     })
 
     it('should handle complex collision scenarios', () => {
-      const allBranches = [
-        'test',
-        'test-1',
-        'test-2',
-        'test/subranch',
-        'test-3/another',
-      ]
+      const allBranches = ['test', 'test-1', 'test-2', 'test/subranch', 'test-3/another']
       const result = gitManager.generateAlternativeBranchName('test', allBranches)
       expect(result).toBe('test-4')
     })

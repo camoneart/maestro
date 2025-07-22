@@ -181,17 +181,17 @@ export class GitWorktreeManager {
   async checkBranchNameCollision(branchName: string): Promise<void> {
     const branches = await this.getAllBranches()
     const allBranches = [...branches.local, ...branches.remote.map(r => r.replace(/^[^/]+\//, ''))]
-    
+
     // 完全一致のチェック
     if (allBranches.includes(branchName)) {
       throw new Error(`ブランチ '${branchName}' は既に存在します`)
     }
-    
+
     // プレフィックス衝突のチェック（新しいブランチが既存ブランチのプレフィックスになる場合）
-    const conflictingBranches = allBranches.filter(existing => 
+    const conflictingBranches = allBranches.filter(existing =>
       existing.startsWith(branchName + '/')
     )
-    
+
     if (conflictingBranches.length > 0) {
       const examples = conflictingBranches.slice(0, 3).join(', ')
       throw new Error(
@@ -200,12 +200,10 @@ export class GitWorktreeManager {
         }`
       )
     }
-    
+
     // 逆方向の衝突チェック（既存ブランチが新しいブランチのプレフィックスになる場合）
-    const parentConflicts = allBranches.filter(existing => 
-      branchName.startsWith(existing + '/')
-    )
-    
+    const parentConflicts = allBranches.filter(existing => branchName.startsWith(existing + '/'))
+
     if (parentConflicts.length > 0) {
       const examples = parentConflicts.slice(0, 3).join(', ')
       throw new Error(
@@ -219,13 +217,17 @@ export class GitWorktreeManager {
   generateAlternativeBranchName(originalName: string, allBranches: string[]): string {
     let counter = 1
     let alternativeName = `${originalName}-${counter}`
-    
-    while (allBranches.includes(alternativeName) || 
-           allBranches.some(b => b.startsWith(alternativeName + '/') || alternativeName.startsWith(b + '/'))) {
+
+    while (
+      allBranches.includes(alternativeName) ||
+      allBranches.some(
+        b => b.startsWith(alternativeName + '/') || alternativeName.startsWith(b + '/')
+      )
+    ) {
       counter++
       alternativeName = `${originalName}-${counter}`
     }
-    
+
     return alternativeName
   }
 }
