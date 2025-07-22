@@ -743,14 +743,17 @@ export async function copyFilesFromCurrentWorktree(
         // ファイルをコピー
         await fs.copyFile(sourcePath, destPath)
         copiedCount++
-      } catch (error: any) {
+      } catch (error) {
         // ファイルが存在しない場合は警告レベルを下げる
-        if (error.code === 'ENOENT') {
+        if (error instanceof Error && 'code' in error && error.code === 'ENOENT') {
           // .envなど任意のファイルの場合はスキップを通知
           console.log(chalk.gray(`   ${file} が見つからないためスキップしました`))
         } else {
           // それ以外のエラーは警告として表示
-          console.warn(chalk.yellow(`\n⚠️  ファイル ${file} のコピーに失敗しました: ${error.message}`))
+          const errorMessage = error instanceof Error ? error.message : String(error)
+          console.warn(
+            chalk.yellow(`\n⚠️  ファイル ${file} のコピーに失敗しました: ${errorMessage}`)
+          )
         }
       }
     }
