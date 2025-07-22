@@ -7,6 +7,11 @@ import { fileURLToPath } from 'url'
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const CLI_PATH = path.resolve(__dirname, '../../../dist/cli.js')
 
+// CI環境でのパス確認
+if (!existsSync(CLI_PATH)) {
+  throw new Error(`CLI not found at ${CLI_PATH}. Run 'pnpm build' first.`)
+}
+
 describe('init command', () => {
   const testDir = path.join(__dirname, '../../../test-temp')
   const originalCwd = process.cwd()
@@ -14,23 +19,31 @@ describe('init command', () => {
   beforeEach(() => {
     // テスト用ディレクトリが存在すれば削除
     if (existsSync(testDir)) {
-      execSync(`rm -rf "${testDir}"`)
+      execSync(`rm -rf "${testDir}"`, { timeout: 10000 })
     }
     // テスト用ディレクトリを作成
-    execSync(`mkdir -p "${testDir}"`)
+    execSync(`mkdir -p "${testDir}"`, { timeout: 5000 })
     process.chdir(testDir)
   })
 
   afterEach(() => {
     process.chdir(originalCwd)
-    if (existsSync(testDir)) {
-      execSync(`rm -rf "${testDir}"`)
+    // CI環境での権限問題を避けるため、try-catch で囲む
+    try {
+      if (existsSync(testDir)) {
+        execSync(`rm -rf "${testDir}"`, { timeout: 10000 })
+      }
+    } catch (error) {
+      console.warn('Failed to cleanup test directory:', error)
     }
   })
 
   describe('--help', () => {
     it('should display help message', () => {
-      const result = execSync(`node "${CLI_PATH}" init --help`, { encoding: 'utf8' })
+      const result = execSync(`node "${CLI_PATH}" init --help`, { 
+        encoding: 'utf8', 
+        timeout: 30000 
+      })
       expect(result).toContain('プロジェクトにMaestro設定を初期化')
       expect(result).toContain('--minimal')
       expect(result).toContain('--package-manager')
@@ -40,7 +53,10 @@ describe('init command', () => {
 
   describe('--minimal', () => {
     it('should create minimal .maestro.json', () => {
-      const result = execSync(`node "${CLI_PATH}" init --minimal`, { encoding: 'utf8' })
+      const result = execSync(`node "${CLI_PATH}" init --minimal`, { 
+        encoding: 'utf8', 
+        timeout: 30000 
+      })
 
       expect(result).toContain('Welcome to Maestro Setup!')
       expect(result).toContain('Maestro の設定が完了しました！')
@@ -67,7 +83,7 @@ describe('init command', () => {
       )
       writeFileSync(path.join(testDir, 'package-lock.json'), '{}')
 
-      const result = execSync(`node "${CLI_PATH}" init --yes`, { encoding: 'utf8' })
+      const result = execSync(`node "${CLI_PATH}" init --yes`, { encoding: 'utf8', timeout: 30000 })
 
       expect(result).toContain('検出されたプロジェクト: React ✅')
 
@@ -90,7 +106,7 @@ describe('init command', () => {
       )
       writeFileSync(path.join(testDir, 'pnpm-lock.yaml'), 'lockfileVersion: 6.0')
 
-      const result = execSync(`node "${CLI_PATH}" init --yes`, { encoding: 'utf8' })
+      const result = execSync(`node "${CLI_PATH}" init --yes`, { encoding: 'utf8', timeout: 30000 })
 
       expect(result).toContain('検出されたプロジェクト: Next.js ✅')
 
@@ -121,7 +137,7 @@ describe('init command', () => {
       const existingConfig = { test: 'existing' }
       writeFileSync(path.join(testDir, '.maestro.json'), JSON.stringify(existingConfig))
 
-      const result = execSync(`node "${CLI_PATH}" init --yes`, { encoding: 'utf8' })
+      const result = execSync(`node "${CLI_PATH}" init --yes`, { encoding: 'utf8', timeout: 30000 })
 
       expect(result).toContain('Maestro の設定が完了しました！')
 
@@ -138,7 +154,7 @@ describe('init command', () => {
     it('should detect Python project', () => {
       writeFileSync(path.join(testDir, 'requirements.txt'), 'flask==2.0.0')
 
-      const result = execSync(`node "${CLI_PATH}" init --yes`, { encoding: 'utf8' })
+      const result = execSync(`node "${CLI_PATH}" init --yes`, { encoding: 'utf8', timeout: 30000 })
 
       expect(result).toContain('検出されたプロジェクト: Python ✅')
 
@@ -151,7 +167,7 @@ describe('init command', () => {
     it('should detect Go project', () => {
       writeFileSync(path.join(testDir, 'go.mod'), 'module test\n\ngo 1.19')
 
-      const result = execSync(`node "${CLI_PATH}" init --yes`, { encoding: 'utf8' })
+      const result = execSync(`node "${CLI_PATH}" init --yes`, { encoding: 'utf8', timeout: 30000 })
 
       expect(result).toContain('検出されたプロジェクト: Go ✅')
 
