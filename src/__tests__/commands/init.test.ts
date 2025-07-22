@@ -3,7 +3,14 @@ import { execSync } from 'child_process'
 import { existsSync, readFileSync, unlinkSync, writeFileSync } from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
-import { detectProjectType, createMinimalConfig, createDefaultConfig, createInteractiveConfig, type ProjectType, type PackageManager } from '../../commands/init.js'
+import {
+  detectProjectType,
+  createMinimalConfig,
+  createDefaultConfig,
+  createInteractiveConfig,
+  type ProjectType,
+  type PackageManager,
+} from '../../commands/init.js'
 import inquirer from 'inquirer'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -186,7 +193,7 @@ describe('init command', () => {
     describe('createMinimalConfig', () => {
       it('should create minimal configuration', () => {
         const config = createMinimalConfig()
-        
+
         expect(config).toEqual({
           worktrees: {
             path: '.git/orchestra-members',
@@ -206,7 +213,7 @@ describe('init command', () => {
           detected: true,
           packageManager: 'npm',
           setupCommands: ['npm install'],
-          syncFiles: ['.env', '.env.local']
+          syncFiles: ['.env', '.env.local'],
         }
 
         const config = createDefaultConfig(projectType)
@@ -231,7 +238,7 @@ describe('init command', () => {
           detected: true,
           packageManager: 'npm',
           setupCommands: ['npm install'],
-          syncFiles: ['.env']
+          syncFiles: ['.env'],
         }
 
         const config = createDefaultConfig(projectType, 'yarn')
@@ -245,7 +252,7 @@ describe('init command', () => {
           detected: true,
           packageManager: 'none',
           setupCommands: ['pip install -r requirements.txt'],
-          syncFiles: ['.env']
+          syncFiles: ['.env'],
         }
 
         const config = createDefaultConfig(projectType)
@@ -256,7 +263,7 @@ describe('init command', () => {
 
     describe('detectProjectType', () => {
       const originalCwd = process.cwd()
-      
+
       beforeEach(() => {
         process.chdir(testDir)
       })
@@ -383,7 +390,7 @@ describe('init command', () => {
           detected: true,
           packageManager: 'npm',
           setupCommands: ['npm install'],
-          syncFiles: ['.env', '.env.local']
+          syncFiles: ['.env', '.env.local'],
         }
 
         // Mock inquirer prompt
@@ -394,7 +401,7 @@ describe('init command', () => {
           defaultEditor: 'cursor',
           autoSetup: true,
           copyEnvFiles: true,
-          syncFiles: ['.env', '.env.local']
+          syncFiles: ['.env', '.env.local'],
         })
 
         const config = await createInteractiveConfig(projectType)
@@ -419,7 +426,7 @@ describe('init command', () => {
           detected: true,
           packageManager: 'npm',
           setupCommands: ['npm install'],
-          syncFiles: ['.env']
+          syncFiles: ['.env'],
         }
 
         vi.spyOn(inquirer, 'prompt').mockResolvedValueOnce({
@@ -427,7 +434,7 @@ describe('init command', () => {
           worktreePath: '../worktrees',
           branchPrefix: 'task/',
           defaultEditor: 'vim',
-          autoSetup: false
+          autoSetup: false,
         })
 
         const config = await createInteractiveConfig(projectType)

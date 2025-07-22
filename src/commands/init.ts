@@ -238,7 +238,9 @@ export function createDefaultConfig(
   }
 }
 
-export async function createInteractiveConfig(projectType: ProjectType): Promise<Record<string, unknown>> {
+export async function createInteractiveConfig(
+  projectType: ProjectType
+): Promise<Record<string, unknown>> {
   const answers = await inquirer.prompt([
     {
       type: 'list',
