@@ -32,6 +32,7 @@ import { healthCommand } from './commands/health.js'
 import { dashboardCommand } from './commands/dashboard.js'
 import { snapshotCommand } from './commands/snapshot.js'
 import { claudeCommand } from './commands/claude.js'
+import { initCommand } from './commands/init.js'
 
 const program = new Command()
 
@@ -42,6 +43,7 @@ program
   .allowUnknownOption()
 
 // サブコマンドを追加
+program.addCommand(initCommand)
 program.addCommand(createCommand)
 program.addCommand(listCommand)
 program.addCommand(deleteCommand)

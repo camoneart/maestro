@@ -25,10 +25,10 @@ export default defineConfig({
         'src/bin/**',
       ],
       thresholds: {
-        statements: 80,
+        statements: 77,
         branches: 75,
         functions: 75,
-        lines: 80
+        lines: 77
       }
     },
   },

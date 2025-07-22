@@ -4,6 +4,52 @@ Detailed usage of all maestro (mst) commands.
 
 ## Basic Commands
 
+### 🚀 init - Initialize Project
+
+Initialize Maestro configuration for your project.
+
+```bash
+mst init [options]
+```
+
+#### Options
+- `-m, --minimal` - Create minimal configuration
+- `-p, --package-manager <manager>` - Specify package manager (pnpm/npm/yarn/none)
+- `-t, --template <name>` - Use predefined template
+- `-y, --yes` - Skip prompts and use defaults
+
+#### Features
+- **Smart Project Detection**: Auto-detects project type (React, Next.js, Vue.js, Python, Go)
+- **Package Manager Detection**: Identifies pnpm/npm/yarn from lockfiles
+- **Interactive Setup**: Guided prompts for custom configuration
+- **Safe Overwrite**: Prompts before overwriting existing `.maestro.json`
+
+#### Examples
+```bash
+# Interactive setup with prompts
+mst init
+
+# Quick minimal setup
+mst init --minimal
+
+# Auto setup with defaults (no prompts)
+mst init --yes
+
+# Override detected package manager
+mst init --package-manager pnpm --yes
+
+# Use template for specific project type
+mst init --template react --yes
+```
+
+#### Project Type Detection
+- **React**: Detects React apps, suggests `.env` and `.env.local`
+- **Next.js**: Detects Next.js projects, includes `.env.development.local`
+- **Vue.js**: Detects Vue projects with appropriate setup
+- **Python**: Detects `requirements.txt`/`pyproject.toml`, suggests `pip install`
+- **Go**: Detects `go.mod` files, suggests `go mod download`
+- **Generic**: Fallback for other project types
+
 ### 🎼 create - Create Orchestra Member
 
 Create a new orchestra member (worktree).
@@ -811,6 +857,7 @@ If an error occurs, use the `--verbose` option for detailed information.
 
 For detailed usage of each command, see the following documentation:
 
+- [Init Command Details](./commands/init.md)
 - [Create Command Details](./commands/create.md)
 - [Delete Command Details](./commands/delete.md)
 - [Sync Command Details](./commands/sync.md)
