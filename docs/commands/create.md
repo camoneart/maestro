@@ -1,6 +1,6 @@
 # 🔸 create
 
-Command to create orchestra members (Git Worktrees). Creates a new branch and worktree simultaneously, building an independent development environment.
+Command to create orchestra members (Git worktrees). Creates a new branch and worktree simultaneously, building an independent development environment.
 
 ## Overview
 
@@ -43,18 +43,18 @@ mst create feature/new-feature --base main --open --setup --tmux --claude --draf
 
 ## Options
 
-| Option | Short | Description | Default |
-|--------|-------|-------------|---------|
-| `--base <branch>` | `-b` | Specify base branch | `main` |
-| `--open` | `-o` | Open in editor after creation | `false` |
-| `--setup` | `-s` | Run environment setup (npm install, etc.) | `false` |
-| `--tmux` | `-t` | Create tmux session/window | `false` |
-| `--claude` | `-c` | Auto-start Claude Code | `false` |
-| `--draft-pr` | `-d` | Auto-create GitHub Draft PR | `false` |
-| `--template <name>` | | Use template | none |
-| `--copy-file <file>` | | Copy files from current worktree (including gitignored files) | none |
-| `--shell` | | Enter shell after creation | `false` |
-| `--exec <command>` | | Execute command after creation | none |
+| Option               | Short | Description                                                   | Default |
+| -------------------- | ----- | ------------------------------------------------------------- | ------- |
+| `--base <branch>`    | `-b`  | Specify base branch                                           | `main`  |
+| `--open`             | `-o`  | Open in editor after creation                                 | `false` |
+| `--setup`            | `-s`  | Run environment setup (npm install, etc.)                     | `false` |
+| `--tmux`             | `-t`  | Create tmux session/window                                    | `false` |
+| `--claude`           | `-c`  | Auto-start Claude Code                                        | `false` |
+| `--draft-pr`         | `-d`  | Auto-create GitHub Draft PR                                   | `false` |
+| `--template <name>`  |       | Use template                                                  | none    |
+| `--copy-file <file>` |       | Copy files from current worktree (including gitignored files) | none    |
+| `--shell`            |       | Enter shell after creation                                    | `false` |
+| `--exec <command>`   |       | Execute command after creation                                | none    |
 
 ## Creating from Issue Number
 
@@ -68,6 +68,7 @@ mst create issue-123
 ```
 
 Retrieved information:
+
 - Issue title
 - Issue body
 - Labels
@@ -91,6 +92,7 @@ mst create experiment/new-arch --template experiment
 ```
 
 Available templates:
+
 - `feature`: For new feature development (auto-start Claude Code)
 - `bugfix`: For bug fixes
 - `experiment`: For experimental development (tmux integration)
@@ -105,6 +107,7 @@ mst create feature/new-ui --draft-pr
 ```
 
 Created PR content:
+
 - Title: `[WIP] {branch-name}`
 - Body: Indicates work in progress and Claude Code integration explanation
 - Status: Draft
@@ -119,6 +122,7 @@ mst create feature/ai-feature --tmux --claude
 ```
 
 Executed processes:
+
 1. Worktree creation
 2. tmux session/window creation
 3. Claude Code startup
@@ -137,6 +141,7 @@ mst create feature/new --copy-file .env --copy-file config/local.json --copy-fil
 ```
 
 Features:
+
 - **Gitignore detection**: Automatically detects and can copy gitignored files
 - **Multiple files**: Can specify multiple files by using the option multiple times
 - **Preserves directory structure**: Maintains the original directory structure when copying
@@ -175,6 +180,7 @@ The `postCreate` section allows automatic execution of file copying and commands
 ### hooks.afterCreate
 
 The `afterCreate` hook supports both string and array formats:
+
 ```json
 // String format (backward compatible)
 "afterCreate": "npm install"
@@ -226,15 +232,19 @@ mst create bugfix/urgent-fix --tmux --new-window
 ### Common Errors
 
 1. **Branch already exists**
+
    ```
    Error: Branch 'feature/new-feature' already exists
    ```
+
    Solution: Use a different branch name or delete the existing branch
 
 2. **Base branch not found**
+
    ```
    Error: Base branch 'develop' not found
    ```
+
    Solution: Specify an existing branch or run `git fetch`
 
 3. **GitHub authentication error**

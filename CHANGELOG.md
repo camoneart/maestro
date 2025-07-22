@@ -1,5 +1,16 @@
 # Changelog
 
+## 2.6.1
+
+### Patch Changes
+
+- fix: サブworktreeからのworktree作成時のパス解決エラーを修正
+  - createWorktreeとattachWorktreeメソッドで相対パスの代わりに絶対パスを使用
+  - getRepositoryRoot()を使用してリポジトリルートからの絶対パスを生成
+  - これによりどのworktreeから実行してもworktree作成が可能に
+
+  Fixes: サブworktree内で'mst create'実行時の'Not a directory'エラー
+
 ## 2.6.0
 
 ### Minor Changes
@@ -194,7 +205,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- 🥷 影分身の術（Git Worktree）CLIツール初回リリース
+- 🥷 影分身の術（Git worktree）CLIツール初回リリース
 - Claude Code統合（MCP）によるAI開発支援
 - GitHub統合（PR/Issue連携）
 - tmux/fzf統合による効率的ワークフロー

@@ -5,7 +5,7 @@
 [![License MIT](https://img.shields.io/badge/License-MIT-yellow?labelColor=555555&style=flat)](https://opensource.org/licenses/MIT)
 
 ![maestro](public/image/logo/maestro-logo.png)
-**A CLI tool that “conducts” Git Worktrees like an orchestra and turbo-charges parallel development with Claude Code.**
+**A CLI tool that “conducts” Git worktrees like an orchestra and turbo-charges parallel development with Claude Code.**
 
 ![Demo Animation]()
 
@@ -26,7 +26,7 @@
 
 ## Overview
 
-Maestro is a CLI that makes Git Worktree management intuitive. When working on multiple branches in parallel you can treat each branch as an independent “orchestra member” without changing directories.
+Maestro is a CLI that makes Git worktree management intuitive. When working on multiple branches in parallel you can treat each branch as an independent “orchestra member” without changing directories.
 
 ### Why Maestro?
 
@@ -57,8 +57,8 @@ Maestro is a CLI that makes Git Worktree management intuitive. When working on m
 brew install camoneart/tap/maestro
 ```
 
-* Homebrew installs completion scripts for **zsh / fish / bash** automatically.<br>
-* For bash you also need `brew install bash-completion@2`. See [Shell Completion](#shell-completion).
+- Homebrew installs completion scripts for **zsh / fish / bash** automatically.<br>
+- For bash you also need `brew install bash-completion@2`. See [Shell Completion](#shell-completion).
 
 ### npm
 
@@ -119,18 +119,18 @@ See the full [Command Reference](./docs/COMMANDS.md).
 
 ### Main Commands
 
-| Command     | Description                  | Example                         |
-| ----------- | ---------------------------- | ------------------------------- |
-| `create`    | Create a new worktree        | `mst create feature/login`      |
-| `list`      | List worktrees               | `mst list`                      |
-| `delete`    | Delete worktree              | `mst delete feature/old --fzf`  |
-| `tmux`      | Open in tmux                 | `mst tmux`                      |
-| `sync`      | Real-time file sync          | `mst sync --auto`               |
-| `suggest`   | Claude suggestions / reviews | `mst suggest --review`          |
-| `github`    | GitHub integration           | `mst github checkout 123`       |
-| `dashboard` | Launch Web dashboard         | `mst dashboard --open`          |
-| `health`    | Health check                 | `mst health --fix`              |
-| `where`     | Show current performer       | `mst where`                     |
+| Command     | Description                  | Example                        |
+| ----------- | ---------------------------- | ------------------------------ |
+| `create`    | Create a new worktree        | `mst create feature/login`     |
+| `list`      | List worktrees               | `mst list`                     |
+| `delete`    | Delete worktree              | `mst delete feature/old --fzf` |
+| `tmux`      | Open in tmux                 | `mst tmux`                     |
+| `sync`      | Real-time file sync          | `mst sync --auto`              |
+| `suggest`   | Claude suggestions / reviews | `mst suggest --review`         |
+| `github`    | GitHub integration           | `mst github checkout 123`      |
+| `dashboard` | Launch Web dashboard         | `mst dashboard --open`         |
+| `health`    | Health check                 | `mst health --fix`             |
+| `where`     | Show current performer       | `mst where`                    |
 
 All sub-commands and options are documented in the [Command Reference](./docs/COMMANDS.md).
 

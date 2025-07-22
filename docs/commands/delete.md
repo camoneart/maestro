@@ -1,6 +1,6 @@
 # 🔸 delete
 
-Command to delete orchestra members (Git Worktrees). Cleans up unnecessary orchestra members and frees disk space.
+Command to delete orchestra members (Git worktrees). Cleans up unnecessary orchestra members and frees disk space.
 
 ## Overview
 
@@ -39,14 +39,14 @@ mst delete --merged --dry-run
 
 ## Options
 
-| Option | Short | Description | Default |
-|--------|-------|-------------|---------|
-| `--force` | `-f` | Force delete (ignore uncommitted changes) | `false` |
-| `--fzf` | | Select with fzf and delete | `false` |
-| `--merged` | `-m` | Delete merged orchestra members | `false` |
-| `--older-than <days>` | `-o` | Delete orchestra members older than specified days | none |
-| `--dry-run` | `-n` | Show deletion targets without actually deleting | `false` |
-| `--yes` | `-y` | Skip confirmation prompts | `false` |
+| Option                | Short | Description                                        | Default |
+| --------------------- | ----- | -------------------------------------------------- | ------- |
+| `--force`             | `-f`  | Force delete (ignore uncommitted changes)          | `false` |
+| `--fzf`               |       | Select with fzf and delete                         | `false` |
+| `--merged`            | `-m`  | Delete merged orchestra members                    | `false` |
+| `--older-than <days>` | `-o`  | Delete orchestra members older than specified days | none    |
+| `--dry-run`           | `-n`  | Show deletion targets without actually deleting    | `false` |
+| `--yes`               | `-y`  | Skip confirmation prompts                          | `false` |
 
 ## Deletion Confirmation
 
@@ -57,9 +57,9 @@ Normally, a confirmation prompt is displayed before deletion:
    Branch: feature/old-feature
    Path: /Users/user/project/.git/orchestra-members/feature-old-feature
    Status: 3 uncommitted changes
-   
+
    This action cannot be undone.
-   
+
 ? Delete worktree? (y/N)
 ```
 
@@ -143,15 +143,19 @@ You can set hooks before and after deletion in `.mst.json`:
 ### Common Errors
 
 1. **Orchestra member not found**
+
    ```
    Error: Worktree 'feature/non-existent' not found
    ```
+
    Solution: Check the correct branch name with `mst list`
 
 2. **Attempting to delete current orchestra member**
+
    ```
    Error: Cannot delete the current worktree
    ```
+
    Solution: Move to another orchestra member before deletion
 
 3. **Remote branch still exists**
@@ -220,10 +224,10 @@ mst-cleanup --yes            # Cleanup old orchestra members
 # Function to delete both local and remote
 delete_worktree_and_remote() {
   local branch=$1
-  
+
   # Delete local orchestra member
   mst delete "$branch" --yes
-  
+
   # Also delete remote branch
   git push origin --delete "$branch" 2>/dev/null || echo "Remote branch not found"
 }

@@ -38,7 +38,7 @@ const program = new Command()
 
 program
   .name('maestro')
-  .description('🎼 Maestro - Git WorktreeオーケストレーションでClaude Codeとパラレル開発')
+  .description('🎼 Maestro - Git worktreeオーケストレーションでClaude Codeとパラレル開発')
   .version(packageJson.version)
   .allowUnknownOption()
 

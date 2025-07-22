@@ -1,6 +1,6 @@
 # 🔸 sync
 
-Command to synchronize code and configuration files between orchestra members (Git Worktrees). You can reflect changes from the main branch to other orchestra members or share environment configuration files.
+Command to synchronize code and configuration files between orchestra members (Git worktrees). You can reflect changes from the main branch to other orchestra members or share environment configuration files.
 
 ## Overview
 
@@ -47,16 +47,16 @@ mst sync --interactive
 
 ## Options
 
-| Option | Short | Description | Default |
-|--------|-------|-------------|---------|
-| `--all` | `-a` | Sync to all orchestra members | `false` |
-| `--rebase` | `-r` | Sync with rebase (default is merge) | `false` |
-| `--files` | `-f` | File sync mode | `false` |
-| `--preset <name>` | `-p` | Use preset | none |
-| `--custom <files>` | `-c` | Custom file list (comma-separated) | none |
-| `--interactive` | `-i` | Interactive mode | `false` |
-| `--force` | | Force sync ignoring conflicts | `false` |
-| `--dry-run` | `-n` | Show changes without actually syncing | `false` |
+| Option             | Short | Description                           | Default |
+| ------------------ | ----- | ------------------------------------- | ------- |
+| `--all`            | `-a`  | Sync to all orchestra members         | `false` |
+| `--rebase`         | `-r`  | Sync with rebase (default is merge)   | `false` |
+| `--files`          | `-f`  | File sync mode                        | `false` |
+| `--preset <name>`  | `-p`  | Use preset                            | none    |
+| `--custom <files>` | `-c`  | Custom file list (comma-separated)    | none    |
+| `--interactive`    | `-i`  | Interactive mode                      | `false` |
+| `--force`          |       | Force sync ignoring conflicts         | `false` |
+| `--dry-run`        | `-n`  | Show changes without actually syncing | `false` |
 
 ## Sync Modes
 
@@ -105,6 +105,7 @@ mst sync --preset env
 ```
 
 Sync targets:
+
 - `.env`
 - `.env.*`
 - `config/.env`
@@ -119,6 +120,7 @@ mst sync --preset config
 ```
 
 Sync targets:
+
 - `config/*.json`
 - `config/*.yml`
 - `config/*.yaml`
@@ -135,6 +137,7 @@ mst sync --preset all
 ```
 
 Sync targets:
+
 - All files from env preset
 - All files from config preset
 - `package.json`
@@ -151,6 +154,7 @@ mst sync --interactive
 ```
 
 Display example:
+
 ```
 ? Select files to sync: (Press <space> to select, <a> to toggle all)
  ◉ .env
@@ -165,24 +169,27 @@ Display example:
 ### Code Sync Details
 
 1. **Pre-check**
+
    ```bash
    # Confirm with dry run
    mst sync feature-branch --dry-run
    ```
 
 2. **Execute sync**
+
    ```bash
    # Actually sync
    mst sync feature-branch
    ```
 
 3. **Conflict resolution**
+
    ```bash
    # If conflicts occur
    # 1. Resolve manually
    mst shell feature-branch
    # Edit conflicts in editor
-   
+
    # 2. Commit resolution
    git add .
    git commit -m "resolve: merge conflicts"
@@ -191,12 +198,14 @@ Display example:
 ### File Sync Details
 
 1. **Check differences**
+
    ```bash
    # Check which files will be synced
    mst sync --files --dry-run
    ```
 
 2. **Execute sync**
+
    ```bash
    # From main branch to all orchestra members
    mst sync --all --files
@@ -247,15 +256,19 @@ mst list --json | jq -r '.worktrees[] | "\(.branch): \(.behind) commits behind"'
 ### Common Errors
 
 1. **Merge conflicts**
+
    ```
    Error: Merge conflict in files: src/index.js, src/utils.js
    ```
+
    Solution: Move to orchestra member and manually resolve conflicts
 
 2. **Uncommitted changes**
+
    ```
    Error: Worktree has uncommitted changes
    ```
+
    Solution: Commit or stash changes before re-running
 
 3. **File not found**
@@ -335,7 +348,7 @@ mst-sync-env    # Sync environment files
 # Sync only if tests pass
 sync_if_tests_pass() {
   local branch=$1
-  
+
   if mst exec "$branch" npm test; then
     mst sync "$branch" --rebase
   else

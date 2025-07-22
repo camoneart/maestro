@@ -108,11 +108,6 @@ mst create <branch-name> [options]
 | `--claude` | Create CLAUDE.md for Claude Code |
 | `--template <name>` | Use template |
 | `--draft-pr` | Auto-create Draft PR |
-| `--no-push` | Create branch without pushing to remote |
-| `--from-pr` | Create from PR |
-| `--from-issue` | Create from Issue |
-| `--fzf` | Select PR/Issue with fzf |
-| `--sync-files` | Sync specific files from main branch |
 | `--copy-file <file>` | Copy files from current worktree |
 | `--yes`, `-y` | Skip confirmations |
 
@@ -141,6 +136,7 @@ Display all orchestra members.
 
 ```bash
 mst list [options]
+mst ls [options]  # alias
 ```
 
 | Option | Description |
@@ -180,12 +176,13 @@ Delete orchestra members.
 
 ```bash
 mst delete [branch-name] [options]
+mst rm [branch-name] [options]  # alias
 ```
 
 | Option | Description |
 |--------|-------------|
-| `--force` | Force delete even with uncommitted changes |
-| `--remove-remote` | Also delete remote branch |
+| `--force`, `-f` | Force delete even with uncommitted changes |
+| `--remove-remote`, `-r` | Also delete remote branch |
 | `--fzf` | Select with fzf (multiple selection) |
 | `--current` | Delete current worktree |
 
@@ -217,9 +214,7 @@ mst sync [options]
 
 | Option | Short | Description |
 |--------|-------|-------------|
-| `--files <pattern>` | | File pattern to sync |
-| `--from <branch>` | | Source branch |
-| `--to <branch>` | | Target branch |
+| `--files` | | Copy files to target worktrees |
 | `--dry-run` | | Preview only, don't sync |
 | `--auto` | | Auto sync mode |
 | `--concurrency <number>` | `-c` | Number of parallel executions (default: 5) |
@@ -229,8 +224,8 @@ mst sync [options]
 # Basic sync
 mst sync
 
-# Sync specific files
-mst sync --files "*.env"
+# Copy files to target worktrees
+mst sync --files
 
 # Dry run mode
 mst sync --dry-run

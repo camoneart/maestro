@@ -96,12 +96,16 @@ locked reason`
   describe('createWorktree', () => {
     it('should create a new worktree', async () => {
       const branchName = 'feature-test'
-      const expectedPath = path.resolve('.git/orchestrations/' + branchName)
+      const mockRepoRoot = '/test/repo'
+      const expectedPath = path.resolve(mockRepoRoot, '.git/orchestrations/' + branchName)
 
       // checkBranchNameCollisionをモック（衝突なし）
       vi.spyOn(gitManager, 'checkBranchNameCollision').mockResolvedValueOnce()
       // git.raw()をモック
-      ;(gitManager as any).git.raw = vi.fn().mockResolvedValue('')
+      ;(gitManager as any).git.raw = vi
+        .fn()
+        .mockResolvedValueOnce(mockRepoRoot + '\n') // getRepositoryRoot()
+        .mockResolvedValueOnce('') // worktree add
       ;(gitManager as any).git.status = vi.fn().mockResolvedValue({ current: 'main' })
 
       const result = await gitManager.createWorktree(branchName)
@@ -113,7 +117,7 @@ locked reason`
         'add',
         '-b',
         branchName,
-        '.git/orchestrations/feature-test',
+        path.join(mockRepoRoot, '.git/orchestrations/feature-test'),
         'main',
       ])
     })
@@ -121,12 +125,16 @@ locked reason`
     it('should use base branch if provided', async () => {
       const branchName = 'feature-test'
       const baseBranch = 'develop'
-      const expectedPath = path.resolve('.git/orchestrations/' + branchName)
+      const mockRepoRoot = '/test/repo'
+      const expectedPath = path.resolve(mockRepoRoot, '.git/orchestrations/' + branchName)
 
       // checkBranchNameCollisionをモック（衝突なし）
       vi.spyOn(gitManager, 'checkBranchNameCollision').mockResolvedValueOnce()
       // git.raw()をモック
-      ;(gitManager as any).git.raw = vi.fn().mockResolvedValue('')
+      ;(gitManager as any).git.raw = vi
+        .fn()
+        .mockResolvedValueOnce(mockRepoRoot + '\n') // getRepositoryRoot()
+        .mockResolvedValueOnce('') // worktree add
 
       const result = await gitManager.createWorktree(branchName, baseBranch)
 
@@ -137,13 +145,14 @@ locked reason`
         'add',
         '-b',
         branchName,
-        '.git/orchestrations/feature-test',
+        path.join(mockRepoRoot, '.git/orchestrations/feature-test'),
         baseBranch,
       ])
     })
 
     it('should throw error if branch collision detected', async () => {
       const branchName = 'existing-branch'
+      const mockRepoRoot = '/test/repo'
 
       // checkBranchNameCollisionをモック（衝突あり）
       vi.spyOn(gitManager, 'checkBranchNameCollision').mockRejectedValueOnce(
@@ -157,11 +166,15 @@ locked reason`
 
     it('should throw error if worktree creation fails after collision check', async () => {
       const branchName = 'valid-branch'
+      const mockRepoRoot = '/test/repo'
 
       // checkBranchNameCollisionをモック（衝突なし）
       vi.spyOn(gitManager, 'checkBranchNameCollision').mockResolvedValueOnce()
       // git.raw()をモックしてエラーを発生させる
-      ;(gitManager as any).git.raw = vi.fn().mockRejectedValue(new Error('worktree creation failed'))
+      ;(gitManager as any).git.raw = vi
+        .fn()
+        .mockResolvedValueOnce(mockRepoRoot + '\n') // getRepositoryRoot()
+        .mockRejectedValueOnce(new Error('worktree creation failed')) // worktree add fails
       ;(gitManager as any).git.status = vi.fn().mockResolvedValue({ current: 'main' })
 
       await expect(gitManager.createWorktree(branchName)).rejects.toThrow('worktree creation failed')

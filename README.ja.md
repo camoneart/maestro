@@ -5,7 +5,7 @@
 [![License MIT](https://img.shields.io/badge/License-MIT-yellow?labelColor=555555&style=flat)](https://opensource.org/licenses/MIT)
 
 ![maestro](public/image/logo/maestro-logo.png)
-**Git Worktreeを“オーケストラ”のように操り、Claude Codeとの並列開発を加速するCLIツール。**
+**Git worktreeを“オーケストラ”のように操り、Claude Codeとの並列開発を加速するCLIツール。**
 
 ![Demo Animation]()
 
@@ -26,7 +26,7 @@
 
 ## 概要
 
-Maestroは、Git Worktreeをより直感的に管理できるCLIツールです。複数のブランチで並行作業を行う際に、ディレクトリを切り替えることなく、各ブランチを独立した「オーケストラメンバー」として扱うことができます。
+Maestroは、Git worktreeをより直感的に管理できるCLIツールです。複数のブランチで並行作業を行う際に、ディレクトリを切り替えることなく、各ブランチを独立した「オーケストラメンバー」として扱うことができます。
 
 ### なぜ Maestro？
 

@@ -1,6 +1,6 @@
 # 🔸 history
 
-Command to manage Claude Code conversation history. You can save, search, and export development history for each orchestra member (Git Worktree).
+Command to manage Claude Code conversation history. You can save, search, and export development history for each orchestra member (Git worktree).
 
 ## Overview
 
@@ -46,17 +46,17 @@ mst history --list --json
 
 ## Options
 
-| Option | Short | Description | Default |
-|--------|-------|-------------|---------|
-| `--list` | `-l` | Display history list | `false` |
-| `--show <branch>` | `-s` | Show history for specific branch | none |
-| `--export <file>` | `-e` | Export histories | none |
-| `--merge <file>` | `-m` | Merge all histories into one file | none |
-| `--cleanup` | `-c` | Cleanup unnecessary histories | `false` |
-| `--sync` | | Sync history paths | `false` |
-| `--search <query>` | | Search histories | none |
-| `--json` | `-j` | Output in JSON format | `false` |
-| `--days <n>` | `-d` | Only histories within specified days | none |
+| Option             | Short | Description                          | Default |
+| ------------------ | ----- | ------------------------------------ | ------- |
+| `--list`           | `-l`  | Display history list                 | `false` |
+| `--show <branch>`  | `-s`  | Show history for specific branch     | none    |
+| `--export <file>`  | `-e`  | Export histories                     | none    |
+| `--merge <file>`   | `-m`  | Merge all histories into one file    | none    |
+| `--cleanup`        | `-c`  | Cleanup unnecessary histories        | `false` |
+| `--sync`           |       | Sync history paths                   | `false` |
+| `--search <query>` |       | Search histories                     | none    |
+| `--json`           | `-j`  | Output in JSON format                | `false` |
+| `--days <n>`       | `-d`  | Only histories within specified days | none    |
 
 ## History Storage Format
 
