@@ -30,7 +30,7 @@ interface PullRequest {
   baseRefName: string
   state: string
   url: string
-  draft?: boolean
+  isDraft?: boolean
   reviewers?: GithubUser[]
   assignees?: GithubUser[]
 }
@@ -300,7 +300,7 @@ export const reviewCommand = new Command('review')
           'pr',
           'list',
           '--json',
-          'number,title,author,draft,state',
+          'number,title,author,isDraft,state',
           '--limit',
           '30',
         ])
@@ -320,7 +320,7 @@ export const reviewCommand = new Command('review')
             message: 'レビューするPRを選択:',
             choices: prs.map(pr => ({
               name: `#${pr.number} ${pr.title} ${chalk.gray(`by ${pr.author.login}`)}${
-                pr.draft ? chalk.yellow(' [draft]') : ''
+                pr.isDraft ? chalk.yellow(' [draft]') : ''
               }`,
               value: pr.number.toString(),
             })),

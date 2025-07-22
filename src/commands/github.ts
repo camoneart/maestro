@@ -25,7 +25,7 @@ interface ItemInfo {
   number: number
   title: string
   author: { login: string }
-  draft?: boolean
+  isDraft?: boolean
   headRefName?: string
 }
 
@@ -279,7 +279,7 @@ async function fetchItems(type: 'pr' | 'issue'): Promise<ItemInfo[]> {
   const spinner = ora(`${type === 'pr' ? 'Pull Request' : 'Issue'}一覧を取得中...`).start()
 
   try {
-    const fields = type === 'pr' ? 'number,title,author,draft' : 'number,title,author'
+    const fields = type === 'pr' ? 'number,title,author,isDraft' : 'number,title,author'
     const result = await execa('gh', [type, 'list', '--json', fields, '--limit', '20'])
     spinner.stop()
     return JSON.parse(result.stdout)
@@ -303,7 +303,7 @@ async function selectItem(items: ItemInfo[], type: 'pr' | 'issue'): Promise<stri
       name: 'selectedNumber',
       message: `${type === 'pr' ? 'Pull Request' : 'Issue'}を選択:`,
       choices: items.map(item => ({
-        name: `#${item.number} ${item.title} ${chalk.gray(`by ${item.author.login}`)}${item.draft ? chalk.yellow(' [draft]') : ''}`,
+        name: `#${item.number} ${item.title} ${chalk.gray(`by ${item.author.login}`)}${item.isDraft ? chalk.yellow(' [draft]') : ''}`,
         value: item.number.toString(),
       })),
       pageSize: 15,
