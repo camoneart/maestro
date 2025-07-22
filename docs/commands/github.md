@@ -1,6 +1,6 @@
 # 🔸 github
 
-Command to create orchestra members (Git Worktrees) directly from GitHub Issues or Pull Requests. Integrates with GitHub CLI to seamlessly integrate development workflows.
+Command to create orchestra members (Git worktrees) directly from GitHub Issues or Pull Requests. Integrates with GitHub CLI to seamlessly integrate development workflows.
 
 ## Overview
 
@@ -46,16 +46,16 @@ mst github 123 --open --setup
 
 ## Options
 
-| Option | Short | Description | Default |
-|--------|-------|-------------|---------|
-| `--open` | `-o` | Open in editor after creation | `false` |
-| `--setup` | `-s` | Execute environment setup | `false` |
-| `--message <message>` | `-m` | Comment message (for comment subcommand) | none |
-| `--reopen` | | Reopen PR/Issue | `false` |
-| `--close` | | Close PR/Issue | `false` |
-| `--tmux` | `-t` | Open in new tmux window | `false` |
-| `--tmux-vertical` | `--tmux-v` | Open in vertical split pane | `false` |
-| `--tmux-horizontal` | `--tmux-h` | Open in horizontal split pane | `false` |
+| Option                | Short      | Description                              | Default |
+| --------------------- | ---------- | ---------------------------------------- | ------- |
+| `--open`              | `-o`       | Open in editor after creation            | `false` |
+| `--setup`             | `-s`       | Execute environment setup                | `false` |
+| `--message <message>` | `-m`       | Comment message (for comment subcommand) | none    |
+| `--reopen`            |            | Reopen PR/Issue                          | `false` |
+| `--close`             |            | Close PR/Issue                           | `false` |
+| `--tmux`              | `-t`       | Open in new tmux window                  | `false` |
+| `--tmux-vertical`     | `--tmux-v` | Open in vertical split pane              | `false` |
+| `--tmux-horizontal`   | `--tmux-h` | Open in horizontal split pane            | `false` |
 
 ## Creating from Pull Requests
 
@@ -147,6 +147,7 @@ mst github
 ```
 
 Displayed menu:
+
 ```
 ? What would you like to create a worktree from?
 ❯ Pull Request
@@ -155,6 +156,7 @@ Displayed menu:
 ```
 
 Then select from list:
+
 ```
 ? Select a Pull Request:
 ❯ #125 feat: Add dark mode support (enhancement, ui)
@@ -204,6 +206,7 @@ mst github pr --multiple
 ```
 
 Selection screen:
+
 ```
 ? Select Pull Requests: (Press <space> to select, <a> to toggle all)
  ◉ #125 feat: Add dark mode support
@@ -260,15 +263,19 @@ done
 ### Common Errors
 
 1. **GitHub authentication error**
+
    ```
    Error: GitHub authentication failed
    ```
+
    Solution: Authenticate GitHub CLI with `gh auth login`
 
 2. **PR/Issue not found**
+
    ```
    Error: Pull request #999 not found
    ```
+
    Solution: Check correct number or verify repository is correct
 
 3. **Orchestra member already exists**
@@ -338,10 +345,10 @@ gh issue-worktree 456
 # Reflect Issue labels in orchestra members created from Issues
 create_issue_worktree() {
   local issue=$1
-  
+
   # Create orchestra member
   mst github issue "$issue"
-  
+
   # Get Issue labels and reflect in commit message
   LABELS=$(gh issue view "$issue" --json labels -q '.labels[].name' | paste -sd,)
   mst exec "issue-$issue" git commit --allow-empty -m "chore: start work on issue #$issue [$LABELS]"

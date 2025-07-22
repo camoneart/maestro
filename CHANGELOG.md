@@ -194,7 +194,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- 🥷 影分身の術（Git Worktree）CLIツール初回リリース
+- 🥷 影分身の術（Git worktree）CLIツール初回リリース
 - Claude Code統合（MCP）によるAI開発支援
 - GitHub統合（PR/Issue連携）
 - tmux/fzf統合による効率的ワークフロー

@@ -1,6 +1,6 @@
 # 🔸 snapshot
 
-Command to save and restore the current state of orchestra members (Git Worktrees) as snapshots. You can create backups before experimental changes or at important work milestones.
+Command to save and restore the current state of orchestra members (Git worktrees) as snapshots. You can create backups before experimental changes or at important work milestones.
 
 ## Overview
 
@@ -45,16 +45,16 @@ mst snapshot --delete snapshot-20250120-103045
 
 ## Options
 
-| Option | Short | Description | Default |
-|--------|-------|-------------|---------|
-| `--message <msg>` | `-m` | Snapshot description | none |
-| `--stash` | `-s` | Stash uncommitted changes | `false` |
-| `--all` | `-a` | Snapshot all orchestra members | `false` |
-| `--list` | `-l` | Display snapshot list | `false` |
-| `--restore <id>` | `-r` | Restore snapshot | none |
-| `--delete <id>` | `-d` | Delete snapshot | none |
-| `--json` | `-j` | Output in JSON format | `false` |
-| `--force` | `-f` | Execute without confirmation | `false` |
+| Option            | Short | Description                    | Default |
+| ----------------- | ----- | ------------------------------ | ------- |
+| `--message <msg>` | `-m`  | Snapshot description           | none    |
+| `--stash`         | `-s`  | Stash uncommitted changes      | `false` |
+| `--all`           | `-a`  | Snapshot all orchestra members | `false` |
+| `--list`          | `-l`  | Display snapshot list          | `false` |
+| `--restore <id>`  | `-r`  | Restore snapshot               | none    |
+| `--delete <id>`   | `-d`  | Delete snapshot                | none    |
+| `--json`          | `-j`  | Output in JSON format          | `false` |
+| `--force`         | `-f`  | Execute without confirmation   | `false` |
 
 ## Snapshot Contents
 

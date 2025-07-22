@@ -1,6 +1,6 @@
 # 🔸 list
 
-Command to display a list of created orchestra members (Git Worktrees). You can check the status, metadata, and GitHub integration status of each orchestra member.
+Command to display a list of created orchestra members (Git worktrees). You can check the status, metadata, and GitHub integration status of each orchestra member.
 
 ## Overview
 
@@ -32,16 +32,16 @@ mst list --full-path
 
 ## Options
 
-| Option         | Short  | Description                            | Default  |
-| -------------- | ------ | -------------------------------------- | -------- |
-| `--json`       | `-j`   | Output in JSON format                  | `false`  |
-| `--metadata`   | `-m`   | Display with metadata                  | `false`  |
-| `--fzf`        | `-f`   | Select mode with fzf                   | `false`  |
-| `--filter`     |        | Filter by branch name or path          | `""`     |
-| `--sort`       |        | Sort by field (branch, age, size)      | `branch` |
-| `--last-commit`|        | Show last commit information           | `false`  |
-| `--full-path`  |        | Show full paths instead of relative    | `false`  |
-| `--names`      |        | Machine-readable output (for scripting)| `false`  |
+| Option          | Short | Description                             | Default  |
+| --------------- | ----- | --------------------------------------- | -------- |
+| `--json`        | `-j`  | Output in JSON format                   | `false`  |
+| `--metadata`    | `-m`  | Display with metadata                   | `false`  |
+| `--fzf`         | `-f`  | Select mode with fzf                    | `false`  |
+| `--filter`      |       | Filter by branch name or path           | `""`     |
+| `--sort`        |       | Sort by field (branch, age, size)       | `branch` |
+| `--last-commit` |       | Show last commit information            | `false`  |
+| `--full-path`   |       | Show full paths instead of relative     | `false`  |
+| `--names`       |       | Machine-readable output (for scripting) | `false`  |
 
 ## Output Formats
 
@@ -52,9 +52,9 @@ By default, paths are shown relative to the repository root:
 ```
 🎼 Orchestra Members:
 
-📍 refs/heads/main                . 
-🎼 feature/auth                   .git/orchestrations/feature-auth 
-🎼 bugfix/login                   .git/orchestrations/bugfix-login 
+📍 refs/heads/main                .
+🎼 feature/auth                   .git/orchestrations/feature-auth
+🎼 bugfix/login                   .git/orchestrations/bugfix-login
 🎼 issue-123                      .git/orchestrations/issue-123
 ```
 
@@ -63,9 +63,9 @@ By default, paths are shown relative to the repository root:
 ```
 🎼 Orchestra Members:
 
-📍 refs/heads/main                /Users/user/project 
-🎼 feature/auth                   /Users/user/project/.git/orchestrations/feature-auth 
-🎼 bugfix/login                   /Users/user/project/.git/orchestrations/bugfix-login 
+📍 refs/heads/main                /Users/user/project
+🎼 feature/auth                   /Users/user/project/.git/orchestrations/feature-auth
+🎼 bugfix/login                   /Users/user/project/.git/orchestrations/bugfix-login
 🎼 issue-123                      /Users/user/project/.git/orchestrations/issue-123
 ```
 

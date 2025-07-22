@@ -1,6 +1,6 @@
 # 🔸 health
 
-Command to check the health of orchestra members (Git Worktrees), detect and fix issues. Provides comprehensive diagnosis including detection of old orchestra members, uncommitted changes, and synchronization status with remote branches.
+Command to check the health of orchestra members (Git worktrees), detect and fix issues. Provides comprehensive diagnosis including detection of old orchestra members, uncommitted changes, and synchronization status with remote branches.
 
 ## Overview
 
@@ -29,14 +29,14 @@ mst health --verbose
 
 ## Options
 
-| Option | Short | Description | Default |
-|--------|-------|-------------|---------|
-| `--fix` | `-f` | Auto-fix fixable issues | `false` |
-| `--prune` | `-p` | Delete old orchestra members | `false` |
-| `--days <n>` | `-d` | Days to consider as old | `30` |
-| `--verbose` | `-v` | Display detailed information | `false` |
-| `--json` | `-j` | Output in JSON format | `false` |
-| `--dry-run` | `-n` | Show results without actually fixing | `false` |
+| Option       | Short | Description                          | Default |
+| ------------ | ----- | ------------------------------------ | ------- |
+| `--fix`      | `-f`  | Auto-fix fixable issues              | `false` |
+| `--prune`    | `-p`  | Delete old orchestra members         | `false` |
+| `--days <n>` | `-d`  | Days to consider as old              | `30`    |
+| `--verbose`  | `-v`  | Display detailed information         | `false` |
+| `--json`     | `-j`  | Output in JSON format                | `false` |
+| `--dry-run`  | `-n`  | Show results without actually fixing | `false` |
 
 ## Detected Issues
 

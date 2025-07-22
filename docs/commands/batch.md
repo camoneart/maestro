@@ -1,6 +1,6 @@
 # 🔸 batch
 
-Command to batch create and manage multiple orchestra members (Git Worktrees). You can efficiently create multiple Worktrees through various methods including GitHub Issues, file input, and interactive mode.
+Command to batch create and manage multiple orchestra members (Git worktrees). You can efficiently create multiple Worktrees through various methods including GitHub Issues, file input, and interactive mode.
 
 ## Overview
 
@@ -29,16 +29,16 @@ mst batch -o -s -b develop  # Open after creation, run setup, base is develop
 
 ## Options
 
-| Option | Short | Description | Default |
-|--------|-------|-------------|---------|
-| `--from-file <file>` | `-f` | Read from batch file | none |
-| `--interactive` | `-i` | Interactive input mode | `false` |
-| `--open` | `-o` | Open in editor after creation | `false` |
-| `--setup` | `-s` | Run environment setup | `false` |
-| `--base <branch>` | `-b` | Specify base branch | `main` |
-| `--template <name>` | `-t` | Template to use | none |
-| `--parallel <n>` | `-p` | Number of parallel executions | `4` |
-| `--dry-run` | `-n` | Show plan without actually creating | `false` |
+| Option               | Short | Description                         | Default |
+| -------------------- | ----- | ----------------------------------- | ------- |
+| `--from-file <file>` | `-f`  | Read from batch file                | none    |
+| `--interactive`      | `-i`  | Interactive input mode              | `false` |
+| `--open`             | `-o`  | Open in editor after creation       | `false` |
+| `--setup`            | `-s`  | Run environment setup               | `false` |
+| `--base <branch>`    | `-b`  | Specify base branch                 | `main`  |
+| `--template <name>`  | `-t`  | Template to use                     | none    |
+| `--parallel <n>`     | `-p`  | Number of parallel executions       | `4`     |
+| `--dry-run`          | `-n`  | Show plan without actually creating | `false` |
 
 ## GitHub Issues Mode (Default)
 
@@ -49,6 +49,7 @@ mst batch
 ```
 
 Selection screen:
+
 ```
 ? Select issues to create worktrees from: (Press <space> to select, <a> to toggle all)
  ◉ #125 feat: Add authentication system (enhancement)
@@ -59,6 +60,7 @@ Selection screen:
 ```
 
 Execution result:
+
 ```
 Creating 3 worktrees...
 
@@ -109,6 +111,7 @@ mst batch --interactive
 ```
 
 Prompt display:
+
 ```
 Enter worktree details (branch-name | description | issue/pr)
 Press Enter twice to finish
@@ -116,7 +119,7 @@ Press Enter twice to finish
 > feature-auth | Implement authentication | #125
 > bugfix-login | Fix login bug
 > refactor-api | API refactoring
-> 
+>
 
 Creating 3 worktrees...
 ```
@@ -141,6 +144,7 @@ mst batch --from-file worktrees.txt --dry-run
 ```
 
 Example output:
+
 ```
 Batch execution plan:
 1. feature-auth (base: main, template: none)
