@@ -457,14 +457,41 @@ export async function executeCreateCommand(
   }
 
   // Worktreeの作成
-  await createWorktreeWithProgress(
-    manager,
-    enhancedBranchName,
-    options,
-    config,
-    githubMetadata,
-    issueNumber
-  )
+  try {
+    await createWorktreeWithProgress(
+      manager,
+      enhancedBranchName,
+      options,
+      config,
+      githubMetadata,
+      issueNumber
+    )
+  } catch (error) {
+    // ブランチ名衝突のエラーハンドリング
+    if (error instanceof Error && error.message.includes('競合します')) {
+      console.error(chalk.red(`✖ 演奏者の招集に失敗しました: ${error.message}`))
+
+      // 代替案を提案
+      const branches = await manager.getAllBranches()
+      const allBranches = [
+        ...branches.local,
+        ...branches.remote.map(r => r.replace(/^[^/]+\//, '')),
+      ]
+      const alternativeName = manager.generateAlternativeBranchName(enhancedBranchName, allBranches)
+
+      console.log(chalk.yellow(`\n💡 代替案: '${alternativeName}' はいかがでしょうか？`))
+      console.log(chalk.gray(`   実行コマンド: mst create ${alternativeName}`))
+      process.exit(1)
+    }
+
+    // その他のエラー
+    console.error(
+      chalk.red(
+        `✖ 演奏者の招集に失敗しました: ${error instanceof Error ? error.message : String(error)}`
+      )
+    )
+    process.exit(1)
+  }
 }
 
 // 確認プロンプトが必要かどうかを判定

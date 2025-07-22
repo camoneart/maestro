@@ -99,6 +99,8 @@ locked reason`
       const mockRepoRoot = '/test/repo'
       const expectedPath = path.resolve(mockRepoRoot, '.git/orchestrations/' + branchName)
 
+      // checkBranchNameCollisionをモック（衝突なし）
+      vi.spyOn(gitManager, 'checkBranchNameCollision').mockResolvedValueOnce()
       // git.raw()をモック
       ;(gitManager as any).git.raw = vi
         .fn()
@@ -109,6 +111,7 @@ locked reason`
       const result = await gitManager.createWorktree(branchName)
 
       expect(result).toBe(expectedPath)
+      expect(gitManager.checkBranchNameCollision).toHaveBeenCalledWith(branchName)
       expect((gitManager as any).git.raw).toHaveBeenCalledWith([
         'worktree',
         'add',
@@ -125,6 +128,8 @@ locked reason`
       const mockRepoRoot = '/test/repo'
       const expectedPath = path.resolve(mockRepoRoot, '.git/orchestrations/' + branchName)
 
+      // checkBranchNameCollisionをモック（衝突なし）
+      vi.spyOn(gitManager, 'checkBranchNameCollision').mockResolvedValueOnce()
       // git.raw()をモック
       ;(gitManager as any).git.raw = vi
         .fn()
@@ -134,6 +139,7 @@ locked reason`
       const result = await gitManager.createWorktree(branchName, baseBranch)
 
       expect(result).toBe(expectedPath)
+      expect(gitManager.checkBranchNameCollision).toHaveBeenCalledWith(branchName)
       expect((gitManager as any).git.raw).toHaveBeenCalledWith([
         'worktree',
         'add',
@@ -144,18 +150,36 @@ locked reason`
       ])
     })
 
-    it('should throw error if worktree creation fails', async () => {
+    it('should throw error if branch collision detected', async () => {
       const branchName = 'existing-branch'
       const mockRepoRoot = '/test/repo'
 
+      // checkBranchNameCollisionをモック（衝突あり）
+      vi.spyOn(gitManager, 'checkBranchNameCollision').mockRejectedValueOnce(
+        new Error("ブランチ 'existing-branch' は既に存在します")
+      )
+
+      await expect(gitManager.createWorktree(branchName)).rejects.toThrow(
+        "ブランチ 'existing-branch' は既に存在します"
+      )
+    })
+
+    it('should throw error if worktree creation fails after collision check', async () => {
+      const branchName = 'valid-branch'
+      const mockRepoRoot = '/test/repo'
+
+      // checkBranchNameCollisionをモック（衝突なし）
+      vi.spyOn(gitManager, 'checkBranchNameCollision').mockResolvedValueOnce()
       // git.raw()をモックしてエラーを発生させる
       ;(gitManager as any).git.raw = vi
         .fn()
         .mockResolvedValueOnce(mockRepoRoot + '\n') // getRepositoryRoot()
-        .mockRejectedValueOnce(new Error('branch already exists')) // worktree add fails
+        .mockRejectedValueOnce(new Error('worktree creation failed')) // worktree add fails
       ;(gitManager as any).git.status = vi.fn().mockResolvedValue({ current: 'main' })
 
-      await expect(gitManager.createWorktree(branchName)).rejects.toThrow('branch already exists')
+      await expect(gitManager.createWorktree(branchName)).rejects.toThrow(
+        'worktree creation failed'
+      )
     })
   })
 
@@ -190,6 +214,7 @@ locked reason`
           head: 'abcdef1234567890',
           branch: 'refs/heads/feature-to-delete',
           isCurrentDirectory: false,
+          detached: false,
           locked: false,
           prunable: false,
         },
@@ -217,6 +242,7 @@ locked reason`
           head: 'abcdef1234567890',
           branch: 'refs/heads/feature-to-force-delete',
           isCurrentDirectory: false,
+          detached: false,
           locked: false,
           prunable: false,
         },
@@ -277,6 +303,98 @@ locked reason`
 
       expect(branches.local).toEqual([])
       expect(branches.remote).toEqual([])
+    })
+  })
+
+  describe('checkBranchNameCollision', () => {
+    it('should throw error for exact branch name match', async () => {
+      // getAllBranchesをモック
+      vi.spyOn(gitManager, 'getAllBranches').mockResolvedValueOnce({
+        local: ['main', 'feature-test', 'develop'],
+        remote: ['origin/main'],
+      })
+
+      await expect(gitManager.checkBranchNameCollision('feature-test')).rejects.toThrow(
+        "ブランチ 'feature-test' は既に存在します"
+      )
+    })
+
+    it('should throw error when new branch would be prefix of existing branch', async () => {
+      // getAllBranchesをモック - feature/test/command-verification-parallel が存在する状況
+      vi.spyOn(gitManager, 'getAllBranches').mockResolvedValueOnce({
+        local: ['main', 'feature/test/command-verification-parallel'],
+        remote: ['origin/main'],
+      })
+
+      await expect(gitManager.checkBranchNameCollision('feature/test')).rejects.toThrow(
+        "ブランチ 'feature/test' を作成できません。以下の既存ブランチと競合します: feature/test/command-verification-parallel"
+      )
+    })
+
+    it('should throw error when existing branch is prefix of new branch', async () => {
+      // getAllBranchesをモック - feature/test が存在する状況
+      vi.spyOn(gitManager, 'getAllBranches').mockResolvedValueOnce({
+        local: ['main', 'feature/test'],
+        remote: ['origin/main'],
+      })
+
+      await expect(gitManager.checkBranchNameCollision('feature/test/new-branch')).rejects.toThrow(
+        "ブランチ 'feature/test/new-branch' を作成できません。以下の既存ブランチのサブブランチになります: feature/test"
+      )
+    })
+
+    it('should handle multiple conflicting branches', async () => {
+      // 複数の競合ブランチがある場合
+      vi.spyOn(gitManager, 'getAllBranches').mockResolvedValueOnce({
+        local: ['main', 'test/branch1', 'test/branch2', 'test/branch3', 'test/branch4'],
+        remote: ['origin/main'],
+      })
+
+      await expect(gitManager.checkBranchNameCollision('test')).rejects.toThrow(
+        "ブランチ 'test' を作成できません。以下の既存ブランチと競合します: test/branch1, test/branch2, test/branch3 など (4件)"
+      )
+    })
+
+    it('should pass when no collision detected', async () => {
+      // 衝突のない場合
+      vi.spyOn(gitManager, 'getAllBranches').mockResolvedValueOnce({
+        local: ['main', 'feature/other', 'develop'],
+        remote: ['origin/main'],
+      })
+
+      await expect(gitManager.checkBranchNameCollision('feature/new')).resolves.toBeUndefined()
+    })
+
+    it('should handle remote branches correctly', async () => {
+      // リモートブランチとの衝突も検知
+      vi.spyOn(gitManager, 'getAllBranches').mockResolvedValueOnce({
+        local: ['main'],
+        remote: ['origin/feature/test/remote-branch'],
+      })
+
+      await expect(gitManager.checkBranchNameCollision('feature/test')).rejects.toThrow(
+        "ブランチ 'feature/test' を作成できません。以下の既存ブランチと競合します: feature/test/remote-branch"
+      )
+    })
+  })
+
+  describe('generateAlternativeBranchName', () => {
+    it('should generate alternative name with counter', () => {
+      const allBranches = ['feature-test', 'feature-test-1', 'main']
+      const result = gitManager.generateAlternativeBranchName('feature-test', allBranches)
+      expect(result).toBe('feature-test-2')
+    })
+
+    it('should handle complex collision scenarios', () => {
+      const allBranches = ['test', 'test-1', 'test-2', 'test/subranch', 'test-3/another']
+      const result = gitManager.generateAlternativeBranchName('test', allBranches)
+      expect(result).toBe('test-4')
+    })
+
+    it('should work with no existing branches', () => {
+      const allBranches = ['main', 'develop']
+      const result = gitManager.generateAlternativeBranchName('feature', allBranches)
+      expect(result).toBe('feature-1')
     })
   })
 })

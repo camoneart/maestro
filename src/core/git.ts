@@ -10,6 +10,9 @@ export class GitWorktreeManager {
   }
 
   async createWorktree(branchName: string, baseBranch?: string): Promise<string> {
+    // ブランチ名の衝突をチェック
+    await this.checkBranchNameCollision(branchName)
+
     // リポジトリルートを取得して絶対パスを生成
     const repoRoot = await this.getRepositoryRoot()
     const worktreePath = path.join(repoRoot, '.git', 'orchestrations', branchName)
@@ -173,5 +176,58 @@ export class GitWorktreeManager {
       // Non-zero exit code means the file is not ignored
       return false
     }
+  }
+
+  async checkBranchNameCollision(branchName: string): Promise<void> {
+    const branches = await this.getAllBranches()
+    const allBranches = [...branches.local, ...branches.remote.map(r => r.replace(/^[^/]+\//, ''))]
+
+    // 完全一致のチェック
+    if (allBranches.includes(branchName)) {
+      throw new Error(`ブランチ '${branchName}' は既に存在します`)
+    }
+
+    // プレフィックス衝突のチェック（新しいブランチが既存ブランチのプレフィックスになる場合）
+    const conflictingBranches = allBranches.filter(existing =>
+      existing.startsWith(branchName + '/')
+    )
+
+    if (conflictingBranches.length > 0) {
+      const examples = conflictingBranches.slice(0, 3).join(', ')
+      throw new Error(
+        `ブランチ '${branchName}' を作成できません。以下の既存ブランチと競合します: ${examples}${
+          conflictingBranches.length > 3 ? ` など (${conflictingBranches.length}件)` : ''
+        }`
+      )
+    }
+
+    // 逆方向の衝突チェック（既存ブランチが新しいブランチのプレフィックスになる場合）
+    const parentConflicts = allBranches.filter(existing => branchName.startsWith(existing + '/'))
+
+    if (parentConflicts.length > 0) {
+      const examples = parentConflicts.slice(0, 3).join(', ')
+      throw new Error(
+        `ブランチ '${branchName}' を作成できません。以下の既存ブランチのサブブランチになります: ${examples}${
+          parentConflicts.length > 3 ? ` など (${parentConflicts.length}件)` : ''
+        }`
+      )
+    }
+  }
+
+  generateAlternativeBranchName(originalName: string, allBranches: string[]): string {
+    let counter = 1
+    let alternativeName = `${originalName}-${counter}`
+
+    while (
+      allBranches.includes(alternativeName) ||
+      allBranches.some(
+        b => b.startsWith(alternativeName + '/') || alternativeName.startsWith(b + '/')
+      )
+    ) {
+      counter++
+      alternativeName = `${originalName}-${counter}`
+    }
+
+    return alternativeName
   }
 }
