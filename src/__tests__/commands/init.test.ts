@@ -98,12 +98,6 @@ describe('init command', () => {
 
   describe('--package-manager option', () => {
     it('should use specified package manager', () => {
-      // package.jsonを作成してからpackage managerを指定
-      writeFileSync(path.join(testDir, 'package.json'), JSON.stringify({
-        name: 'test-project',
-        dependencies: {}
-      }))
-      
       const result = execSync(`node "${CLI_PATH}" init --yes --package-manager yarn`, { encoding: 'utf8' })
       
       const configPath = path.join(testDir, '.maestro.json')

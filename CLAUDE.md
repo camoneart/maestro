@@ -8,23 +8,29 @@ Maestro is a CLI tool for managing Git Worktrees with a conductor/orchestra them
 
 ## Development Commands
 
+**IMPORTANT**: This project uses pnpm exclusively. All commands must use `pnpm` instead of `npm`.
+
 ### Build & Test
-- `npm run build` - Build the TypeScript project using tsup
-- `npm run dev` - Watch mode development using tsx
-- `npm test` - Run tests with vitest
-- `npm run test:e2e` - Run end-to-end tests
-- `npm run test:coverage` - Run tests with coverage report
-- `npm run typecheck` - Type checking without emitting files
+- `pnpm build` - Build the TypeScript project using tsup
+- `pnpm dev` - Watch mode development using tsx
+- `pnpm test` - Run tests with vitest
+- `pnpm test:e2e` - Run end-to-end tests
+- `pnpm test:coverage` - Run tests with coverage report (80% minimum threshold)
+- `pnpm typecheck` - Type checking without emitting files
 
 ### Code Quality
-- `npm run lint` - ESLint checking on TypeScript files
-- `npm run format` - Format code with Prettier
-- `npm run prettier:check` - Check code formatting
+- `pnpm lint` - ESLint checking on TypeScript files
+- `pnpm format` - Format code with Prettier
+- `pnpm prettier:check` - Check code formatting
+
+### Single Test Execution
+- `pnpm test -- path/to/test.test.ts` - Run a specific test file
+- `pnpm test -- --reporter=verbose` - Run tests with detailed output
 
 ### Publishing
-- `npm run changeset` - Create a changeset for releases
-- `npm run version` - Version bump using changesets
-- `npm run release` - Build and publish to npm
+- `pnpm changeset` - Create a changeset for releases
+- `pnpm version` - Version bump using changesets
+- `pnpm release` - Build and publish to npm
 
 ## Core Architecture
 
@@ -60,10 +66,23 @@ The CLI follows a modular command structure where each command (create, delete, 
 
 ## Testing Approach
 
-- Unit tests: `src/__tests__/commands/` and `src/__tests__/core/`
-- E2E tests: `e2e/tests/`
-- Test utilities: `src/__tests__/utils/`
-- Run single test: `npm test -- path/to/test.test.ts`
+### Test Structure
+- **Unit tests**: `src/__tests__/commands/` and `src/__tests__/core/`
+- **E2E tests**: `e2e/tests/`
+- **Test utilities**: `src/__tests__/utils/`
+- **Coverage Requirements**: 80% statements minimum, configured in vitest.config.ts
+
+### Test-Driven Development (TDD)
+This project follows TDD methodology:
+1. Create failing test first (Red)
+2. Write minimal code to pass (Green) 
+3. Refactor while keeping tests green
+4. Always run `pnpm lint && pnpm typecheck` after changes
+
+### Running Tests
+- `pnpm test -- path/to/test.test.ts` - Run specific test file
+- `pnpm test:coverage` - Generate coverage report
+- `pnpm test:e2e` - Run end-to-end tests
 
 ## Implementation Logs
 
@@ -89,3 +108,38 @@ The project includes MCP (Model Context Protocol) server functionality in `src/m
 - chalk - Terminal colors
 - chokidar - File watching
 - conf - Configuration management
+- zod - Runtime type validation
+- execa - Process execution
+
+## Orchestra Theme & Terminology
+
+Maestro uses orchestra/conductor metaphors throughout:
+- **Orchestra Members**: Git worktrees (stored in `.git/orchestra-members`)
+- **Performers**: Active worktree sessions
+- **Conductors**: Main branch or coordinating worktrees
+- **Configuration**: `.maestro.json` for project-specific settings
+
+## Git Commit Guidelines
+
+Follow semantic commit prefixes for this project:
+- `feat:` - New features
+- `fix:` - Bug fixes
+- `test:` - Test additions/updates
+- `refactor:` - Code refactoring
+- `docs:` - Documentation changes
+- `chore:` - Build/dependency updates
+
+**IMPORTANT**: Always stage files individually with `git add <specific-files>` instead of `git add -A`. Create meaningful commit messages that explain the "why" of changes.
+
+## Integration Points
+
+### Claude Code MCP
+- Server implementation in `src/mcp/server.ts`
+- Auto-generates CLAUDE.md files for new worktrees
+- Supports AI-powered code review workflows
+
+### External Tool Integration
+- **GitHub CLI**: Direct `gh` command integration for PR management
+- **tmux**: Session management and pane splitting
+- **fzf**: Fuzzy finding for interactive selection
+- **Shell Completion**: bash/zsh/fish completion scripts available

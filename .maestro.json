@@ -8,8 +8,12 @@
     "defaultEditor": "cursor"
   },
   "postCreate": {
-    "copyFiles": [".env", ".env.local"],
-    "commands": ["pnpm install"]
+    "copyFiles": [
+      ".env"
+    ],
+    "commands": [
+      "pnpm install"
+    ]
   },
   "hooks": {
     "beforeDelete": "echo \"演奏者を削除します: $ORCHESTRA_MEMBER\""

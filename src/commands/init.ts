@@ -4,10 +4,7 @@ import inquirer from 'inquirer'
 import { existsSync, readFileSync, writeFileSync } from 'fs'
 import path from 'path'
 import ora from 'ora'
-import { ConfigManager } from '../core/config.js'
-
 type PackageManager = 'pnpm' | 'npm' | 'yarn' | 'none'
-type Editor = 'cursor' | 'vscode' | 'vim' | 'other'
 
 interface InitOptions {
   minimal?: boolean
@@ -63,7 +60,7 @@ export const initCommand = new Command('init')
         )
       )
 
-      let config: any
+      let config: Record<string, unknown>
 
       if (options.minimal) {
         config = createMinimalConfig()
@@ -90,10 +87,11 @@ export const initCommand = new Command('init')
       console.log(chalk.gray('  mst list                  # 演奏者一覧を表示'))
       console.log(chalk.gray('  mst --help               # その他のコマンドを確認'))
 
-      if (config.postCreate?.commands?.length > 0) {
+      const postCreate = config.postCreate as { commands?: string[] } | undefined
+      if (postCreate?.commands && postCreate.commands.length > 0) {
         console.log(
           chalk.yellow(
-            `\n💡 worktree作成時に自動で実行されるコマンド: ${config.postCreate.commands.join(
+            `\n💡 worktree作成時に自動で実行されるコマンド: ${postCreate.commands.join(
               ', '
             )}`
           )
@@ -200,9 +198,22 @@ function createMinimalConfig() {
   }
 }
 
-function createDefaultConfig(projectType: ProjectType, packageManager?: PackageManager): any {
-  const pm = packageManager || projectType.packageManager || 'npm'
-  const commands = projectType.setupCommands || (pm !== 'none' ? [`${pm} install`] : [])
+function createDefaultConfig(projectType: ProjectType, packageManager?: PackageManager): Record<string, unknown> {
+  let commands: string[] = []
+  
+  if (packageManager && packageManager !== 'none') {
+    // 明示的にpackage managerが指定された場合は、それを使用
+    commands = [`${packageManager} install`]
+  } else if (projectType.setupCommands && projectType.setupCommands.length > 0) {
+    // プロジェクトタイプに特有のsetupCommandsがある場合
+    commands = projectType.setupCommands
+  } else {
+    // デフォルトまたは検出されたpackage managerを使用
+    const pm = projectType.packageManager || 'npm'
+    if (pm !== 'none') {
+      commands = [`${pm} install`]
+    }
+  }
 
   return {
     worktrees: {
@@ -223,7 +234,7 @@ function createDefaultConfig(projectType: ProjectType, packageManager?: PackageM
   }
 }
 
-async function createInteractiveConfig(projectType: ProjectType): Promise<any> {
+async function createInteractiveConfig(projectType: ProjectType): Promise<Record<string, unknown>> {
   const answers = await inquirer.prompt([
     {
       type: 'list',
