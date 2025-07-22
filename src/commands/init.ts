@@ -91,9 +91,7 @@ export const initCommand = new Command('init')
       if (postCreate?.commands && postCreate.commands.length > 0) {
         console.log(
           chalk.yellow(
-            `\n💡 worktree作成時に自動で実行されるコマンド: ${postCreate.commands.join(
-              ', '
-            )}`
+            `\n💡 worktree作成時に自動で実行されるコマンド: ${postCreate.commands.join(', ')}`
           )
         )
       }
@@ -109,7 +107,7 @@ function detectProjectType(): ProjectType {
   // package.jsonの存在確認とパッケージマネージャー検出
   if (existsSync(path.join(cwd, 'package.json'))) {
     const packageJson = JSON.parse(readFileSync(path.join(cwd, 'package.json'), 'utf-8'))
-    
+
     let packageManager: PackageManager = 'npm'
     if (existsSync(path.join(cwd, 'pnpm-lock.yaml'))) {
       packageManager = 'pnpm'
@@ -119,7 +117,7 @@ function detectProjectType(): ProjectType {
 
     // プロジェクトタイプの判定
     const dependencies = { ...packageJson.dependencies, ...packageJson.devDependencies }
-    
+
     if (dependencies['next']) {
       return {
         name: 'Next.js',
@@ -156,7 +154,10 @@ function detectProjectType(): ProjectType {
   }
 
   // Pythonプロジェクト
-  if (existsSync(path.join(cwd, 'requirements.txt')) || existsSync(path.join(cwd, 'pyproject.toml'))) {
+  if (
+    existsSync(path.join(cwd, 'requirements.txt')) ||
+    existsSync(path.join(cwd, 'pyproject.toml'))
+  ) {
     return {
       name: 'Python',
       detected: true,
@@ -198,9 +199,12 @@ function createMinimalConfig() {
   }
 }
 
-function createDefaultConfig(projectType: ProjectType, packageManager?: PackageManager): Record<string, unknown> {
+function createDefaultConfig(
+  projectType: ProjectType,
+  packageManager?: PackageManager
+): Record<string, unknown> {
   let commands: string[] = []
-  
+
   if (packageManager && packageManager !== 'none') {
     // 明示的にpackage managerが指定された場合は、それを使用
     commands = [`${packageManager} install`]
@@ -283,15 +287,19 @@ async function createInteractiveConfig(projectType: ProjectType): Promise<Record
       name: 'copyEnvFiles',
       message: '環境ファイルをworktreeにコピーしますか？',
       default: true,
-      when: (answers) => answers.autoSetup,
+      when: answers => answers.autoSetup,
     },
     {
       type: 'input',
       name: 'syncFiles',
       message: 'コピーするファイルを指定 (カンマ区切り):',
       default: (projectType.syncFiles || ['.env']).join(', '),
-      when: (answers) => answers.copyEnvFiles,
-      filter: (input: string) => input.split(',').map((s) => s.trim()).filter(Boolean),
+      when: answers => answers.copyEnvFiles,
+      filter: (input: string) =>
+        input
+          .split(',')
+          .map(s => s.trim())
+          .filter(Boolean),
     },
   ])
 
