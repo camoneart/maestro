@@ -122,6 +122,7 @@ describe('init command', () => {
     it('should use specified package manager', () => {
       const result = execSync(`node "${CLI_PATH}" init --yes --package-manager yarn`, {
         encoding: 'utf8',
+        timeout: 30000,
       })
 
       const configPath = path.join(testDir, '.maestro.json')
