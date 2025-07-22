@@ -1,4 +1,4 @@
-# mst health
+# 🔸 health
 
 Command to check the health of orchestra members (Git Worktrees), detect and fix issues. Provides comprehensive diagnosis including detection of old orchestra members, uncommitted changes, and synchronization status with remote branches.
 

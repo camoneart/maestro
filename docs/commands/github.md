@@ -1,4 +1,4 @@
-# mst github
+# 🔸 github
 
 Command to create orchestra members (Git Worktrees) directly from GitHub Issues or Pull Requests. Integrates with GitHub CLI to seamlessly integrate development workflows.
 

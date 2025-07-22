@@ -1,4 +1,4 @@
-# 🐚 shell - Enter Orchestra Member Shell
+# 🔸 shell
 
 Enter an interactive shell session in an orchestra member.
 

@@ -1,4 +1,4 @@
-# mst sync
+# 🔸 sync
 
 Command to synchronize code and configuration files between orchestra members (Git Worktrees). You can reflect changes from the main branch to other orchestra members or share environment configuration files.
 

@@ -1,4 +1,4 @@
-# 🔗 exec - Execute Commands
+# 🔸 exec
 
 Execute commands in specific or all orchestra members.
 

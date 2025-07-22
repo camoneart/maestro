@@ -2,9 +2,47 @@
 
 Detailed usage of all maestro (mst) commands.
 
-## Basic Commands
+## 📑 Table of Contents
 
-### 🚀 init - Initialize Project
+### 🎯 Basic Commands
+- [init](#init) - Initialize project configuration
+- [create](#create) - Create new orchestra member (worktree)
+- [list](#list) - Display all orchestra members
+- [delete](#delete) - Delete orchestra members
+- [sync](#sync) - Sync files between members
+- [shell](#shell) - Enter member shell
+
+### 🔗 Integration Commands
+- [suggest](#suggest) - AI-powered suggestions
+- [github](#github) - GitHub integration features
+- [tmux](#tmux) - tmux session management
+
+### 📊 Advanced Features
+- [dashboard](#dashboard) - Web UI dashboard
+- [health](#health) - Health status checking
+- [snapshot](#snapshot) - Work state snapshots
+- [watch](#watch) - File watching and auto-sync
+
+### 🛠️ Utility Commands
+- [config](#config) - Configuration management
+- [where](#where) - Check current location
+- [exec](#exec) - Execute commands in members
+- [batch](#batch) - Batch operations
+- [template](#template) - Template management
+- [mcp](#mcp) - MCP server management
+- [attach](#attach) - Attach to existing branch
+- [graph](#graph) - Display relationships
+- [history](#history) - Operation history
+- [issue](#issue) - GitHub issue integration
+- [review](#review) - PR review management
+- [claude](#claude) - Claude Code management
+- [completion](#completion) - Shell auto-completion
+
+---
+
+## 🎯 Basic Commands
+
+### 🔸 init
 
 Initialize Maestro configuration for your project.
 
@@ -12,11 +50,12 @@ Initialize Maestro configuration for your project.
 mst init [options]
 ```
 
-#### Options
-- `-m, --minimal` - Create minimal configuration
-- `-p, --package-manager <manager>` - Specify package manager (pnpm/npm/yarn/none)
-- `-t, --template <name>` - Use predefined template
-- `-y, --yes` - Skip prompts and use defaults
+| Option | Short | Description |
+|--------|-------|-------------|
+| `--minimal` | `-m` | Create minimal configuration |
+| `--package-manager <manager>` | `-p` | Specify package manager (pnpm/npm/yarn/none) |
+| `--template <name>` | `-t` | Use predefined template |
+| `--yes` | `-y` | Skip prompts and use defaults |
 
 #### Features
 - **Smart Project Detection**: Auto-detects project type (React, Next.js, Vue.js, Python, Go)
@@ -50,7 +89,7 @@ mst init --template react --yes
 - **Go**: Detects `go.mod` files, suggests `go mod download`
 - **Generic**: Fallback for other project types
 
-### 🎼 create - Create Orchestra Member
+### 🔸 create
 
 Create a new orchestra member (worktree).
 
@@ -58,23 +97,24 @@ Create a new orchestra member (worktree).
 mst create <branch-name> [options]
 ```
 
-#### Options
-- `--base <branch>` - Specify base branch (default: main)
-- `--open` - Automatically open in editor
-- `--setup` - Auto-setup development environment
-- `--tmux` - Create new tmux window
-- `--tmux-h` - Create in horizontal tmux pane split (side by side)
-- `--tmux-v` - Create in vertical tmux pane split (top and bottom)
-- `--claude` - Create CLAUDE.md for Claude Code
-- `--template <name>` - Use template
-- `--draft-pr` - Auto-create Draft PR
-- `--no-push` - Create branch without pushing to remote
-- `--from-pr` - Create from PR
-- `--from-issue` - Create from Issue
-- `--fzf` - Select PR/Issue with fzf
-- `--sync-files` - Sync specific files from main branch
-- `--copy-file <file>` - Copy files from current worktree (including gitignored files)
-- `-y, --yes` - Skip confirmations
+| Option | Description |
+|--------|-------------|
+| `--base <branch>` | Specify base branch (default: main) |
+| `--open` | Automatically open in editor |
+| `--setup` | Auto-setup development environment |
+| `--tmux` | Create new tmux window |
+| `--tmux-h` | Create in horizontal tmux pane split |
+| `--tmux-v` | Create in vertical tmux pane split |
+| `--claude` | Create CLAUDE.md for Claude Code |
+| `--template <name>` | Use template |
+| `--draft-pr` | Auto-create Draft PR |
+| `--no-push` | Create branch without pushing to remote |
+| `--from-pr` | Create from PR |
+| `--from-issue` | Create from Issue |
+| `--fzf` | Select PR/Issue with fzf |
+| `--sync-files` | Sync specific files from main branch |
+| `--copy-file <file>` | Copy files from current worktree |
+| `--yes`, `-y` | Skip confirmations |
 
 #### Examples
 ```bash
@@ -95,7 +135,7 @@ mst create issue-456 --tmux-v --setup     # Vertical split with setup
 mst create feature/api --copy-file .env --copy-file .env.local
 ```
 
-### 📋 list - List Orchestra Members
+### 🔸 list
 
 Display all orchestra members.
 
@@ -103,15 +143,16 @@ Display all orchestra members.
 mst list [options]
 ```
 
-#### Options
-- `--json` - Output in JSON format
-- `--sort <field>` - Sort by field (branch, age, size)
-- `--filter <pattern>` - Filter by pattern
-- `--last-commit` - Show last commit info
-- `--metadata` - Show metadata info
-- `--full-path` - Show full paths instead of relative paths
-- `--fzf` - Select with fzf (outputs selected branch name)
-- `--names` - Machine-readable output (for scripting)
+| Option | Description |
+|--------|-------------|
+| `--json` | Output in JSON format |
+| `--sort <field>` | Sort by field (branch, age, size) |
+| `--filter <pattern>` | Filter by pattern |
+| `--last-commit` | Show last commit info |
+| `--metadata` | Show metadata info |
+| `--full-path` | Show full paths instead of relative paths |
+| `--fzf` | Select with fzf (outputs selected branch name) |
+| `--names` | Machine-readable output (for scripting) |
 
 #### Examples
 ```bash
@@ -133,7 +174,7 @@ for worktree in $(mst list --names); do
 done
 ```
 
-### 🗑️ delete - Delete Orchestra Member
+### 🔸 delete
 
 Delete orchestra members.
 
@@ -141,11 +182,12 @@ Delete orchestra members.
 mst delete [branch-name] [options]
 ```
 
-#### Options
-- `--force` - Force delete
-- `--remove-remote` - Also delete remote branch
-- `--fzf` - Select with fzf (multiple selection)
-- `--current` - Delete current worktree
+| Option | Description |
+|--------|-------------|
+| `--force` | Force delete even with uncommitted changes |
+| `--remove-remote` | Also delete remote branch |
+| `--fzf` | Select with fzf (multiple selection) |
+| `--current` | Delete current worktree |
 
 #### Features
 - **Wildcard support**: Use patterns like `"feature/old-*"` to delete multiple branches
@@ -165,7 +207,7 @@ mst delete "feature/old-*"
 mst delete --fzf
 ```
 
-### 🔄 sync - Sync Orchestra Members
+### 🔸 sync
 
 Sync files between orchestra members.
 
@@ -173,13 +215,14 @@ Sync files between orchestra members.
 mst sync [options]
 ```
 
-#### Options
-- `--files <pattern>` - File pattern to sync
-- `--from <branch>` - Source branch
-- `--to <branch>` - Target branch
-- `--dry-run` - Preview only, don't sync
-- `--auto` - Auto sync mode
-- `-c, --concurrency <number>` - Number of parallel executions (default: 5)
+| Option | Short | Description |
+|--------|-------|-------------|
+| `--files <pattern>` | | File pattern to sync |
+| `--from <branch>` | | Source branch |
+| `--to <branch>` | | Target branch |
+| `--dry-run` | | Preview only, don't sync |
+| `--auto` | | Auto sync mode |
+| `--concurrency <number>` | `-c` | Number of parallel executions (default: 5) |
 
 #### Examples
 ```bash
@@ -193,7 +236,7 @@ mst sync --files "*.env"
 mst sync --dry-run
 ```
 
-### 🐚 shell - Enter Orchestra Member Shell
+### 🔸 shell
 
 Enter the shell of an orchestra member.
 
@@ -202,12 +245,13 @@ mst shell [branch-name] [options]
 mst sh [branch-name] [options]  # alias
 ```
 
-#### Options
-- `--fzf` - Select with fzf
-- `--cmd <command>` - Execute command and exit
-- `--tmux` - Attach to tmux session (create if doesn't exist)
-- `--tmux-vertical`, `--tmux-v` - Open shell in vertical split pane
-- `--tmux-horizontal`, `--tmux-h` - Open shell in horizontal split pane
+| Option | Aliases | Description |
+|--------|---------|-------------|
+| `--fzf` | | Select with fzf |
+| `--cmd <command>` | | Execute command and exit |
+| `--tmux` | | Attach to tmux session (create if doesn't exist) |
+| `--tmux-vertical` | `--tmux-v` | Open shell in vertical split pane |
+| `--tmux-horizontal` | `--tmux-h` | Open shell in horizontal split pane |
 
 #### Examples
 ```bash
@@ -227,9 +271,9 @@ mst shell feature/new --tmux-v
 mst shell feature/test --tmux-h
 ```
 
-## Integration Commands
+## 🔗 Integration Commands
 
-### 🤖 suggest - AI Suggestions
+### 🔸 suggest
 
 Use Claude Code to provide various suggestions.
 
@@ -237,14 +281,15 @@ Use Claude Code to provide various suggestions.
 mst suggest [options]
 ```
 
-#### Options
-- `--branch` - Suggest branch name
-- `--commit` - Suggest commit message
-- `--issue` - Suggest issue title
-- `--pr` - Suggest PR title/description
-- `--review` - Suggest review comments
-- `--description <text>` - Specify description
-- `--diff` - Include diff
+| Option | Description |
+|--------|-------------|
+| `--branch` | Suggest branch name |
+| `--commit` | Suggest commit message |
+| `--issue` | Suggest issue title |
+| `--pr` | Suggest PR title/description |
+| `--review` | Suggest review comments |
+| `--description <text>` | Specify description |
+| `--diff` | Include diff |
 
 #### Examples
 ```bash
@@ -258,7 +303,7 @@ mst suggest --commit --diff
 mst suggest --pr --description "Implement login feature"
 ```
 
-### 🔗 github - GitHub Integration
+### 🔸 github
 
 Provides GitHub integration features.
 
@@ -268,18 +313,22 @@ mst gh [type] [number] [options]  # alias
 ```
 
 #### Arguments
-- `type` - Type (checkout, pr, issue, comment)
-- `number` - PR/Issue number
+| Argument | Description |
+|----------|-------------|
+| `type` | Type (checkout, pr, issue, comment) |
+| `number` | PR/Issue number |
 
 #### Options
-- `-o, --open` - Open in editor
-- `-s, --setup` - Execute environment setup
-- `-m, --message <message>` - Comment message
-- `--reopen` - Reopen PR/Issue
-- `--close` - Close PR/Issue
-- `-t, --tmux` - Open in new tmux window
-- `--tmux-vertical`, `--tmux-v` - Open in vertical split pane
-- `--tmux-horizontal`, `--tmux-h` - Open in horizontal split pane
+| Option | Short | Description |
+|--------|-------|-------------|
+| `--open` | `-o` | Open in editor |
+| `--setup` | `-s` | Execute environment setup |
+| `--message <message>` | `-m` | Comment message |
+| `--reopen` | | Reopen PR/Issue |
+| `--close` | | Close PR/Issue |
+| `--tmux` | `-t` | Open in new tmux window |
+| `--tmux-vertical` | `--tmux-v` | Open in vertical split pane |
+| `--tmux-horizontal` | `--tmux-h` | Open in horizontal split pane |
 
 #### Examples
 ```bash
@@ -300,7 +349,7 @@ mst github 123 --tmux-v
 mst github comment 123 -m "LGTM!"
 ```
 
-### 🖥️ tmux - tmux Integration
+### 🔸 tmux
 
 Manage orchestra members with tmux sessions.
 
@@ -308,16 +357,16 @@ Manage orchestra members with tmux sessions.
 mst tmux [branch-name] [options]
 ```
 
-#### Options
-- `--detach` - Start in detached mode
-- `--kill` - Kill session
-- `--list` - List active sessions
-- `--editor` - Launch editor
-- `-n, --new-window` - Open in new window
-- `-p, --split-pane` - Split current pane
-- `-v, --vertical` - Vertical split (use with -p)
-- `-e, --editor <editor>` - Auto-launch editor (nvim, vim, code, emacs)
-- `-d, --detach` - Only create session (don't attach)
+| Option | Short | Description |
+|--------|-------|-------------|
+| `--detach` | `-d` | Start in detached mode |
+| `--kill` | | Kill session |
+| `--list` | | List active sessions |
+| `--editor` | | Launch editor |
+| `--new-window` | `-n` | Open in new window |
+| `--split-pane` | `-p` | Split current pane |
+| `--vertical` | `-v` | Vertical split (use with -p) |
+| `--editor <editor>` | `-e` | Auto-launch editor (nvim, vim, code, emacs) |
 
 #### Examples
 ```bash
@@ -331,9 +380,9 @@ mst tmux
 mst tmux feature/background --detach
 ```
 
-## Advanced Features
+## 📊 Advanced Features
 
-### 📊 dashboard - Dashboard
+### 🔸 dashboard
 
 Launch Web UI dashboard.
 
@@ -341,10 +390,11 @@ Launch Web UI dashboard.
 mst dashboard [options]
 ```
 
-#### Options
-- `-p, --port <number>` - Port number (default: 8765)
-- `--no-open` - Don't auto-open browser
-- `--host <address>` - Host address
+| Option | Short | Description |
+|--------|-------|-------------|
+| `--port <number>` | `-p` | Port number (default: 8765) |
+| `--no-open` | | Don't auto-open browser |
+| `--host <address>` | | Host address |
 
 #### Examples
 ```bash
@@ -355,7 +405,7 @@ mst dashboard
 mst dashboard --port 8080
 ```
 
-### 🩺 health - Health Check
+### 🔸 health
 
 Check health status of orchestra members.
 
@@ -363,12 +413,13 @@ Check health status of orchestra members.
 mst health [options]
 ```
 
-#### Options
-- `--fix` - Auto-fix issues
-- `--json` - Output in JSON format
-- `--verbose` - Detailed diagnostic info
-- `-p, --prune` - Delete old worktrees
-- `-d, --days <number>` - Days to determine "old" (default: 30)
+| Option | Short | Description |
+|--------|-------|-------------|
+| `--fix` | | Auto-fix issues |
+| `--json` | | Output in JSON format |
+| `--verbose` | | Detailed diagnostic info |
+| `--prune` | `-p` | Delete old worktrees |
+| `--days <number>` | `-d` | Days to determine "old" (default: 30) |
 
 #### Examples
 ```bash
@@ -382,7 +433,7 @@ mst health --fix
 mst health --prune --days 60
 ```
 
-### 📸 snapshot - Snapshots
+### 🔸 snapshot
 
 Manage work state snapshots.
 
@@ -411,7 +462,7 @@ mst snapshot --list
 mst snapshot --restore <snapshot-id>
 ```
 
-### 👁️ watch - File Watch
+### 🔸 watch
 
 Watch file changes and auto-sync.
 
@@ -437,9 +488,9 @@ mst watch --files "src/**/*.ts"
 mst watch --auto
 ```
 
-## Utility Commands
+## 🛠️ Utility Commands
 
-### 🔧 config - Configuration Management
+### 🔸 config
 
 Manage configuration.
 
@@ -465,7 +516,7 @@ mst config set development.defaultEditor cursor
 mst config get worktrees.root
 ```
 
-### 📍 where - Current Location
+### 🔸 where
 
 Check current worktree location.
 
@@ -473,9 +524,10 @@ Check current worktree location.
 mst where [options]
 ```
 
-#### Options
-- `--json` - Output in JSON format
-- `--verbose` - Show detailed info
+| Option | Description |
+|--------|-------------|
+| `--json` | Output in JSON format |
+| `--verbose` | Show detailed info |
 
 #### Examples
 ```bash
@@ -486,7 +538,7 @@ mst where
 mst where --verbose
 ```
 
-### 🔗 exec - Execute Commands
+### 🔸 exec
 
 Execute command in a specific orchestra member or all orchestra members.
 
@@ -495,13 +547,14 @@ mst exec [branch-name] <command> [options]
 mst e [branch-name] <command> [options]  # alias
 ```
 
-#### Options
-- `-s, --silent` - Suppress output
-- `-a, --all` - Execute on all orchestra members
-- `--fzf` - Select orchestra member with fzf
-- `-t, --tmux` - Execute in new tmux window
-- `--tmux-vertical`, `--tmux-v` - Execute in vertical split pane
-- `--tmux-horizontal`, `--tmux-h` - Execute in horizontal split pane
+| Option | Short | Description |
+|--------|-------|-------------|
+| `--silent` | `-s` | Suppress output |
+| `--all` | `-a` | Execute on all orchestra members |
+| `--fzf` | | Select orchestra member with fzf |
+| `--tmux` | `-t` | Execute in new tmux window |
+| `--tmux-vertical` | `--tmux-v` | Execute in vertical split pane |
+| `--tmux-horizontal` | `--tmux-h` | Execute in horizontal split pane |
 
 #### Examples
 ```bash
@@ -521,7 +574,7 @@ mst exec feature/api --tmux npm run watch
 mst exec --fzf --tmux-v npm test
 ```
 
-### 🔄 batch - Batch Processing
+### 🔸 batch
 
 Batch process multiple orchestra members.
 
@@ -529,13 +582,15 @@ Batch process multiple orchestra members.
 mst batch <command> [options]
 ```
 
-#### Options
-- `-c, --concurrency <number>` - Number of parallel executions (default: 5)
+| Option | Short | Description |
+|--------|-------|-------------|
+| `--concurrency <number>` | `-c` | Number of parallel executions (default: 5) |
 
-#### Subcommands
-- `create <pattern>` - Create multiple based on pattern
-- `delete <pattern>` - Delete multiple based on pattern
-- `sync` - Sync all orchestra members
+| Subcommand | Description |
+|------------|-------------|
+| `create <pattern>` | Create multiple based on pattern |
+| `delete <pattern>` | Delete multiple based on pattern |
+| `sync` | Sync all orchestra members |
 
 #### Examples
 ```bash
@@ -546,7 +601,7 @@ mst batch create feature/task-{1..5}
 mst batch delete "feature/old-*"
 ```
 
-### 📋 template - Template Management
+### 🔸 template
 
 Manage project templates.
 
@@ -572,7 +627,7 @@ mst template create react-component
 mst template apply react-component
 ```
 
-### 🔍 mcp - MCP Server
+### 🔸 mcp
 
 Manage MCP server.
 
@@ -580,11 +635,12 @@ Manage MCP server.
 mst mcp <command> [options]
 ```
 
-#### Subcommands
-- `start` - Start MCP server
-- `stop` - Stop MCP server
-- `status` - Check server status
-- `restart` - Restart server
+| Subcommand | Description |
+|------------|-------------|
+| `start` | Start MCP server |
+| `stop` | Stop MCP server |
+| `status` | Check server status |
+| `restart` | Restart server |
 
 #### Examples
 ```bash
@@ -595,7 +651,7 @@ mst mcp start
 mst mcp status
 ```
 
-### 🎯 attach - Session Attach
+### 🔸 attach
 
 Attach to existing branch.
 
@@ -603,11 +659,12 @@ Attach to existing branch.
 mst attach [branch-name] [options]
 ```
 
-#### Options
-- `-r, --remote` - Include remote branches
-- `-f, --fetch` - Execute fetch first
-- `-o, --open` - Open in editor
-- `-s, --setup` - Execute environment setup
+| Option | Short | Description |
+|--------|-------|-------------|
+| `--remote` | `-r` | Include remote branches |
+| `--fetch` | `-f` | Execute fetch first |
+| `--open` | `-o` | Open in editor |
+| `--setup` | `-s` | Execute environment setup |
 
 #### Examples
 ```bash
@@ -618,7 +675,7 @@ mst attach feature-awesome
 mst attach --fetch --setup
 ```
 
-### 📈 graph - Relationship Graph
+### 🔸 graph
 
 Display orchestra member relationships.
 
@@ -626,12 +683,13 @@ Display orchestra member relationships.
 mst graph [options]
 ```
 
-#### Options
-- `--format <type>` - Output format (text, mermaid, dot)
-- `--output <file>` - Output file
-- `--show-commits` - Show latest commits
-- `--show-dates` - Show last update dates
-- `-d, --depth <number>` - Display depth (default: 3)
+| Option | Short | Description |
+|--------|-------|-------------|
+| `--format <type>` | | Output format (text, mermaid, dot) |
+| `--output <file>` | | Output file |
+| `--show-commits` | | Show latest commits |
+| `--show-dates` | | Show last update dates |
+| `--depth <number>` | `-d` | Display depth (default: 3) |
 
 #### Examples
 ```bash
@@ -642,7 +700,7 @@ mst graph
 mst graph --format mermaid --output graph.md
 ```
 
-### 📚 history - History
+### 🔸 history
 
 Display operation history.
 
@@ -650,10 +708,11 @@ Display operation history.
 mst history [options]
 ```
 
-#### Options
-- `--limit <number>` - Number of history entries
-- `--json` - Output in JSON format
-- `--filter <pattern>` - Filter pattern
+| Option | Description |
+|--------|-------------|
+| `--limit <number>` | Number of history entries |
+| `--json` | Output in JSON format |
+| `--filter <pattern>` | Filter pattern |
 
 #### Examples
 ```bash
@@ -664,7 +723,7 @@ mst history
 mst history --limit 10
 ```
 
-### 🔍 issue - Issue Management
+### 🔸 issue
 
 GitHub Issue integration.
 
@@ -690,7 +749,7 @@ mst issue list
 mst issue view 123
 ```
 
-### 🔍 review - Review Management
+### 🔸 review
 
 Manage Pull Request reviews.
 
@@ -719,7 +778,7 @@ mst review approve 123
 mst review request-changes 123
 ```
 
-### 🤖 claude - Claude Code Management
+### 🔸 claude
 
 Manage Claude Code instances for each orchestra member.
 
@@ -753,7 +812,7 @@ mst claude stop feature/awesome
 mst claude stop --all
 ```
 
-### 🔄 completion - Auto Completion
+### 🔸 completion
 
 Set up shell auto-completion.
 
@@ -775,7 +834,7 @@ mst completion zsh > ~/.zsh/completions/_mst
 mst completion bash > /etc/bash_completion.d/mst
 ```
 
-## Global Options
+## 🌐 Global Options
 
 Options available for all commands:
 
@@ -786,7 +845,7 @@ Options available for all commands:
 - `--config <path>` - Config file path
 - `--no-color` - Disable colors
 
-## Configuration File
+## ⚙️ Configuration File
 
 Customize settings with `mst.config.json`:
 
@@ -832,7 +891,7 @@ Customize settings with `mst.config.json`:
 }
 ```
 
-## Environment Variables
+## 🌍 Environment Variables
 
 - `MST_CONFIG_PATH` - Config file path
 - `MST_WORKTREES_ROOT` - Worktrees root directory
@@ -841,7 +900,7 @@ Customize settings with `mst.config.json`:
 - `MST_CLAUDE_ENABLED` - Enable/disable Claude Code integration
 - `DEBUG` - Debug mode (`DEBUG=mst:*`)
 
-## Error Handling
+## ⚠️ Error Handling
 
 maestro properly handles the following errors:
 
@@ -853,7 +912,7 @@ maestro properly handles the following errors:
 
 If an error occurs, use the `--verbose` option for detailed information.
 
-## More Information
+## 📚 More Information
 
 For detailed usage of each command, see the following documentation:
 

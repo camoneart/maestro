@@ -1,4 +1,4 @@
-# mst delete
+# 🔸 delete
 
 Command to delete orchestra members (Git Worktrees). Cleans up unnecessary orchestra members and frees disk space.
 

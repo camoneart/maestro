@@ -1,4 +1,4 @@
-# mst list
+# 🔸 list
 
 Command to display a list of created orchestra members (Git Worktrees). You can check the status, metadata, and GitHub integration status of each orchestra member.
 
