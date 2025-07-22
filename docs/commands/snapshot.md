@@ -1,4 +1,4 @@
-# mst snapshot
+# 🔸 snapshot
 
 Command to save and restore the current state of orchestra members (Git Worktrees) as snapshots. You can create backups before experimental changes or at important work milestones.
 

@@ -1,4 +1,4 @@
-# mst batch
+# 🔸 batch
 
 Command to batch create and manage multiple orchestra members (Git Worktrees). You can efficiently create multiple Worktrees through various methods including GitHub Issues, file input, and interactive mode.
 

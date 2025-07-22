@@ -1,4 +1,4 @@
-# mst claude
+# 🔸 claude
 
 Manage Claude Code instances for each orchestra member (worktree). This command allows you to start, stop, and monitor Claude Code processes across multiple worktrees.
 

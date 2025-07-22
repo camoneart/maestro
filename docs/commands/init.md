@@ -1,4 +1,4 @@
-# 🚀 init - Initialize Project
+# 🔸 init
 
 The `init` command helps you bootstrap your project with proper Maestro configuration. It automatically detects your project type and suggests optimal settings for seamless worktree management.
 

@@ -1,4 +1,4 @@
-# mst history
+# 🔸 history
 
 Command to manage Claude Code conversation history. You can save, search, and export development history for each orchestra member (Git Worktree).
 

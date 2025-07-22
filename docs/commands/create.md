@@ -1,4 +1,4 @@
-# mst create
+# 🔸 create
 
 Command to create orchestra members (Git Worktrees). Creates a new branch and worktree simultaneously, building an independent development environment.
 
