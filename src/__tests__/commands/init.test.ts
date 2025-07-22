@@ -40,9 +40,9 @@ describe('init command', () => {
 
   describe('--help', () => {
     it('should display help message', () => {
-      const result = execSync(`node "${CLI_PATH}" init --help`, { 
-        encoding: 'utf8', 
-        timeout: 30000 
+      const result = execSync(`node "${CLI_PATH}" init --help`, {
+        encoding: 'utf8',
+        timeout: 30000,
       })
       expect(result).toContain('プロジェクトにMaestro設定を初期化')
       expect(result).toContain('--minimal')
@@ -53,9 +53,9 @@ describe('init command', () => {
 
   describe('--minimal', () => {
     it('should create minimal .maestro.json', () => {
-      const result = execSync(`node "${CLI_PATH}" init --minimal`, { 
-        encoding: 'utf8', 
-        timeout: 30000 
+      const result = execSync(`node "${CLI_PATH}" init --minimal`, {
+        encoding: 'utf8',
+        timeout: 30000,
       })
 
       expect(result).toContain('Welcome to Maestro Setup!')

@@ -92,15 +92,15 @@ jobs:
           # Temporarily disabled while fixing tests
           echo "Skipped test check temporarily disabled"
 
+      - name: Build
+        run: pnpm run build
+
       - name: Run unit tests
         run: pnpm run test
 
       - name: Run tests with coverage
         if: matrix.os == 'ubuntu-latest' && matrix.node-version == '20'
         run: pnpm run test:coverage
-
-      - name: Build
-        run: pnpm run build
 
       - name: Run E2E tests
         run: pnpm run test:e2e
