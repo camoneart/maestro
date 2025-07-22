@@ -35,44 +35,55 @@ describe('GitWorktreeManager - coverage tests', () => {
 
   describe('createWorktree', () => {
     it('should create worktree with base branch', async () => {
-      const result = await gitManager.createWorktree('feature/test', 'main')
+      // モックでブランチの衝突を回避
+      mockGit.branchLocal.mockResolvedValue({ all: ['main'] })
+      mockGit.branch.mockResolvedValue({ all: ['remotes/origin/main'] })
+      
+      const result = await gitManager.createWorktree('feature/new-test', 'main')
 
       expect(mockGit.raw).toHaveBeenCalledWith([
         'worktree',
         'add',
         '-b',
-        'feature/test',
-        expect.stringContaining('feature/test'),
+        'feature/new-test',
+        expect.stringContaining('feature/new-test'),
         'main',
       ])
-      expect(result).toContain('feature/test')
+      expect(result).toContain('feature/new-test')
     })
 
     it('should create worktree with current branch as base', async () => {
-      await gitManager.createWorktree('feature/test')
+      // モックでブランチの衝突を回避
+      mockGit.branchLocal.mockResolvedValue({ all: ['main'] })
+      mockGit.branch.mockResolvedValue({ all: ['remotes/origin/main'] })
+      
+      await gitManager.createWorktree('feature/another-test')
 
       expect(mockGit.status).toHaveBeenCalled()
       expect(mockGit.raw).toHaveBeenCalledWith([
         'worktree',
         'add',
         '-b',
-        'feature/test',
-        expect.stringContaining('feature/test'),
+        'feature/another-test',
+        expect.stringContaining('feature/another-test'),
         'main',
       ])
     })
 
     it('should use main as fallback when current branch is null', async () => {
+      // モックでブランチの衝突を回避
+      mockGit.branchLocal.mockResolvedValue({ all: ['main'] })
+      mockGit.branch.mockResolvedValue({ all: ['remotes/origin/main'] })
       mockGit.status.mockResolvedValue({ current: null })
 
-      await gitManager.createWorktree('feature/test')
+      await gitManager.createWorktree('feature/fallback-test')
 
       expect(mockGit.raw).toHaveBeenCalledWith([
         'worktree',
         'add',
         '-b',
-        'feature/test',
-        expect.stringContaining('feature/test'),
+        'feature/fallback-test',
+        expect.stringContaining('feature/fallback-test'),
         'main',
       ])
     })
