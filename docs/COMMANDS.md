@@ -5,38 +5,38 @@ Detailed usage of all maestro (mst) commands.
 ## 📑 Table of Contents
 
 ### 🎯 Basic Commands
-- [init](#init) - Initialize project configuration
-- [create](#create) - Create new orchestra member (worktree)
-- [list](#list) - Display all orchestra members
-- [delete](#delete) - Delete orchestra members
-- [sync](#sync) - Sync files between members
-- [shell](#shell) - Enter member shell
+- [init](#-init) - Initialize project configuration
+- [create](#-create) - Create new orchestra member (worktree)
+- [list](#-list) - Display all orchestra members
+- [delete](#-delete) - Delete orchestra members
+- [sync](#-sync) - Sync files between members
+- [shell](#-shell) - Enter member shell
 
 ### 🔗 Integration Commands
-- [suggest](#suggest) - AI-powered suggestions
-- [github](#github) - GitHub integration features
-- [tmux](#tmux) - tmux session management
+- [suggest](#-suggest) - AI-powered suggestions
+- [github](#-github) - GitHub integration features
+- [tmux](#-tmux) - tmux session management
 
 ### 📊 Advanced Features
-- [dashboard](#dashboard) - Web UI dashboard
-- [health](#health) - Health status checking
-- [snapshot](#snapshot) - Work state snapshots
-- [watch](#watch) - File watching and auto-sync
+- [dashboard](#-dashboard) - Web UI dashboard
+- [health](#-health) - Health status checking
+- [snapshot](#-snapshot) - Work state snapshots
+- [watch](#-watch) - File watching and auto-sync
 
 ### 🛠️ Utility Commands
-- [config](#config) - Configuration management
-- [where](#where) - Check current location
-- [exec](#exec) - Execute commands in members
-- [batch](#batch) - Batch operations
-- [template](#template) - Template management
-- [mcp](#mcp) - MCP server management
-- [attach](#attach) - Attach to existing branch
-- [graph](#graph) - Display relationships
-- [history](#history) - Operation history
-- [issue](#issue) - GitHub issue integration
-- [review](#review) - PR review management
-- [claude](#claude) - Claude Code management
-- [completion](#completion) - Shell auto-completion
+- [config](#-config) - Configuration management
+- [where](#-where) - Check current location
+- [exec](#-exec) - Execute commands in members
+- [batch](#-batch) - Batch operations
+- [template](#-template) - Template management
+- [mcp](#-mcp) - MCP server management
+- [attach](#-attach) - Attach to existing branch
+- [graph](#-graph) - Display relationships
+- [history](#-history) - Operation history
+- [issue](#-issue) - GitHub issue integration
+- [review](#-review) - PR review management
+- [claude](#-claude) - Claude Code management
+- [completion](#-completion) - Shell auto-completion
 
 ---
 
