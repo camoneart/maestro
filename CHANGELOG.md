@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.6.2
+
+### Patch Changes
+
+- fix: improve error messages when copying optional files like .env
+
 ## 2.6.1
 
 ### Patch Changes
