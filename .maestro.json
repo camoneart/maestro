@@ -5,14 +5,13 @@
   },
   "development": {
     "autoSetup": true,
-    "syncFiles": [
-      ".env",
-      ".env.local"
-    ],
     "defaultEditor": "cursor"
   },
+  "postCreate": {
+    "copyFiles": [".env", ".env.local"],
+    "commands": ["pnpm install"]
+  },
   "hooks": {
-    "afterCreate": "npm install",
     "beforeDelete": "echo \"演奏者を削除します: $ORCHESTRA_MEMBER\""
   }
 }
