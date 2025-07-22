@@ -3,6 +3,15 @@ import { execSync } from 'child_process'
 import { existsSync, readFileSync, unlinkSync, writeFileSync } from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
+import {
+  detectProjectType,
+  createMinimalConfig,
+  createDefaultConfig,
+  createInteractiveConfig,
+  type ProjectType,
+  type PackageManager,
+} from '../../commands/init.js'
+import inquirer from 'inquirer'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const CLI_PATH = path.resolve(__dirname, '../../../dist/cli.js')
@@ -176,6 +185,273 @@ describe('init command', () => {
       const config = JSON.parse(readFileSync(configPath, 'utf8'))
 
       expect(config.postCreate.commands).toContain('go mod download')
+    })
+  })
+
+  // 関数の直接テスト（カバレッジ向上のため）
+  describe('Unit Tests', () => {
+    describe('createMinimalConfig', () => {
+      it('should create minimal configuration', () => {
+        const config = createMinimalConfig()
+
+        expect(config).toEqual({
+          worktrees: {
+            path: '.git/orchestra-members',
+          },
+          development: {
+            autoSetup: true,
+            defaultEditor: 'cursor',
+          },
+        })
+      })
+    })
+
+    describe('createDefaultConfig', () => {
+      it('should create default config with npm project', () => {
+        const projectType: ProjectType = {
+          name: 'React',
+          detected: true,
+          packageManager: 'npm',
+          setupCommands: ['npm install'],
+          syncFiles: ['.env', '.env.local'],
+        }
+
+        const config = createDefaultConfig(projectType)
+
+        expect(config.worktrees).toEqual({
+          path: '.git/orchestra-members',
+          branchPrefix: 'feature/',
+        })
+        expect(config.development).toEqual({
+          autoSetup: true,
+          defaultEditor: 'cursor',
+        })
+        expect(config.postCreate).toEqual({
+          copyFiles: ['.env', '.env.local'],
+          commands: ['npm install'],
+        })
+      })
+
+      it('should override package manager when explicitly specified', () => {
+        const projectType: ProjectType = {
+          name: 'React',
+          detected: true,
+          packageManager: 'npm',
+          setupCommands: ['npm install'],
+          syncFiles: ['.env'],
+        }
+
+        const config = createDefaultConfig(projectType, 'yarn')
+
+        expect((config.postCreate as any).commands).toEqual(['yarn install'])
+      })
+
+      it('should handle projects without package manager', () => {
+        const projectType: ProjectType = {
+          name: 'Python',
+          detected: true,
+          packageManager: 'none',
+          setupCommands: ['pip install -r requirements.txt'],
+          syncFiles: ['.env'],
+        }
+
+        const config = createDefaultConfig(projectType)
+
+        expect((config.postCreate as any).commands).toEqual(['pip install -r requirements.txt'])
+      })
+    })
+
+    describe('detectProjectType', () => {
+      const originalCwd = process.cwd()
+
+      beforeEach(() => {
+        process.chdir(testDir)
+      })
+
+      afterEach(() => {
+        process.chdir(originalCwd)
+      })
+
+      it('should detect React project', () => {
+        writeFileSync(
+          path.join(testDir, 'package.json'),
+          JSON.stringify({
+            name: 'test-project',
+            dependencies: { react: '^18.0.0' },
+          })
+        )
+        writeFileSync(path.join(testDir, 'package-lock.json'), '{}')
+
+        const result = detectProjectType()
+
+        expect(result.name).toBe('React')
+        expect(result.detected).toBe(true)
+        expect(result.packageManager).toBe('npm')
+        expect(result.setupCommands).toEqual(['npm install'])
+        expect(result.syncFiles).toEqual(['.env', '.env.local'])
+      })
+
+      it('should detect Next.js project', () => {
+        writeFileSync(
+          path.join(testDir, 'package.json'),
+          JSON.stringify({
+            name: 'test-project',
+            dependencies: { next: '^14.0.0' },
+          })
+        )
+        writeFileSync(path.join(testDir, 'pnpm-lock.yaml'), 'lockfileVersion: 6.0')
+
+        const result = detectProjectType()
+
+        expect(result.name).toBe('Next.js')
+        expect(result.packageManager).toBe('pnpm')
+        expect(result.syncFiles).toEqual(['.env', '.env.local', '.env.development.local'])
+      })
+
+      it('should detect Vue.js project', () => {
+        writeFileSync(
+          path.join(testDir, 'package.json'),
+          JSON.stringify({
+            name: 'test-project',
+            dependencies: { vue: '^3.0.0' },
+          })
+        )
+        writeFileSync(path.join(testDir, 'yarn.lock'), '')
+
+        const result = detectProjectType()
+
+        expect(result.name).toBe('Vue.js')
+        expect(result.packageManager).toBe('yarn')
+      })
+
+      it('should detect Python project', () => {
+        writeFileSync(path.join(testDir, 'requirements.txt'), 'flask==2.0.0')
+
+        const result = detectProjectType()
+
+        expect(result.name).toBe('Python')
+        expect(result.detected).toBe(true)
+        expect(result.packageManager).toBe('none')
+        expect(result.setupCommands).toEqual(['pip install -r requirements.txt'])
+      })
+
+      it('should detect Go project', () => {
+        writeFileSync(path.join(testDir, 'go.mod'), 'module test\n\ngo 1.19')
+
+        const result = detectProjectType()
+
+        expect(result.name).toBe('Go')
+        expect(result.detected).toBe(true)
+        expect(result.setupCommands).toEqual(['go mod download'])
+      })
+
+      it('should default to generic project', () => {
+        // No project files
+
+        const result = detectProjectType()
+
+        expect(result.name).toBe('Generic')
+        expect(result.detected).toBe(false)
+        expect(result.packageManager).toBe('none')
+        expect(result.setupCommands).toEqual([])
+        expect(result.syncFiles).toEqual(['.env'])
+      })
+
+      it('should detect Node.js project without framework', () => {
+        writeFileSync(
+          path.join(testDir, 'package.json'),
+          JSON.stringify({
+            name: 'test-project',
+            dependencies: { express: '^4.0.0' },
+          })
+        )
+
+        const result = detectProjectType()
+
+        expect(result.name).toBe('Node.js')
+        expect(result.detected).toBe(true)
+        expect(result.packageManager).toBe('npm')
+      })
+
+      it('should detect pyproject.toml Python project', () => {
+        writeFileSync(path.join(testDir, 'pyproject.toml'), '[project]\nname = "test"')
+
+        const result = detectProjectType()
+
+        expect(result.name).toBe('Python')
+        expect(result.detected).toBe(true)
+      })
+    })
+
+    describe('createInteractiveConfig', () => {
+      it('should create config based on user inputs', async () => {
+        const projectType: ProjectType = {
+          name: 'React',
+          detected: true,
+          packageManager: 'npm',
+          setupCommands: ['npm install'],
+          syncFiles: ['.env', '.env.local'],
+        }
+
+        // Mock inquirer prompt
+        vi.spyOn(inquirer, 'prompt').mockResolvedValueOnce({
+          packageManager: 'pnpm',
+          worktreePath: '.git/orchestra-members',
+          branchPrefix: 'feature/',
+          defaultEditor: 'cursor',
+          autoSetup: true,
+          copyEnvFiles: true,
+          syncFiles: ['.env', '.env.local'],
+        })
+
+        const config = await createInteractiveConfig(projectType)
+
+        expect(config.worktrees).toEqual({
+          path: '.git/orchestra-members',
+          branchPrefix: 'feature/',
+        })
+        expect(config.development).toEqual({
+          autoSetup: true,
+          defaultEditor: 'cursor',
+        })
+        expect(config.postCreate).toEqual({
+          copyFiles: ['.env', '.env.local'],
+          commands: ['pnpm install'],
+        })
+      })
+
+      it('should handle case without auto setup', async () => {
+        const projectType: ProjectType = {
+          name: 'React',
+          detected: true,
+          packageManager: 'npm',
+          setupCommands: ['npm install'],
+          syncFiles: ['.env'],
+        }
+
+        vi.spyOn(inquirer, 'prompt').mockResolvedValueOnce({
+          packageManager: 'none',
+          worktreePath: '../worktrees',
+          branchPrefix: 'task/',
+          defaultEditor: 'vim',
+          autoSetup: false,
+        })
+
+        const config = await createInteractiveConfig(projectType)
+
+        expect(config.worktrees).toEqual({
+          path: '../worktrees',
+          branchPrefix: 'task/',
+        })
+        expect(config.development).toEqual({
+          autoSetup: false,
+          defaultEditor: 'vim',
+        })
+        expect(config.postCreate).toEqual({
+          copyFiles: [],
+          commands: [],
+        })
+      })
     })
   })
 })

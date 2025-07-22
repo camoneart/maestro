@@ -4,16 +4,16 @@ import inquirer from 'inquirer'
 import { existsSync, readFileSync, writeFileSync } from 'fs'
 import path from 'path'
 import ora from 'ora'
-type PackageManager = 'pnpm' | 'npm' | 'yarn' | 'none'
+export type PackageManager = 'pnpm' | 'npm' | 'yarn' | 'none'
 
-interface InitOptions {
+export interface InitOptions {
   minimal?: boolean
   packageManager?: PackageManager
   template?: string
   yes?: boolean
 }
 
-interface ProjectType {
+export interface ProjectType {
   name: string
   detected: boolean
   packageManager?: PackageManager
@@ -101,7 +101,7 @@ export const initCommand = new Command('init')
     }
   })
 
-function detectProjectType(): ProjectType {
+export function detectProjectType(): ProjectType {
   const cwd = process.cwd()
 
   // package.jsonの存在確認とパッケージマネージャー検出
@@ -187,7 +187,7 @@ function detectProjectType(): ProjectType {
   }
 }
 
-function createMinimalConfig() {
+export function createMinimalConfig() {
   return {
     worktrees: {
       path: '.git/orchestra-members',
@@ -199,7 +199,7 @@ function createMinimalConfig() {
   }
 }
 
-function createDefaultConfig(
+export function createDefaultConfig(
   projectType: ProjectType,
   packageManager?: PackageManager
 ): Record<string, unknown> {
@@ -238,7 +238,9 @@ function createDefaultConfig(
   }
 }
 
-async function createInteractiveConfig(projectType: ProjectType): Promise<Record<string, unknown>> {
+export async function createInteractiveConfig(
+  projectType: ProjectType
+): Promise<Record<string, unknown>> {
   const answers = await inquirer.prompt([
     {
       type: 'list',
