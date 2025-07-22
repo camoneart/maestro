@@ -96,10 +96,14 @@ locked reason`
   describe('createWorktree', () => {
     it('should create a new worktree', async () => {
       const branchName = 'feature-test'
-      const expectedPath = path.resolve('.git/orchestrations/' + branchName)
+      const mockRepoRoot = '/test/repo'
+      const expectedPath = path.resolve(mockRepoRoot, '.git/orchestrations/' + branchName)
 
       // git.raw()をモック
-      ;(gitManager as any).git.raw = vi.fn().mockResolvedValue('')
+      ;(gitManager as any).git.raw = vi
+        .fn()
+        .mockResolvedValueOnce(mockRepoRoot + '\n') // getRepositoryRoot()
+        .mockResolvedValueOnce('') // worktree add
       ;(gitManager as any).git.status = vi.fn().mockResolvedValue({ current: 'main' })
 
       const result = await gitManager.createWorktree(branchName)
@@ -110,7 +114,7 @@ locked reason`
         'add',
         '-b',
         branchName,
-        '.git/orchestrations/feature-test',
+        path.join(mockRepoRoot, '.git/orchestrations/feature-test'),
         'main',
       ])
     })
@@ -118,10 +122,14 @@ locked reason`
     it('should use base branch if provided', async () => {
       const branchName = 'feature-test'
       const baseBranch = 'develop'
-      const expectedPath = path.resolve('.git/orchestrations/' + branchName)
+      const mockRepoRoot = '/test/repo'
+      const expectedPath = path.resolve(mockRepoRoot, '.git/orchestrations/' + branchName)
 
       // git.raw()をモック
-      ;(gitManager as any).git.raw = vi.fn().mockResolvedValue('')
+      ;(gitManager as any).git.raw = vi
+        .fn()
+        .mockResolvedValueOnce(mockRepoRoot + '\n') // getRepositoryRoot()
+        .mockResolvedValueOnce('') // worktree add
 
       const result = await gitManager.createWorktree(branchName, baseBranch)
 
@@ -131,16 +139,20 @@ locked reason`
         'add',
         '-b',
         branchName,
-        '.git/orchestrations/feature-test',
+        path.join(mockRepoRoot, '.git/orchestrations/feature-test'),
         baseBranch,
       ])
     })
 
     it('should throw error if worktree creation fails', async () => {
       const branchName = 'existing-branch'
+      const mockRepoRoot = '/test/repo'
 
       // git.raw()をモックしてエラーを発生させる
-      ;(gitManager as any).git.raw = vi.fn().mockRejectedValue(new Error('branch already exists'))
+      ;(gitManager as any).git.raw = vi
+        .fn()
+        .mockResolvedValueOnce(mockRepoRoot + '\n') // getRepositoryRoot()
+        .mockRejectedValueOnce(new Error('branch already exists')) // worktree add fails
       ;(gitManager as any).git.status = vi.fn().mockResolvedValue({ current: 'main' })
 
       await expect(gitManager.createWorktree(branchName)).rejects.toThrow('branch already exists')
