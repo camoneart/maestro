@@ -100,4 +100,27 @@ describe('gitignore utility', () => {
       expect(result).toBe(false)
     })
   })
+
+  describe('addToGitignore with comment', () => {
+    it('should add entry with comment to .gitignore', async () => {
+      writeFileSync(gitignorePath, 'node_modules/\n', 'utf-8')
+
+      await addToGitignore(testDir, '.maestro-metadata.json', 'maestro metadata')
+
+      const content = readFileSync(gitignorePath, 'utf-8')
+      expect(content).toContain('# maestro metadata')
+      expect(content).toContain('.maestro-metadata.json')
+      expect(content.indexOf('# maestro metadata')).toBeLessThan(content.indexOf('.maestro-metadata.json'))
+    })
+
+    it('should not add comment for existing entry', async () => {
+      writeFileSync(gitignorePath, 'node_modules/\n.maestro-metadata.json\n', 'utf-8')
+
+      await addToGitignore(testDir, '.maestro-metadata.json', 'maestro metadata')
+
+      const content = readFileSync(gitignorePath, 'utf-8')
+      expect(content).not.toContain('# maestro metadata')
+      expect(content.split('.maestro-metadata.json')).toHaveLength(2) // Only one occurrence
+    })
+  })
 })
