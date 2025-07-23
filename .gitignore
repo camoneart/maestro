@@ -35,7 +35,6 @@ Thumbs.db
 
 # IDE
 .idea/
-.vscode/
 *.swp
 *.swo
 *~
@@ -69,8 +68,9 @@ worktrees/
 .scj-config.json
 .scj/
 
-# cc conversations
+# Claude Code
 .claude/export-conversations/
+.claude/settings.local.json
 
 # docs
 _docs/
