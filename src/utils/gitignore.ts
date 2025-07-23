@@ -1,7 +1,11 @@
 import { existsSync, readFileSync, writeFileSync, appendFileSync } from 'fs'
 import path from 'path'
 
-export async function addToGitignore(projectPath: string, entry: string, comment?: string): Promise<void> {
+export async function addToGitignore(
+  projectPath: string,
+  entry: string,
+  comment?: string
+): Promise<void> {
   const gitignorePath = path.join(projectPath, '.gitignore')
 
   let gitignoreContent = ''
@@ -17,11 +21,13 @@ export async function addToGitignore(projectPath: string, entry: string, comment
     let entryToAdd: string
     if (comment) {
       const commentLine = `# ${comment}`
-      entryToAdd = gitignoreContent && !gitignoreContent.endsWith('\n') 
-        ? `\n\n${commentLine}\n${entry}\n` 
-        : `\n${commentLine}\n${entry}\n`
+      entryToAdd =
+        gitignoreContent && !gitignoreContent.endsWith('\n')
+          ? `\n\n${commentLine}\n${entry}\n`
+          : `\n${commentLine}\n${entry}\n`
     } else {
-      entryToAdd = gitignoreContent && !gitignoreContent.endsWith('\n') ? `\n${entry}\n` : `${entry}\n`
+      entryToAdd =
+        gitignoreContent && !gitignoreContent.endsWith('\n') ? `\n${entry}\n` : `${entry}\n`
     }
 
     if (existsSync(gitignorePath)) {

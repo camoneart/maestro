@@ -110,7 +110,9 @@ describe('gitignore utility', () => {
       const content = readFileSync(gitignorePath, 'utf-8')
       expect(content).toContain('# maestro metadata')
       expect(content).toContain('.maestro-metadata.json')
-      expect(content.indexOf('# maestro metadata')).toBeLessThan(content.indexOf('.maestro-metadata.json'))
+      expect(content.indexOf('# maestro metadata')).toBeLessThan(
+        content.indexOf('.maestro-metadata.json')
+      )
     })
 
     it('should not add comment for existing entry', async () => {
