@@ -1,5 +1,15 @@
 # Changelog
 
+## 2.6.3
+
+### Patch Changes
+
+- fix: improve create command package manager detection and gitignore handling
+  - Automatically detect project package manager (pnpm/npm/yarn) instead of hardcoding npm
+  - Auto-add .maestro-metadata.json to .gitignore in worktrees
+  - Add comprehensive documentation for 13 missing commands
+  - Improve CI Prettier configuration and Claude Code settings
+
 ## 2.6.2
 
 ### Patch Changes
