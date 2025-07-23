@@ -7,6 +7,7 @@ Detailed usage of all maestro (mst) commands.
 ### 🎯 Basic Commands
 - [init](#-init) - Initialize project configuration
 - [create](#-create) - Create new orchestra member (worktree)
+- [push](#-push) - Push current branch and create PR
 - [list](#-list) - Display all orchestra members
 - [delete](#-delete) - Delete orchestra members
 - [sync](#-sync) - Sync files between members
@@ -107,7 +108,6 @@ mst create <branch-name> [options]
 | `--tmux-v` | Create in vertical tmux pane split |
 | `--claude` | Create CLAUDE.md for Claude Code |
 | `--template <name>` | Use template |
-| `--draft-pr` | Auto-create Draft PR |
 | `--copy-file <file>` | Copy files from current worktree |
 | `--yes`, `-y` | Skip confirmations |
 
@@ -128,6 +128,53 @@ mst create issue-456 --tmux-v --setup     # Vertical split with setup
 
 # Copy environment files to new worktree
 mst create feature/api --copy-file .env --copy-file .env.local
+```
+
+### 🔸 push
+
+Push current branch to remote and optionally create Pull Request.
+
+```bash
+mst push [options]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--pr` | Create regular Pull Request |
+| `--draft-pr` | Create Draft Pull Request |
+| `--base <branch>` | Specify base branch (default: main) |
+| `--title <title>` | Specify PR title |
+| `--body <body>` | Specify PR body |
+| `--no-edit` | Skip PR template editing |
+| `--force` | Force push (uses --force-with-lease) |
+| `--all` | Push all orchestra members |
+| `--issue <number>` | Link to issue number |
+
+#### Examples
+```bash
+# Basic push
+mst push
+
+# Push and create regular PR
+mst push --pr
+
+# Push and create Draft PR
+mst push --draft-pr
+
+# Push with custom PR title and body
+mst push --pr --title "Add user authentication" --body "Implements login and signup features"
+
+# Push to specific base branch
+mst push --pr --base develop
+
+# Force push (safe with --force-with-lease)
+mst push --force
+
+# Push all orchestra members with Draft PRs
+mst push --all --draft-pr
+
+# Skip PR template editing
+mst push --pr --no-edit
 ```
 
 ### 🔸 list
@@ -911,16 +958,37 @@ If an error occurs, use the `--verbose` option for detailed information.
 
 For detailed usage of each command, see the following documentation:
 
+### 🎯 Basic Commands
 - [Init Command Details](./commands/init.md)
 - [Create Command Details](./commands/create.md)
+- [Push Command Details](./commands/push.md)
+- [List Display Details](./commands/list.md)
 - [Delete Command Details](./commands/delete.md)
 - [Sync Command Details](./commands/sync.md)
+- [Shell Command Details](./commands/shell.md)
+
+### 🔗 Integration Commands
+- [Suggest Details](./commands/suggest.md)
 - [GitHub Integration Details](./commands/github.md)
+- [Tmux Integration Details](./commands/tmux.md)
+
+### 📊 Advanced Features
+- [Dashboard Details](./commands/dashboard.md)
 - [Health Check Details](./commands/health.md)
 - [Snapshot Details](./commands/snapshot.md)
-- [Batch Processing Details](./commands/batch.md)
-- [History Management Details](./commands/history.md)
-- [List Display Details](./commands/list.md)
-- [Claude Code Management Details](./commands/claude.md)
-- [Shell Command Details](./commands/shell.md)
+- [Watch Details](./commands/watch.md)
+
+### 🛠️ Utility Commands
+- [Config Management Details](./commands/config.md)
+- [Where Command Details](./commands/where.md)
 - [Exec Command Details](./commands/exec.md)
+- [Batch Processing Details](./commands/batch.md)
+- [Template Management Details](./commands/template.md)
+- [MCP Server Details](./commands/mcp.md)
+- [Attach Command Details](./commands/attach.md)
+- [Graph Display Details](./commands/graph.md)
+- [History Management Details](./commands/history.md)
+- [Issue Integration Details](./commands/issue.md)
+- [Review Management Details](./commands/review.md)
+- [Claude Code Management Details](./commands/claude.md)
+- [Completion Setup Details](./commands/completion.md)

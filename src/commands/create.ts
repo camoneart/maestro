@@ -591,11 +591,6 @@ export async function executePostCreationTasks(
     tasks.push(handleClaudeMarkdown(worktreePath, config))
   }
 
-  // Draft PR作成
-  if (options.draftPr) {
-    tasks.push(createDraftPR(branchName, worktreePath))
-  }
-
   // 並行実行
   await Promise.allSettled(tasks)
 
@@ -819,7 +814,6 @@ export const createCommand = new Command('create')
   .option('-c, --claude', 'Claude Codeを自動起動')
   .option('--template <name>', 'テンプレートを使用')
   .option('-y, --yes', '確認をスキップ')
-  .option('--draft-pr', 'Draft PRを自動作成')
   .option('--shell', '作成後にシェルに入る')
   .option('--exec <command>', '作成後にコマンドを実行')
   .option(
