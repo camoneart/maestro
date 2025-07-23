@@ -29,9 +29,12 @@ vi.mock('chalk', () => ({
   },
 }))
 
-const mockExeca = vi.mocked(execa)
+const mockExeca = vi.mocked(execa) as any
 const mockGitWorktreeManager = vi.mocked(GitWorktreeManager)
-const mockInquirer = vi.mocked(inquirer)
+const mockInquirer = vi.mocked(inquirer) as any
+
+// Helper function to create mock result
+const createMockResult = (stdout: string, stderr = ''): any => ({ stdout, stderr })
 
 describe('push command simple tests', () => {
   beforeEach(() => {
@@ -208,17 +211,16 @@ describe('push command simple tests', () => {
     beforeEach(() => {
       // Setup default mocks
       mockGitWorktreeManager.prototype.isGitRepository = vi.fn().mockResolvedValue(true)
-      mockExeca.mockResolvedValue({ stdout: 'feature/test', stderr: '' })
+      mockExeca.mockResolvedValue(createMockResult('feature/test'))
     })
 
     it('should handle git repository check', async () => {
       mockGitWorktreeManager.prototype.isGitRepository = vi.fn().mockResolvedValue(false)
-      
+
       let errorMessage = ''
-      vi.spyOn(console, 'error').mockImplementation((msg) => {
+      vi.spyOn(console, 'error').mockImplementation(msg => {
         errorMessage = msg
       })
-      vi.spyOn(process, 'exitCode', 'set').mockImplementation(() => {})
 
       await pushCommand.parseAsync(['node', 'test'])
 
@@ -227,10 +229,10 @@ describe('push command simple tests', () => {
 
     it('should handle branch retrieval', async () => {
       mockExeca
-        .mockResolvedValueOnce({ stdout: 'feature/test', stderr: '' }) // branch --show-current
-        .mockResolvedValueOnce({ stdout: 'origin', stderr: '' }) // remote get-url origin
+        .mockResolvedValueOnce(createMockResult('feature/test')) // branch --show-current
+        .mockResolvedValueOnce(createMockResult('origin')) // remote get-url origin
         .mockRejectedValueOnce(new Error('no remote branch')) // rev-parse origin/feature/test
-        .mockResolvedValueOnce({ stdout: '', stderr: '' }) // push -u origin feature/test
+        .mockResolvedValueOnce(createMockResult('')) // push -u origin feature/test
 
       await pushCommand.parseAsync(['node', 'test'])
 
@@ -240,11 +242,11 @@ describe('push command simple tests', () => {
     })
 
     it('should handle main branch warning', async () => {
-      mockExeca.mockResolvedValueOnce({ stdout: 'main', stderr: '' })
-      mockInquirer.prompt = vi.fn().mockResolvedValue({ confirmPush: false })
-      
+      mockExeca.mockResolvedValueOnce(createMockResult('main'))
+      mockInquirer.prompt = vi.fn().mockResolvedValue({ confirmPush: false }) as any
+
       let consoleOutput = ''
-      vi.spyOn(console, 'log').mockImplementation((msg) => {
+      vi.spyOn(console, 'log').mockImplementation(msg => {
         consoleOutput = msg
       })
 
@@ -263,12 +265,12 @@ describe('push command simple tests', () => {
 
     it('should handle PR creation', async () => {
       mockExeca
-        .mockResolvedValueOnce({ stdout: 'feature/test', stderr: '' }) // branch --show-current
-        .mockResolvedValueOnce({ stdout: 'origin', stderr: '' }) // remote get-url origin
-        .mockResolvedValueOnce({ stdout: '', stderr: '' }) // gh auth status
+        .mockResolvedValueOnce(createMockResult('feature/test')) // branch --show-current
+        .mockResolvedValueOnce(createMockResult('origin')) // remote get-url origin
+        .mockResolvedValueOnce(createMockResult('')) // gh auth status
         .mockRejectedValueOnce(new Error('no remote branch')) // rev-parse origin/feature/test
-        .mockResolvedValueOnce({ stdout: '', stderr: '' }) // push -u origin feature/test
-        .mockResolvedValueOnce({ stdout: '', stderr: '' }) // gh pr create
+        .mockResolvedValueOnce(createMockResult('')) // push -u origin feature/test
+        .mockResolvedValueOnce(createMockResult('')) // gh pr create
 
       await pushCommand.parseAsync(['node', 'test', '--pr'])
 
@@ -278,12 +280,12 @@ describe('push command simple tests', () => {
 
     it('should handle draft PR creation', async () => {
       mockExeca
-        .mockResolvedValueOnce({ stdout: 'feature/test', stderr: '' }) // branch --show-current
-        .mockResolvedValueOnce({ stdout: 'origin', stderr: '' }) // remote get-url origin
-        .mockResolvedValueOnce({ stdout: '', stderr: '' }) // gh auth status
+        .mockResolvedValueOnce(createMockResult('feature/test')) // branch --show-current
+        .mockResolvedValueOnce(createMockResult('origin')) // remote get-url origin
+        .mockResolvedValueOnce(createMockResult('')) // gh auth status
         .mockRejectedValueOnce(new Error('no remote branch')) // rev-parse origin/feature/test
-        .mockResolvedValueOnce({ stdout: '', stderr: '' }) // push -u origin feature/test
-        .mockResolvedValueOnce({ stdout: '', stderr: '' }) // gh pr create --draft
+        .mockResolvedValueOnce(createMockResult('')) // push -u origin feature/test
+        .mockResolvedValueOnce(createMockResult('')) // gh pr create --draft
 
       await pushCommand.parseAsync(['node', 'test', '--draft-pr'])
 
@@ -300,10 +302,10 @@ describe('push command simple tests', () => {
 
     it('should handle force push', async () => {
       mockExeca
-        .mockResolvedValueOnce({ stdout: 'feature/test', stderr: '' }) // branch --show-current
-        .mockResolvedValueOnce({ stdout: 'origin', stderr: '' }) // remote get-url origin
-        .mockResolvedValueOnce({ stdout: '', stderr: '' }) // rev-parse origin/feature/test (exists)
-        .mockResolvedValueOnce({ stdout: '', stderr: '' }) // push --force-with-lease
+        .mockResolvedValueOnce(createMockResult('feature/test')) // branch --show-current
+        .mockResolvedValueOnce(createMockResult('origin')) // remote get-url origin
+        .mockResolvedValueOnce(createMockResult('')) // rev-parse origin/feature/test (exists)
+        .mockResolvedValueOnce(createMockResult('')) // push --force-with-lease
 
       await pushCommand.parseAsync(['node', 'test', '--force'])
 
@@ -322,12 +324,12 @@ describe('push command simple tests', () => {
       vi.spyOn(process, 'chdir').mockImplementation(() => {})
 
       mockExeca
-        .mockResolvedValue({ stdout: 'origin', stderr: '' }) // remote get-url origin calls
+        .mockResolvedValue(createMockResult('origin')) // remote get-url origin calls
         .mockRejectedValue(new Error('no remote branch')) // rev-parse calls
-        .mockResolvedValue({ stdout: '', stderr: '' }) // push calls
+        .mockResolvedValue(createMockResult('')) // push calls
 
       let consoleOutput = ''
-      vi.spyOn(console, 'log').mockImplementation((msg) => {
+      vi.spyOn(console, 'log').mockImplementation(msg => {
         consoleOutput += msg + '\n'
       })
 
@@ -339,12 +341,11 @@ describe('push command simple tests', () => {
 
     it('should handle errors gracefully', async () => {
       mockExeca.mockRejectedValue(new Error('Git command failed'))
-      
+
       let errorMessage = ''
-      vi.spyOn(console, 'error').mockImplementation((msg) => {
+      vi.spyOn(console, 'error').mockImplementation(msg => {
         errorMessage = msg
       })
-      vi.spyOn(process, 'exitCode', 'set').mockImplementation(() => {})
 
       await pushCommand.parseAsync(['node', 'test'])
 
