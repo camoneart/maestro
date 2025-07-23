@@ -33,6 +33,7 @@ import { dashboardCommand } from './commands/dashboard.js'
 import { snapshotCommand } from './commands/snapshot.js'
 import { claudeCommand } from './commands/claude.js'
 import { initCommand } from './commands/init.js'
+import { pushCommand } from './commands/push.js'
 
 const program = new Command()
 
@@ -69,6 +70,7 @@ program.addCommand(healthCommand)
 program.addCommand(dashboardCommand)
 program.addCommand(snapshotCommand)
 program.addCommand(claudeCommand)
+program.addCommand(pushCommand)
 
 // エラーハンドリング
 program.exitOverride()

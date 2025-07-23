@@ -28,8 +28,6 @@ mst create issue-123     # Created as issue-123
 # Create with tmux session (auto-start Claude Code)
 mst create feature/new-feature --tmux --claude
 
-# Auto-create Draft PR
-mst create feature/new-feature --draft-pr
 
 # Create with specified base branch
 mst create feature/new-feature --base develop
@@ -38,7 +36,7 @@ mst create feature/new-feature --base develop
 mst create feature/new-feature --template feature
 
 # Combine all options
-mst create feature/new-feature --base main --open --setup --tmux --claude --draft-pr
+mst create feature/new-feature --base main --open --setup --tmux --claude
 ```
 
 ## Options
@@ -50,7 +48,6 @@ mst create feature/new-feature --base main --open --setup --tmux --claude --draf
 | `--setup`            | `-s`  | Run environment setup (npm install, etc.)                     | `false` |
 | `--tmux`             | `-t`  | Create tmux session/window                                    | `false` |
 | `--claude`           | `-c`  | Auto-start Claude Code                                        | `false` |
-| `--draft-pr`         | `-d`  | Auto-create GitHub Draft PR                                   | `false` |
 | `--template <name>`  |       | Use template                                                  | none    |
 | `--copy-file <file>` |       | Copy files from current worktree (including gitignored files) | none    |
 | `--shell`            |       | Enter shell after creation                                    | `false` |
@@ -98,20 +95,6 @@ Available templates:
 - `experiment`: For experimental development (tmux integration)
 - `docs`: For documentation creation
 
-## Draft PR Feature
-
-Using the `--draft-pr` option creates a GitHub Draft Pull Request simultaneously with orchestra member creation:
-
-```bash
-mst create feature/new-ui --draft-pr
-```
-
-Created PR content:
-
-- Title: `[WIP] {branch-name}`
-- Body: Indicates work in progress and Claude Code integration explanation
-- Status: Draft
-- Base branch: Specified base branch (default: main)
 
 ## Claude Code Integration
 

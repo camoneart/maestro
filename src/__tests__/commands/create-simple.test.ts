@@ -22,7 +22,6 @@ describe('create command simple tests', () => {
     expect(optionNames).toContain('--setup')
     expect(optionNames).toContain('--tmux')
     expect(optionNames).toContain('--claude')
-    expect(optionNames).toContain('--draft-pr')
   })
 
   it('should have correct argument configuration', () => {
