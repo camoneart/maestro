@@ -8,6 +8,7 @@ import { execa } from 'execa'
 import path from 'path'
 import fs from 'fs/promises'
 import pLimit from 'p-limit'
+import { detectPackageManager } from '../utils/packageManager.js'
 
 interface BatchCreateOptions {
   base?: string
@@ -198,9 +199,10 @@ async function createWorktreesInParallel(
         // 環境セットアップ（必要な場合）
         if (options.setup || (options.setup === undefined && config.development?.autoSetup)) {
           try {
-            await execa('npm', ['install'], { cwd: worktreePath })
+            const packageManager = detectPackageManager(worktreePath)
+            await execa(packageManager, ['install'], { cwd: worktreePath })
           } catch {
-            // npm installが失敗してもworktree作成は成功とする
+            // package manager installが失敗してもworktree作成は成功とする
           }
 
           // 同期ファイルのコピー

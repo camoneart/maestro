@@ -4,7 +4,7 @@ import inquirer from 'inquirer'
 import { existsSync, readFileSync, writeFileSync } from 'fs'
 import path from 'path'
 import ora from 'ora'
-export type PackageManager = 'pnpm' | 'npm' | 'yarn' | 'none'
+import { detectPackageManager, type PackageManager } from '../utils/packageManager.js'
 
 export interface InitOptions {
   minimal?: boolean
@@ -108,12 +108,7 @@ export function detectProjectType(): ProjectType {
   if (existsSync(path.join(cwd, 'package.json'))) {
     const packageJson = JSON.parse(readFileSync(path.join(cwd, 'package.json'), 'utf-8'))
 
-    let packageManager: PackageManager = 'npm'
-    if (existsSync(path.join(cwd, 'pnpm-lock.yaml'))) {
-      packageManager = 'pnpm'
-    } else if (existsSync(path.join(cwd, 'yarn.lock'))) {
-      packageManager = 'yarn'
-    }
+    const packageManager = detectPackageManager(cwd)
 
     // プロジェクトタイプの判定
     const dependencies = { ...packageJson.dependencies, ...packageJson.devDependencies }

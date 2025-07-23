@@ -8,6 +8,7 @@ import { execa } from 'execa'
 import path from 'path'
 import fs from 'fs/promises'
 import { startTmuxShell, isInTmuxSession, TmuxPaneType } from '../utils/tmux.js'
+import { detectPackageManager } from '../utils/packageManager.js'
 
 // 型定義
 interface GithubOptions {
@@ -160,13 +161,14 @@ async function setupEnvironment(
 ): Promise<void> {
   if (!shouldSetup) return
 
+  const packageManager = detectPackageManager(worktreePath)
   const setupSpinner = ora('環境をセットアップ中...').start()
 
   try {
-    await execa('npm', ['install'], { cwd: worktreePath })
-    setupSpinner.succeed('npm install 完了')
+    await execa(packageManager, ['install'], { cwd: worktreePath })
+    setupSpinner.succeed(`${packageManager} install 完了`)
   } catch {
-    setupSpinner.warn('npm install をスキップ')
+    setupSpinner.warn(`${packageManager} install をスキップ`)
   }
 
   // 同期ファイルのコピー

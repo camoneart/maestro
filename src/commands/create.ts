@@ -11,6 +11,7 @@ import path from 'path'
 import fs from 'fs/promises'
 import { spawn } from 'child_process'
 import { setupTmuxStatusLine } from '../utils/tmux.js'
+import { detectPackageManager } from '../utils/packageManager.js'
 
 // GitHubラベル型定義
 interface GithubLabel {
@@ -642,7 +643,7 @@ export async function setupEnvironment(worktreePath: string, config: Config): Pr
 
   try {
     // 依存関係のインストール
-    const packageManager = 'npm' // Default to npm for now
+    const packageManager = detectPackageManager(worktreePath)
     await execa(packageManager, ['install'], { cwd: worktreePath })
 
     // 設定ファイルの同期
