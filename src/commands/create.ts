@@ -11,6 +11,8 @@ import path from 'path'
 import fs from 'fs/promises'
 import { spawn } from 'child_process'
 import { setupTmuxStatusLine } from '../utils/tmux.js'
+import { detectPackageManager } from '../utils/packageManager.js'
+import { addToGitignore } from '../utils/gitignore.js'
 
 // GitHubラベル型定義
 interface GithubLabel {
@@ -141,6 +143,11 @@ export async function saveWorktreeMetadata(
 
   try {
     await fs.writeFile(metadataPath, JSON.stringify(metadataContent, null, 2))
+
+    // プロジェクトルートの.gitignoreに.maestro-metadata.jsonを追加
+    const git = new GitWorktreeManager()
+    const projectRoot = await git.getRepositoryRoot()
+    await addToGitignore(projectRoot, '.maestro-metadata.json')
   } catch {
     // メタデータの保存に失敗しても処理は続行
   }
@@ -642,7 +649,7 @@ export async function setupEnvironment(worktreePath: string, config: Config): Pr
 
   try {
     // 依存関係のインストール
-    const packageManager = 'npm' // Default to npm for now
+    const packageManager = detectPackageManager(worktreePath)
     await execa(packageManager, ['install'], { cwd: worktreePath })
 
     // 設定ファイルの同期

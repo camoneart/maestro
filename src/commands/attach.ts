@@ -5,6 +5,7 @@ import inquirer from 'inquirer'
 import { GitWorktreeManager } from '../core/git.js'
 import { execa } from 'execa'
 import { spawn } from 'child_process'
+import { detectPackageManager } from '../utils/packageManager.js'
 
 // 利用可能なブランチを取得
 async function getAvailableBranches(
@@ -67,13 +68,14 @@ function validateBranchExists(branchName: string, availableBranches: string[]): 
 
 // 環境セットアップを実行
 async function setupEnvironment(worktreePath: string): Promise<void> {
+  const packageManager = detectPackageManager(worktreePath)
   const setupSpinner = ora('環境をセットアップ中...').start()
 
   try {
-    await execa('npm', ['install'], { cwd: worktreePath })
-    setupSpinner.succeed('npm install 完了')
+    await execa(packageManager, ['install'], { cwd: worktreePath })
+    setupSpinner.succeed(`${packageManager} install 完了`)
   } catch {
-    setupSpinner.warn('npm install をスキップ')
+    setupSpinner.warn(`${packageManager} install をスキップ`)
   }
 }
 
