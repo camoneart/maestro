@@ -7,11 +7,11 @@ export function detectPackageManager(projectPath: string): PackageManager {
   if (existsSync(path.join(projectPath, 'pnpm-lock.yaml'))) {
     return 'pnpm'
   }
-  
+
   if (existsSync(path.join(projectPath, 'yarn.lock'))) {
     return 'yarn'
   }
-  
+
   if (existsSync(path.join(projectPath, 'package-lock.json'))) {
     return 'npm'
   }

@@ -4,7 +4,7 @@ import { detectPackageManager } from '../../utils/packageManager.js'
 
 vi.mock('fs', () => ({
   existsSync: vi.fn(),
-  readFileSync: vi.fn()
+  readFileSync: vi.fn(),
 }))
 
 const mockExistsSync = vi.mocked(existsSync)
@@ -57,9 +57,11 @@ describe('detectPackageManager', () => {
       return path.includes('package.json')
     })
 
-    mockReadFileSync.mockReturnValue(JSON.stringify({
-      packageManager: 'pnpm@8.15.0'
-    }))
+    mockReadFileSync.mockReturnValue(
+      JSON.stringify({
+        packageManager: 'pnpm@8.15.0',
+      })
+    )
 
     const result = detectPackageManager('/test/project')
     expect(result).toBe('pnpm')
@@ -94,9 +96,11 @@ describe('detectPackageManager', () => {
       return path.includes('package.json')
     })
 
-    mockReadFileSync.mockReturnValue(JSON.stringify({
-      packageManager: 'bun@1.0.0'
-    }))
+    mockReadFileSync.mockReturnValue(
+      JSON.stringify({
+        packageManager: 'bun@1.0.0',
+      })
+    )
 
     const result = detectPackageManager('/test/project')
     expect(result).toBe('npm')
@@ -107,9 +111,11 @@ describe('detectPackageManager', () => {
       return path.includes('pnpm-lock.yaml') || path.includes('package.json')
     })
 
-    mockReadFileSync.mockReturnValue(JSON.stringify({
-      packageManager: 'yarn@3.0.0'
-    }))
+    mockReadFileSync.mockReturnValue(
+      JSON.stringify({
+        packageManager: 'yarn@3.0.0',
+      })
+    )
 
     const result = detectPackageManager('/test/project')
     expect(result).toBe('pnpm')
