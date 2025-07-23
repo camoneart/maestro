@@ -144,10 +144,8 @@ export async function saveWorktreeMetadata(
   try {
     await fs.writeFile(metadataPath, JSON.stringify(metadataContent, null, 2))
 
-    // プロジェクトルートの.gitignoreに.maestro-metadata.jsonを追加
-    const git = new GitWorktreeManager()
-    const projectRoot = await git.getRepositoryRoot()
-    await addToGitignore(projectRoot, '.maestro-metadata.json')
+    // worktreeの.gitignoreに.maestro-metadata.jsonを追加
+    await addToGitignore(worktreePath, '.maestro-metadata.json', 'maestro metadata')
   } catch {
     // メタデータの保存に失敗しても処理は続行
   }
