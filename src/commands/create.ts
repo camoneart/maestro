@@ -593,7 +593,6 @@ export async function executePostCreationTasks(
     tasks.push(handleClaudeMarkdown(worktreePath, config))
   }
 
-
   // 並行実行
   await Promise.allSettled(tasks)
 
