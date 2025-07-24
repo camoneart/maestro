@@ -609,7 +609,7 @@ mst attach --fetch --setup
 
 ### 🔸 graph
 
-Display orchestra member relationships.
+Display orchestra member relationships with automatic circular dependency detection.
 
 ```bash
 mst graph [options]
@@ -623,6 +623,12 @@ mst graph [options]
 | `--show-dates` | | Show last update dates |
 | `--depth <number>` | `-d` | Display depth (default: 3) |
 
+#### Features
+- **Circular Reference Detection**: Automatically detects and resolves circular dependencies between branches
+- **Branch Relationship Analysis**: Shows parent-child relationships and commit divergence
+- **Multiple Output Formats**: Supports Mermaid diagrams and Graphviz DOT format
+- **Health Assessment**: Identifies outdated branches and potential issues
+
 #### Examples
 ```bash
 # Display graph (default: mermaid format)
@@ -630,6 +636,11 @@ mst graph
 
 # Output as DOT format
 mst graph --format dot --output graph.dot
+
+# When circular dependencies are detected, warnings are automatically shown:
+# ⚠️  循環参照が検出されました:
+#   - feature-a → feature-b → feature-c → feature-a
+# 循環参照のあるブランチは main から派生するよう調整されました
 ```
 
 ### 🔸 history
