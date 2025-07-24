@@ -35,7 +35,7 @@ export const mcpCommand = new Command('mcp')
     )
 
     // MCPサーバーを起動
-    const serverPath = path.join(__dirname, '..', '..', 'dist', 'mcp', 'server.js')
+    const serverPath = path.join(__dirname, 'mcp', 'server.js')
     const serverProcess = spawn('node', [serverPath], {
       stdio: 'inherit',
       env: {
