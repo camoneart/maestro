@@ -12,6 +12,8 @@ export const ConfigSchema = z.object({
       path: z.string().optional(),
       // ブランチ名のプレフィックス
       branchPrefix: z.string().optional(),
+      // ディレクトリ名のプレフィックス（デフォルト: 空文字列）
+      directoryPrefix: z.string().optional(),
     })
     .optional(),
 
@@ -105,6 +107,7 @@ export type Config = z.infer<typeof ConfigSchema>
 const DEFAULT_CONFIG: Config = {
   worktrees: {
     path: '../maestro-{branch}',
+    directoryPrefix: '',
   },
   development: {
     autoSetup: true,
@@ -204,6 +207,7 @@ export class ConfigManager {
       worktrees: {
         path: '../maestro-{branch}',
         branchPrefix: 'feature/',
+        directoryPrefix: 'maestro-',
       },
       development: {
         autoSetup: true,

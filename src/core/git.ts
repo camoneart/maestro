@@ -1,21 +1,29 @@
 import simpleGit, { SimpleGit } from 'simple-git'
 import { Worktree } from '../types/index.js'
+import { ConfigManager } from './config.js'
 import path from 'path'
 
 export class GitWorktreeManager {
   private git: SimpleGit
+  private configManager: ConfigManager
 
   constructor(baseDir?: string) {
     this.git = simpleGit(baseDir || process.cwd())
+    this.configManager = new ConfigManager()
   }
 
   async createWorktree(branchName: string, baseBranch?: string): Promise<string> {
     // ブランチ名の衝突をチェック
     await this.checkBranchNameCollision(branchName)
 
+    // 設定を読み込み
+    await this.configManager.loadProjectConfig()
+    const worktreeConfig = this.configManager.get('worktrees')
+    const directoryPrefix = worktreeConfig?.directoryPrefix || ''
+
     // リポジトリルートを取得して絶対パスを生成
     const repoRoot = await this.getRepositoryRoot()
-    const worktreePath = path.join(repoRoot, '..', `maestro-${branchName}`)
+    const worktreePath = path.join(repoRoot, '..', `${directoryPrefix}${branchName}`)
 
     // ベースブランチが指定されていない場合は現在のブランチを使用
     if (!baseBranch) {
@@ -30,11 +38,16 @@ export class GitWorktreeManager {
   }
 
   async attachWorktree(existingBranch: string): Promise<string> {
+    // 設定を読み込み
+    await this.configManager.loadProjectConfig()
+    const worktreeConfig = this.configManager.get('worktrees')
+    const directoryPrefix = worktreeConfig?.directoryPrefix || ''
+
     // リポジトリルートを取得して絶対パスを生成
     const repoRoot = await this.getRepositoryRoot()
     // ワークツリーのパスを生成（ブランチ名からスラッシュを置換）
     const safeBranchName = existingBranch.replace(/\//g, '-')
-    const worktreePath = path.join(repoRoot, '..', `maestro-${safeBranchName}`)
+    const worktreePath = path.join(repoRoot, '..', `${directoryPrefix}${safeBranchName}`)
 
     // 既存のブランチでワークツリーを作成
     await this.git.raw(['worktree', 'add', worktreePath, existingBranch])
