@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { GitWorktreeManager } from '../../core/git'
+import { ConfigManager } from '../../core/config'
 import { execa } from 'execa'
 import path from 'path'
 import fs from 'fs/promises'
@@ -7,6 +8,7 @@ import fs from 'fs/promises'
 // モック設定
 vi.mock('execa')
 vi.mock('fs/promises')
+vi.mock('../../core/config')
 vi.mock('simple-git', () => ({
   default: vi.fn(() => ({
     checkIsRepo: vi.fn().mockResolvedValue(true),
@@ -21,8 +23,17 @@ vi.mock('simple-git', () => ({
 
 describe('GitWorktreeManager', () => {
   let gitManager: GitWorktreeManager
+  let mockConfigManager: ConfigManager
 
   beforeEach(() => {
+    // ConfigManagerのモックを設定
+    mockConfigManager = {
+      loadProjectConfig: vi.fn().mockResolvedValue(undefined),
+      get: vi.fn().mockReturnValue({ directoryPrefix: '' }),
+    } as any
+
+    vi.mocked(ConfigManager).mockImplementation(() => mockConfigManager)
+
     // GitWorktreeManagerが使用するメソッドをモック
     vi.mocked(execa).mockResolvedValue({
       stdout: '',
@@ -94,10 +105,10 @@ locked reason`
   })
 
   describe('createWorktree', () => {
-    it('should create a new worktree', async () => {
+    it('should create a new worktree with default empty prefix', async () => {
       const branchName = 'feature-test'
       const mockRepoRoot = '/test/repo'
-      const expectedPath = path.resolve(mockRepoRoot, '..', `maestro-${branchName}`)
+      const expectedPath = path.resolve(mockRepoRoot, '..', branchName)
 
       // checkBranchNameCollisionをモック（衝突なし）
       vi.spyOn(gitManager, 'checkBranchNameCollision').mockResolvedValueOnce()
@@ -111,6 +122,42 @@ locked reason`
       const result = await gitManager.createWorktree(branchName)
 
       expect(result).toBe(expectedPath)
+      expect(mockConfigManager.loadProjectConfig).toHaveBeenCalled()
+      expect(mockConfigManager.get).toHaveBeenCalledWith('worktrees')
+      expect(gitManager.checkBranchNameCollision).toHaveBeenCalledWith(branchName)
+      expect((gitManager as any).git.raw).toHaveBeenCalledWith([
+        'worktree',
+        'add',
+        '-b',
+        branchName,
+        path.join(mockRepoRoot, '..', 'feature-test'),
+        'main',
+      ])
+    })
+
+    it('should create a new worktree with custom prefix', async () => {
+      const branchName = 'feature-test'
+      const mockRepoRoot = '/test/repo'
+      const customPrefix = 'maestro-'
+      const expectedPath = path.resolve(mockRepoRoot, '..', `${customPrefix}${branchName}`)
+
+      // カスタムプレフィックスを返すConfigManagerをモック
+      mockConfigManager.get = vi.fn().mockReturnValue({ directoryPrefix: customPrefix })
+
+      // checkBranchNameCollisionをモック（衝突なし）
+      vi.spyOn(gitManager, 'checkBranchNameCollision').mockResolvedValueOnce()
+      // git.raw()をモック
+      ;(gitManager as any).git.raw = vi
+        .fn()
+        .mockResolvedValueOnce(mockRepoRoot + '\n') // getRepositoryRoot()
+        .mockResolvedValueOnce('') // worktree add
+      ;(gitManager as any).git.status = vi.fn().mockResolvedValue({ current: 'main' })
+
+      const result = await gitManager.createWorktree(branchName)
+
+      expect(result).toBe(expectedPath)
+      expect(mockConfigManager.loadProjectConfig).toHaveBeenCalled()
+      expect(mockConfigManager.get).toHaveBeenCalledWith('worktrees')
       expect(gitManager.checkBranchNameCollision).toHaveBeenCalledWith(branchName)
       expect((gitManager as any).git.raw).toHaveBeenCalledWith([
         'worktree',
@@ -126,7 +173,7 @@ locked reason`
       const branchName = 'feature-test'
       const baseBranch = 'develop'
       const mockRepoRoot = '/test/repo'
-      const expectedPath = path.resolve(mockRepoRoot, '..', `maestro-${branchName}`)
+      const expectedPath = path.resolve(mockRepoRoot, '..', branchName)
 
       // checkBranchNameCollisionをモック（衝突なし）
       vi.spyOn(gitManager, 'checkBranchNameCollision').mockResolvedValueOnce()
@@ -139,20 +186,21 @@ locked reason`
       const result = await gitManager.createWorktree(branchName, baseBranch)
 
       expect(result).toBe(expectedPath)
+      expect(mockConfigManager.loadProjectConfig).toHaveBeenCalled()
+      expect(mockConfigManager.get).toHaveBeenCalledWith('worktrees')
       expect(gitManager.checkBranchNameCollision).toHaveBeenCalledWith(branchName)
       expect((gitManager as any).git.raw).toHaveBeenCalledWith([
         'worktree',
         'add',
         '-b',
         branchName,
-        path.join(mockRepoRoot, '..', 'maestro-feature-test'),
+        path.join(mockRepoRoot, '..', 'feature-test'),
         baseBranch,
       ])
     })
 
     it('should throw error if branch collision detected', async () => {
       const branchName = 'existing-branch'
-      const mockRepoRoot = '/test/repo'
 
       // checkBranchNameCollisionをモック（衝突あり）
       vi.spyOn(gitManager, 'checkBranchNameCollision').mockRejectedValueOnce(
@@ -184,9 +232,38 @@ locked reason`
   })
 
   describe('attachWorktree', () => {
-    it('should attach to an existing branch', async () => {
+    it('should attach to an existing branch with default empty prefix', async () => {
       const branchName = 'existing-feature'
       const mockRepoRoot = '/test/repo'
+
+      // getRepositoryRoot()をモック
+      ;(gitManager as any).git.raw = vi
+        .fn()
+        .mockResolvedValueOnce(mockRepoRoot + '\n') // getRepositoryRoot()
+        .mockResolvedValueOnce('') // worktree add
+
+      const expectedPath = path.resolve(mockRepoRoot, '..', 'existing-feature')
+
+      const result = await gitManager.attachWorktree(branchName)
+
+      expect(result).toBe(expectedPath)
+      expect(mockConfigManager.loadProjectConfig).toHaveBeenCalled()
+      expect(mockConfigManager.get).toHaveBeenCalledWith('worktrees')
+      expect((gitManager as any).git.raw).toHaveBeenNthCalledWith(2, [
+        'worktree',
+        'add',
+        path.join(mockRepoRoot, '..', 'existing-feature'),
+        branchName,
+      ])
+    })
+
+    it('should attach to an existing branch with custom prefix', async () => {
+      const branchName = 'existing-feature'
+      const mockRepoRoot = '/test/repo'
+      const customPrefix = 'maestro-'
+
+      // カスタムプレフィックスを返すConfigManagerをモック
+      mockConfigManager.get = vi.fn().mockReturnValue({ directoryPrefix: customPrefix })
 
       // getRepositoryRoot()をモック
       ;(gitManager as any).git.raw = vi
@@ -199,6 +276,8 @@ locked reason`
       const result = await gitManager.attachWorktree(branchName)
 
       expect(result).toBe(expectedPath)
+      expect(mockConfigManager.loadProjectConfig).toHaveBeenCalled()
+      expect(mockConfigManager.get).toHaveBeenCalledWith('worktrees')
       expect((gitManager as any).git.raw).toHaveBeenNthCalledWith(2, [
         'worktree',
         'add',
