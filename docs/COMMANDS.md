@@ -543,8 +543,10 @@ mst e [branch-name] <command> [options]  # alias
 # Execute in specific orchestra member
 mst exec feature/test npm test
 
-# Execute in all orchestra members
+# Execute in all orchestra members (various formats)
 mst exec --all npm run lint
+mst exec -a npm run lint
+# Note: When using -a/--all flag, the branch name is optional
 
 # Select with fzf
 mst exec --fzf npm run dev

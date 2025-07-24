@@ -151,15 +151,44 @@ export const execCommand = new Command('exec')
           process.exit(0)
         }
 
+        // --allオプションの処理
+        let actualBranchName = branchName
+        let actualCommandParts = commandParts
+        let isAllMode = options.all
+
+        if (options.all) {
+          isAllMode = true
+          actualBranchName = undefined
+
+          // Issue #72対応: branchNameが実際のブランチ名でない場合はコマンドの一部として扱う
+          const isValidBranch =
+            branchName &&
+            orchestraMembers.some(wt => {
+              const branch = wt.branch?.replace('refs/heads/', '')
+              return branch === branchName || wt.branch === branchName
+            })
+
+          if (isValidBranch) {
+            // branchNameが実際のブランチの場合: 従来の動作（ブランチ名を無視）
+            actualCommandParts = commandParts
+          } else if (branchName) {
+            // branchNameが実際のブランチでない場合: コマンドの一部として扱う
+            actualCommandParts = [branchName, ...commandParts]
+          } else {
+            // branchNameがundefinedの場合
+            actualCommandParts = commandParts
+          }
+        }
+
         // コマンドを結合
-        const command = commandParts.join(' ')
-        if (!command && !options.all) {
+        const command = actualCommandParts.join(' ')
+        if (!command && !isAllMode) {
           console.error(chalk.red('エラー: 実行するコマンドを指定してください'))
           process.exit(1)
         }
 
         // --allオプションの処理
-        if (options?.all) {
+        if (isAllMode) {
           await executeOnAllMembers(orchestraMembers, command, options.silent)
           return
         }
@@ -184,7 +213,7 @@ export const execCommand = new Command('exec')
         }
 
         // ブランチ名が指定されていない場合またはfzfオプションが指定された場合
-        if (!branchName || options?.fzf) {
+        if (!actualBranchName || options?.fzf) {
           if (options?.fzf) {
             // fzfの利用可能性をチェック
             if (!(await isFzfAvailable())) {
@@ -202,7 +231,7 @@ export const execCommand = new Command('exec')
               process.exit(0)
             }
 
-            branchName = selectedBranch
+            actualBranchName = selectedBranch
           } else {
             console.error(
               chalk.red('エラー: ブランチ名を指定するか --fzf オプションを使用してください')
@@ -213,12 +242,12 @@ export const execCommand = new Command('exec')
 
         const targetWorktree = orchestraMembers.find(wt => {
           const branch = wt.branch?.replace('refs/heads/', '')
-          return branch === branchName || wt.branch === branchName
+          return branch === actualBranchName || wt.branch === actualBranchName
         })
 
         if (!targetWorktree) {
-          console.error(chalk.red(`エラー: 演奏者 '${branchName}' が見つかりません`))
-          suggestSimilarBranches(orchestraMembers, branchName)
+          console.error(chalk.red(`エラー: 演奏者 '${actualBranchName}' が見つかりません`))
+          suggestSimilarBranches(orchestraMembers, actualBranchName)
           process.exit(1)
         }
 
