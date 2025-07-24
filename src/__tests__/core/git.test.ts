@@ -187,13 +187,13 @@ locked reason`
     it('should attach to an existing branch', async () => {
       const branchName = 'existing-feature'
       const mockRepoRoot = '/test/repo'
-      
+
       // getRepositoryRoot()をモック
       ;(gitManager as any).git.raw = vi
         .fn()
         .mockResolvedValueOnce(mockRepoRoot + '\n') // getRepositoryRoot()
         .mockResolvedValueOnce('') // worktree add
-      
+
       const expectedPath = path.resolve(mockRepoRoot, '..', 'maestro-existing-feature')
 
       const result = await gitManager.attachWorktree(branchName)
