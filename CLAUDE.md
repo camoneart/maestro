@@ -145,6 +145,8 @@ Follow semantic commit prefixes for this project:
 
 **IMPORTANT**: Always stage files individually with `git add <specific-files>` instead of `git add -A`. Create meaningful commit messages that explain the "why" of changes.
 
+**Post-Implementation Requirements**: After completing any issue fixes or feature additions, always run `pnpm format` to ensure code formatting consistency and avoid CI/Lint errors.
+
 ## Integration Points
 
 ### Claude Code MCP
