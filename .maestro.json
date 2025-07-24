@@ -1,7 +1,7 @@
 {
   "worktrees": {
     "path": ".git/orchestra-members",
-    "branchPrefix": "feature/"
+    "branchPrefix": ""
   },
   "development": {
     "autoSetup": true,
