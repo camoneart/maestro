@@ -236,6 +236,53 @@ describe('graph command', () => {
       expect(console.log).toHaveBeenCalledWith(expect.stringContaining('feature-b'))
     })
 
+    it('循環参照を検出して警告を表示する', async () => {
+      // 循環参照を作成: feature-a -> feature-b -> feature-c -> feature-a
+      mockGitManager.listWorktrees.mockResolvedValue([
+        createMockWorktree({ path: '/repo/.', branch: 'refs/heads/main' }),
+        createMockWorktree({ path: '/repo/worktree-1', branch: 'refs/heads/feature-a' }),
+        createMockWorktree({ path: '/repo/worktree-2', branch: 'refs/heads/feature-b' }),
+        createMockWorktree({ path: '/repo/worktree-3', branch: 'refs/heads/feature-c' }),
+      ])
+
+      // 循環参照のシナリオを設定
+      vi.mocked(execa).mockImplementation(async (cmd: any, args: any) => {
+        if (cmd === 'git' && args[0] === 'rev-list' && args[1] === '--count') {
+          // feature-a <- feature-b <- feature-c <- feature-a (循環)
+          if (args[2] === 'feature-a..feature-b') return createMockExecaResponse('1')
+          if (args[2] === 'feature-b..feature-c') return createMockExecaResponse('1')
+          if (args[2] === 'feature-c..feature-a') return createMockExecaResponse('1')
+          // その他
+          if (args[2].includes('main..')) return createMockExecaResponse('3')
+          if (args[2].includes('..main')) return createMockExecaResponse('2')
+          return createMockExecaResponse('0')
+        }
+        if (args[0] === 'log') {
+          return createMockExecaResponse('abc1234|2025-01-01 12:00:00 +0900|feat: add new feature')
+        }
+        return createMockExecaResponse('abc123')
+      })
+
+      await graphCommand.parseAsync(['node', 'test'])
+
+      // 循環参照の警告が表示されることを確認
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringContaining('⚠️  循環参照が検出されました:')
+      )
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringContaining('循環参照のあるブランチは main から派生するよう調整されました')
+      )
+    })
+
+    it('循環参照がない場合は警告を表示しない', async () => {
+      await graphCommand.parseAsync(['node', 'test'])
+
+      // 循環参照の警告が表示されないことを確認
+      expect(console.log).not.toHaveBeenCalledWith(
+        expect.stringContaining('⚠️  循環参照が検出されました:')
+      )
+    })
+
     it('ブランチ分析エラーを無視する', async () => {
       // 一部のgitコマンドを失敗させる
       let callCount = 0
