@@ -100,10 +100,87 @@ describe('exec command', () => {
         stderr: '',
       })
 
-      await execCommand.parseAsync(['node', 'exec', 'dummy', 'echo', 'hello', '--all'])
+      await execCommand.parseAsync(['node', 'exec', 'feature-1', 'echo', 'hello', '--all'])
 
       expect(consoleLogSpy).toHaveBeenCalledWith(
         chalk.bold(`\n🎼 すべての演奏者でコマンドを実行: ${chalk.cyan('echo hello')}\n`)
+      )
+      expect(execa).toHaveBeenCalledTimes(2)
+      expect(consoleLogSpy).toHaveBeenCalledWith(chalk.green('▶ feature-1'))
+      expect(consoleLogSpy).toHaveBeenCalledWith(chalk.green('▶ feature-2'))
+    })
+
+    // Issue #72: Fix for -a flag being parsed as positional argument
+    it('should handle -a flag before positional arguments (Issue #72)', async () => {
+      const mockWorktrees: ParsedWorktreeInfo[] = [
+        {
+          path: '/path/to/worktree/feature-1',
+          branch: 'refs/heads/feature-1',
+          commit: 'abc123',
+          isCurrentDirectory: false,
+          locked: false,
+          prunable: false,
+          detached: false,
+        },
+        {
+          path: '/path/to/worktree/feature-2',
+          branch: 'refs/heads/feature-2',
+          commit: 'def456',
+          isCurrentDirectory: false,
+          locked: false,
+          prunable: false,
+          detached: false,
+        },
+      ]
+      mockGitManager.listWorktrees.mockResolvedValue(mockWorktrees)
+      ;(execa as Mock).mockResolvedValue({
+        stdout: 'Command output',
+        stderr: '',
+      })
+
+      // This should work: mst exec -a "echo test"
+      await execCommand.parseAsync(['node', 'exec', '-a', 'echo', 'test'])
+
+      expect(consoleLogSpy).toHaveBeenCalledWith(
+        chalk.bold(`\n🎼 すべての演奏者でコマンドを実行: ${chalk.cyan('echo test')}\n`)
+      )
+      expect(execa).toHaveBeenCalledTimes(2)
+      expect(consoleLogSpy).toHaveBeenCalledWith(chalk.green('▶ feature-1'))
+      expect(consoleLogSpy).toHaveBeenCalledWith(chalk.green('▶ feature-2'))
+    })
+
+    it('should handle --all flag before positional arguments (Issue #72)', async () => {
+      const mockWorktrees: ParsedWorktreeInfo[] = [
+        {
+          path: '/path/to/worktree/feature-1',
+          branch: 'refs/heads/feature-1',
+          commit: 'abc123',
+          isCurrentDirectory: false,
+          locked: false,
+          prunable: false,
+          detached: false,
+        },
+        {
+          path: '/path/to/worktree/feature-2',
+          branch: 'refs/heads/feature-2',
+          commit: 'def456',
+          isCurrentDirectory: false,
+          locked: false,
+          prunable: false,
+          detached: false,
+        },
+      ]
+      mockGitManager.listWorktrees.mockResolvedValue(mockWorktrees)
+      ;(execa as Mock).mockResolvedValue({
+        stdout: 'Command output',
+        stderr: '',
+      })
+
+      // This should also work: mst exec --all "echo test"
+      await execCommand.parseAsync(['node', 'exec', '--all', 'echo', 'test'])
+
+      expect(consoleLogSpy).toHaveBeenCalledWith(
+        chalk.bold(`\n🎼 すべての演奏者でコマンドを実行: ${chalk.cyan('echo test')}\n`)
       )
       expect(execa).toHaveBeenCalledTimes(2)
       expect(consoleLogSpy).toHaveBeenCalledWith(chalk.green('▶ feature-1'))
@@ -268,7 +345,7 @@ describe('exec command', () => {
         stderr: '',
       })
 
-      await execCommand.parseAsync(['node', 'exec', 'dummy', 'test-command', '--all'])
+      await execCommand.parseAsync(['node', 'exec', 'feature-1', 'test-command', '--all'])
 
       expect(execa).toHaveBeenCalledTimes(2)
       expect(consoleErrorSpy).toHaveBeenCalledWith(chalk.red('  エラー (exit code: 1)'))
@@ -304,7 +381,7 @@ describe('exec command', () => {
         stderr: '',
       })
 
-      await execCommand.parseAsync(['node', 'exec', 'dummy', 'echo', 'hello', '--all'])
+      await execCommand.parseAsync(['node', 'exec', 'feature-1', 'echo', 'hello', '--all'])
 
       expect(execa).toHaveBeenCalledTimes(1)
       expect(execa).toHaveBeenCalledWith(

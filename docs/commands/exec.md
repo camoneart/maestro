@@ -44,14 +44,22 @@ mst exec hotfix/urgent git status
 Run the same command across all worktrees:
 
 ```bash
-# Install dependencies in all
+# Install dependencies in all (various formats)
 mst exec --all npm install
+mst exec -a npm install
 
 # Run linting in all
 mst exec --all npm run lint
+mst exec -a npm run lint
 
 # Check git status of all
 mst exec --all git status --short
+mst exec -a git status --short
+
+# Note: When using -a/--all flag, the branch name argument is optional.
+# Both of these work:
+mst exec dummy npm test --all  # 'dummy' is ignored
+mst exec -a npm test           # More concise
 ```
 
 ### Interactive Selection with fzf
@@ -100,6 +108,7 @@ When executing commands, these environment variables are automatically set:
    
    # Run tests in all branches
    mst exec --all npm test
+   mst exec -a npm test
    ```
 
 2. **Building Projects**
@@ -109,6 +118,7 @@ When executing commands, these environment variables are automatically set:
    
    # Build all features
    mst exec --all npm run build
+   mst exec -a npm run build
    ```
 
 3. **Git Operations**
@@ -118,6 +128,7 @@ When executing commands, these environment variables are automatically set:
    
    # Pull latest changes in all
    mst exec --all git pull
+   mst exec -a git pull
    ```
 
 4. **Development Servers**
