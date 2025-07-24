@@ -1,6 +1,5 @@
 {
   "worktrees": {
-    "path": ".git/orchestra-members",
     "branchPrefix": ""
   },
   "development": {
