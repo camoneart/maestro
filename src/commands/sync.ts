@@ -23,6 +23,8 @@ interface SyncOptions {
   interactive?: boolean
   preset?: string
   concurrency?: number
+  filter?: string
+  pattern?: string
 }
 
 interface SyncResult {
@@ -115,22 +117,60 @@ async function selectWithFzf(orchestraMembers: Worktree[]): Promise<Worktree[]> 
   })
 }
 
+// worktreeをフィルタリング
+function filterWorktrees(orchestraMembers: Worktree[], options: SyncOptions): Worktree[] {
+  let filteredWorktrees = orchestraMembers
+
+  // --filter オプション（キーワードフィルタ）
+  if (options.filter) {
+    const keyword = options.filter.toLowerCase()
+    filteredWorktrees = filteredWorktrees.filter(wt => {
+      const branch =
+        wt.branch?.replace('refs/heads/', '')?.toLowerCase() || wt.branch?.toLowerCase()
+      const path = wt.path.toLowerCase()
+      return branch?.includes(keyword) || path.includes(keyword)
+    })
+  }
+
+  // --pattern オプション（ワイルドカードパターン）
+  if (options.pattern) {
+    const pattern = options.pattern
+      .replace(/[.+?^${}()|[\]\\]/g, '\\$&') // 特殊文字をエスケープ
+      .replace(/\*/g, '.*') // * を .* に置換
+    const regex = new RegExp(`^(refs/heads/)?${pattern}$`)
+
+    filteredWorktrees = filteredWorktrees.filter(wt => {
+      const branch = wt.branch || ''
+      return regex.test(branch) || regex.test(branch.replace('refs/heads/', ''))
+    })
+  }
+
+  return filteredWorktrees
+}
+
 // 同期対象を選択
 async function selectTargetWorktrees(
   orchestraMembers: Worktree[],
   branchName?: string,
   options: SyncOptions = {}
 ): Promise<Worktree[]> {
+  // まずフィルタリングを適用
+  const filteredWorktrees = filterWorktrees(orchestraMembers, options)
+
+  if (filteredWorktrees.length === 0) {
+    throw new Error('フィルター条件に一致する演奏者が見つかりません')
+  }
+
   if (options.all) {
-    return orchestraMembers
+    return filteredWorktrees
   }
 
   if (options.fzf && !branchName) {
-    return selectWithFzf(orchestraMembers)
+    return selectWithFzf(filteredWorktrees)
   }
 
   if (branchName) {
-    const target = orchestraMembers.find(wt => {
+    const target = filteredWorktrees.find(wt => {
       const branch = wt.branch?.replace('refs/heads/', '')
       return branch === branchName || wt.branch === branchName
     })
@@ -148,7 +188,7 @@ async function selectTargetWorktrees(
       type: 'checkbox',
       name: 'selectedBranches',
       message: '同期する演奏者を選択してください:',
-      choices: orchestraMembers.map(wt => {
+      choices: filteredWorktrees.map(wt => {
         const branchName = wt.branch?.replace('refs/heads/', '') || wt.branch
         return {
           name: `${chalk.cyan(branchName)} ${chalk.gray(wt.path)}`,
@@ -346,6 +386,11 @@ export const syncCommand = new Command('sync')
   .option('--rebase', 'マージの代わりにrebaseを使用')
   .option('--dry-run', '実行内容のみ表示（実際の同期は行わない）')
   .option('--push', 'merge/rebase後にgit pushを実施')
+  .option('--filter <keyword>', 'ブランチ名またはパスでworktreeをフィルタ')
+  .option(
+    '--pattern <pattern>',
+    'ワイルドカードパターンでworktreeをフィルタ (例: feature/*, bug-fix-*)'
+  )
   .option('-f, --files', '環境変数・設定ファイルを同期')
   .option('-i, --interactive', 'インタラクティブモードで同期するファイルを選択')
   .option('-p, --preset <name>', '同期プリセットを使用（env, config, all）')

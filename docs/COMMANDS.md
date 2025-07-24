@@ -244,29 +244,46 @@ mst delete --fzf
 
 ### 🔸 sync
 
-Sync files between orchestra members.
+Sync changes from main branch to orchestra members.
 
 ```bash
-mst sync [options]
+mst sync [branch-name] [options]
 ```
 
 | Option | Short | Description |
 |--------|-------|-------------|
-| `--files` | | Copy files to target worktrees |
+| `--all` | `-a` | Sync all orchestra members |
+| `--main <branch>` | `-m` | Specify main branch (default: main or master) |
+| `--fzf` | | Select with fzf |
+| `--rebase` | | Use rebase instead of merge |
 | `--dry-run` | | Preview only, don't sync |
-| `--auto` | | Auto sync mode |
+| `--push` | | Push after merge/rebase |
+| `--filter <keyword>` | | Filter worktrees by branch name or path |
+| `--pattern <pattern>` | | Filter worktrees by wildcard pattern |
+| `--files` | `-f` | Copy environment/config files |
+| `--interactive` | `-i` | Interactive file selection |
+| `--preset <name>` | `-p` | Use sync preset (env, config, all) |
 | `--concurrency <number>` | `-c` | Number of parallel executions (default: 5) |
 
 #### Examples
 ```bash
-# Basic sync
-mst sync
+# Sync specific branch
+mst sync feature/auth
 
-# Copy files to target worktrees
-mst sync --files
+# Sync all branches
+mst sync --all
 
-# Dry run mode
-mst sync --dry-run
+# Filter by keyword
+mst sync --filter feature --all
+
+# Filter by pattern
+mst sync --pattern "feature/*" --all
+
+# Sync with rebase
+mst sync --rebase --all
+
+# Copy environment files
+mst sync --files --all
 ```
 
 ### 🔸 shell
