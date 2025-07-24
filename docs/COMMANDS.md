@@ -586,18 +586,15 @@ mst mcp <command> [options]
 
 | Subcommand | Description |
 |------------|-------------|
-| `start` | Start MCP server |
-| `stop` | Stop MCP server |
-| `status` | Check server status |
-| `restart` | Restart server |
+| `serve` | Start MCP server for Claude Code/Cursor integration |
 
 #### Examples
 ```bash
-# Start server
-mst mcp start
+# Start MCP server
+mst mcp serve
 
-# Check status
-mst mcp status
+# Display usage information
+mst mcp
 ```
 
 ### 🔸 attach
