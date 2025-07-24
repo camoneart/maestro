@@ -319,7 +319,7 @@ mst gh [type] [number] [options]  # alias
 #### Arguments
 | Argument | Description |
 |----------|-------------|
-| `type` | Type (checkout, pr, issue, comment) |
+| `type` | Type (checkout, pr, issue, comment, list) |
 | `number` | PR/Issue number |
 
 #### Options
@@ -336,6 +336,10 @@ mst gh [type] [number] [options]  # alias
 
 #### Examples
 ```bash
+# List all GitHub PRs and Issues
+mst github list
+mst gh list
+
 # Create from PR #123
 mst github checkout 123
 mst gh 123  # shorthand

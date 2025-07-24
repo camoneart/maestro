@@ -402,6 +402,109 @@ describe('github command', () => {
     })
   })
 
+  describe('list type', () => {
+    it('should list PRs and Issues', async () => {
+      const mockPRs = [
+        { number: 123, title: 'Feature A', author: { login: 'user1' }, isDraft: false },
+        { number: 124, title: 'Feature B', author: { login: 'user2' }, isDraft: true },
+      ]
+      const mockIssues = [
+        { number: 456, title: 'Bug Report', author: { login: 'user3' } },
+        { number: 789, title: 'Enhancement', author: { login: 'user4' } },
+      ]
+
+      mockExeca.mockImplementation((cmd: string, args: string[]) => {
+        if (cmd === 'gh' && args[0] === '--version') {
+          return Promise.resolve(mockGhVersion())
+        }
+        if (cmd === 'gh' && args[0] === 'auth' && args[1] === 'status') {
+          return Promise.resolve(mockGhAuthStatus())
+        }
+        if (cmd === 'gh' && args[0] === 'pr' && args[1] === 'list') {
+          return Promise.resolve({
+            stdout: JSON.stringify(mockPRs),
+            stderr: '',
+            exitCode: 0,
+          } as any)
+        }
+        if (cmd === 'gh' && args[0] === 'issue' && args[1] === 'list') {
+          return Promise.resolve({
+            stdout: JSON.stringify(mockIssues),
+            stderr: '',
+            exitCode: 0,
+          } as any)
+        }
+        return Promise.resolve({ stdout: '', stderr: '', exitCode: 0 } as any)
+      })
+
+      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
+
+      await program.parseAsync(['node', 'test', 'github', 'list'])
+
+      expect(mockExeca).toHaveBeenCalledWith('gh', [
+        'pr',
+        'list',
+        '--json',
+        'number,title,author,isDraft',
+        '--limit',
+        '20',
+      ])
+      expect(mockExeca).toHaveBeenCalledWith('gh', [
+        'issue',
+        'list',
+        '--json',
+        'number,title,author',
+        '--limit',
+        '20',
+      ])
+
+      // Check that console.log was called with PR and Issue information
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Pull Requests'))
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Issues'))
+
+      consoleSpy.mockRestore()
+    })
+
+    it('should handle empty PR and Issue lists', async () => {
+      mockExeca.mockImplementation((cmd: string, args: string[]) => {
+        if (cmd === 'gh' && args[0] === '--version') {
+          return Promise.resolve(mockGhVersion())
+        }
+        if (cmd === 'gh' && args[0] === 'auth' && args[1] === 'status') {
+          return Promise.resolve(mockGhAuthStatus())
+        }
+        if (cmd === 'gh' && args[0] === 'pr' && args[1] === 'list') {
+          return Promise.resolve({
+            stdout: JSON.stringify([]),
+            stderr: '',
+            exitCode: 0,
+          } as any)
+        }
+        if (cmd === 'gh' && args[0] === 'issue' && args[1] === 'list') {
+          return Promise.resolve({
+            stdout: JSON.stringify([]),
+            stderr: '',
+            exitCode: 0,
+          } as any)
+        }
+        return Promise.resolve({ stdout: '', stderr: '', exitCode: 0 } as any)
+      })
+
+      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
+
+      await program.parseAsync(['node', 'test', 'github', 'list'])
+
+      expect(consoleSpy).toHaveBeenCalledWith(
+        expect.stringContaining('開いているPull Requestがありません')
+      )
+      expect(consoleSpy).toHaveBeenCalledWith(
+        expect.stringContaining('開いているIssueがありません')
+      )
+
+      consoleSpy.mockRestore()
+    })
+  })
+
   describe('error handling', () => {
     it('should handle gh CLI not installed', async () => {
       mockExeca.mockRejectedValue(new Error('command not found: gh'))
