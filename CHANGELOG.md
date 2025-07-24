@@ -1,5 +1,16 @@
 # Changelog
 
+## 2.7.1
+
+### Patch Changes
+
+- Fix multiple critical bugs affecting core functionality
+  - Fix exec command -a flag not working across all worktrees (Issue #72)
+  - Fix sync command failing with worktree filters (Issue #73)
+  - Fix github list command undefined property errors (Issue #74)
+  - Fix graph command stack overflow from circular dependencies (Issue #75)
+  - Fix mcp serve module resolution errors (Issue #76)
+
 ## 2.7.0
 
 ### Minor Changes
