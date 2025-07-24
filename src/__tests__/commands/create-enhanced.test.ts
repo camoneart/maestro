@@ -245,7 +245,7 @@ describe('Create Command - Enhanced Coverage', () => {
         }
       }
 
-      await expect().resolves.toBeUndefined()
+      await expect(saveWorktreeMetadata('/path/to/worktree', 'test-branch', {})).resolves.toBeUndefined()
       expect(mockFs.writeFile).toHaveBeenCalledWith(
         '/path/to/worktree/.maestro-metadata.json',
         expect.stringContaining('test-branch')

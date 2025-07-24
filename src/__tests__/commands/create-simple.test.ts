@@ -149,6 +149,7 @@ describe('create command simple tests', () => {
       return metadata
     }
 
+    const meta1 = createMetadata('feature-test')
     expect(meta1.branch).toBe('feature-test')
     expect(meta1.maestro).toBe(true)
     expect(meta1.createdAt).toMatch(/\d{4}-\d{2}-\d{2}/)
