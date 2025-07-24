@@ -90,12 +90,10 @@ describe('create command - utility functions', () => {
           url: 'https://github.com/test/repo/issues/123',
           issueNumber: '123',
         },
-        template: 'react',
       }
 
       expect(metadata.branch).toBe('feature-test')
       expect(metadata.github?.issueNumber).toBe('123')
-      expect(metadata.template).toBe('react')
     })
   })
 
@@ -107,7 +105,6 @@ describe('create command - utility functions', () => {
         open: true,
         tmux: false,
         claude: true,
-        template: 'react',
         draftPr: false,
       }
 

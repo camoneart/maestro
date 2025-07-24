@@ -32,8 +32,6 @@ mst create feature/new-feature --tmux --claude
 # Create with specified base branch
 mst create feature/new-feature --base develop
 
-# Create using template
-mst create feature/new-feature --template feature
 
 # Combine all options
 mst create feature/new-feature --base main --open --setup --tmux --claude
@@ -48,7 +46,6 @@ mst create feature/new-feature --base main --open --setup --tmux --claude
 | `--setup`            | `-s`  | Run environment setup (npm install, etc.)                     | `false` |
 | `--tmux`             | `-t`  | Create tmux session/window                                    | `false` |
 | `--claude`           | `-c`  | Auto-start Claude Code                                        | `false` |
-| `--template <name>`  |       | Use template                                                  | none    |
 | `--copy-file <file>` |       | Copy files from current worktree (including gitignored files) | none    |
 | `--shell`            |       | Enter shell after creation                                    | `false` |
 | `--exec <command>`   |       | Execute command after creation                                | none    |
@@ -73,27 +70,6 @@ Retrieved information:
 - Milestone
 - Author information
 
-## Template Feature
-
-You can create orchestra members with predefined templates using specific settings:
-
-```bash
-# Feature development template
-mst create feature/auth --template feature
-
-# Bug fix template
-mst create bugfix/login --template bugfix
-
-# Experimental template
-mst create experiment/new-arch --template experiment
-```
-
-Available templates:
-
-- `feature`: For new feature development (auto-start Claude Code)
-- `bugfix`: For bug fixes
-- `experiment`: For experimental development (tmux integration)
-- `docs`: For documentation creation
 
 
 ## Claude Code Integration
@@ -241,4 +217,3 @@ mst create bugfix/urgent-fix --tmux --new-window
 - [`mst list`](./list.md) - Display list of created orchestra members
 - [`mst delete`](./delete.md) - Delete orchestra members
 - [`mst github`](./github.md) - Create orchestra members from GitHub PR/Issues
-- [`mst template`](./template.md) - Template management

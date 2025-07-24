@@ -105,7 +105,6 @@ describe('create command refactored functions', () => {
     })
 
     it('should handle template options', async () => {
-      const options = { template: 'feature' }
 
       await executeCreateCommand('test-branch', options)
 

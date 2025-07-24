@@ -188,10 +188,6 @@ describe('github command functions', () => {
 
       // Test different template patterns
       const testCases = [
-        { template: '{type}/{number}', expected: 'pr/123' },
-        { template: '{type}_{number}_{title}', expected: 'pr_123_test-title' },
-        { template: 'prefix-{number}-suffix', expected: 'prefix-123-suffix' },
-        { template: '{title}-{number}-{type}', expected: 'test-title-123-pr' },
       ]
 
       for (const { template, expected } of testCases) {

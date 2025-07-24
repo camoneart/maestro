@@ -5,7 +5,6 @@ import inquirer from 'inquirer'
 import { GitWorktreeManager } from '../core/git.js'
 import { CreateOptions } from '../types/index.js'
 import { ConfigManager, Config } from '../core/config.js'
-import { getTemplateConfig } from './template.js'
 import { execa } from 'execa'
 import path from 'path'
 import fs from 'fs/promises'
@@ -42,7 +41,6 @@ interface WorktreeMetadata {
   branch: string
   worktreePath: string
   github?: GithubMetadata & { issueNumber?: string }
-  template?: string
 }
 
 // Issue番号からブランチ名を生成する関数
@@ -278,65 +276,6 @@ Add specific instructions for this worktree here.
   }
 }
 
-interface TemplateConfig {
-  autoSetup?: boolean
-  editor?: 'vscode' | 'cursor' | 'none'
-  tmux?: boolean
-  claude?: boolean
-  branchPrefix?: string
-  syncFiles?: string[]
-  hooks?: Config['hooks']
-}
-
-// テンプレート設定を適用する純粋関数
-// テンプレート設定からオプションを更新
-function updateOptionsFromTemplate(
-  options: CreateOptions & { template?: string },
-  templateConfig: TemplateConfig
-): CreateOptions & { template?: string } {
-  const updatedOptions = { ...options }
-  if (templateConfig.autoSetup !== undefined) updatedOptions.setup = templateConfig.autoSetup
-  if (templateConfig.editor !== 'none') updatedOptions.open = true
-  if (templateConfig.tmux) updatedOptions.tmux = true
-  if (templateConfig.claude) updatedOptions.claude = true
-  return updatedOptions
-}
-
-// テンプレート設定から設定オブジェクトを更新
-function updateConfigFromTemplate(baseConfig: Config, templateConfig: TemplateConfig): Config {
-  return {
-    ...baseConfig,
-    worktrees: {
-      ...baseConfig.worktrees,
-      branchPrefix: templateConfig.branchPrefix || baseConfig.worktrees?.branchPrefix,
-    },
-    development: {
-      ...baseConfig.development,
-      autoSetup: templateConfig.autoSetup ?? baseConfig.development?.autoSetup ?? true,
-      syncFiles: templateConfig.syncFiles ||
-        baseConfig.development?.syncFiles || ['.env', '.env.local'],
-      defaultEditor: templateConfig.editor || baseConfig.development?.defaultEditor || 'cursor',
-    },
-    hooks: templateConfig.hooks || baseConfig.hooks,
-  }
-}
-
-export async function applyTemplateConfig(
-  templateName: string,
-  options: CreateOptions & { template?: string },
-  baseConfig: Config
-): Promise<{ config: Config; updatedOptions: CreateOptions & { template?: string } }> {
-  const templateConfig = await getTemplateConfig(templateName)
-
-  if (!templateConfig) {
-    return { config: baseConfig, updatedOptions: options }
-  }
-
-  const updatedOptions = updateOptionsFromTemplate(options, templateConfig)
-  const config = updateConfigFromTemplate(baseConfig, templateConfig)
-
-  return { config, updatedOptions }
-}
 
 // ブランチ名の解析と処理を行う純粋関数
 export function processBranchName(
@@ -402,16 +341,6 @@ export async function executeCreateCommand(
   await configManager.loadProjectConfig()
   let config = configManager.getAll()
 
-  // テンプレート設定の適用
-  if (options.template) {
-    const { config: updatedConfig, updatedOptions } = await applyTemplateConfig(
-      options.template,
-      options,
-      config
-    )
-    config = updatedConfig
-    Object.assign(options, updatedOptions)
-  }
 
   // ブランチ名の処理
   const { isIssue, issueNumber, finalBranchName } = processBranchName(branchName, config)
@@ -549,7 +478,6 @@ export async function createWorktreeWithProgress(
       github: githubMetadata
         ? { ...githubMetadata, issueNumber: issueNumber || undefined }
         : undefined,
-      template: options.template,
     })
 
     spinner.succeed(chalk.green(`✨ 新しい演奏者を招集しました: ${worktreePath}`))
@@ -812,7 +740,6 @@ export const createCommand = new Command('create')
   .option('--tmux-h', 'tmuxペインを水平分割して作成')
   .option('--tmux-v', 'tmuxペインを垂直分割して作成')
   .option('-c, --claude', 'Claude Codeを自動起動')
-  .option('--template <name>', 'テンプレートを使用')
   .option('-y, --yes', '確認をスキップ')
   .option('--shell', '作成後にシェルに入る')
   .option('--exec <command>', '作成後にコマンドを実行')

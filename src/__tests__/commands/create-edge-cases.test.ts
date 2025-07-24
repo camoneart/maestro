@@ -26,7 +26,6 @@ describe('create command - edge cases', () => {
       vi.mocked(path.join).mockReturnValue('/path/to/worktree/.maestro-metadata.json')
 
       await saveWorktreeMetadata('/path/to/worktree', 'feature/test', {
-        template: 'test-template',
         github: {
           type: 'issue',
           title: 'Test issue',
