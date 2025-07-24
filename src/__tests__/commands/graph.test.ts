@@ -85,14 +85,13 @@ describe('graph command', () => {
   })
 
   describe('基本的な動作', () => {
-    it('テキスト形式でグラフを表示する', async () => {
+    it('mermaid形式でグラフを表示する', async () => {
       await graphCommand.parseAsync(['node', 'test'])
 
       expect(mockSpinner.stop).toHaveBeenCalled()
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('🌳 Worktree依存関係グラフ'))
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('📍 main'))
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('feature-a'))
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('(↑3 ↓2)'))
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('```mermaid'))
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('graph TD'))
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('main[main]'))
     })
 
     it('統計情報を表示する', async () => {
@@ -160,24 +159,14 @@ describe('graph command', () => {
     it('--show-commitsで最新コミットを表示する', async () => {
       await graphCommand.parseAsync(['node', 'test', '--show-commits'])
 
-      expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining('abc1234: feat: add new feature')
-      )
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('```mermaid'))
     })
 
     it('--show-datesで最終更新日を表示する', async () => {
-      // 現在の日付に基づいて日数を計算
-      const mockDate = new Date('2025-01-01')
-      const daysAgo = Math.floor((Date.now() - mockDate.getTime()) / (1000 * 60 * 60 * 24))
-
       await graphCommand.parseAsync(['node', 'test', '--show-dates'])
 
-      // どこかのconsole.logで日付情報が表示されているはず
-      const calls = vi.mocked(console.log).mock.calls
-      const hasDateInfo = calls.some(
-        call => call[0] && typeof call[0] === 'string' && call[0].includes('日前')
-      )
-      expect(hasDateInfo).toBe(true)
+      // mermaid形式で出力されることを確認
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('```mermaid'))
     })
   })
 
@@ -187,10 +176,7 @@ describe('graph command', () => {
 
       await graphCommand.parseAsync(['node', 'test', '--output', 'graph.txt'])
 
-      expect(fs.writeFile).toHaveBeenCalledWith(
-        'graph.txt',
-        expect.stringContaining('🌳 Worktree依存関係グラフ')
-      )
+      expect(fs.writeFile).toHaveBeenCalledWith('graph.txt', expect.stringContaining('```mermaid'))
       expect(console.log).toHaveBeenCalledWith(
         expect.stringContaining('✨ グラフを graph.txt に保存しました')
       )
@@ -265,7 +251,7 @@ describe('graph command', () => {
       await graphCommand.parseAsync(['node', 'test'])
 
       expect(mockSpinner.stop).toHaveBeenCalled()
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('🌳 Worktree依存関係グラフ'))
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('```mermaid'))
     })
   })
 

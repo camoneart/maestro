@@ -14,12 +14,10 @@ Detailed usage of all maestro (mst) commands.
 - [shell](#-shell) - Enter member shell
 
 ### 🔗 Integration Commands
-- [suggest](#-suggest) - AI-powered suggestions
 - [github](#-github) - GitHub integration features
 - [tmux](#-tmux) - tmux session management
 
 ### 📊 Advanced Features
-- [dashboard](#-dashboard) - Web UI dashboard
 - [health](#-health) - Health status checking
 - [snapshot](#-snapshot) - Work state snapshots
 - [watch](#-watch) - File watching and auto-sync
@@ -28,8 +26,6 @@ Detailed usage of all maestro (mst) commands.
 - [config](#-config) - Configuration management
 - [where](#-where) - Check current location
 - [exec](#-exec) - Execute commands in members
-- [batch](#-batch) - Batch operations
-- [template](#-template) - Template management
 - [mcp](#-mcp) - MCP server management
 - [attach](#-attach) - Attach to existing branch
 - [graph](#-graph) - Display relationships
@@ -55,7 +51,6 @@ mst init [options]
 |--------|-------|-------------|
 | `--minimal` | `-m` | Create minimal configuration |
 | `--package-manager <manager>` | `-p` | Specify package manager (pnpm/npm/yarn/none) |
-| `--template <name>` | `-t` | Use predefined template |
 | `--yes` | `-y` | Skip prompts and use defaults |
 
 #### Features
@@ -77,9 +72,6 @@ mst init --yes
 
 # Override detected package manager
 mst init --package-manager pnpm --yes
-
-# Use template for specific project type
-mst init --template react --yes
 ```
 
 #### Project Type Detection
@@ -107,7 +99,6 @@ mst create <branch-name> [options]
 | `--tmux-h` | Create in horizontal tmux pane split |
 | `--tmux-v` | Create in vertical tmux pane split |
 | `--claude` | Create CLAUDE.md for Claude Code |
-| `--template <name>` | Use template |
 | `--copy-file <file>` | Copy files from current worktree |
 | `--yes`, `-y` | Skip confirmations |
 
@@ -315,35 +306,6 @@ mst shell feature/test --tmux-h
 
 ## 🔗 Integration Commands
 
-### 🔸 suggest
-
-Use Claude Code to provide various suggestions.
-
-```bash
-mst suggest [options]
-```
-
-| Option | Description |
-|--------|-------------|
-| `--branch` | Suggest branch name |
-| `--commit` | Suggest commit message |
-| `--issue` | Suggest issue title |
-| `--pr` | Suggest PR title/description |
-| `--review` | Suggest review comments |
-| `--description <text>` | Specify description |
-| `--diff` | Include diff |
-
-#### Examples
-```bash
-# Suggest branch name
-mst suggest --branch --description "Add user authentication"
-
-# Suggest commit message
-mst suggest --commit --diff
-
-# Suggest PR description
-mst suggest --pr --description "Implement login feature"
-```
 
 ### 🔸 github
 
@@ -424,28 +386,6 @@ mst tmux feature/background --detach
 
 ## 📊 Advanced Features
 
-### 🔸 dashboard
-
-Launch Web UI dashboard.
-
-```bash
-mst dashboard [options]
-```
-
-| Option | Short | Description |
-|--------|-------|-------------|
-| `--port <number>` | `-p` | Port number (default: 8765) |
-| `--no-open` | | Don't auto-open browser |
-| `--host <address>` | | Host address |
-
-#### Examples
-```bash
-# Launch dashboard
-mst dashboard
-
-# Launch on port 8080
-mst dashboard --port 8080
-```
 
 ### 🔸 health
 
@@ -616,58 +556,6 @@ mst exec feature/api --tmux npm run watch
 mst exec --fzf --tmux-v npm test
 ```
 
-### 🔸 batch
-
-Batch process multiple orchestra members.
-
-```bash
-mst batch <command> [options]
-```
-
-| Option | Short | Description |
-|--------|-------|-------------|
-| `--concurrency <number>` | `-c` | Number of parallel executions (default: 5) |
-
-| Subcommand | Description |
-|------------|-------------|
-| `create <pattern>` | Create multiple based on pattern |
-| `delete <pattern>` | Delete multiple based on pattern |
-| `sync` | Sync all orchestra members |
-
-#### Examples
-```bash
-# Create multiple
-mst batch create feature/task-{1..5}
-
-# Delete by pattern
-mst batch delete "feature/old-*"
-```
-
-### 🔸 template
-
-Manage project templates.
-
-```bash
-mst template <command> [options]
-```
-
-#### Subcommands
-- `list` - List templates
-- `create <name>` - Create template
-- `apply <name>` - Apply template
-- `delete <name>` - Delete template
-
-#### Examples
-```bash
-# List templates
-mst template list
-
-# Create template
-mst template create react-component
-
-# Apply template
-mst template apply react-component
-```
 
 ### 🔸 mcp
 
@@ -727,7 +615,7 @@ mst graph [options]
 
 | Option | Short | Description |
 |--------|-------|-------------|
-| `--format <type>` | | Output format (text, mermaid, dot) |
+| `--format <type>` | | Output format (mermaid, dot) |
 | `--output <file>` | | Output file |
 | `--show-commits` | | Show latest commits |
 | `--show-dates` | | Show last update dates |
@@ -735,11 +623,11 @@ mst graph [options]
 
 #### Examples
 ```bash
-# Display graph
+# Display graph (default: mermaid format)
 mst graph
 
-# Output as Mermaid
-mst graph --format mermaid --output graph.md
+# Output as DOT format
+mst graph --format dot --output graph.dot
 ```
 
 ### 🔸 history
@@ -968,12 +856,10 @@ For detailed usage of each command, see the following documentation:
 - [Shell Command Details](./commands/shell.md)
 
 ### 🔗 Integration Commands
-- [Suggest Details](./commands/suggest.md)
 - [GitHub Integration Details](./commands/github.md)
 - [Tmux Integration Details](./commands/tmux.md)
 
 ### 📊 Advanced Features
-- [Dashboard Details](./commands/dashboard.md)
 - [Health Check Details](./commands/health.md)
 - [Snapshot Details](./commands/snapshot.md)
 - [Watch Details](./commands/watch.md)
@@ -982,8 +868,6 @@ For detailed usage of each command, see the following documentation:
 - [Config Management Details](./commands/config.md)
 - [Where Command Details](./commands/where.md)
 - [Exec Command Details](./commands/exec.md)
-- [Batch Processing Details](./commands/batch.md)
-- [Template Management Details](./commands/template.md)
 - [MCP Server Details](./commands/mcp.md)
 - [Attach Command Details](./commands/attach.md)
 - [Graph Display Details](./commands/graph.md)

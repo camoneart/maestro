@@ -5,7 +5,7 @@ import { GitWorktreeManager } from '../core/git.js'
 import { execa } from 'execa'
 
 interface GraphOptions {
-  format?: 'text' | 'mermaid' | 'dot'
+  format?: 'mermaid' | 'dot'
   output?: string
   showCommits?: boolean
   showDates?: boolean
@@ -128,52 +128,6 @@ async function analyzeBranchRelations(worktrees: Worktree[]): Promise<BranchRela
   return relations
 }
 
-// テキスト形式でグラフを表示
-function renderTextGraph(relations: BranchRelation[], options: GraphOptions): string {
-  let output = chalk.bold('🌳 Worktree依存関係グラフ\n\n')
-
-  // mainブランチ
-  output += '📍 main\n'
-
-  // 階層構造で表示
-  const renderBranch = (branch: string, indent: number = 0) => {
-    const relation = relations.find(r => r.branch === branch)
-    if (!relation) return
-
-    const prefix = '  '.repeat(indent) + '└─ '
-    let line = prefix + chalk.cyan(branch)
-
-    if (relation.ahead > 0 || relation.behind > 0) {
-      line += chalk.gray(` (↑${relation.ahead} ↓${relation.behind})`)
-    }
-
-    if (options.showDates && relation.lastCommit) {
-      const daysAgo = Math.floor(
-        (Date.now() - relation.lastCommit.date.getTime()) / (1000 * 60 * 60 * 24)
-      )
-      line += chalk.gray(` - ${daysAgo}日前`)
-    }
-
-    if (options.showCommits && relation.lastCommit) {
-      line += chalk.gray(
-        `\n${'  '.repeat(indent + 1)}  ${relation.lastCommit.hash}: ${relation.lastCommit.message}`
-      )
-    }
-
-    output += line + '\n'
-
-    // 子ブランチを再帰的に表示
-    const children = relations.filter(r => r.parent === branch)
-    children.forEach(child => renderBranch(child.branch, indent + 1))
-  }
-
-  // mainから派生したブランチを表示
-  const mainChildren = relations.filter(r => r.parent === 'main')
-  mainChildren.forEach(child => renderBranch(child.branch, 1))
-
-  return output
-}
-
 // Mermaid形式でグラフを生成
 function renderMermaidGraph(relations: BranchRelation[]): string {
   let output = '```mermaid\ngraph TD\n'
@@ -210,7 +164,7 @@ function renderDotGraph(relations: BranchRelation[]): string {
 export const graphCommand = new Command('graph')
   .alias('g')
   .description('worktree間の依存関係をグラフで可視化')
-  .option('-f, --format <type>', '出力形式（text, mermaid, dot）', 'text')
+  .option('-f, --format <type>', '出力形式（mermaid, dot）', 'mermaid')
   .option('-o, --output <file>', '出力ファイル')
   .option('--show-commits', '最新コミットを表示')
   .option('--show-dates', '最終更新日を表示')
@@ -248,14 +202,11 @@ export const graphCommand = new Command('graph')
       let graphOutput: string
 
       switch (options.format) {
-        case 'mermaid':
-          graphOutput = renderMermaidGraph(relations)
-          break
         case 'dot':
           graphOutput = renderDotGraph(relations)
           break
         default:
-          graphOutput = renderTextGraph(relations, options)
+          graphOutput = renderMermaidGraph(relations)
       }
 
       // 出力

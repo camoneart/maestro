@@ -14,17 +14,14 @@ mst g [options]  # alias
 ### Basic Usage
 
 ```bash
-# Display text-based dependency graph
+# Display Mermaid diagram (default)
 mst graph
-
-# Generate Mermaid diagram
-mst graph --format mermaid
 
 # Generate Graphviz DOT format
 mst graph --format dot
 
 # Save to file
-mst graph --output dependencies.txt
+mst graph --output dependencies.md
 ```
 
 ### Advanced Usage
@@ -45,7 +42,7 @@ mst graph --format mermaid --depth 5 --show-dates --output branch-tree.md
 
 | Option | Short | Description | Default |
 |--------|-------|-------------|---------|
-| `--format <type>` | `-f` | Output format (text, mermaid, dot) | `text` |
+| `--format <type>` | `-f` | Output format (mermaid, dot) | `mermaid` |
 | `--output <file>` | `-o` | Save to file instead of stdout | stdout |
 | `--show-commits` | | Display latest commit information | `false` |
 | `--show-dates` | | Show last update dates | `false` |
@@ -53,26 +50,7 @@ mst graph --format mermaid --depth 5 --show-dates --output branch-tree.md
 
 ## Output Formats
 
-### Text Format (Default)
-
-Human-readable tree structure with branch relationships:
-
-```
-🌳 Worktree依存関係グラフ
-
-📍 main
-└─ feature/authentication (↑3 ↓0)
-   └─ feature/auth-api (↑5 ↓2) - 2日前
-└─ bugfix/login-issue (↑1 ↓1) - 1日前
-```
-
-**Symbols:**
-- **📍** Main branch (repository root)
-- **└─** Branch relationship
-- **(↑X ↓Y)** X commits ahead, Y commits behind main
-- **- N日前** Days since last commit (with `--show-dates`)
-
-### Mermaid Format
+### Mermaid Format (Default)
 
 Generates Mermaid.js compatible diagrams for documentation:
 

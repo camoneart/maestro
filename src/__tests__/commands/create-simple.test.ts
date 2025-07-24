@@ -17,7 +17,6 @@ describe('create command simple tests', () => {
     const optionNames = options.map(opt => opt.long)
 
     expect(optionNames).toContain('--base')
-    expect(optionNames).toContain('--template')
     expect(optionNames).toContain('--open')
     expect(optionNames).toContain('--setup')
     expect(optionNames).toContain('--tmux')
@@ -143,10 +142,6 @@ describe('create command simple tests', () => {
         maestro: true,
       }
 
-      if (options.template) {
-        metadata.template = options.template
-      }
-
       if (options.github) {
         metadata.github = options.github
       }
@@ -154,9 +149,8 @@ describe('create command simple tests', () => {
       return metadata
     }
 
-    const meta1 = createMetadata('feature-test', { template: 'react' })
+    const meta1 = createMetadata('feature-test')
     expect(meta1.branch).toBe('feature-test')
-    expect(meta1.template).toBe('react')
     expect(meta1.maestro).toBe(true)
     expect(meta1.createdAt).toMatch(/\d{4}-\d{2}-\d{2}/)
 

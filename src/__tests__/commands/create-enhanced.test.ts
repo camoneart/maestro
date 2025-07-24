@@ -11,7 +11,6 @@ vi.mock('fs/promises')
 vi.mock('path')
 vi.mock('../../core/config.js')
 vi.mock('../../core/git.js')
-vi.mock('./template.js')
 
 const mockExeca = execa as any
 const mockFs = fs as any
@@ -247,7 +246,7 @@ describe('Create Command - Enhanced Coverage', () => {
       }
 
       await expect(
-        saveWorktreeMetadata('/path/to/worktree', 'test-branch', { template: 'feature' })
+        saveWorktreeMetadata('/path/to/worktree', 'test-branch', {})
       ).resolves.toBeUndefined()
       expect(mockFs.writeFile).toHaveBeenCalledWith(
         '/path/to/worktree/.maestro-metadata.json',

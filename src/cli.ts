@@ -22,14 +22,10 @@ import { whereCommand } from './commands/where.js'
 import { syncCommand } from './commands/sync.js'
 import { reviewCommand } from './commands/review.js'
 import { issueCommand } from './commands/issue.js'
-import { batchCommand } from './commands/batch.js'
 import { historyCommand } from './commands/history.js'
-import { suggestCommand } from './commands/suggest.js'
 import { graphCommand } from './commands/graph.js'
-import { templateCommand } from './commands/template.js'
 import { watchCommand } from './commands/watch.js'
 import { healthCommand } from './commands/health.js'
-import { dashboardCommand } from './commands/dashboard.js'
 import { snapshotCommand } from './commands/snapshot.js'
 import { claudeCommand } from './commands/claude.js'
 import { initCommand } from './commands/init.js'
@@ -60,14 +56,10 @@ program.addCommand(whereCommand)
 program.addCommand(syncCommand)
 program.addCommand(reviewCommand)
 program.addCommand(issueCommand)
-program.addCommand(batchCommand)
 program.addCommand(historyCommand)
-program.addCommand(suggestCommand)
 program.addCommand(graphCommand)
-program.addCommand(templateCommand)
 program.addCommand(watchCommand)
 program.addCommand(healthCommand)
-program.addCommand(dashboardCommand)
 program.addCommand(snapshotCommand)
 program.addCommand(claudeCommand)
 program.addCommand(pushCommand)

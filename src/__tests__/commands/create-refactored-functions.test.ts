@@ -105,8 +105,7 @@ describe('create command refactored functions', () => {
     })
 
     it('should handle template options', async () => {
-      const options = { template: 'feature' }
-
+      const options = { base: 'main', setup: true }
       await executeCreateCommand('test-branch', options)
 
       expect(mockConfigManager.getAll).toHaveBeenCalled()
@@ -211,7 +210,7 @@ describe('create command refactored functions', () => {
   describe('createWorktreeWithProgress', () => {
     it('should create worktree with progress indicator', async () => {
       const config = {
-        development: { autoSetup: true },
+        development: { autoSetup: true, syncFiles: [], defaultEditor: 'cursor' as const },
         tmux: { enabled: true },
         claude: { autoStart: true },
       }
@@ -248,7 +247,7 @@ describe('create command refactored functions', () => {
   describe('executePostCreationTasks', () => {
     it('should execute all enabled tasks', async () => {
       const config = {
-        development: { autoSetup: true },
+        development: { autoSetup: true, syncFiles: [], defaultEditor: 'cursor' as const },
         tmux: { enabled: true },
         claude: { autoStart: true },
       }
@@ -262,7 +261,7 @@ describe('create command refactored functions', () => {
 
     it('should skip disabled tasks', async () => {
       const config = {
-        development: { autoSetup: false },
+        development: { autoSetup: false, syncFiles: [], defaultEditor: 'cursor' as const },
         tmux: { enabled: false },
         claude: { autoStart: false },
       }
@@ -277,7 +276,13 @@ describe('create command refactored functions', () => {
 
   describe('setupEnvironment', () => {
     it('should setup environment with npm install', async () => {
-      const config = { development: { syncFiles: ['.env', '.env.local'] } }
+      const config = {
+        development: {
+          autoSetup: true,
+          syncFiles: ['.env', '.env.local'],
+          defaultEditor: 'cursor' as const,
+        },
+      }
 
       await setupEnvironment('/path/to/worktree', config)
 
@@ -316,7 +321,9 @@ describe('create command refactored functions', () => {
 
   describe('openInEditor', () => {
     it('should open in default editor', async () => {
-      const config = { development: { defaultEditor: 'cursor' } }
+      const config = {
+        development: { autoSetup: true, syncFiles: [], defaultEditor: 'cursor' as const },
+      }
 
       await openInEditor('/path/to/worktree', config)
 

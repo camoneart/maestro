@@ -14,7 +14,6 @@ mst init [options]
 |--------|-------------|---------|
 | `-m, --minimal` | Create minimal configuration | false |
 | `-p, --package-manager <manager>` | Specify package manager (pnpm/npm/yarn/none) | auto-detect |
-| `-t, --template <name>` | Use predefined template | none |
 | `-y, --yes` | Skip prompts and use defaults | false |
 | `-h, --help` | Display help message | - |
 
@@ -239,7 +238,6 @@ After initialization, the generated configuration will be used by:
 
 - `mst create` - Uses `branchPrefix` and `postCreate` settings
 - `mst config` - Can modify the generated configuration
-- `mst template` - Can override init settings with templates
 
 ## Best Practices
 

@@ -18,7 +18,6 @@ describe('maestro E2E basic tests', () => {
     expect(output).toContain('sync')
     expect(output).toContain('watch')
     expect(output).toContain('health')
-    expect(output).toContain('dashboard')
     expect(output).toContain('snapshot')
   })
 
