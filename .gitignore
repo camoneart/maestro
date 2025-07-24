@@ -65,8 +65,6 @@ temp/
 worktrees/
 .maestro-config.json
 .maestro/
-.scj-config.json
-.scj/
 
 # Claude Code
 .claude/export-conversations/
