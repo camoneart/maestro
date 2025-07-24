@@ -15,7 +15,7 @@ export class GitWorktreeManager {
 
     // リポジトリルートを取得して絶対パスを生成
     const repoRoot = await this.getRepositoryRoot()
-    const worktreePath = path.join(repoRoot, '.git', 'orchestrations', branchName)
+    const worktreePath = path.join(repoRoot, '..', `maestro-${branchName}`)
 
     // ベースブランチが指定されていない場合は現在のブランチを使用
     if (!baseBranch) {
@@ -34,7 +34,7 @@ export class GitWorktreeManager {
     const repoRoot = await this.getRepositoryRoot()
     // ワークツリーのパスを生成（ブランチ名からスラッシュを置換）
     const safeBranchName = existingBranch.replace(/\//g, '-')
-    const worktreePath = path.join(repoRoot, '.git', 'orchestrations', safeBranchName)
+    const worktreePath = path.join(repoRoot, '..', `maestro-${safeBranchName}`)
 
     // 既存のブランチでワークツリーを作成
     await this.git.raw(['worktree', 'add', worktreePath, existingBranch])
