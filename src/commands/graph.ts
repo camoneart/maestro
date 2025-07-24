@@ -69,18 +69,66 @@ async function getBranchMainRelation(
   }
 }
 
-// より正確な親ブランチを検出
+// 循環参照を検出する関数
+function detectCycles(relations: BranchRelation[]): string[] {
+  const visited = new Set<string>()
+  const recursionStack = new Set<string>()
+  const cycles: string[] = []
+
+  function dfs(branch: string, path: string[]): void {
+    if (recursionStack.has(branch)) {
+      const cycleStart = path.indexOf(branch)
+      if (cycleStart >= 0) {
+        const cycle = path.slice(cycleStart).concat(branch).join(' → ')
+        cycles.push(cycle)
+      }
+      return
+    }
+
+    if (visited.has(branch)) return
+
+    visited.add(branch)
+    recursionStack.add(branch)
+
+    const relation = relations.find(r => r.branch === branch)
+    if (relation && relation.parent !== 'main') {
+      dfs(relation.parent, [...path, branch])
+    }
+
+    recursionStack.delete(branch)
+  }
+
+  for (const relation of relations) {
+    if (!visited.has(relation.branch)) {
+      dfs(relation.branch, [])
+    }
+  }
+
+  return cycles
+}
+
+// より正確な親ブランチを検出（循環参照チェック付き）
 async function findBetterParent(
   branch: string,
   worktreePath: string,
-  otherWorktrees: Worktree[]
+  otherWorktrees: Worktree[],
+  visitedBranches: Set<string> = new Set()
 ): Promise<string> {
+  // 循環参照を防ぐため、既に訪問したブランチはスキップ
+  if (visitedBranches.has(branch)) {
+    return 'main'
+  }
+
+  visitedBranches.add(branch)
   let parent = 'main'
 
   for (const otherWorktree of otherWorktrees) {
     if (!otherWorktree.branch) continue
 
     const otherBranch = otherWorktree.branch.replace('refs/heads/', '')
+
+    // 自分自身や既に訪問したブランチはスキップ
+    if (otherBranch === branch || visitedBranches.has(otherBranch)) continue
 
     try {
       await execa('git', ['merge-base', branch, otherBranch], { cwd: worktreePath })
@@ -99,11 +147,13 @@ async function findBetterParent(
     }
   }
 
+  visitedBranches.delete(branch)
   return parent
 }
 
 async function analyzeBranchRelations(worktrees: Worktree[]): Promise<BranchRelation[]> {
   const relations: BranchRelation[] = []
+  const visitedBranches = new Set<string>()
 
   for (const worktree of worktrees) {
     if (!worktree.branch) continue
@@ -114,7 +164,7 @@ async function analyzeBranchRelations(worktrees: Worktree[]): Promise<BranchRela
     if (!branchRelation) continue
 
     const otherWorktrees = worktrees.filter(wt => wt !== worktree)
-    const parent = await findBetterParent(branch, worktree.path, otherWorktrees)
+    const parent = await findBetterParent(branch, worktree.path, otherWorktrees, visitedBranches)
 
     relations.push({
       branch,
@@ -123,6 +173,16 @@ async function analyzeBranchRelations(worktrees: Worktree[]): Promise<BranchRela
       behind: branchRelation.behind,
       lastCommit: branchRelation.lastCommit,
     })
+  }
+
+  // 循環参照をチェックして警告を表示
+  const cycles = detectCycles(relations)
+  if (cycles.length > 0) {
+    console.log(chalk.yellow('\n⚠️  循環参照が検出されました:'))
+    cycles.forEach(cycle => {
+      console.log(chalk.gray(`  - ${cycle}`))
+    })
+    console.log(chalk.gray('  循環参照のあるブランチは main から派生するよう調整されました\n'))
   }
 
   return relations
