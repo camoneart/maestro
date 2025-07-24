@@ -46,6 +46,26 @@ describe('mcp command', () => {
       )
     })
 
+    it('should resolve correct path to MCP server module', async () => {
+      const mockChildProcess = {
+        on: vi.fn(),
+        killed: false,
+      }
+      ;(spawn as Mock).mockReturnValue(mockChildProcess)
+
+      await mcpCommand.parseAsync(['node', 'mcp', 'serve'])
+
+      const spawnCall = (spawn as Mock).mock.calls[0]
+      const serverPath = spawnCall[1][0]
+
+      // パスがmcp/server.jsで終わることを確認（テスト環境を考慮）
+      expect(serverPath).toMatch(/mcp[/\\]server\.js$/)
+
+      // パスが文字列であることを確認
+      expect(typeof serverPath).toBe('string')
+      expect(serverPath.length).toBeGreaterThan(0)
+    })
+
     it('should show usage for invalid subcommand', async () => {
       await expect(mcpCommand.parseAsync(['node', 'mcp', 'unknown'])).rejects.toThrow(
         'Process exited with code 0'
