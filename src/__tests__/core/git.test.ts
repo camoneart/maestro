@@ -97,7 +97,7 @@ locked reason`
     it('should create a new worktree', async () => {
       const branchName = 'feature-test'
       const mockRepoRoot = '/test/repo'
-      const expectedPath = path.resolve(mockRepoRoot, '.git/orchestrations/' + branchName)
+      const expectedPath = path.resolve(mockRepoRoot, '..', `maestro-${branchName}`)
 
       // checkBranchNameCollisionをモック（衝突なし）
       vi.spyOn(gitManager, 'checkBranchNameCollision').mockResolvedValueOnce()
@@ -117,7 +117,7 @@ locked reason`
         'add',
         '-b',
         branchName,
-        path.join(mockRepoRoot, '.git/orchestrations/feature-test'),
+        path.join(mockRepoRoot, '..', 'maestro-feature-test'),
         'main',
       ])
     })
@@ -126,7 +126,7 @@ locked reason`
       const branchName = 'feature-test'
       const baseBranch = 'develop'
       const mockRepoRoot = '/test/repo'
-      const expectedPath = path.resolve(mockRepoRoot, '.git/orchestrations/' + branchName)
+      const expectedPath = path.resolve(mockRepoRoot, '..', `maestro-${branchName}`)
 
       // checkBranchNameCollisionをモック（衝突なし）
       vi.spyOn(gitManager, 'checkBranchNameCollision').mockResolvedValueOnce()
@@ -145,7 +145,7 @@ locked reason`
         'add',
         '-b',
         branchName,
-        path.join(mockRepoRoot, '.git/orchestrations/feature-test'),
+        path.join(mockRepoRoot, '..', 'maestro-feature-test'),
         baseBranch,
       ])
     })
@@ -186,18 +186,23 @@ locked reason`
   describe('attachWorktree', () => {
     it('should attach to an existing branch', async () => {
       const branchName = 'existing-feature'
-      const expectedPath = path.resolve('.git/orchestrations/existing-feature')
-
-      // git.raw()をモック
-      ;(gitManager as any).git.raw = vi.fn().mockResolvedValue('')
+      const mockRepoRoot = '/test/repo'
+      
+      // getRepositoryRoot()をモック
+      ;(gitManager as any).git.raw = vi
+        .fn()
+        .mockResolvedValueOnce(mockRepoRoot + '\n') // getRepositoryRoot()
+        .mockResolvedValueOnce('') // worktree add
+      
+      const expectedPath = path.resolve(mockRepoRoot, '..', 'maestro-existing-feature')
 
       const result = await gitManager.attachWorktree(branchName)
 
       expect(result).toBe(expectedPath)
-      expect((gitManager as any).git.raw).toHaveBeenCalledWith([
+      expect((gitManager as any).git.raw).toHaveBeenNthCalledWith(2, [
         'worktree',
         'add',
-        '.git/orchestrations/existing-feature',
+        path.join(mockRepoRoot, '..', 'maestro-existing-feature'),
         branchName,
       ])
     })
