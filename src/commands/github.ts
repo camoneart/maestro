@@ -246,6 +246,52 @@ async function handleCommentCommand(number: string, options: GithubOptions): Pro
   }
 }
 
+// GitHub list表示処理
+async function handleListCommand(): Promise<void> {
+  console.log(chalk.blue('\n🔍 GitHub Pull Requests & Issues\n'))
+
+  try {
+    // PRリストを取得して表示
+    console.log(chalk.cyan('📋 Pull Requests:'))
+    const prs = await fetchItems('pr')
+
+    if (prs.length === 0) {
+      console.log(chalk.gray('  開いているPull Requestがありません'))
+    } else {
+      prs.forEach(pr => {
+        const draftLabel = pr.isDraft ? chalk.yellow(' [draft]') : ''
+        console.log(`  ${chalk.green(`#${pr.number}`)} ${pr.title}${draftLabel}`)
+        console.log(`    ${chalk.gray(`by ${pr.author.login}`)}`)
+      })
+    }
+
+    console.log() // 空行
+
+    // Issueリストを取得して表示
+    console.log(chalk.cyan('🎯 Issues:'))
+    const issues = await fetchItems('issue')
+
+    if (issues.length === 0) {
+      console.log(chalk.gray('  開いているIssueがありません'))
+    } else {
+      issues.forEach(issue => {
+        console.log(`  ${chalk.green(`#${issue.number}`)} ${issue.title}`)
+        console.log(`    ${chalk.gray(`by ${issue.author.login}`)}`)
+      })
+    }
+
+    console.log(chalk.gray('\n使用例:'))
+    console.log(chalk.gray('  mst github pr 123   # PRから演奏者を招集'))
+    console.log(chalk.gray('  mst github issue 456 # Issueから演奏者を招集'))
+  } catch (error) {
+    console.error(
+      chalk.red('リスト取得中にエラーが発生しました:'),
+      error instanceof Error ? error.message : '不明なエラー'
+    )
+    process.exit(1)
+  }
+}
+
 // インタラクティブコメント処理
 async function handleInteractiveComment(): Promise<void> {
   const { inputNumber } = await inquirer.prompt([
@@ -565,6 +611,12 @@ async function executeGithubCommand(
     return
   }
 
+  // listサブコマンドの処理
+  if (type === 'list') {
+    await handleListCommand()
+    return
+  }
+
   // インタラクティブモードの処理
   let finalType = type
   let finalNumber = number
@@ -601,7 +653,7 @@ async function executeGithubCommand(
 export const githubCommand = new Command('github')
   .alias('gh')
   .description('GitHub PR/Issueから演奏者を招集する')
-  .argument('[type]', 'タイプ (checkout, pr, issue, comment)')
+  .argument('[type]', 'タイプ (checkout, pr, issue, comment, list)')
   .argument('[number]', 'PR/Issue番号')
   .option('-o, --open', 'VSCode/Cursorで開く')
   .option('-s, --setup', '環境セットアップを実行')

@@ -14,6 +14,10 @@ mst gh [type] [number] [options]  # alias
 ### Basic Usage
 
 ```bash
+# List all GitHub PRs and Issues
+mst github list
+mst gh list
+
 # Create orchestra member from Pull Request
 mst github checkout 123
 mst gh 123  # shorthand
@@ -57,13 +61,55 @@ mst github 123 --open --setup
 | `--tmux-vertical`     | `--tmux-v` | Open in vertical split pane              | `false` |
 | `--tmux-horizontal`   | `--tmux-h` | Open in horizontal split pane            | `false` |
 
+## Listing GitHub Items
+
+### GitHub List Command
+
+The `list` subcommand displays all open Pull Requests and Issues in the current repository:
+
+```bash
+# Display all PRs and Issues
+mst github list
+mst gh list  # alias
+```
+
+#### Example Output
+
+```
+🔍 GitHub Pull Requests & Issues
+
+📋 Pull Requests:
+  #125 Add user authentication [draft]
+    by johndoe
+  #123 Fix login bug
+    by janedoe
+
+🎯 Issues:
+  #124 Improve error handling
+    by contributor
+  #122 Add documentation
+    by maintainer
+
+使用例:
+  mst github pr 123   # PRから演奏者を招集
+  mst github issue 456 # Issueから演奏者を招集
+```
+
+#### Features
+
+- **Colored Output**: Uses colors to distinguish between PRs and Issues
+- **Draft Indicators**: Shows `[draft]` label for draft Pull Requests
+- **Author Information**: Displays the author of each PR/Issue
+- **Usage Examples**: Provides helpful examples for next steps
+- **Error Handling**: Graceful handling of network errors or authentication issues
+
 ## Creating from Pull Requests
 
 ### Basic Flow
 
 ```bash
-# 1. Check PR list
-gh pr list
+# 1. Check PR list using maestro
+mst github list
 
 # 2. Create orchestra member from PR
 mst github pr 123
