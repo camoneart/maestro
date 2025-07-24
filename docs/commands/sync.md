@@ -27,6 +27,23 @@ mst sync
 mst sync --rebase
 ```
 
+### Filtering Orchestra Members
+
+```bash
+# Filter by keyword (branch name or path)
+mst sync --filter feature --all
+
+# Filter by wildcard pattern
+mst sync --pattern "feature/*" --all
+mst sync --pattern "bugfix-*" --all
+
+# Combine filters (AND condition)
+mst sync --filter api --pattern "feature/*" --all
+
+# Use with fzf for interactive selection from filtered results
+mst sync --filter feature --fzf
+```
+
 ### File Synchronization
 
 ```bash
@@ -50,13 +67,17 @@ mst sync --interactive
 | Option             | Short | Description                           | Default |
 | ------------------ | ----- | ------------------------------------- | ------- |
 | `--all`            | `-a`  | Sync to all orchestra members         | `false` |
-| `--rebase`         | `-r`  | Sync with rebase (default is merge)   | `false` |
+| `--main <branch>`  | `-m`  | Specify main branch                   | auto-detect |
+| `--fzf`            |       | Select orchestra members with fzf     | `false` |
+| `--rebase`         |       | Sync with rebase (default is merge)   | `false` |
+| `--dry-run`        |       | Show changes without actually syncing | `false` |
+| `--push`           |       | Push after merge/rebase              | `false` |
+| `--filter <keyword>` |     | Filter worktrees by branch/path      | none    |
+| `--pattern <pattern>` |    | Filter by wildcard pattern           | none    |
 | `--files`          | `-f`  | File sync mode                        | `false` |
-| `--preset <name>`  | `-p`  | Use preset                            | none    |
-| `--custom <files>` | `-c`  | Custom file list (comma-separated)    | none    |
-| `--interactive`    | `-i`  | Interactive mode                      | `false` |
-| `--force`          |       | Force sync ignoring conflicts         | `false` |
-| `--dry-run`        | `-n`  | Show changes without actually syncing | `false` |
+| `--preset <name>`  | `-p`  | Use preset for file sync             | none    |
+| `--interactive`    | `-i`  | Interactive file selection           | `false` |
+| `--concurrency <n>`| `-c`  | Parallel execution count             | `5`     |
 
 ## Sync Modes
 
@@ -75,7 +96,22 @@ mst sync feature-branch --rebase
 
 # Apply to all orchestra members
 mst sync --all --rebase
+
+# Apply to filtered orchestra members
+mst sync --filter feature --all
+mst sync --pattern "release-*" --all --rebase
 ```
+
+#### Filtering Options
+
+- **`--filter <keyword>`**: Filter by keyword in branch name or path (case-insensitive)
+  - Example: `--filter api` matches `feature/api-v2`, `api-refactor`, `/path/to/api-workspace`
+  
+- **`--pattern <pattern>`**: Filter by wildcard pattern (supports `*` wildcard)
+  - Example: `--pattern "feature/*"` matches `feature/auth`, `feature/api`
+  - Example: `--pattern "*-fix"` matches `bug-fix`, `hotfix`, `security-fix`
+
+Both options can be combined for more precise filtering (AND logic).
 
 ### File Sync
 
@@ -237,7 +273,13 @@ chmod +x sync-ci.sh
 ### Selective Sync
 
 ```bash
-# Sync only orchestra members matching specific pattern
+# Using built-in filtering (recommended)
+mst sync --pattern "feature/*" --all --rebase
+
+# Or filter by keyword
+mst sync --filter hotfix --all --push
+
+# Legacy method using shell scripting
 mst list --json | jq -r '.worktrees[] | select(.branch | startswith("feature/")) | .branch' | while read branch; do
   echo "Syncing $branch..."
   mst sync "$branch" --rebase
@@ -336,10 +378,14 @@ Customize sync settings in `.maestro.json`:
 alias mst-sync-all='mst sync --all --rebase'
 alias mst-sync-env='mst sync --all --preset env'
 alias mst-sync-safe='mst sync --dry-run'
+alias mst-sync-features='mst sync --pattern "feature/*" --all'
+alias mst-sync-fixes='mst sync --filter fix --all --rebase'
 
 # Usage examples
-mst-sync-all    # Sync all orchestra members with rebase
-mst-sync-env    # Sync environment files
+mst-sync-all        # Sync all orchestra members with rebase
+mst-sync-env        # Sync environment files
+mst-sync-features   # Sync only feature branches
+mst-sync-fixes      # Sync branches containing "fix"
 ```
 
 ### Conditional Sync

@@ -482,6 +482,237 @@ describe('sync command', () => {
     })
   })
 
+  describe('フィルタリング機能', () => {
+    it('--filterオプションでブランチ名をフィルタする', async () => {
+      await syncCommand.parseAsync(['node', 'test', '--filter', 'feature', '--all'])
+
+      expect(mockProgressBar.start).toHaveBeenCalledWith(2, 0)
+      expect(execa).toHaveBeenCalledWith(
+        'git',
+        ['merge', 'main', '--no-edit'],
+        expect.objectContaining({
+          cwd: '/repo/worktree-1',
+        })
+      )
+      expect(execa).toHaveBeenCalledWith(
+        'git',
+        ['merge', 'main', '--no-edit'],
+        expect.objectContaining({
+          cwd: '/repo/worktree-2',
+        })
+      )
+    })
+
+    it('--filterオプションでパスをフィルタする', async () => {
+      mockGitManager.listWorktrees.mockResolvedValue([
+        createMockWorktree({
+          path: '/repo/.',
+          branch: 'refs/heads/main',
+        }),
+        createMockWorktree({
+          path: '/repo/feature-workspace/feature-a',
+          branch: 'refs/heads/feature-a',
+        }),
+        createMockWorktree({
+          path: '/repo/bugfix-workspace/bug-fix',
+          branch: 'refs/heads/bug-fix',
+        }),
+      ])
+
+      await syncCommand.parseAsync(['node', 'test', '--filter', 'feature-workspace', '--all'])
+
+      expect(mockProgressBar.start).toHaveBeenCalledWith(1, 0)
+      expect(execa).toHaveBeenCalledWith(
+        'git',
+        ['merge', 'main', '--no-edit'],
+        expect.objectContaining({
+          cwd: '/repo/feature-workspace/feature-a',
+        })
+      )
+      expect(execa).not.toHaveBeenCalledWith(
+        'git',
+        ['merge', 'main', '--no-edit'],
+        expect.objectContaining({
+          cwd: '/repo/bugfix-workspace/bug-fix',
+        })
+      )
+    })
+
+    it('--patternオプションでワイルドカードパターンを使用する', async () => {
+      await syncCommand.parseAsync(['node', 'test', '--pattern', 'feature-*', '--all'])
+
+      expect(mockProgressBar.start).toHaveBeenCalledWith(2, 0)
+      expect(execa).toHaveBeenCalledWith(
+        'git',
+        ['merge', 'main', '--no-edit'],
+        expect.objectContaining({
+          cwd: '/repo/worktree-1',
+        })
+      )
+      expect(execa).toHaveBeenCalledWith(
+        'git',
+        ['merge', 'main', '--no-edit'],
+        expect.objectContaining({
+          cwd: '/repo/worktree-2',
+        })
+      )
+    })
+
+    it('--patternオプションで部分一致パターンを使用する', async () => {
+      mockGitManager.listWorktrees.mockResolvedValue([
+        createMockWorktree({
+          path: '/repo/.',
+          branch: 'refs/heads/main',
+        }),
+        createMockWorktree({
+          path: '/repo/worktree-1',
+          branch: 'refs/heads/feature/user-auth',
+        }),
+        createMockWorktree({
+          path: '/repo/worktree-2',
+          branch: 'refs/heads/feature/payments',
+        }),
+        createMockWorktree({
+          path: '/repo/worktree-3',
+          branch: 'refs/heads/bugfix/login-error',
+        }),
+      ])
+
+      await syncCommand.parseAsync(['node', 'test', '--pattern', 'feature/*', '--all'])
+
+      expect(mockProgressBar.start).toHaveBeenCalledWith(2, 0)
+      expect(execa).toHaveBeenCalledWith(
+        'git',
+        ['merge', 'main', '--no-edit'],
+        expect.objectContaining({
+          cwd: '/repo/worktree-1',
+        })
+      )
+      expect(execa).toHaveBeenCalledWith(
+        'git',
+        ['merge', 'main', '--no-edit'],
+        expect.objectContaining({
+          cwd: '/repo/worktree-2',
+        })
+      )
+      expect(execa).not.toHaveBeenCalledWith(
+        'git',
+        ['merge', 'main', '--no-edit'],
+        expect.objectContaining({
+          cwd: '/repo/worktree-3',
+        })
+      )
+    })
+
+    it('フィルター条件に一致する演奏者がない場合エラーを表示', async () => {
+      await expect(
+        syncCommand.parseAsync(['node', 'test', '--filter', 'nonexistent', '--all'])
+      ).rejects.toThrow('process.exit called with code 1')
+
+      expect(mockSpinner.fail).toHaveBeenCalledWith('同期に失敗しました')
+      expect(console.error).toHaveBeenCalledWith(
+        chalk.red('フィルター条件に一致する演奏者が見つかりません')
+      )
+    })
+
+    it('--filterと--patternオプションを併用する', async () => {
+      mockGitManager.listWorktrees.mockResolvedValue([
+        createMockWorktree({
+          path: '/repo/.',
+          branch: 'refs/heads/main',
+        }),
+        createMockWorktree({
+          path: '/repo/worktree-1',
+          branch: 'refs/heads/feature/user-auth',
+        }),
+        createMockWorktree({
+          path: '/repo/worktree-2',
+          branch: 'refs/heads/feature/payments',
+        }),
+        createMockWorktree({
+          path: '/repo/worktree-3',
+          branch: 'refs/heads/feat/new-ui',
+        }),
+      ])
+
+      await syncCommand.parseAsync([
+        'node',
+        'test',
+        '--filter',
+        'feature',
+        '--pattern',
+        'feature/*',
+        '--all',
+      ])
+
+      // --filterでfeatureを含むブランチを選択し、さらに--patternでfeature/*パターンにマッチするものを選択
+      // この場合、feature/user-authとfeature/paymentsの2つがマッチ
+      expect(mockProgressBar.start).toHaveBeenCalledWith(2, 0)
+      expect(execa).toHaveBeenCalledWith(
+        'git',
+        ['merge', 'main', '--no-edit'],
+        expect.objectContaining({
+          cwd: '/repo/worktree-1',
+        })
+      )
+      expect(execa).toHaveBeenCalledWith(
+        'git',
+        ['merge', 'main', '--no-edit'],
+        expect.objectContaining({
+          cwd: '/repo/worktree-2',
+        })
+      )
+      expect(execa).not.toHaveBeenCalledWith(
+        'git',
+        ['merge', 'main', '--no-edit'],
+        expect.objectContaining({
+          cwd: '/repo/worktree-3',
+        })
+      )
+    })
+
+    it('フィルタリング結果をfzfで選択する', async () => {
+      mockGitManager.listWorktrees.mockResolvedValue([
+        createMockWorktree({
+          path: '/repo/.',
+          branch: 'refs/heads/main',
+        }),
+        createMockWorktree({
+          path: '/repo/worktree-1',
+          branch: 'refs/heads/feature/user-auth',
+        }),
+        createMockWorktree({
+          path: '/repo/worktree-2',
+          branch: 'refs/heads/feature/payments',
+        }),
+        createMockWorktree({
+          path: '/repo/worktree-3',
+          branch: 'refs/heads/bugfix/login-error',
+        }),
+      ])
+
+      const syncPromise = syncCommand.parseAsync(['node', 'test', '--filter', 'feature', '--fzf'])
+
+      // fzf選択をシミュレート（フィルタリング結果のみ表示される）
+      setTimeout(() => {
+        mockFzfProcess.stdout.emit('data', 'feature/user-auth | /repo/worktree-1\n')
+        mockFzfProcess.emit('close', 0)
+      }, 50)
+
+      await syncPromise
+
+      expect(spawn).toHaveBeenCalledWith(
+        'fzf',
+        expect.arrayContaining([
+          '--multi',
+          '--header=同期する演奏者を選択 (Tab で複数選択, Ctrl-C でキャンセル)',
+        ]),
+        expect.any(Object)
+      )
+      expect(mockProgressBar.start).toHaveBeenCalledWith(1, 0)
+    })
+  })
+
   describe('エラーハンドリング', () => {
     it('Gitリポジトリでない場合エラーを表示する', async () => {
       mockGitManager.isGitRepository.mockResolvedValue(false)
