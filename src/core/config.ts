@@ -104,7 +104,7 @@ export type Config = z.infer<typeof ConfigSchema>
 // デフォルト設定
 const DEFAULT_CONFIG: Config = {
   worktrees: {
-    path: '.git/orchestrations',
+    path: '../maestro-{branch}',
   },
   development: {
     autoSetup: true,
@@ -202,7 +202,7 @@ export class ConfigManager {
     const targetPath = configPath || path.join(process.cwd(), '.maestro.json')
     const exampleConfig: Partial<Config> = {
       worktrees: {
-        path: '.git/orchestrations',
+        path: '../maestro-{branch}',
         branchPrefix: 'feature/',
       },
       development: {
