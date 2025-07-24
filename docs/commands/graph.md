@@ -90,6 +90,7 @@ The graph command analyzes several aspects of branch relationships:
 - **Commit Analysis**: Shows divergence from parent branches  
 - **Age calculation**: Determines days since last update
 - **Health Assessment**: Identifies branches with no activity for 30+ days
+- **Circular Reference Detection**: Automatically detects and warns about circular dependencies between branches
 
 ## Use Cases
 
@@ -133,6 +134,15 @@ mst graph --show-dates
    # Use depth limiting
    mst graph --depth 2
    ```
+
+3. **Circular reference warnings**
+   ```bash
+   # When circular dependencies are detected:
+   ⚠️  循環参照が検出されました:
+     - feature-a → feature-b → feature-c → feature-a
+   循環参照のあるブランチは main から派生するよう調整されました
+   ```
+   This indicates that some branches have circular dependencies, which have been automatically resolved by connecting them to the main branch instead.
 
 ## Related Commands
 
