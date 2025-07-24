@@ -1,5 +1,31 @@
 # Changelog
 
+## 2.7.0
+
+### Minor Changes
+
+- ### 💥 Breaking Changes
+  - Worktrees are now created outside the `.git` directory by default (Issue #67)
+    - Old: `.git/orchestrations/feature/branch-name`
+    - New: `../branch-name` (sibling to main repository)
+  - Removed hardcoded `maestro-` prefix for worktree directories (Issue #69)
+    - Now configurable via `directoryPrefix` setting (default: empty string)
+
+  ### 🚀 New Features
+  - Add `mst push --draft-pr` option to create draft pull requests
+  - Add configurable `directoryPrefix` for worktree directory names
+
+  ### 🐛 Bug Fixes
+  - Fix gitignore auto-addition bug (Issue #62, #64)
+  - Add `.maestro-metadata.json` to repository .gitignore (Issue #66)
+  - Remove default branch prefix to allow flexible branch naming
+  - Remove legacy path config from .maestro.json
+
+  ### 📝 Notes
+  - Existing worktrees inside `.git/` will need to be manually recreated
+  - Update your `.maestro.json` if you have custom `path` settings
+  - This release follows Git's standard worktree conventions
+
 ## 2.6.3
 
 ### Patch Changes
