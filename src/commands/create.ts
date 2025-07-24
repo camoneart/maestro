@@ -276,7 +276,6 @@ Add specific instructions for this worktree here.
   }
 }
 
-
 // ブランチ名の解析と処理を行う純粋関数
 export function processBranchName(
   branchName: string,
@@ -339,8 +338,7 @@ export async function executeCreateCommand(
 
   // 設定の読み込み
   await configManager.loadProjectConfig()
-  let config = configManager.getAll()
-
+  const config = configManager.getAll()
 
   // ブランチ名の処理
   const { isIssue, issueNumber, finalBranchName } = processBranchName(branchName, config)

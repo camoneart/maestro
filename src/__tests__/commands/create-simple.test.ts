@@ -142,8 +142,6 @@ describe('create command simple tests', () => {
         maestro: true,
       }
 
-      }
-
       if (options.github) {
         metadata.github = options.github
       }

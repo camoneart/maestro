@@ -187,8 +187,7 @@ describe('github command functions', () => {
       }
 
       // Test different template patterns
-      const testCases = [
-      ]
+      const testCases = []
 
       for (const { template, expected } of testCases) {
         const result = generateBranchName(template, '123', 'Test Title', 'pr')

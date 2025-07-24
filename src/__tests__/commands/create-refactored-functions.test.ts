@@ -105,7 +105,6 @@ describe('create command refactored functions', () => {
     })
 
     it('should handle template options', async () => {
-
       await executeCreateCommand('test-branch', options)
 
       expect(mockConfigManager.getAll).toHaveBeenCalled()
