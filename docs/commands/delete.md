@@ -14,7 +14,10 @@ mst rm <branch-name> [options]  # alias
 When you delete an orchestra member, Maestro performs a **complete cleanup**:
 
 1. **Worktree directory** - The physical directory containing the branch's files
-2. **Local branch** - The Git branch associated with the worktree (uses `git branch -d` for safety)
+2. **Local branch** - The Git branch associated with the worktree
+   - First attempts safe deletion with `git branch -d`
+   - Automatically retries with `git branch -D` if the branch is not fully merged
+   - Ensures complete cleanup without manual intervention
 
 This ensures no orphaned branches remain after worktree deletion.
 
