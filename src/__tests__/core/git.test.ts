@@ -355,6 +355,39 @@ locked reason`
         "ワークツリー 'non-existent' が見つかりません"
       )
     })
+
+    it('should delete local branch after removing worktree (issue #94)', async () => {
+      const branchName = 'feature-to-delete'
+
+      // listWorktreesをモック
+      vi.spyOn(gitManager, 'listWorktrees').mockResolvedValueOnce([
+        {
+          path: '/path/to/feature',
+          head: 'abcdef1234567890',
+          branch: 'refs/heads/feature-to-delete',
+          isCurrentDirectory: false,
+          detached: false,
+          locked: false,
+          prunable: false,
+        },
+      ])
+
+      // git.rawをモック
+      ;(gitManager as any).git.raw = vi.fn().mockResolvedValue('')
+      ;(gitManager as any).git.branch = vi.fn().mockResolvedValue('')
+
+      await gitManager.deleteWorktree(branchName)
+
+      // worktreeの削除が呼び出されることを確認
+      expect((gitManager as any).git.raw).toHaveBeenCalledWith([
+        'worktree',
+        'remove',
+        '/path/to/feature',
+      ])
+
+      // ローカルブランチの削除も呼び出されることを確認（現在は失敗する）
+      expect((gitManager as any).git.branch).toHaveBeenCalledWith(['-d', branchName])
+    })
   })
 
   describe('getAllBranches', () => {

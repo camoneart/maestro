@@ -114,6 +114,9 @@ export class GitWorktreeManager {
     args.push(worktree.path)
 
     await this.git.raw(args)
+
+    // ローカルブランチも削除
+    await this.git.branch(['-d', branchName])
   }
 
   async getCurrentBranch(): Promise<string | null> {
