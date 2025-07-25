@@ -33,7 +33,7 @@ Maestro is a CLI that makes Git worktree management intuitive. When working on m
 | Pain Point                                                                                      | Maestro’s Approach                                                           | Benefit                                               |
 | ----------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- | ----------------------------------------------------- |
 | **Inefficient parallel development**<br>Frequent branch switches, stashes and context switching | **Automatic Worktree management**<br>Each feature lives in its own directory | Zero branch-switch cost, smooth multitasking          |
-| **Hard to keep track of tasks**                                                                 | **Dashboard & CLI list**<br>Visualise all performers (worktrees)             | Instantly know where you are and the current progress |
+| **Hard to keep track of tasks**                                                                 | **CLI list & status**<br>Visualise all performers (worktrees)                | Instantly know where you are and the current progress |
 | **Heavy review / merge workload**                                                               | **Claude Code integration**<br>AI diff reviews & automated PR flow           | Drastically reduces review time                       |
 
 ## Key Features
@@ -44,7 +44,7 @@ Maestro is a CLI that makes Git worktree management intuitive. When working on m
 | 🤖 **Claude AI**          | AI diff reviews & code suggestions                  |
 | 🔗 **GitHub integration** | Generate worktrees from Issues / PRs                |
 | 🎯 **tmux / fzf**         | Keyboard-only, lightning-fast switching             |
-| 📊 **Dashboard**          | Visualise everything in a Web UI                    |
+| 📊 **Status**             | Real-time worktree status and health monitoring     |
 | 🔄 **Auto Sync**          | Propagate file changes in real time                 |
 | 📸 **Snapshot**           | Save / restore any state with one command           |
 | 🏥 **Health Check**       | Detect & auto-fix orphaned / conflicting branches   |
@@ -109,8 +109,9 @@ mst create feature/awesome-feature --tmux --claude
 | **Fast switch** via tmux          | `mst tmux`                                                                   |
 | **Create from GitHub Issue**      | `mst create 123`                                                             |
 | **Create from PR**                | `mst github checkout 456`                                                    |
-| **Auto draft PR**                 | `mst create feature/new-ui --draft-pr`                                       |
-| **AI diff review**                | `mst suggest --review`                                                       |
+| **List GitHub issues/PRs**        | `mst github list`                                                            |
+| **Push with PR**                  | `mst push --pr`                                                              |
+| **Push with draft PR**            | `mst push --draft-pr`                                                        |
 | **Auto review & merge**           | `mst review --auto-flow`                                                     |
 
 ## Command Reference
@@ -126,9 +127,8 @@ See the full [Command Reference](./docs/COMMANDS.md).
 | `delete`    | Delete worktree              | `mst delete feature/old --fzf` |
 | `tmux`      | Open in tmux                 | `mst tmux`                     |
 | `sync`      | Real-time file sync          | `mst sync --auto`              |
-| `suggest`   | Claude suggestions / reviews | `mst suggest --review`         |
+| `push`      | Push and create PR           | `mst push --pr`                |
 | `github`    | GitHub integration           | `mst github checkout 123`      |
-| `dashboard` | Launch Web dashboard         | `mst dashboard --open`         |
 | `health`    | Health check                 | `mst health --fix`             |
 | `where`     | Show current performer       | `mst where`                    |
 
@@ -140,7 +140,7 @@ All sub-commands and options are documented in the [Command Reference](./docs/CO
 mst create feature/my-ui --tmux --claude   # create + AI + tmux
 mst list                                   # list performers
 mst tmux                                   # switch via fzf
-mst suggest --branch                       # AI suggestions
+mst push --pr                              # push with PR
 mst review --auto-flow                     # auto review & merge
 ```
 
@@ -151,7 +151,7 @@ Maestro ships with **power commands** that automate tedious tasks in a single li
 | Feature                     | Command Example                                                       | What It Automates                                                           |
 | --------------------------- | --------------------------------------------------------------------- | --------------------------------------------------------------------------- |
 | **Auto Review & Merge 🚀**  | `mst review --auto-flow`                                              | Fetch → rebase → AI review → Conventional Commit → open PR — all in one go  |
-| **Integrated Dashboard 📊** | `mst dashboard` <br>`mst dashboard --port 3000`                       | Real-time Web UI showing worktree state, GitHub status, health metrics      |
+| **GitHub Integration 🔗**   | `mst github list` <br>`mst github checkout 123`                       | List and checkout GitHub issues/PRs, automate repository workflows         |
 | **Snapshot 📸**             | `mst snapshot -m "before-refactor"` <br>`mst snapshot --restore <id>` | Save / restore any working state instantly                                  |
 | **Health Check 🏥**         | `mst health` <br>`mst health --fix`                                   | Detects stale / orphaned / conflicted branches and fixes them automatically |
 
