@@ -84,6 +84,10 @@ brew install camoneart/tap/maestro
 # 2. Move to your Git project
 cd ~/path/to/your-repo
 
+# 2.5. Initialize maestro for your project (NEW!)
+mst init                                      # Interactive setup
+# or: mst init --yes                          # Quick setup with defaults
+
 # 3. Create a performer (worktree)
 mst create feature/awesome-feature            # create only
 
@@ -122,6 +126,7 @@ See the full [Command Reference](./docs/COMMANDS.md).
 
 | Command     | Description                  | Example                        |
 | ----------- | ---------------------------- | ------------------------------ |
+| `init`      | Initialize project config    | `mst init --yes`               |
 | `create`    | Create a new worktree        | `mst create feature/login`     |
 | `list`      | List worktrees               | `mst list`                     |
 | `delete`    | Delete worktree & local branch | `mst delete feature/old --fzf` |
