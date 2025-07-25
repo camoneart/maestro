@@ -1,5 +1,20 @@
 # Changelog
 
+## 3.0.1
+
+### Patch Changes
+
+- Fix EEXIST error when using --claude option with existing CLAUDE.md
+
+  Resolves issue where `mst create <branch> --claude` would fail with EEXIST error when CLAUDE.md already exists in the worktree. Git worktree creation automatically copies all files from the root directory, including CLAUDE.md, but the --claude option was attempting to create a symlink without removing the existing file first.
+
+  Changes:
+  - Delete existing CLAUDE.md in worktree before creating symlink in shared mode
+  - Add graceful error handling for cases where the file doesn't exist
+  - Include comprehensive test coverage for the fix
+
+  Fixes #106
+
 ## 3.0.0
 
 ### Major Changes
