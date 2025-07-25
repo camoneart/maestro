@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.7.4
+
+### Patch Changes
+
+- Fix critical bug in delete command
+  - #98 365842c Thanks @camoneart! - Ensure local branch is deleted when removing worktree
+
 ## 2.7.3
 
 ### Patch Changes
