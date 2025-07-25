@@ -27,7 +27,6 @@ import { graphCommand } from './commands/graph.js'
 import { watchCommand } from './commands/watch.js'
 import { healthCommand } from './commands/health.js'
 import { snapshotCommand } from './commands/snapshot.js'
-import { claudeCommand } from './commands/claude.js'
 import { initCommand } from './commands/init.js'
 import { pushCommand } from './commands/push.js'
 
@@ -61,7 +60,6 @@ program.addCommand(graphCommand)
 program.addCommand(watchCommand)
 program.addCommand(healthCommand)
 program.addCommand(snapshotCommand)
-program.addCommand(claudeCommand)
 program.addCommand(pushCommand)
 
 // エラーハンドリング
