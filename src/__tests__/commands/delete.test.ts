@@ -305,10 +305,10 @@ describe('delete command', () => {
 
       // --forceフラグが設定されている場合は確認プロンプトをスキップ
       const options = { force: true, fzf: true }
-      
+
       // 確認プロンプトが呼ばれないことを確認するために、inquirer.promptをモック
       const promptSpy = vi.mocked(inquirer.prompt)
-      
+
       // forceオプションが有効な場合はpromptが呼ばれないはず
       if (!options.force) {
         await inquirer.prompt([
