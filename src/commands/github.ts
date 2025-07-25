@@ -671,7 +671,7 @@ export const githubCommand = new Command('github')
       const args = parseArguments(type, number)
 
       // 初期化
-      spinner.text = '初期化中...'
+      spinner.text = '準備中...'
       const { gitManager, config } = await initialize()
       spinner.stop()
 
