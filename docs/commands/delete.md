@@ -1,6 +1,6 @@
 # 🔸 delete
 
-Command to delete orchestra members (Git worktrees). Cleans up unnecessary orchestra members and frees disk space.
+Command to delete orchestra members (Git worktrees). Provides complete cleanup by removing both the worktree directory and associated local branch.
 
 ## Overview
 
@@ -9,12 +9,21 @@ mst delete <branch-name> [options]
 mst rm <branch-name> [options]  # alias
 ```
 
+### What gets deleted
+
+When you delete an orchestra member, Maestro performs a **complete cleanup**:
+
+1. **Worktree directory** - The physical directory containing the branch's files
+2. **Local branch** - The Git branch associated with the worktree (uses `git branch -d` for safety)
+
+This ensures no orphaned branches remain after worktree deletion.
+
 ## Usage Examples
 
 ### Basic Usage
 
 ```bash
-# Delete orchestra member
+# Delete orchestra member (removes both worktree and local branch)
 mst delete feature/old-feature
 
 # Force delete (delete even with uncommitted changes)
@@ -42,9 +51,9 @@ mst delete --merged --dry-run
 | Option                | Short | Description                                        | Default |
 | --------------------- | ----- | -------------------------------------------------- | ------- |
 | `--force`             | `-f`  | Force delete (ignore uncommitted changes)          | `false` |
+| `--remove-remote`     | `-r`  | Also delete remote branch                          | `false` |
 | `--fzf`               |       | Select with fzf and delete                         | `false` |
-| `--merged`            | `-m`  | Delete merged orchestra members                    | `false` |
-| `--older-than <days>` | `-o`  | Delete orchestra members older than specified days | none    |
+| `--current`           |       | Delete current worktree                            | `false` |
 | `--dry-run`           | `-n`  | Show deletion targets without actually deleting    | `false` |
 | `--yes`               | `-y`  | Skip confirmation prompts                          | `false` |
 
@@ -57,6 +66,10 @@ Normally, a confirmation prompt is displayed before deletion:
    Branch: feature/old-feature
    Path: /Users/user/project/.git/orchestra-members/feature-old-feature
    Status: 3 uncommitted changes
+
+   ⚠️  This will delete:
+   • Worktree directory and all its contents
+   • Local branch 'feature/old-feature'
 
    This action cannot be undone.
 
@@ -162,7 +175,7 @@ You can set hooks before and after deletion in `.mst.json`:
    ```
    Warning: Remote branch 'origin/feature/old-feature' still exists
    ```
-   Action: Also delete remote branch with `git push origin --delete feature/old-feature`
+   Action: Also delete remote branch with `mst delete feature/old-feature --remove-remote` or manually with `git push origin --delete feature/old-feature`
 
 ## Best Practices
 
@@ -221,11 +234,14 @@ mst-cleanup --yes            # Cleanup old orchestra members
 ### Delete Both Remote and Local
 
 ```bash
-# Function to delete both local and remote
+# Since v2.7.3, the --remove-remote option makes this simpler
+mst delete feature/old-feature --remove-remote
+
+# Or use a function for more control
 delete_worktree_and_remote() {
   local branch=$1
 
-  # Delete local orchestra member
+  # Delete local orchestra member (worktree + local branch)
   mst delete "$branch" --yes
 
   # Also delete remote branch
