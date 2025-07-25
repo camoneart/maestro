@@ -1,5 +1,14 @@
 # Changelog
 
+## 2.7.3
+
+### Patch Changes
+
+- Fix bugs and improve user experience
+  - #91 932a35a Thanks @camoneart! - Add confirmation prompt after fzf selection for better UX
+  - #92 077a70e Thanks @camoneart! - Update README files to reflect v2.7.0+ changes (removed commands, new features)
+  - 02571d7 Thanks @camoneart! - Improve spinner text from '初期化中...' to '準備中...' for better UX
+
 ## 2.7.2
 
 ### Patch Changes
