@@ -1,5 +1,14 @@
 # Changelog
 
+## 2.7.2
+
+### Patch Changes
+
+- Fix repository maintenance issues and update dependencies
+  - Remove gitignored \_docs directory from repository (#88)
+  - Remove caret from @types/node version for consistency (#87)
+  - Update dependencies to latest versions (Issue #84) (#85)
+
 ## 2.7.1
 
 ### Patch Changes
