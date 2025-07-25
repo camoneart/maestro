@@ -185,7 +185,10 @@ export async function executeWorktreeDeletion(
 }
 
 // fzfを使用してワークツリーを選択
-async function selectWorktreesWithFzf(filteredWorktrees: Worktree[]): Promise<Worktree[]> {
+async function selectWorktreesWithFzf(
+  filteredWorktrees: Worktree[],
+  options: { force?: boolean } = {}
+): Promise<Worktree[]> {
   const fzfInput = filteredWorktrees
     .map(w => {
       const status = []
@@ -222,7 +225,7 @@ async function selectWorktreesWithFzf(filteredWorktrees: Worktree[]): Promise<Wo
   })
 
   return new Promise<Worktree[]>((resolve, reject) => {
-    fzfProcess.on('close', code => {
+    fzfProcess.on('close', async code => {
       if (code !== 0 || !selected.trim()) {
         reject(new DeleteCommandError('キャンセルされました'))
         return
@@ -245,6 +248,29 @@ async function selectWorktreesWithFzf(filteredWorktrees: Worktree[]): Promise<Wo
         return selectedBranches.includes(branch)
       })
 
+      // --forceオプションがない場合は最終確認プロンプトを表示
+      if (!options.force && targetWorktrees.length > 0) {
+        console.log(chalk.yellow('\n⚠️  以下の選択したworktreeを本当に削除しますか？'))
+        targetWorktrees.forEach(wt => {
+          const branch = wt.branch?.replace('refs/heads/', '') || wt.branch
+          console.log(`  ${chalk.green('✅')} ${chalk.cyan(branch)}`)
+        })
+
+        const { confirmDelete } = await inquirer.prompt([
+          {
+            type: 'confirm',
+            name: 'confirmDelete',
+            message: '削除を実行しますか？',
+            default: false,
+          },
+        ])
+
+        if (!confirmDelete) {
+          reject(new DeleteCommandError('キャンセルされました'))
+          return
+        }
+      }
+
       resolve(targetWorktrees)
     })
   })
@@ -255,14 +281,14 @@ async function determineTargetWorktrees(
   filteredWorktrees: Worktree[],
   needsInteractiveSelection: boolean,
   branchName?: string,
-  options: { fzf?: boolean } = {}
+  options: { fzf?: boolean; force?: boolean } = {}
 ): Promise<Worktree[]> {
   if (!needsInteractiveSelection) {
     return filteredWorktrees
   }
 
   if (options.fzf && !branchName) {
-    return selectWorktreesWithFzf(filteredWorktrees)
+    return selectWorktreesWithFzf(filteredWorktrees, options)
   }
 
   if (branchName) {
@@ -438,8 +464,8 @@ export const deleteCommand = new Command('delete')
 
         await displayDeletionDetails(targetWorktrees)
 
-        // 削除確認
-        if (!options.force) {
+        // fzf使用時は selectWorktreesWithFzf 内で確認済み、そうでなければここで確認
+        if (!options.force && !(options.fzf && !branchName)) {
           const { confirmDelete } = await inquirer.prompt([
             {
               type: 'confirm',
