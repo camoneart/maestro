@@ -32,7 +32,6 @@ Detailed usage of all maestro (mst) commands.
 - [history](#-history) - Operation history
 - [issue](#-issue) - GitHub issue integration
 - [review](#-review) - PR review management
-- [claude](#-claude) - Claude Code management
 - [completion](#-completion) - Shell auto-completion
 
 ---
@@ -741,39 +740,6 @@ mst review approve 123
 mst review request-changes 123
 ```
 
-### 🔸 claude
-
-Manage Claude Code instances for each orchestra member.
-
-```bash
-mst claude <command> [options]
-```
-
-#### Subcommands
-- `list` - List running Claude Code instances
-- `start <branch-name>` - Start Claude Code for specific worktree
-- `stop <branch-name>` - Stop Claude Code for specific worktree
-
-#### Options
-- `--all` - Apply to all orchestra members (for start/stop)
-
-#### Examples
-```bash
-# List running instances
-mst claude list
-
-# Start Claude Code for a branch
-mst claude start feature/awesome
-
-# Start Claude Code for all branches
-mst claude start --all
-
-# Stop Claude Code
-mst claude stop feature/awesome
-
-# Stop all Claude Code instances
-mst claude stop --all
-```
 
 ### 🔸 completion
 
@@ -907,5 +873,4 @@ For detailed usage of each command, see the following documentation:
 - [History Management Details](./commands/history.md)
 - [Issue Integration Details](./commands/issue.md)
 - [Review Management Details](./commands/review.md)
-- [Claude Code Management Details](./commands/claude.md)
 - [Completion Setup Details](./commands/completion.md)
