@@ -388,6 +388,48 @@ locked reason`
       // ローカルブランチの削除も呼び出されることを確認（現在は失敗する）
       expect((gitManager as any).git.branch).toHaveBeenCalledWith(['-d', branchName])
     })
+
+    it('should force delete local branch when regular deletion fails (issue #98)', async () => {
+      const branchName = 'feature-not-fully-merged'
+      // listWorktreesをモック
+      vi.spyOn(gitManager, 'listWorktrees').mockResolvedValueOnce([
+        {
+          path: '/path/to/feature',
+          head: 'abcdef1234567890',
+          branch: 'refs/heads/feature-not-fully-merged',
+          isCurrentDirectory: false,
+          detached: false,
+          locked: false,
+          prunable: false,
+        },
+      ])
+
+      // git.rawをモック
+      ;(gitManager as any).git.raw = vi.fn().mockResolvedValue('')
+
+      // git.branchをモック - 最初の-dで失敗、-Dで成功するシナリオ
+      const branchMock = vi
+        .fn()
+        .mockRejectedValueOnce(
+          new Error("error: The branch 'feature-not-fully-merged' is not fully merged.")
+        )
+        .mockResolvedValueOnce('')
+      ;(gitManager as any).git.branch = branchMock
+
+      await gitManager.deleteWorktree(branchName)
+
+      // worktreeの削除が呼び出されることを確認
+      expect((gitManager as any).git.raw).toHaveBeenCalledWith([
+        'worktree',
+        'remove',
+        '/path/to/feature',
+      ])
+
+      // ローカルブランチの削除が2回呼び出されることを確認
+      expect(branchMock).toHaveBeenCalledTimes(2)
+      expect(branchMock).toHaveBeenNthCalledWith(1, ['-d', branchName])
+      expect(branchMock).toHaveBeenNthCalledWith(2, ['-D', branchName])
+    })
   })
 
   describe('getAllBranches', () => {

@@ -116,7 +116,16 @@ export class GitWorktreeManager {
     await this.git.raw(args)
 
     // ローカルブランチも削除
-    await this.git.branch(['-d', branchName])
+    try {
+      await this.git.branch(['-d', branchName])
+    } catch (error) {
+      // -d で削除できない場合は -D で強制削除を試みる
+      if (error instanceof Error && error.message.includes('not fully merged')) {
+        await this.git.branch(['-D', branchName])
+      } else {
+        throw error
+      }
+    }
   }
 
   async getCurrentBranch(): Promise<string | null> {
