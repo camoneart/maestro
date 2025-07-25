@@ -1,5 +1,20 @@
 # Changelog
 
+## 3.0.0
+
+### Major Changes
+
+- [#108](https://github.com/camoneart/maestro/pull/108) [`3684416`](https://github.com/camoneart/maestro/commit/368441684d5dbdb4e4630eec9d6d827738dc8e50) Thanks [@camoneart](https://github.com/camoneart)! - Remove non-functional `mst claude` command
+
+  The `mst claude` command has been removed due to fundamental design issues:
+  - Claude Code is an interactive CLI tool that cannot run as a background process
+  - The "start/stop" concept is not applicable to Claude Code
+  - Commands appeared to work but were actually non-functional
+
+  **Breaking Change**: The `mst claude` command and its subcommands (`start`, `stop`, `list`) are no longer available.
+
+  **Migration**: Use the `claude` command directly in your worktrees. The `--claude` option for `mst create` remains available for CLAUDE.md generation.
+
 ## 2.7.4
 
 ### Patch Changes
