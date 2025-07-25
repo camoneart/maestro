@@ -464,10 +464,16 @@ async function createWorktreeFromGithub(
 
   spinner.start('演奏者を招集中...')
 
-  const worktreePath =
-    type === 'pr'
-      ? await createWorktreeForPR(number, branchName, gitManager)
-      : await gitManager.createWorktree(branchName)
+  let worktreePath: string
+  try {
+    worktreePath =
+      type === 'pr'
+        ? await createWorktreeForPR(number, branchName, gitManager)
+        : await gitManager.createWorktree(branchName)
+  } catch (error) {
+    spinner.fail('演奏者の招集に失敗しました')
+    throw error
+  }
 
   spinner.succeed(
     `演奏者 '${chalk.cyan(branchName)}' を招集しました！\n` +
