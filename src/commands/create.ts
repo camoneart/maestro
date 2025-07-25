@@ -232,6 +232,17 @@ export async function createTmuxSession(
 
       console.log(chalk.green(`✨ Claude Codeを起動しました`))
     }
+
+    // 自動でセッションにアタッチ
+    console.log(chalk.cyan(`🎵 tmuxセッション '${sessionName}' にアタッチしています...`))
+
+    // tmux内からはattach-sessionを使用、外からはattachを使用
+    const isInsideTmux = process.env.TMUX !== undefined
+    if (isInsideTmux) {
+      await execa('tmux', ['switch-client', '-t', sessionName], { stdio: 'inherit' })
+    } else {
+      await execa('tmux', ['attach', '-t', sessionName], { stdio: 'inherit' })
+    }
   } catch (error) {
     console.error(chalk.red(`tmuxセッションの作成に失敗しました: ${error}`))
   }

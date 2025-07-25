@@ -25,13 +25,18 @@ mst create issue-123     # Created as issue-123
 ### Advanced Usage
 
 ```bash
-# Create with tmux session (auto-start Claude Code)
+# Create with tmux session (auto-attaches to the session)
+mst create feature/new-feature --tmux
+
+# Create with tmux session and auto-start Claude Code
 mst create feature/new-feature --tmux --claude
 
+# Create with tmux pane split options (when already in tmux)
+mst create feature/new-feature --tmux-h  # Horizontal split
+mst create feature/new-feature --tmux-v  # Vertical split
 
 # Create with specified base branch
 mst create feature/new-feature --base develop
-
 
 # Combine all options
 mst create feature/new-feature --base main --open --setup --tmux --claude
@@ -44,7 +49,9 @@ mst create feature/new-feature --base main --open --setup --tmux --claude
 | `--base <branch>`    | `-b`  | Specify base branch                                           | `main`  |
 | `--open`             | `-o`  | Open in editor after creation                                 | `false` |
 | `--setup`            | `-s`  | Run environment setup (npm install, etc.)                     | `false` |
-| `--tmux`             | `-t`  | Create tmux session/window                                    | `false` |
+| `--tmux`             | `-t`  | Create tmux session and auto-attach                          | `false` |
+| `--tmux-h`           |       | Split tmux pane horizontally (when in tmux)                  | `false` |
+| `--tmux-v`           |       | Split tmux pane vertically (when in tmux)                    | `false` |
 | `--claude`           | `-c`  | Auto-start Claude Code                                        | `false` |
 | `--copy-file <file>` |       | Copy files from current worktree (including gitignored files) | none    |
 | `--shell`            |       | Enter shell after creation                                    | `false` |
@@ -72,6 +79,35 @@ Retrieved information:
 
 
 
+## tmux Integration
+
+### Session Creation with Auto-Attach
+
+Using the `--tmux` option creates a new tmux session and automatically attaches to it:
+
+```bash
+# Creates session and attaches immediately
+mst create feature/new-feature --tmux
+```
+
+**Behavior:**
+- If outside tmux: Creates session and attaches using `tmux attach`
+- If inside tmux: Creates session and switches using `tmux switch-client`
+
+### Pane Splitting (when already in tmux)
+
+For quick development without leaving your current tmux session:
+
+```bash
+# Split horizontally (left/right)
+mst create feature/new-feature --tmux-h
+
+# Split vertically (top/bottom)
+mst create feature/new-feature --tmux-v
+```
+
+These options create a new pane in your current tmux window and immediately switch to the worktree directory.
+
 ## Claude Code Integration
 
 Using the `--claude` option automatically starts Claude Code after orchestra member creation:
@@ -83,7 +119,7 @@ mst create feature/ai-feature --tmux --claude
 Executed processes:
 
 1. Worktree creation
-2. tmux session/window creation
+2. tmux session/window creation (with auto-attach if using `--tmux`)
 3. Claude Code startup
 4. Initial command execution (if specified in configuration)
 
