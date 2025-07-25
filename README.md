@@ -124,7 +124,7 @@ See the full [Command Reference](./docs/COMMANDS.md).
 | ----------- | ---------------------------- | ------------------------------ |
 | `create`    | Create a new worktree        | `mst create feature/login`     |
 | `list`      | List worktrees               | `mst list`                     |
-| `delete`    | Delete worktree              | `mst delete feature/old --fzf` |
+| `delete`    | Delete worktree & local branch | `mst delete feature/old --fzf` |
 | `tmux`      | Open in tmux                 | `mst tmux`                     |
 | `sync`      | Real-time file sync          | `mst sync --auto`              |
 | `push`      | Push and create PR           | `mst push --pr`                |

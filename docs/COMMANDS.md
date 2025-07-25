@@ -225,11 +225,13 @@ mst rm [branch-name] [options]  # alias
 | `--current` | Delete current worktree |
 
 #### Features
+- **Complete cleanup**: Automatically deletes both worktree directory and associated local branch
 - **Wildcard support**: Use patterns like `"feature/old-*"` to delete multiple branches
+- **Safe deletion**: Uses `git branch -d` to prevent deletion of unmerged branches
 
 #### Examples
 ```bash
-# Basic delete
+# Basic delete (removes both worktree and local branch)
 mst delete feature/old-feature
 
 # Force delete (even with uncommitted changes)

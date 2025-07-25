@@ -122,7 +122,7 @@ mst create feature/awesome-feature --tmux --claude
 | ----------- | -------------------------- | ------------------------------ |
 | `create`    | 新しい worktree を作成     | `mst create feature/login`     |
 | `list`      | worktree を一覧表示        | `mst list`                     |
-| `delete`    | worktree を削除            | `mst delete feature/old --fzf` |
+| `delete`    | worktree とローカルブランチを削除 | `mst delete feature/old --fzf` |
 | `tmux`      | tmux セッションで開く      | `mst tmux`                     |
 | `sync`      | ファイルをリアルタイム同期 | `mst sync --auto`              |
 | `push`      | Push してPR作成            | `mst push --pr`                |
