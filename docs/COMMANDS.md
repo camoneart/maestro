@@ -95,7 +95,7 @@ mst create <branch-name> [options]
 | `--base <branch>` | Specify base branch (default: main) |
 | `--open` | Automatically open in editor |
 | `--setup` | Auto-setup development environment |
-| `--tmux` | Create new tmux window |
+| `--tmux` | Create tmux session and auto-attach |
 | `--tmux-h` | Create in horizontal tmux pane split |
 | `--tmux-v` | Create in vertical tmux pane split |
 | `--claude` | Create CLAUDE.md for Claude Code |
