@@ -52,7 +52,7 @@ describe('createTmuxSession - pane split options', () => {
     ])
   })
 
-  it('should create new session with regular --tmux option', async () => {
+  it('should create new session with regular --tmux option and auto-attach', async () => {
     const options: CreateOptions = { tmux: true }
     vi.mocked(execa).mockRejectedValueOnce(new Error('no session')) // has-session fails
 
@@ -66,5 +66,33 @@ describe('createTmuxSession - pane split options', () => {
       '-c',
       '/path/to/worktree',
     ])
+
+    // Should auto-attach to the session
+    expect(execa).toHaveBeenCalledWith('tmux', ['attach', '-t', 'feature-test'], {
+      stdio: 'inherit',
+    })
+  })
+
+  it('should use switch-client when already inside tmux', async () => {
+    const options: CreateOptions = { tmux: true }
+    vi.mocked(execa).mockRejectedValueOnce(new Error('no session')) // has-session fails
+
+    // Mock being inside tmux
+    const originalTmux = process.env.TMUX
+    process.env.TMUX = '/tmp/tmux-1000/default,1234,0'
+
+    await createTmuxSession('feature-test', '/path/to/worktree', mockConfig, options)
+
+    // Should use switch-client instead of attach
+    expect(execa).toHaveBeenCalledWith('tmux', ['switch-client', '-t', 'feature-test'], {
+      stdio: 'inherit',
+    })
+
+    // Restore original TMUX env
+    if (originalTmux !== undefined) {
+      process.env.TMUX = originalTmux
+    } else {
+      delete process.env.TMUX
+    }
   })
 })
