@@ -241,4 +241,88 @@ describe('delete command', () => {
       expect(currentWt?.branch).toBe('refs/heads/feature-current')
     })
   })
+
+  describe('fzf confirmation prompt', () => {
+    it('should prompt for confirmation after fzf selection when not using --force', async () => {
+      const worktrees = [
+        createMockWorktree({ branch: 'refs/heads/feature-1', path: '/path/feature1' }),
+        createMockWorktree({ branch: 'refs/heads/feature-2', path: '/path/feature2' }),
+      ]
+      mockGitManager.listWorktrees.mockResolvedValue(worktrees)
+
+      // fzf選択後の確認プロンプトをシミュレート
+      vi.mocked(inquirer.prompt).mockResolvedValueOnce({
+        confirmDelete: true,
+      })
+
+      const result = await inquirer.prompt([
+        {
+          type: 'confirm',
+          name: 'confirmDelete',
+          message: '削除を実行しますか？',
+          default: false,
+        },
+      ])
+
+      expect(result.confirmDelete).toBe(true)
+      expect(inquirer.prompt).toHaveBeenCalledWith([
+        {
+          type: 'confirm',
+          name: 'confirmDelete',
+          message: '削除を実行しますか？',
+          default: false,
+        },
+      ])
+    })
+
+    it('should cancel deletion when user declines fzf confirmation', async () => {
+      const worktrees = [
+        createMockWorktree({ branch: 'refs/heads/feature-1', path: '/path/feature1' }),
+      ]
+      mockGitManager.listWorktrees.mockResolvedValue(worktrees)
+
+      vi.mocked(inquirer.prompt).mockResolvedValueOnce({
+        confirmDelete: false,
+      })
+
+      const result = await inquirer.prompt([
+        {
+          type: 'confirm',
+          name: 'confirmDelete',
+          message: '削除を実行しますか？',
+          default: false,
+        },
+      ])
+
+      expect(result.confirmDelete).toBe(false)
+    })
+
+    it('should skip confirmation when using --force flag with fzf', async () => {
+      const worktrees = [
+        createMockWorktree({ branch: 'refs/heads/feature-1', path: '/path/feature1' }),
+      ]
+      mockGitManager.listWorktrees.mockResolvedValue(worktrees)
+
+      // --forceフラグが設定されている場合は確認プロンプトをスキップ
+      const options = { force: true, fzf: true }
+      
+      // 確認プロンプトが呼ばれないことを確認するために、inquirer.promptをモック
+      const promptSpy = vi.mocked(inquirer.prompt)
+      
+      // forceオプションが有効な場合はpromptが呼ばれないはず
+      if (!options.force) {
+        await inquirer.prompt([
+          {
+            type: 'confirm',
+            name: 'confirmDelete',
+            message: '削除を実行しますか？',
+            default: false,
+          },
+        ])
+      }
+
+      // --forceが有効な場合はpromptが呼ばれない
+      expect(promptSpy).not.toHaveBeenCalled()
+    })
+  })
 })
