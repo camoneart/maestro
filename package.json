@@ -1,6 +1,6 @@
 {
   "name": "@camoneart/maestro",
-  "version": "2.7.4",
+  "version": "3.0.0",
   "description": "Git worktreeを活用した「オーケストラ開発」で、Claude Codeとのパラレル開発を飛躍的に効率化するCLIツール",
   "type": "module",
   "bin": {
