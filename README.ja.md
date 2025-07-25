@@ -82,6 +82,10 @@ brew install camoneart/tap/maestro
 # 2. Git プロジェクトに移動
 cd ~/path/to/your-repo
 
+# 2.5. プロジェクトで maestro を初期化（新機能！）
+mst init                                      # 対話的セットアップ
+# または: mst init --yes                      # デフォルト設定で素早くセットアップ
+
 # 3. 新しい worktree (演奏者) を作成
 mst create feature/awesome-feature            # まず作成だけ
 
@@ -120,6 +124,7 @@ mst create feature/awesome-feature --tmux --claude
 
 | コマンド    | 説明                       | ショート例                     |
 | ----------- | -------------------------- | ------------------------------ |
+| `init`      | プロジェクト設定を初期化    | `mst init --yes`               |
 | `create`    | 新しい worktree を作成     | `mst create feature/login`     |
 | `list`      | worktree を一覧表示        | `mst list`                     |
 | `delete`    | worktree とローカルブランチを削除 | `mst delete feature/old --fzf` |
