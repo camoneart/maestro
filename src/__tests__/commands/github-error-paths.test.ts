@@ -499,6 +499,71 @@ describe('github command error paths', () => {
     })
   })
 
+  describe('worktree creation error handling', () => {
+    it('should handle branch collision error and stop spinner properly', async () => {
+      const mockIssue = {
+        number: 90,
+        title: 'test',
+        author: { login: 'user1' },
+      }
+
+      mockExeca.mockImplementation((cmd: string, args: string[]) => {
+        if (cmd === 'gh' && args[0] === '--version') {
+          return Promise.resolve(mockGhVersion())
+        }
+        if (cmd === 'gh' && args[0] === 'auth' && args[1] === 'status') {
+          return Promise.resolve(mockGhAuthStatus())
+        }
+        if (cmd === 'gh' && args[0] === 'pr' && args[1] === 'view') {
+          throw new Error('not a PR')
+        }
+        if (cmd === 'gh' && args[0] === 'issue' && args[1] === 'view') {
+          return Promise.resolve({
+            stdout: JSON.stringify(mockIssue),
+            stderr: '',
+            exitCode: 0,
+          } as any)
+        }
+        return Promise.resolve({ stdout: '', stderr: '', exitCode: 0 } as any)
+      })
+
+      // ブランチ衝突エラーをモック
+      mockGitWorktreeManagerInstance.createWorktree.mockRejectedValue(
+        new Error("ブランチ 'issue-90' は既に存在します")
+      )
+
+      mockInquirer.prompt.mockResolvedValueOnce({ confirmCreate: true })
+
+      // oraモックのfailメソッドが呼ばれるかをチェック
+      const { default: ora } = await import('ora')
+      const mockOra = vi.mocked(ora)
+      const mockFail = vi.fn().mockReturnThis()
+      const mockStart = vi.fn().mockReturnThis()
+      mockOra.mockReturnValue({
+        start: mockStart,
+        succeed: vi.fn().mockReturnThis(),
+        fail: mockFail,
+        warn: vi.fn().mockReturnThis(),
+        info: vi.fn().mockReturnThis(),
+        stop: vi.fn().mockReturnThis(),
+        text: '',
+      } as any)
+
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+
+      try {
+        await program.parseAsync(['node', 'test', 'github', 'issue', '90'])
+      } catch (error) {
+        expect(error).toBeDefined()
+      }
+
+      // スピナーのfailメソッドが呼ばれたことを確認
+      expect(mockFail).toHaveBeenCalledWith('演奏者の招集に失敗しました')
+      expect(consoleSpy).toHaveBeenCalled()
+      consoleSpy.mockRestore()
+    })
+  })
+
   describe('not git repository error', () => {
     it('should handle when not in a git repository', async () => {
       mockGitWorktreeManagerInstance.isGitRepository.mockResolvedValue(false)
