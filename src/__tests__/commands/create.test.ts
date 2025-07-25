@@ -5,6 +5,7 @@ import { execa } from 'execa'
 import fs from 'fs/promises'
 import inquirer from 'inquirer'
 import ora from 'ora'
+import { handleClaudeMarkdown } from '../../commands/create'
 
 // モック設定
 vi.mock('../../core/git')
@@ -244,6 +245,99 @@ describe('create command', () => {
       await expect(gitManager.createWorktree('existing-branch')).rejects.toThrow(
         'Branch already exists'
       )
+    })
+  })
+
+  describe('handleClaudeMarkdown', () => {
+    it('should handle existing CLAUDE.md file in shared mode', async () => {
+      const worktreePath = '/path/to/worktree'
+      const config = {
+        claude: {
+          autoStart: false,
+          markdownMode: 'shared' as const,
+          initialCommands: [],
+        },
+      }
+
+      // CLAUDE.mdがルートに存在する
+      vi.mocked(fs.access).mockResolvedValue(undefined)
+      // unlinkは成功
+      vi.mocked(fs.unlink).mockResolvedValue(undefined)
+      // symlinkも成功
+      vi.mocked(fs.symlink).mockResolvedValue(undefined)
+
+      // 関数を呼び出し
+      await handleClaudeMarkdown(worktreePath, config)
+
+      // unlinkが呼ばれたことを確認
+      expect(fs.unlink).toHaveBeenCalledWith(worktreePath + '/CLAUDE.md')
+      // symlinkが呼ばれたことを確認
+      expect(fs.symlink).toHaveBeenCalled()
+    })
+
+    it('should create symlink successfully when CLAUDE.md does not exist', async () => {
+      const worktreePath = '/path/to/worktree'
+      const config = {
+        claude: {
+          autoStart: false,
+          markdownMode: 'shared' as const,
+          initialCommands: [],
+        },
+      }
+
+      // CLAUDE.mdが存在しない場合をシミュレート
+      vi.mocked(fs.access).mockResolvedValue(undefined)
+      vi.mocked(fs.symlink).mockResolvedValue(undefined)
+
+      await handleClaudeMarkdown(worktreePath, config)
+
+      expect(fs.symlink).toHaveBeenCalled()
+    })
+
+    it('should create split mode CLAUDE.md', async () => {
+      const worktreePath = '/path/to/worktree'
+      const config = {
+        claude: {
+          autoStart: false,
+          markdownMode: 'split' as const,
+          initialCommands: [],
+        },
+      }
+
+      vi.mocked(fs.writeFile).mockResolvedValue(undefined)
+
+      await handleClaudeMarkdown(worktreePath, config)
+
+      expect(fs.writeFile).toHaveBeenCalledWith(
+        expect.stringContaining('CLAUDE.md'),
+        expect.stringContaining('Claude Code Instructions')
+      )
+    })
+
+    it('should handle unlink failure gracefully', async () => {
+      const worktreePath = '/path/to/worktree'
+      const config = {
+        claude: {
+          autoStart: false,
+          markdownMode: 'shared' as const,
+          initialCommands: [],
+        },
+      }
+
+      // CLAUDE.mdがルートに存在する
+      vi.mocked(fs.access).mockResolvedValue(undefined)
+      // unlinkが失敗する（ファイルが存在しない場合）
+      vi.mocked(fs.unlink).mockRejectedValueOnce(new Error('ENOENT'))
+      // symlinkは成功
+      vi.mocked(fs.symlink).mockResolvedValue(undefined)
+
+      // 関数を呼び出し（エラーにならないことを確認）
+      await handleClaudeMarkdown(worktreePath, config)
+
+      // unlinkが呼ばれたことを確認
+      expect(fs.unlink).toHaveBeenCalled()
+      // symlinkが呼ばれたことを確認
+      expect(fs.symlink).toHaveBeenCalled()
     })
   })
 })

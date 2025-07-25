@@ -263,6 +263,14 @@ export async function handleClaudeMarkdown(worktreePath: string, config: Config)
           .then(() => true)
           .catch(() => false)
       ) {
+        // worktreeにコピーされたCLAUDE.mdを削除
+        try {
+          await fs.unlink(worktreeClaudePath)
+        } catch {
+          // ファイルが存在しない場合は無視
+        }
+
+        // シンボリックリンクを作成
         await fs.symlink(path.relative(worktreePath, rootClaudePath), worktreeClaudePath)
         console.log(chalk.green(`✨ CLAUDE.md を共有モードで設定しました`))
       }
