@@ -170,6 +170,10 @@ Need more? Run `mst <command> --help`.
 Maestro reads **`.maestro.json` at the project root** to customise behaviour.<br>
 Key settings are summarised below; a full example follows.
 
+**Claude Configuration:**
+- `markdownMode: "shared"` - Creates symlink to main repository's CLAUDE.md (default)
+- `markdownMode: "split"` - Creates independent CLAUDE.md for each worktree
+
 | Category    | Key            | Purpose                               | Default / Example                   |
 | ----------- | -------------- | ------------------------------------- | ----------------------------------- |
 | worktrees   | `path`         | Where to store performers             | `.git/orchestra-members`            |
@@ -178,7 +182,7 @@ Key settings are summarised below; a full example follows.
 |             | `syncFiles`    | Files to sync across worktrees        | `[".env", ".env.local"]`            |
 | hooks       | `afterCreate`  | Command after creation                | `npm install`                       |
 |             | `beforeDelete` | Command before deletion               | `echo "Deleting $ORCHESTRA_MEMBER"` |
-| claude      | `markdownMode` | CLAUDE.md file management mode       | `shared`                            |
+| claude      | `markdownMode` | CLAUDE.md file management mode       | `shared` (`shared` or `split`)      |
 
 #### Full Example
 
@@ -198,7 +202,7 @@ Key settings are summarised below; a full example follows.
     "beforeDelete": "echo \"Deleting performer: $ORCHESTRA_MEMBER\""
   },
   "claude": {
-    "markdownMode": "shared"
+    "markdownMode": "shared"  // "shared" | "split"
   }
 }
 ```

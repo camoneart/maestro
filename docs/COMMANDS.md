@@ -776,7 +776,11 @@ Options available for all commands:
 
 ## ⚙️ Configuration File
 
-Customize settings with `mst.config.json`:
+Customize settings with `.maestro.json`:
+
+### Claude Configuration
+- `markdownMode: "shared"` - Creates symlink to main repository's CLAUDE.md (default)
+- `markdownMode: "split"` - Creates independent CLAUDE.md for each worktree
 
 ```json
 {
@@ -797,6 +801,9 @@ Customize settings with `mst.config.json`:
   "hooks": {
     "afterCreate": ["npm install", "npm run setup"],
     "beforeDelete": "echo 'Cleaning up worktree'"
+  },
+  "claude": {
+    "markdownMode": "shared"  // "shared" | "split"
   },
   "integrations": {
     "claude": {

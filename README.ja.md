@@ -170,6 +170,10 @@ Maestro が提供する “もう一歩進んだ” 機能を一覧で把握で�
 Maestro は **リポジトリ直下の `.maestro.json`** を読み取り、動作をカスタマイズできます。<br>
 よく使うキーを以下の表にまとめ、完全なサンプルは表に続くコードブロックで確認できます。
 
+**Claude設定:**
+- `markdownMode: "shared"` - メインリポジトリのCLAUDE.mdへのシンボリックリンクを作成（デフォルト）
+- `markdownMode: "split"` - 各worktreeに独立したCLAUDE.mdファイルを作成
+
 | カテゴリ    | 主なキー       | 役割                                    | 例 / デフォルト                     |
 | ----------- | -------------- | --------------------------------------- | ----------------------------------- |
 | worktrees   | `path`         | worktree（演奏者）の格納先              | `.git/orchestra-members`            |
@@ -178,7 +182,7 @@ Maestro は **リポジトリ直下の `.maestro.json`** を読み取り、動�
 |             | `syncFiles`    | 共有したいファイルの配列                | `[".env", ".env.local"]`            |
 | hooks       | `afterCreate`  | 作成後に実行する任意コマンド            | `npm install`                       |
 |             | `beforeDelete` | 削除前フック                            | `echo "Deleting $ORCHESTRA_MEMBER"` |
-| claude      | `markdownMode` | CLAUDE.md ファイル管理モード            | `shared`                            |
+| claude      | `markdownMode` | CLAUDE.md ファイル管理モード            | `shared` (`shared` または `split`)  |
 
 #### 完全なサンプル
 
@@ -198,7 +202,7 @@ Maestro は **リポジトリ直下の `.maestro.json`** を読み取り、動�
     "beforeDelete": "echo \"演奏者を削除します: $ORCHESTRA_MEMBER\""
   },
   "claude": {
-    "markdownMode": "shared"
+    "markdownMode": "shared"  // "shared" | "split"
   }
 }
 ```
