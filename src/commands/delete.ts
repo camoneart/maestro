@@ -184,6 +184,12 @@ export async function executeWorktreeDeletion(
   }
 }
 
+// 現在のディレクトリが指定されたworktree内にあるかチェック
+export function isCurrentDirectoryInWorktree(worktreePath: string): boolean {
+  const currentDir = process.cwd()
+  return currentDir.startsWith(worktreePath)
+}
+
 // fzfを使用してワークツリーを選択
 async function selectWorktreesWithFzf(
   filteredWorktrees: Worktree[],
@@ -475,6 +481,17 @@ export const deleteCommand = new Command('delete')
         }
 
         spinner.stop()
+
+        // 削除対象のworktree内から削除しようとしているかチェック
+        for (const worktree of targetWorktrees) {
+          if (isCurrentDirectoryInWorktree(worktree.path)) {
+            throw new DeleteCommandError(
+              `現在のディレクトリが削除対象のworktree内にあります。\n` +
+                `別のディレクトリから実行してください。\n` +
+                `例: cd .. && mst delete ${worktree.branch?.replace('refs/heads/', '') || branchName}`
+            )
+          }
+        }
 
         await displayDeletionDetails(targetWorktrees)
 
