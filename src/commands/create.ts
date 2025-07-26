@@ -160,32 +160,79 @@ export async function createTmuxSession(
   try {
     // ペイン分割オプションの場合
     if (options?.tmuxH || options?.tmuxV) {
-      // 現在のtmuxセッション内でペインを分割
-      const splitArgs = ['split-window']
+      const isInsideTmux = process.env.TMUX !== undefined
+      
+      if (!isInsideTmux) {
+        // tmux外から実行された場合：新しいセッションを作成
+        try {
+          await execa('tmux', ['has-session', '-t', sessionName])
+          console.log(chalk.yellow(`tmuxセッション '${sessionName}' は既に存在します`))
+          // 既存セッションにアタッチ
+          await execa('tmux', ['attach', '-t', sessionName], { stdio: 'inherit' })
+          return
+        } catch {
+          // セッションが存在しない場合は作成
+        }
 
-      if (options.tmuxH) {
-        splitArgs.push('-h') // 水平分割（左右）
-      } else if (options.tmuxV) {
-        splitArgs.push('-v') // 垂直分割（上下）
+        // tmuxセッションを作成（detached mode）
+        await execa('tmux', ['new-session', '-d', '-s', sessionName, '-c', worktreePath])
+        
+        // ペイン分割を実行
+        const splitArgs = ['split-window', '-t', sessionName]
+        if (options.tmuxH) {
+          splitArgs.push('-h') // 水平分割（左右）
+        } else if (options.tmuxV) {
+          splitArgs.push('-v') // 垂直分割（上下）
+        }
+        splitArgs.push('-c', worktreePath)
+        await execa('tmux', splitArgs)
+
+        // 新しいペインへフォーカスを移動
+        await execa('tmux', ['select-pane', '-t', sessionName, '-l'])
+
+        // 新しいペインにタイトルを設定
+        await execa('tmux', ['select-pane', '-t', sessionName, '-T', branchName])
+        
+        // ウィンドウ名を設定
+        await execa('tmux', ['rename-window', '-t', sessionName, branchName])
+        
+        // tmuxステータスラインを設定
+        await setupTmuxStatusLine()
+        
+        console.log(chalk.green(`✨ tmuxセッション '${sessionName}' を作成し、ペインを${options.tmuxH ? '水平' : '垂直'}分割しました`))
+        
+        // セッションにアタッチ
+        console.log(chalk.cyan(`🎵 tmuxセッション '${sessionName}' にアタッチしています...`))
+        await execa('tmux', ['attach', '-t', sessionName], { stdio: 'inherit' })
+        return
+      } else {
+        // tmux内から実行された場合：現在のセッション内でペインを分割
+        const splitArgs = ['split-window']
+
+        if (options.tmuxH) {
+          splitArgs.push('-h') // 水平分割（左右）
+        } else if (options.tmuxV) {
+          splitArgs.push('-v') // 垂直分割（上下）
+        }
+
+        splitArgs.push('-c', worktreePath)
+        await execa('tmux', splitArgs)
+
+        // 新しいペインへフォーカスを移動（最後の分割されたペインが選択される）
+        await execa('tmux', ['select-pane', '-l'])
+
+        // 新しいペインにタイトルを設定
+        await execa('tmux', ['select-pane', '-T', branchName])
+
+        // tmuxステータスラインを設定
+        await setupTmuxStatusLine()
+
+        // 新しいペインでシェルのプロンプトを表示
+        console.log(
+          chalk.green(`✅ tmuxペインを${options.tmuxH ? '水平' : '垂直'}分割しました: ${branchName}`)
+        )
+        return
       }
-
-      splitArgs.push('-c', worktreePath)
-      await execa('tmux', splitArgs)
-
-      // 新しいペインへフォーカスを移動（最後の分割されたペインが選択される）
-      await execa('tmux', ['select-pane', '-l'])
-
-      // 新しいペインにタイトルを設定
-      await execa('tmux', ['select-pane', '-T', branchName])
-
-      // tmuxステータスラインを設定
-      await setupTmuxStatusLine()
-
-      // 新しいペインでシェルのプロンプトを表示
-      console.log(
-        chalk.green(`✅ tmuxペインを${options.tmuxH ? '水平' : '垂直'}分割しました: ${branchName}`)
-      )
-      return
     }
 
     // 既存のセッションをチェック（通常のtmuxオプションの場合）
