@@ -1,5 +1,33 @@
 # Changelog
 
+## 3.2.1
+
+### Patch Changes
+
+- Improve README documentation with update commands and enhanced content
+
+  ### Documentation Improvements
+  - **Add comprehensive "Updating" section**
+    - Homebrew: `brew upgrade camoneart/tap/maestro`
+    - npm: `npm update -g @camoneart/maestro`
+    - pnpm: `pnpm update -g @camoneart/maestro`
+  - **Add "Requirements" section with detailed dependency table**
+    - Node.js >=20.0.0, Git >=2.22 requirements
+    - Optional tools: tmux, fzf, GitHub CLI with install commands
+  - **Add status badges**
+    - CI workflow badge
+    - Coverage status badge (≥80%)
+  - **Enhance visual presentation**
+    - Demo animation placeholder
+    - Updated table of contents
+    - Consistent formatting across README.md and README.ja.md
+
+  ### Why This Matters
+  - Users can now easily find update commands for their installation method
+  - Professional documentation follows CLI tool best practices
+  - Reduces support questions about "how to update"
+  - Improves first-time user experience with clear requirements
+
 ## 3.2.0
 
 ### Minor Changes
