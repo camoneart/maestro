@@ -153,7 +153,6 @@ export async function saveWorktreeMetadata(
 export async function createTmuxSession(
   branchName: string,
   worktreePath: string,
-  config: Config,
   options?: CreateOptions
 ): Promise<void> {
   const sessionName = branchName.replace(/[^a-zA-Z0-9_-]/g, '-')
@@ -179,21 +178,6 @@ export async function createTmuxSession(
       // tmuxステータスラインを設定
       await setupTmuxStatusLine()
 
-      // 新しいペインでClaudeコマンドを実行（オプションが有効な場合）
-      if (options.claude || config.claude?.autoStart) {
-        // Issue番号からの作成の場合、説明を含める
-        let claudeCommand = 'claude'
-
-        if (branchName.includes('issue-')) {
-          const issueNumber = branchName.match(/issue-(\d+)/)?.[1]
-          if (issueNumber) {
-            claudeCommand = `claude "fix issue ${issueNumber}"`
-          }
-        }
-
-        // 新しいペインにコマンドを送信
-        await execa('tmux', ['send-keys', '-t', ':.', claudeCommand, 'Enter'])
-      }
 
       // 新しいペインでシェルのプロンプトを表示
       console.log(
@@ -219,19 +203,6 @@ export async function createTmuxSession(
 
     console.log(chalk.green(`✨ tmuxセッション '${sessionName}' を作成しました`))
 
-    // Claude Codeを起動する場合
-    if (config.claude?.autoStart) {
-      await execa('tmux', ['send-keys', '-t', sessionName, 'claude', 'Enter'])
-
-      // 初期コマンドを送信
-      if (config.claude?.initialCommands) {
-        for (const cmd of config.claude.initialCommands) {
-          await execa('tmux', ['send-keys', '-t', sessionName, cmd, 'Enter'])
-        }
-      }
-
-      console.log(chalk.green(`✨ Claude Codeを起動しました`))
-    }
 
     // 自動でセッションにアタッチ
     console.log(chalk.cyan(`🎵 tmuxセッション '${sessionName}' にアタッチしています...`))
@@ -528,11 +499,11 @@ export async function executePostCreationTasks(
 
   // tmuxセッション作成
   if (options.tmux || options.tmuxH || options.tmuxV || config.tmux?.enabled) {
-    tasks.push(createTmuxSession(branchName, worktreePath, config, options))
+    tasks.push(createTmuxSession(branchName, worktreePath, options))
   }
 
   // Claude.md処理
-  if (options.claude || config.claude?.autoStart) {
+  if (options.claudeMd) {
     tasks.push(handleClaudeMarkdown(worktreePath, config))
   }
 
@@ -756,7 +727,7 @@ export const createCommand = new Command('create')
   .option('-t, --tmux', 'tmuxセッションを作成してClaude Codeを起動')
   .option('--tmux-h', 'tmuxペインを水平分割して作成')
   .option('--tmux-v', 'tmuxペインを垂直分割して作成')
-  .option('-c, --claude', 'Claude Codeを自動起動')
+  .option('-c, --claude-md', 'CLAUDE.mdファイルを管理')
   .option('-y, --yes', '確認をスキップ')
   .option('--shell', '作成後にシェルに入る')
   .option('--exec <command>', '作成後にコマンドを実行')
