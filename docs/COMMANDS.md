@@ -220,21 +220,26 @@ mst rm [branch-name] [options]  # alias
 |--------|-------------|
 | `--force`, `-f` | Force delete even with uncommitted changes |
 | `--remove-remote`, `-r` | Also delete remote branch |
+| `--keep-session` | Keep tmux session after deleting worktree |
 | `--fzf` | Select with fzf (multiple selection) |
 | `--current` | Delete current worktree |
 
 #### Features
-- **Complete cleanup**: Automatically deletes both worktree directory and associated local branch
+- **Complete cleanup**: Automatically deletes both worktree directory, associated local branch, and tmux session
+- **tmux Session Management**: Automatically terminates associated tmux sessions (use `--keep-session` to preserve)
 - **Wildcard support**: Use patterns like `"feature/old-*"` to delete multiple branches
 - **Safe deletion**: Uses `git branch -d` to prevent deletion of unmerged branches
 
 #### Examples
 ```bash
-# Basic delete (removes both worktree and local branch)
+# Basic delete (removes worktree, local branch, and tmux session)
 mst delete feature/old-feature
 
 # Force delete (even with uncommitted changes)
 mst delete feature/broken --force
+
+# Keep tmux session after deleting worktree
+mst delete feature/old-feature --keep-session
 
 # Delete with wildcards
 mst delete "feature/old-*"
