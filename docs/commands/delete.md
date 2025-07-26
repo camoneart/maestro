@@ -216,10 +216,12 @@ You can set hooks before and after deletion in `.mst.json`:
 2. **Attempting to delete current orchestra member**
 
    ```
-   Error: Cannot delete the current worktree
+   Error: 現在のディレクトリが削除対象のworktree内にあります。
+   別のディレクトリから実行してください。
+   例: cd .. && mst delete feature/current-branch
    ```
 
-   Solution: Move to another orchestra member before deletion
+   Solution: Move to a different directory (outside the worktree) before deletion
 
 3. **Remote branch still exists**
    ```
