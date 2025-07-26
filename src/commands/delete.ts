@@ -355,7 +355,7 @@ async function displayDeletionDetails(targetWorktrees: Worktree[]): Promise<void
 async function executeWorktreesDeletion(
   targetWorktrees: Worktree[],
   gitManager: GitWorktreeManager,
-  options: { force?: boolean; removeRemote?: boolean } = {}
+  options: { force?: boolean; removeRemote?: boolean; keepSession?: boolean } = {}
 ): Promise<void> {
   const results: { branch: string; status: 'success' | 'failed'; error?: string }[] = []
 
@@ -372,6 +372,19 @@ async function executeWorktreesDeletion(
 
       if (options.removeRemote && worktree.branch) {
         await deleteRemoteBranch(worktree.branch.replace('refs/heads/', ''))
+      }
+
+      // tmuxセッションの削除
+      if (!options.keepSession) {
+        try {
+          // tmuxセッションが存在するかチェック
+          await execa('tmux', ['has-session', '-t', branch])
+          // 存在する場合は削除
+          await execa('tmux', ['kill-session', '-t', branch])
+          console.log(`  ${chalk.gray(`tmuxセッション '${branch}' を削除しました`)}`)
+        } catch {
+          // セッションが存在しない場合は何もしない
+        }
       }
 
       results.push({ branch, status: 'success' })
@@ -414,12 +427,13 @@ export const deleteCommand = new Command('delete')
   .argument('[branch-name]', '削除するブランチ名（ワイルドカード使用可: feature/demo-*）')
   .option('-f, --force', '強制削除')
   .option('-r, --remove-remote', 'リモートブランチも削除')
+  .option('--keep-session', 'tmuxセッションを保持')
   .option('--fzf', 'fzfで選択（複数選択可）')
   .option('--current', '現在のworktreeを削除')
   .action(
     async (
       branchName?: string,
-      options: DeleteOptions & { fzf?: boolean; current?: boolean } = {}
+      options: DeleteOptions & { fzf?: boolean; current?: boolean; keepSession?: boolean } = {}
     ) => {
       const spinner = ora('演奏者を確認中...').start()
 

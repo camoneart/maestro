@@ -38,4 +38,5 @@ export interface CreateOptions {
 export interface DeleteOptions {
   force?: boolean
   removeRemote?: boolean
+  keepSession?: boolean
 }

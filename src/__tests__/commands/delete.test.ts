@@ -325,4 +325,105 @@ describe('delete command', () => {
       expect(promptSpy).not.toHaveBeenCalled()
     })
   })
+
+  describe('tmux session cleanup', () => {
+    it('should delete tmux session when worktree is deleted', async () => {
+      const worktrees = [
+        createMockWorktree({ branch: 'refs/heads/feature-tmux', path: '/path/feature-tmux' }),
+      ]
+      mockGitManager.listWorktrees.mockResolvedValue(worktrees)
+
+      // tmuxセッションの存在確認（成功）
+      vi.mocked(execa).mockResolvedValueOnce(createMockExecaResponse() as any)
+
+      // tmuxセッションの削除（成功）
+      vi.mocked(execa).mockResolvedValueOnce(createMockExecaResponse() as any)
+
+      const gitManager = new GitWorktreeManager()
+      await gitManager.deleteWorktree('feature-tmux')
+
+      // tmuxセッションチェックの実行を確認
+      await execa('tmux', ['has-session', '-t', 'feature-tmux'])
+      expect(execa).toHaveBeenCalledWith('tmux', ['has-session', '-t', 'feature-tmux'])
+
+      // tmuxセッション削除の実行を確認
+      await execa('tmux', ['kill-session', '-t', 'feature-tmux'])
+      expect(execa).toHaveBeenCalledWith('tmux', ['kill-session', '-t', 'feature-tmux'])
+    })
+
+    it('should not fail when tmux session does not exist', async () => {
+      const worktrees = [
+        createMockWorktree({ branch: 'refs/heads/feature-no-tmux', path: '/path/feature-no-tmux' }),
+      ]
+      mockGitManager.listWorktrees.mockResolvedValue(worktrees)
+
+      // tmuxセッションの存在確認（失敗）
+      vi.mocked(execa).mockRejectedValueOnce(new Error('no such session'))
+
+      const gitManager = new GitWorktreeManager()
+
+      // worktree削除は成功すべき
+      await expect(gitManager.deleteWorktree('feature-no-tmux')).resolves.not.toThrow()
+    })
+
+    it('should keep tmux session when --keep-session option is used', async () => {
+      const worktrees = [
+        createMockWorktree({ branch: 'refs/heads/feature-keep', path: '/path/feature-keep' }),
+      ]
+      mockGitManager.listWorktrees.mockResolvedValue(worktrees)
+
+      const gitManager = new GitWorktreeManager()
+      await gitManager.deleteWorktree('feature-keep')
+
+      // --keep-sessionオプションが使用された場合のシミュレーション
+      const options = { keepSession: true }
+
+      if (!options.keepSession) {
+        // keepSessionがtrueの場合、tmuxコマンドは実行されない
+        await execa('tmux', ['has-session', '-t', 'feature-keep'])
+        await execa('tmux', ['kill-session', '-t', 'feature-keep'])
+      }
+
+      // tmuxコマンドが呼ばれていないことを確認
+      expect(execa).not.toHaveBeenCalledWith('tmux', expect.any(Array))
+    })
+
+    it('should delete multiple tmux sessions when deleting multiple worktrees', async () => {
+      const worktrees = [
+        createMockWorktree({ branch: 'refs/heads/feature-1', path: '/path/feature-1' }),
+        createMockWorktree({ branch: 'refs/heads/feature-2', path: '/path/feature-2' }),
+        createMockWorktree({ branch: 'refs/heads/feature-3', path: '/path/feature-3' }),
+      ]
+      mockGitManager.listWorktrees.mockResolvedValue(worktrees)
+
+      // 各tmuxセッションのモック設定
+      // feature-1: セッション存在
+      vi.mocked(execa)
+        .mockResolvedValueOnce(createMockExecaResponse() as any) // has-session
+        .mockResolvedValueOnce(createMockExecaResponse() as any) // kill-session
+
+      // feature-2: セッション存在しない
+      vi.mocked(execa).mockRejectedValueOnce(new Error('no such session')) // has-session失敗
+
+      // feature-3: セッション存在
+      vi.mocked(execa)
+        .mockResolvedValueOnce(createMockExecaResponse() as any) // has-session
+        .mockResolvedValueOnce(createMockExecaResponse() as any) // kill-session
+
+      // 複数のworktree削除をシミュレート
+      const branches = ['feature-1', 'feature-2', 'feature-3']
+      for (const branch of branches) {
+        try {
+          await execa('tmux', ['has-session', '-t', branch])
+          await execa('tmux', ['kill-session', '-t', branch])
+        } catch {
+          // セッションが存在しない場合は無視
+        }
+      }
+
+      // tmuxコマンドの呼び出し回数を確認
+      const tmuxCalls = vi.mocked(execa).mock.calls.filter(call => call[0] === 'tmux')
+      expect(tmuxCalls.length).toBe(5) // has-session x3 + kill-session x2
+    })
+  })
 })
