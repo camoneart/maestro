@@ -95,21 +95,21 @@ mst create feature/awesome-feature            # create only
 mst shell feature/awesome-feature             # open a shell inside
 
 # ── one-liner (tmux + Claude) ──
-# Create the worktree and automatically attach to a tmux session with Claude Code running
-mst create feature/awesome-feature --tmux --claude
+# Create the worktree, automatically attach to a tmux session, and set up Claude Code workspace
+mst create feature/awesome-feature --tmux --claude-md
 ```
 
 #### Tips
 
 - `mst shell <branch>` lets you enter any performer after creation (fzf prompt when omitted).
-- `--tmux` creates a dedicated tmux session and automatically attaches to it; combine with `--claude` to auto-start Claude Code.
+- `--tmux` creates a dedicated tmux session and automatically attaches to it; combine with `--claude-md` to set up Claude Code workspace files.
 - `--tmux-h`/`--tmux-v` splits the current tmux pane horizontally/vertically and auto-focuses to the new pane for immediate development.
 
 ### Basic Usage Examples
 
 | Goal                              | Command Example                                                              |
 | --------------------------------- | ---------------------------------------------------------------------------- |
-| **Parallel dev** Feature + bugfix | `mst create feature/auth --tmux --claude`<br>`mst create bugfix/login-issue` |
+| **Parallel dev** Feature + bugfix | `mst create feature/auth --tmux --claude-md`<br>`mst create bugfix/login-issue` |
 | **List performers**               | `mst list`                                                                   |
 | **Fast switch** via tmux          | `mst tmux`                                                                   |
 | **Create from GitHub Issue**      | `mst create 123`                                                             |
@@ -143,7 +143,7 @@ All sub-commands and options are documented in the [Command Reference](./docs/CO
 #### One-line Cheat Sheet
 
 ```bash
-mst create feature/my-ui --tmux --claude   # create + AI + tmux
+mst create feature/my-ui --tmux --claude-md   # create + AI + tmux
 mst list                                   # list performers
 mst tmux                                   # switch via fzf
 mst push --pr                              # push with PR
@@ -178,7 +178,7 @@ Key settings are summarised below; a full example follows.
 |             | `syncFiles`    | Files to sync across worktrees        | `[".env", ".env.local"]`            |
 | hooks       | `afterCreate`  | Command after creation                | `npm install`                       |
 |             | `beforeDelete` | Command before deletion               | `echo "Deleting $ORCHESTRA_MEMBER"` |
-| claude      | `autoStart`    | Start Claude Code on enter            | `true`                              |
+| claude      | `markdownMode` | CLAUDE.md file management mode       | `shared`                            |
 
 #### Full Example
 
@@ -198,9 +198,7 @@ Key settings are summarised below; a full example follows.
     "beforeDelete": "echo \"Deleting performer: $ORCHESTRA_MEMBER\""
   },
   "claude": {
-    "autoStart": true,
-    "markdownMode": "shared",
-    "initialCommands": ["/model sonnet-3.5"]
+    "markdownMode": "shared"
   }
 }
 ```

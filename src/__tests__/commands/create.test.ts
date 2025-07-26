@@ -253,9 +253,7 @@ describe('create command', () => {
       const worktreePath = '/path/to/worktree'
       const config = {
         claude: {
-          autoStart: false,
           markdownMode: 'shared' as const,
-          initialCommands: [],
         },
       }
 
@@ -279,9 +277,7 @@ describe('create command', () => {
       const worktreePath = '/path/to/worktree'
       const config = {
         claude: {
-          autoStart: false,
           markdownMode: 'shared' as const,
-          initialCommands: [],
         },
       }
 
@@ -298,9 +294,7 @@ describe('create command', () => {
       const worktreePath = '/path/to/worktree'
       const config = {
         claude: {
-          autoStart: false,
           markdownMode: 'split' as const,
-          initialCommands: [],
         },
       }
 
@@ -318,9 +312,7 @@ describe('create command', () => {
       const worktreePath = '/path/to/worktree'
       const config = {
         claude: {
-          autoStart: false,
           markdownMode: 'shared' as const,
-          initialCommands: [],
         },
       }
 

@@ -20,7 +20,7 @@ describe('create command simple tests', () => {
     expect(optionNames).toContain('--open')
     expect(optionNames).toContain('--setup')
     expect(optionNames).toContain('--tmux')
-    expect(optionNames).toContain('--claude')
+    expect(optionNames).toContain('--claude-md')
   })
 
   it('should have correct argument configuration', () => {
@@ -43,22 +43,22 @@ describe('create command simple tests', () => {
         env.RUN_SETUP = true
       }
 
-      if (options.claude) {
-        env.CLAUDE_ENABLED = true
+      if (options.claudeMd) {
+        env.CLAUDE_MD_ENABLED = true
       }
 
       return env
     }
 
-    const env1 = setupEnvironment({ open: true, setup: false, claude: true })
+    const env1 = setupEnvironment({ open: true, setup: false, claudeMd: true })
     expect(env1.OPEN_EDITOR).toBe(true)
     expect(env1.RUN_SETUP).toBeUndefined()
-    expect(env1.CLAUDE_ENABLED).toBe(true)
+    expect(env1.CLAUDE_MD_ENABLED).toBe(true)
 
-    const env2 = setupEnvironment({ open: false, setup: true, claude: false })
+    const env2 = setupEnvironment({ open: false, setup: true, claudeMd: false })
     expect(env2.OPEN_EDITOR).toBeUndefined()
     expect(env2.RUN_SETUP).toBe(true)
-    expect(env2.CLAUDE_ENABLED).toBeUndefined()
+    expect(env2.CLAUDE_MD_ENABLED).toBeUndefined()
   })
 
   it('should test worktree path generation', () => {
@@ -327,26 +327,26 @@ This is a git worktree for parallel development.
       if (templateConfig.tmux) {
         processed.tmux = true
       }
-      if (templateConfig.claude) {
-        processed.claude = true
+      if (templateConfig.claudeMd) {
+        processed.claudeMd = true
       }
 
       return processed
     }
 
-    const options = { open: false, setup: false, tmux: false, claude: false }
+    const options = { open: false, setup: false, tmux: false, claudeMd: false }
     const templateConfig = {
       autoSetup: true,
       editor: 'code',
       tmux: true,
-      claude: true,
+      claudeMd: true,
     }
 
     const processed = processTemplateOptions(options, templateConfig)
     expect(processed.setup).toBe(true)
     expect(processed.open).toBe(true)
     expect(processed.tmux).toBe(true)
-    expect(processed.claude).toBe(true)
+    expect(processed.claudeMd).toBe(true)
   })
 
   it('should test parseIssueNumber function', () => {

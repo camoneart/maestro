@@ -28,7 +28,7 @@
 
   **Breaking Change**: The `mst claude` command and its subcommands (`start`, `stop`, `list`) are no longer available.
 
-  **Migration**: Use the `claude` command directly in your worktrees. The `--claude` option for `mst create` remains available for CLAUDE.md generation.
+  **Migration**: Use the `claude` command directly in your worktrees. The `--claude-md` option for `mst create` remains available for CLAUDE.md generation.
 
 ## 2.7.4
 

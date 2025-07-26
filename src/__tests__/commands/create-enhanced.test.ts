@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { execa } from 'execa'
 import fs from 'fs/promises'
 import path from 'path'
@@ -287,7 +287,7 @@ describe('Create Command - Enhanced Coverage', () => {
         .mockResolvedValueOnce({ stdout: '' }) // new-session succeeds
         .mockResolvedValueOnce({ stdout: '' }) // rename-window succeeds
 
-      async function createTmuxSession(branchName: string, worktreePath: string, config: any) {
+      async function createTmuxSession(branchName: string, worktreePath: string) {
         const sessionName = branchName.replace(/[^a-zA-Z0-9_-]/g, '-')
 
         try {
@@ -308,7 +308,7 @@ describe('Create Command - Enhanced Coverage', () => {
         }
       }
 
-      await createTmuxSession('feature/test', '/path/to/worktree', {})
+      await createTmuxSession('feature/test', '/path/to/worktree')
 
       expect(mockExeca).toHaveBeenCalledWith('tmux', ['has-session', '-t', 'feature-test'])
       expect(mockExeca).toHaveBeenCalledWith('tmux', [
@@ -330,7 +330,7 @@ describe('Create Command - Enhanced Coverage', () => {
     it('should handle existing tmux session', async () => {
       mockExeca.mockResolvedValueOnce({ stdout: '' }) // has-session succeeds
 
-      async function createTmuxSession(branchName: string, worktreePath: string, config: any) {
+      async function createTmuxSession(branchName: string, _worktreePath: string) {
         const sessionName = branchName.replace(/[^a-zA-Z0-9_-]/g, '-')
 
         try {
@@ -342,63 +342,10 @@ describe('Create Command - Enhanced Coverage', () => {
         }
       }
 
-      await createTmuxSession('test-branch', '/path/to/worktree', {})
+      await createTmuxSession('test-branch', '/path/to/worktree')
 
       expect(mockExeca).toHaveBeenCalledWith('tmux', ['has-session', '-t', 'test-branch'])
       expect(mockExeca).toHaveBeenCalledTimes(1)
-    })
-
-    it('should handle Claude Code auto-start', async () => {
-      mockExeca
-        .mockRejectedValueOnce(new Error('Session does not exist'))
-        .mockResolvedValueOnce({ stdout: '' })
-        .mockResolvedValueOnce({ stdout: '' })
-        .mockResolvedValueOnce({ stdout: '' }) // claude command
-        .mockResolvedValueOnce({ stdout: '' }) // initial command
-
-      async function createTmuxSession(branchName: string, worktreePath: string, config: any) {
-        const sessionName = branchName.replace(/[^a-zA-Z0-9_-]/g, '-')
-
-        try {
-          try {
-            await execa('tmux', ['has-session', '-t', sessionName])
-            return
-          } catch {
-            // セッション作成
-          }
-
-          await execa('tmux', ['new-session', '-d', '-s', sessionName, '-c', worktreePath])
-          await execa('tmux', ['rename-window', '-t', sessionName, branchName])
-
-          if (config.claude?.autoStart) {
-            await execa('tmux', ['send-keys', '-t', sessionName, 'claude', 'Enter'])
-
-            if (config.claude?.initialCommands) {
-              for (const cmd of config.claude.initialCommands) {
-                await execa('tmux', ['send-keys', '-t', sessionName, cmd, 'Enter'])
-              }
-            }
-          }
-        } catch (error) {
-          // エラーハンドリング
-        }
-      }
-
-      await createTmuxSession('test', '/path', {
-        claude: {
-          autoStart: true,
-          initialCommands: ['echo "hello"'],
-        },
-      })
-
-      expect(mockExeca).toHaveBeenCalledWith('tmux', ['send-keys', '-t', 'test', 'claude', 'Enter'])
-      expect(mockExeca).toHaveBeenCalledWith('tmux', [
-        'send-keys',
-        '-t',
-        'test',
-        'echo "hello"',
-        'Enter',
-      ])
     })
   })
 
@@ -482,7 +429,7 @@ Add specific instructions for this worktree here.
       mockPath.join.mockReturnValue('/worktree/CLAUDE.md')
       mockFs.access.mockRejectedValue(new Error('File not found'))
 
-      async function handleClaudeMarkdown(worktreePath: string, config: any) {
+      async function handleClaudeMarkdown(_worktreePath: string, _config: any) {
         try {
           const rootClaudePath = path.join(process.cwd(), 'CLAUDE.md')
           if (

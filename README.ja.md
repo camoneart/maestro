@@ -93,21 +93,21 @@ mst create feature/awesome-feature            # まず作成だけ
 mst shell feature/awesome-feature             # シェルへ入室
 
 # ── ワンライナー (tmux + Claude) ──
-# 作成と同時に tmux セッションを作成して自動的にアタッチ & Claude Code を起動
-mst create feature/awesome-feature --tmux --claude
+# 作成と同時に tmux セッションを作成して自動的にアタッチ & Claude Code ワークスペースファイルを設定
+mst create feature/awesome-feature --tmux --claude-md
 ```
 
 #### ポイント
 
 - `mst shell <ブランチ名>` でいつでも演奏者に入れます（省略すると fzf で選択）。
-- `--tmux` を付けると専用 tmux セッションを作成して自動的にアタッチし、`--claude` を併用すると Claude Code も自動起動します。
+- `--tmux` を付けると専用 tmux セッションを作成して自動的にアタッチし、`--claude-md` を併用すると Claude Code ワークスペースファイルを設定します。
 - `--tmux-h`/`--tmux-v` は現在の tmux ペインを水平/垂直分割し、新しいペインに自動フォーカスして即座に開発開始できます。
 
 ### 基本的な使用例
 
 | 目的                                    | コマンド例                                                                   |
 | --------------------------------------- | ---------------------------------------------------------------------------- |
-| **並列開発** 新機能とバグ修正を同時進行 | `mst create feature/auth --tmux --claude`<br>`mst create bugfix/login-issue` |
+| **並列開発** 新機能とバグ修正を同時進行 | `mst create feature/auth --tmux --claude-md`<br>`mst create bugfix/login-issue` |
 | **状態確認** 演奏者一覧を表示           | `mst list`                                                                   |
 | **高速切替** tmux セッションへ          | `mst tmux`                                                                   |
 | **GitHub Issue から作成**               | `mst create 123`                                                             |
@@ -142,7 +142,7 @@ mst create feature/awesome-feature --tmux --claude
 
 ```bash
 # 代表的な操作
-mst create feature/my-ui --tmux --claude   # 作成 + AI + tmux
+mst create feature/my-ui --tmux --claude-md   # 作成 + AI + tmux
 mst list                                   # 一覧
 mst tmux                                   # fzf で切替
 mst push --pr                              # push with PR
@@ -178,7 +178,7 @@ Maestro は **リポジトリ直下の `.maestro.json`** を読み取り、動�
 |             | `syncFiles`    | 共有したいファイルの配列                | `[".env", ".env.local"]`            |
 | hooks       | `afterCreate`  | 作成後に実行する任意コマンド            | `npm install`                       |
 |             | `beforeDelete` | 削除前フック                            | `echo "Deleting $ORCHESTRA_MEMBER"` |
-| claude      | `autoStart`    | worktree 入室時に Claude Code を起動    | `true`                              |
+| claude      | `markdownMode` | CLAUDE.md ファイル管理モード            | `shared`                            |
 
 #### 完全なサンプル
 
@@ -198,9 +198,7 @@ Maestro は **リポジトリ直下の `.maestro.json`** を読み取り、動�
     "beforeDelete": "echo \"演奏者を削除します: $ORCHESTRA_MEMBER\""
   },
   "claude": {
-    "autoStart": true,
-    "markdownMode": "shared",
-    "initialCommands": ["/model sonnet-3.5"]
+    "markdownMode": "shared"
   }
 }
 ```

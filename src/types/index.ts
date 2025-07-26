@@ -28,7 +28,7 @@ export interface CreateOptions {
   tmuxV?: boolean
   tmuxVertical?: boolean
   tmuxHorizontal?: boolean
-  claude?: boolean
+  claudeMd?: boolean
   yes?: boolean
   shell?: boolean
   exec?: string

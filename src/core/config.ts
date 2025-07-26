@@ -43,23 +43,8 @@ export const ConfigSchema = z.object({
   // Claude Code統合設定
   claude: z
     .object({
-      // 自動起動
-      autoStart: z.boolean().default(false),
       // CLAUDE.mdの処理方法
       markdownMode: z.enum(['shared', 'split']).default('shared'),
-      // 初期コマンド
-      initialCommands: z.array(z.string()).default([]),
-      // コスト最適化設定
-      costOptimization: z
-        .object({
-          // 停止時の自動コマンド
-          stopHooks: z.array(z.string()).default(['/compact', '/clear']),
-          // 最大出力トークン数
-          maxOutputTokens: z.number().optional(),
-          // セッション履歴の保存先
-          historyPath: z.string().default('~/.claude/history/{branch}.md'),
-        })
-        .optional(),
     })
     .optional(),
 
@@ -120,13 +105,7 @@ const DEFAULT_CONFIG: Config = {
     sessionNaming: '{branch}',
   },
   claude: {
-    autoStart: false,
     markdownMode: 'shared',
-    initialCommands: [],
-    costOptimization: {
-      stopHooks: ['/compact', '/clear'],
-      historyPath: '~/.claude/history/{branch}.md',
-    },
   },
   github: {
     autoFetch: true,
@@ -220,14 +199,7 @@ export class ConfigManager {
         sessionNaming: '{branch}',
       },
       claude: {
-        autoStart: true,
         markdownMode: 'shared',
-        initialCommands: ['/model sonnet-3.5'],
-        costOptimization: {
-          stopHooks: ['/compact', '/clear'],
-          maxOutputTokens: 5000,
-          historyPath: '~/.claude/history/{branch}.md',
-        },
       },
       github: {
         autoFetch: true,

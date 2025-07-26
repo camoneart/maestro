@@ -3,7 +3,7 @@ import chalk from 'chalk'
 import ora from 'ora'
 import inquirer from 'inquirer'
 import { GitWorktreeManager } from '../core/git.js'
-import { ConfigManager, Config } from '../core/config.js'
+import { ConfigManager } from '../core/config.js'
 import path from 'path'
 import fs from 'fs/promises'
 import { homedir } from 'os'
@@ -32,8 +32,8 @@ function getClaudeHistoryDir(): string {
 }
 
 // ブランチ名から履歴ファイルパスを生成
-function getHistoryPathForBranch(branchName: string, config: Config): string {
-  const template = config.claude?.costOptimization?.historyPath || '~/.claude/history/{branch}.md'
+function getHistoryPathForBranch(branchName: string): string {
+  const template = '~/.claude/history/{branch}.md'
   const expandedPath = template
     .replace('~', homedir())
     .replace('{branch}', branchName.replace(/\//g, '-'))
@@ -41,17 +41,14 @@ function getHistoryPathForBranch(branchName: string, config: Config): string {
 }
 
 // 全ての履歴を検索
-async function findAllHistories(
-  gitManager: GitWorktreeManager,
-  config: Config
-): Promise<ClaudeHistory[]> {
+async function findAllHistories(gitManager: GitWorktreeManager): Promise<ClaudeHistory[]> {
   const histories: ClaudeHistory[] = []
   const worktrees = await gitManager.listWorktrees()
 
   for (const worktree of worktrees) {
     if (!worktree.branch) continue
 
-    const historyPath = getHistoryPathForBranch(worktree.branch, config)
+    const historyPath = getHistoryPathForBranch(worktree.branch)
 
     try {
       const stats = await fs.stat(historyPath)
@@ -270,7 +267,7 @@ async function cleanupHistories(histories: ClaudeHistory[]): Promise<void> {
 }
 
 // 履歴を同期（worktreeパスに移動）
-async function syncHistories(histories: ClaudeHistory[], config: Config): Promise<void> {
+async function syncHistories(histories: ClaudeHistory[]): Promise<void> {
   const spinner = ora('履歴を同期中...').start()
   let syncedCount = 0
 
@@ -278,7 +275,7 @@ async function syncHistories(histories: ClaudeHistory[], config: Config): Promis
     if (!history.worktreePath) continue
 
     // 理想的なパスを計算
-    const idealPath = getHistoryPathForBranch(history.branch, config)
+    const idealPath = getHistoryPathForBranch(history.branch)
 
     if (history.historyPath !== idealPath) {
       try {
@@ -311,10 +308,9 @@ export const historyCommand = new Command('history')
       const gitManager = new GitWorktreeManager()
       const configManager = new ConfigManager()
       await configManager.loadProjectConfig()
-      const config = configManager.getAll()
 
       // 全履歴を検索
-      const histories = await findAllHistories(gitManager, config)
+      const histories = await findAllHistories(gitManager)
 
       if (
         options.list ||
@@ -361,7 +357,7 @@ export const historyCommand = new Command('history')
       }
 
       if (options.sync) {
-        await syncHistories(histories, config)
+        await syncHistories(histories)
       }
     } catch (error) {
       console.error(chalk.red(error instanceof Error ? error.message : '不明なエラー'))

@@ -70,7 +70,7 @@ describe('create command - edge cases', () => {
         },
       }
 
-      await createTmuxSession('feature/test', '/path/to/worktree', config)
+      await createTmuxSession('feature/test', '/path/to/worktree')
 
       expect(execa).toHaveBeenCalledWith('tmux', ['has-session', '-t', 'feature-test'])
       expect(execa).toHaveBeenCalledWith('tmux', [
@@ -99,7 +99,7 @@ describe('create command - edge cases', () => {
 
       const config = { claude: { autoStart: false } }
 
-      await createTmuxSession('feature/test', '/path/to/worktree', config)
+      await createTmuxSession('feature/test', '/path/to/worktree')
 
       expect(execa).toHaveBeenCalledWith('tmux', ['has-session', '-t', 'feature-test'])
       // Should not create new session
@@ -110,46 +110,6 @@ describe('create command - edge cases', () => {
         'feature-test',
         '-c',
         '/path/to/worktree',
-      ])
-    })
-
-    it('should start Claude Code with initial commands', async () => {
-      vi.mocked(execa).mockImplementation(async (cmd, args) => {
-        if (cmd === 'tmux' && args?.[0] === 'has-session') {
-          throw new Error('session not found')
-        }
-        return { stdout: 'success' }
-      })
-
-      const config = {
-        claude: {
-          autoStart: true,
-          initialCommands: ['echo "hello"', 'pwd'],
-        },
-      }
-
-      await createTmuxSession('feature/test', '/path/to/worktree', config)
-
-      expect(execa).toHaveBeenCalledWith('tmux', [
-        'send-keys',
-        '-t',
-        'feature-test',
-        'claude',
-        'Enter',
-      ])
-      expect(execa).toHaveBeenCalledWith('tmux', [
-        'send-keys',
-        '-t',
-        'feature-test',
-        'echo "hello"',
-        'Enter',
-      ])
-      expect(execa).toHaveBeenCalledWith('tmux', [
-        'send-keys',
-        '-t',
-        'feature-test',
-        'pwd',
-        'Enter',
       ])
     })
 
@@ -167,9 +127,7 @@ describe('create command - edge cases', () => {
       const config = { claude: { autoStart: false } }
 
       // Should not throw error
-      await expect(
-        createTmuxSession('feature/test', '/path/to/worktree', config)
-      ).resolves.not.toThrow()
+      await expect(createTmuxSession('feature/test', '/path/to/worktree')).resolves.not.toThrow()
     })
 
     it('should sanitize session name', async () => {
@@ -182,7 +140,7 @@ describe('create command - edge cases', () => {
 
       const config = { claude: { autoStart: false } }
 
-      await createTmuxSession('feature/test@special#chars', '/path/to/worktree', config)
+      await createTmuxSession('feature/test@special#chars', '/path/to/worktree')
 
       expect(execa).toHaveBeenCalledWith('tmux', [
         'has-session',
