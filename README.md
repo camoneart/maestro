@@ -3,11 +3,13 @@
 [![Node.js >=20.0.0](https://img.shields.io/badge/Node.js-%3E%3D20.0.0-45CC11?labelColor=555555&style=flat&logoColor=FFFFFF)](https://nodejs.org/)
 [![npm version](https://img.shields.io/npm/v/@camoneart/maestro?color=007EC5&labelColor=555555&style=flat&logoColor=FFFFFF)](https://www.npmjs.com/package/@camoneart/maestro)
 [![License MIT](https://img.shields.io/badge/License-MIT-yellow?labelColor=555555&style=flat)](https://opensource.org/licenses/MIT)
+[![CI](https://github.com/camoneart/maestro/actions/workflows/ci.yml/badge.svg)](https://github.com/camoneart/maestro/actions/workflows/ci.yml)
+[![Coverage Status](https://img.shields.io/badge/Coverage-%3E%3D80%25-green?labelColor=555555&style=flat)](https://github.com/camoneart/maestro/actions)
 
 ![maestro](public/image/logo/maestro-logo.png)
 **A CLI tool that “conducts” Git worktrees like an orchestra and turbo-charges parallel development with Claude Code.**
 
-![Demo Animation]()
+![Demo Animation](https://via.placeholder.com/800x400/2D3748/FFFFFF?text=Demo+Animation+Coming+Soon)
 
 **English** | **[日本語](/README.ja.md)**
 
@@ -16,6 +18,8 @@
 - [Overview](#overview)
 - [Key Features](#key-features)
 - [Installation](#installation)
+- [Updating](#updating)
+- [Requirements](#requirements)
 - [Quick Start](#quick-start)
 - [Command Reference](#command-reference)
 - [Advanced Features](#advanced-features)
@@ -74,6 +78,36 @@ npm install -g pnpm
 
 pnpm add -g @camoneart/maestro
 ```
+
+## Updating
+
+### Homebrew
+
+```bash
+brew upgrade camoneart/tap/maestro
+```
+
+### npm
+
+```bash
+npm update -g @camoneart/maestro
+```
+
+### pnpm
+
+```bash
+pnpm update -g @camoneart/maestro
+```
+
+## Requirements
+
+| Requirement | Version | Purpose | Install Command |
+|-------------|---------|---------|-----------------|
+| **Node.js** | >=20.0.0 | JavaScript runtime | [nodejs.org](https://nodejs.org/) |
+| **Git** | >=2.22 | Worktree support | `brew install git` |
+| **tmux** (optional) | Any | Session management | `brew install tmux` |
+| **fzf** (optional) | Any | Fuzzy finding | `brew install fzf` |
+| **GitHub CLI** (optional) | Any | GitHub integration | `brew install gh` |
 
 ## Quick Start
 
