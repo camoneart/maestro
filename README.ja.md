@@ -3,11 +3,13 @@
 [![Node.js >=20.0.0](https://img.shields.io/badge/Node.js-%3E%3D20.0.0-45CC11?labelColor=555555&style=flat&logoColor=FFFFFF)](https://nodejs.org/)
 [![npm version](https://img.shields.io/npm/v/@camoneart/maestro?color=007EC5&labelColor=555555&style=flat&logoColor=FFFFFF)](https://www.npmjs.com/package/@camoneart/maestro)
 [![License MIT](https://img.shields.io/badge/License-MIT-yellow?labelColor=555555&style=flat)](https://opensource.org/licenses/MIT)
+[![CI](https://github.com/camoneart/maestro/actions/workflows/ci.yml/badge.svg)](https://github.com/camoneart/maestro/actions/workflows/ci.yml)
+[![Coverage Status](https://img.shields.io/badge/Coverage-%3E%3D80%25-green?labelColor=555555&style=flat)](https://github.com/camoneart/maestro/actions)
 
 ![maestro](public/image/logo/maestro-logo.png)
 **Git worktreeを“オーケストラ”のように操り、Claude Codeとの並列開発を加速するCLIツール。**
 
-![Demo Animation]()
+![Demo Animation](https://via.placeholder.com/800x400/2D3748/FFFFFF?text=Demo+Animation+Coming+Soon)
 
 **[English](/README.md)** | **日本語**
 
@@ -16,6 +18,8 @@
 - [概要](#概要)
 - [主な特徴](#主な特徴)
 - [インストール](#インストール)
+- [アップデート](#アップデート)
+- [要件](#要件)
 - [クイックスタート](#クイックスタート)
 - [コマンドリファレンス](#コマンドリファレンス)
 - [高度な機能](#高度な機能)
@@ -72,6 +76,36 @@ npm install -g @camoneart/maestro
 # pnpm が入っていない場合は最初に: npm install -g pnpm
 pnpm add -g @camoneart/maestro
 ```
+
+## アップデート
+
+### Homebrew を使用
+
+```bash
+brew upgrade camoneart/tap/maestro
+```
+
+### npm を使用
+
+```bash
+npm update -g @camoneart/maestro
+```
+
+### pnpm を使用
+
+```bash
+pnpm update -g @camoneart/maestro
+```
+
+## 要件
+
+| 要件 | バージョン | 用途 | インストールコマンド |
+|------|-----------|------|--------------------|
+| **Node.js** | >=20.0.0 | JavaScript ランタイム | [nodejs.org](https://nodejs.org/) |
+| **Git** | >=2.22 | Worktree サポート | `brew install git` |
+| **tmux** (オプション) | Any | セッション管理 | `brew install tmux` |
+| **fzf** (オプション) | Any | ファジーファインディング | `brew install fzf` |
+| **GitHub CLI** (オプション) | Any | GitHub 連携 | `brew install gh` |
 
 ## クイックスタート
 
