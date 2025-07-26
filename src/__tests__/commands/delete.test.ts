@@ -8,6 +8,7 @@ import {
   createMockExecaResponse,
   createMockSpinner,
 } from '../utils/test-helpers'
+import { isCurrentDirectoryInWorktree } from '../../commands/delete'
 
 // モック設定
 vi.mock('../../core/git')
@@ -61,6 +62,38 @@ describe('delete command', () => {
       await gitManager.deleteWorktree('locked-feature', true)
 
       expect(mockGitManager.deleteWorktree).toHaveBeenCalledWith('locked-feature', true)
+    })
+  })
+
+  describe('current directory check', () => {
+    it('should return true when current directory is inside worktree', () => {
+      const originalCwd = process.cwd
+      process.cwd = vi.fn().mockReturnValue('/path/to/worktree/src')
+
+      const result = isCurrentDirectoryInWorktree('/path/to/worktree')
+      expect(result).toBe(true)
+
+      process.cwd = originalCwd
+    })
+
+    it('should return false when current directory is outside worktree', () => {
+      const originalCwd = process.cwd
+      process.cwd = vi.fn().mockReturnValue('/other/path')
+
+      const result = isCurrentDirectoryInWorktree('/path/to/worktree')
+      expect(result).toBe(false)
+
+      process.cwd = originalCwd
+    })
+
+    it('should return false when current directory is parent of worktree', () => {
+      const originalCwd = process.cwd
+      process.cwd = vi.fn().mockReturnValue('/path/to')
+
+      const result = isCurrentDirectoryInWorktree('/path/to/worktree')
+      expect(result).toBe(false)
+
+      process.cwd = originalCwd
     })
   })
 
