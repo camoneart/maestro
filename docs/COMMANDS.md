@@ -112,7 +112,7 @@ mst create feature/full-setup --tmux --claude --open --setup
 # Create from GitHub Issue
 mst create 123  # Auto-generates branch name from Issue #123
 
-# Create with tmux pane split
+# Create with tmux pane split (auto-focus to new pane)
 mst create feature/new --tmux-h --claude  # Horizontal split with Claude
 mst create issue-456 --tmux-v --setup     # Vertical split with setup
 

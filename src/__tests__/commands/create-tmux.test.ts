@@ -26,7 +26,7 @@ describe('createTmuxSession - pane split options', () => {
     await createTmuxSession('feature-test', '/path/to/worktree', mockConfig, options)
 
     expect(execa).toHaveBeenCalledWith('tmux', ['split-window', '-h', '-c', '/path/to/worktree'])
-
+    expect(execa).toHaveBeenCalledWith('tmux', ['select-pane', '-l'])
     expect(execa).toHaveBeenCalledWith('tmux', ['select-pane', '-T', 'feature-test'])
   })
 
@@ -36,6 +36,8 @@ describe('createTmuxSession - pane split options', () => {
     await createTmuxSession('feature-test', '/path/to/worktree', mockConfig, options)
 
     expect(execa).toHaveBeenCalledWith('tmux', ['split-window', '-v', '-c', '/path/to/worktree'])
+    expect(execa).toHaveBeenCalledWith('tmux', ['select-pane', '-l'])
+    expect(execa).toHaveBeenCalledWith('tmux', ['select-pane', '-T', 'feature-test'])
   })
 
   it('should send claude command when claude option is enabled', async () => {
