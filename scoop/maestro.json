@@ -1,12 +1,12 @@
 {
-  "version": "0.1.0",
+  "version": "3.2.1",
   "description": "Git worktree management tool with Claude Code integration",
   "homepage": "https://github.com/camoneart/maestro",
   "license": "MIT",
   "architecture": {
     "64bit": {
-      "url": "https://registry.npmjs.org/maestro/-/maestro-0.1.0.tgz",
-      "hash": "PLACEHOLDER_SHA256"
+      "url": "https://registry.npmjs.org/maestro/-/maestro-3.2.1.tgz",
+      "hash": "a479b940f9e12ad55d9c4cc4fe1f8f3d0648bdde7acf14230fde5cdb831483a5"
     }
   },
   "depends": "nodejs",
@@ -17,8 +17,14 @@
     "}"
   ],
   "bin": [
-    ["node_modules\\maestro\\dist\\cli.js", "mst"],
-    ["node_modules\\maestro\\dist\\cli.js", "maestro"]
+    [
+      "node_modules\\maestro\\dist\\cli.js",
+      "mst"
+    ],
+    [
+      "node_modules\\maestro\\dist\\cli.js",
+      "maestro"
+    ]
   ],
   "checkver": {
     "url": "https://registry.npmjs.org/maestro/latest",
