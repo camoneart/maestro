@@ -1,5 +1,30 @@
 # Changelog
 
+## 3.2.0
+
+### Minor Changes
+
+- Enhance tmux integration and improve documentation
+
+  ### New Features
+  - **Auto-attach to tmux session when using --tmux-h/--tmux-v from terminal**
+    - Now `--tmux-h` and `--tmux-v` options work consistently with `--tmux`
+    - When run from terminal, automatically creates and attaches to tmux session
+    - Maintains existing behavior when run inside tmux (pane splitting with auto-focus)
+    - Resolves UX inconsistency where users had to manually start tmux sessions
+
+  ### Documentation Improvements
+  - **Add comprehensive documentation for claude.markdownMode configuration**
+    - Added detailed explanation of `"shared"` vs `"split"` modes
+    - Updated README.md and README.ja.md with configuration table
+    - Enhanced docs/COMMANDS.md with practical examples
+    - Improved docs/commands/create.md with detailed usage scenarios
+
+  ### Technical Details
+  - Enhanced tmux session management logic to detect terminal vs tmux execution context
+  - Improved command consistency across all `--tmux*` options
+  - Better error handling for tmux session creation and attachment
+
 ## 3.1.0
 
 ### Minor Changes
