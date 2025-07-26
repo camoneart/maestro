@@ -1,5 +1,29 @@
 # Changelog
 
+## 3.1.0
+
+### Minor Changes
+
+- Add tmux auto-focus and refactor --claude option to --claude-md
+
+  ### New Features
+  - **Auto-focus to new pane when using --tmux-h/--tmux-v options**
+    - New tmux panes now automatically receive focus after creation
+    - Eliminates manual pane switching for immediate development workflow
+    - Uses `tmux select-pane -l` to focus the last created pane
+    - Fixes #105
+  - **Simplified --claude option to --claude-md**
+    - Renamed `--claude` to `--claude-md` for clearer purpose indication
+    - Focuses specifically on CLAUDE.md file management
+    - Removed non-functional autoStart and initialCommands features
+    - Simplified configuration and reduced complexity
+    - Fixes #112
+
+  ### Improvements
+  - Streamlined tmux workflow with seamless pane focus management
+  - Better semantic naming for Claude Code integration options
+  - Reduced configuration complexity for better maintainability
+
 ## 3.0.1
 
 ### Patch Changes
