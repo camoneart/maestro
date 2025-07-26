@@ -18,8 +18,11 @@ When you delete an orchestra member, Maestro performs a **complete cleanup**:
    - First attempts safe deletion with `git branch -d`
    - Automatically retries with `git branch -D` if the branch is not fully merged
    - Ensures complete cleanup without manual intervention
+3. **tmux session** - The tmux session with the same name as the worktree (if exists)
+   - Automatically terminates the session when deleting the worktree
+   - Use `--keep-session` to preserve the tmux session after deletion
 
-This ensures no orphaned branches remain after worktree deletion.
+This ensures no orphaned branches or sessions remain after worktree deletion.
 
 ## Usage Examples
 
@@ -31,6 +34,9 @@ mst delete feature/old-feature
 
 # Force delete (delete even with uncommitted changes)
 mst delete feature/old-feature --force
+
+# Keep tmux session after deleting worktree
+mst delete feature/old-feature --keep-session
 
 # Select with fzf and delete
 mst delete --fzf
@@ -55,6 +61,7 @@ mst delete --merged --dry-run
 | --------------------- | ----- | -------------------------------------------------- | ------- |
 | `--force`             | `-f`  | Force delete (ignore uncommitted changes)          | `false` |
 | `--remove-remote`     | `-r`  | Also delete remote branch                          | `false` |
+| `--keep-session`      |       | Keep tmux session after deleting worktree         | `false` |
 | `--fzf`               |       | Select with fzf and delete                         | `false` |
 | `--current`           |       | Delete current worktree                            | `false` |
 | `--dry-run`           | `-n`  | Show deletion targets without actually deleting    | `false` |
@@ -113,6 +120,46 @@ mst delete --merged --dry-run
 
 # Actually delete
 mst delete --merged --yes
+```
+
+## tmux Session Management
+
+By default, Maestro automatically cleans up tmux sessions when deleting worktrees to prevent orphaned sessions:
+
+### Default Behavior (Auto-cleanup)
+
+```bash
+# Deletes both worktree and tmux session (if it exists)
+mst delete feature/my-feature
+
+# Example output:
+# ✅ Worktree 'feature/my-feature' deleted
+# ✅ tmux session 'feature/my-feature' terminated
+```
+
+### Preserving tmux Sessions
+
+If you want to keep the tmux session active after deleting the worktree:
+
+```bash
+# Keep tmux session after deleting worktree
+mst delete feature/my-feature --keep-session
+
+# Example output:
+# ✅ Worktree 'feature/my-feature' deleted
+# ℹ️  tmux session 'feature/my-feature' preserved
+```
+
+### Use Cases for --keep-session
+
+- **Continuing work in the same session**: You want to recreate the worktree later but keep your tmux environment
+- **Session has other windows**: Your tmux session contains additional windows/panes you want to preserve
+- **Custom session setup**: The session has been customized with specific layouts or configurations
+
+```bash
+# Example workflow
+mst delete feature/temp-branch --keep-session  # Delete worktree, keep session
+mst create feature/new-branch --tmux           # Create new worktree in existing session
 ```
 
 ## Utilizing Batch Deletion
