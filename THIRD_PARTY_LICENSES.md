@@ -9,10 +9,14 @@ The majority of dependencies use the MIT License, which is compatible with this 
 ### Main Dependencies (MIT)
 
 - @modelcontextprotocol/sdk - Model Context Protocol SDK by Anthropic
+- @types/cli-progress - TypeScript definitions for cli-progress
 - chalk - Terminal string styling
+- cli-progress - Easy to use progress-bar for command-line/terminal applications
 - commander - Node.js command-line interfaces
+- conf - Simple config handling for your app or module
 - execa - A better child_process
 - inquirer - Interactive command line user interfaces
+- open - Open stuff like URLs, files, executables
 - ora - Elegant terminal spinner
 - p-limit - Run multiple promise-returning & async functions with limited concurrency
 - simple-git - A light weight interface for running git commands
