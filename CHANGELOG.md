@@ -1,5 +1,30 @@
 # Changelog
 
+## 3.3.0
+
+### Minor Changes
+
+- Add automatic tmux session cleanup when deleting worktrees
+
+  ### New Features
+  - **Automatic tmux session cleanup**
+    - `mst delete` now automatically removes associated tmux sessions
+    - Prevents accumulation of orphaned tmux sessions
+    - Improves system resource management
+
+  ### Options
+  - **--keep-session flag**
+    - Use `mst delete <branch> --keep-session` to preserve tmux session
+    - Maintains backward compatibility for users who want to keep sessions
+
+  ### Benefits
+  - Eliminates manual tmux session cleanup
+  - Prevents "duplicate session" errors on recreation
+  - Reduces memory usage from orphaned sessions
+  - Provides consistent worktree lifecycle management
+
+  Resolves: #122
+
 ## 3.2.1
 
 ### Patch Changes
