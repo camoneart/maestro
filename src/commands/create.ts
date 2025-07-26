@@ -172,6 +172,9 @@ export async function createTmuxSession(
       splitArgs.push('-c', worktreePath)
       await execa('tmux', splitArgs)
 
+      // 新しいペインへフォーカスを移動（最後の分割されたペインが選択される）
+      await execa('tmux', ['select-pane', '-l'])
+
       // 新しいペインにタイトルを設定
       await execa('tmux', ['select-pane', '-T', branchName])
 

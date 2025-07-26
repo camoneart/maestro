@@ -106,7 +106,14 @@ mst create feature/new-feature --tmux-h
 mst create feature/new-feature --tmux-v
 ```
 
-These options create a new pane in your current tmux window and immediately switch to the worktree directory.
+**Behavior:**
+- Creates a new pane in your current tmux window
+- Automatically switches focus to the new pane (Issue #105 fix)
+- Sets the working directory to the new worktree
+- Sets pane title to the branch name for easy identification
+
+**Focus Management:**
+The new pane is automatically focused after creation, providing a seamless workflow from creation to development. This eliminates the need to manually switch panes after worktree creation.
 
 ## Claude Code Integration
 

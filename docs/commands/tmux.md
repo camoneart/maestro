@@ -98,6 +98,26 @@ mst tmux feature/backend --split-pane --vertical
 mst tmux feature/database --split-pane
 ```
 
+### Instant Worktree Creation with Pane Splitting
+
+Use `mst create` with tmux split options for immediate worktree creation and pane setup:
+
+```bash
+# Create worktree and split horizontally (auto-focus to new pane)
+mst create feature/new-ui --tmux-h
+
+# Create worktree and split vertically (auto-focus to new pane)  
+mst create bugfix/critical --tmux-v
+
+# Combine with Claude Code for AI-assisted development
+mst create feature/ai-feature --tmux-h --claude
+```
+
+**Auto-Focus Feature:**
+- New panes are automatically focused after creation (Issue #105 fix)
+- No manual pane switching required - ready for immediate development
+- Pane title is set to branch name for easy identification
+
 ### Editor Integration
 
 ```bash
