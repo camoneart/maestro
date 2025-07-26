@@ -46,7 +46,7 @@ You can customize the PR template by modifying the code in `src/commands/create.
 
 ## Tips
 
-- Use with `--tmux --claude` for immediate development start
+- Use with `--tmux --claude-md` for immediate development start
 - The PR URL is displayed after creation
 - You can convert from Draft to Ready later via GitHub UI
 - Works seamlessly with Issue-based branch creation

@@ -97,7 +97,7 @@ mst create <branch-name> [options]
 | `--tmux` | Create tmux session and auto-attach |
 | `--tmux-h` | Create in horizontal tmux pane split |
 | `--tmux-v` | Create in vertical tmux pane split |
-| `--claude` | Create CLAUDE.md for Claude Code |
+| `--claude-md` | Create CLAUDE.md for Claude Code |
 | `--copy-file <file>` | Copy files from current worktree |
 | `--yes`, `-y` | Skip confirmations |
 
@@ -107,14 +107,14 @@ mst create <branch-name> [options]
 mst create feature/awesome-feature
 
 # Full setup
-mst create feature/full-setup --tmux --claude --open --setup
+mst create feature/full-setup --tmux --claude-md --open --setup
 
 # Create from GitHub Issue
 mst create 123  # Auto-generates branch name from Issue #123
 
 # Create with tmux pane split
-mst create feature/new --tmux-h --claude  # Horizontal split with Claude
-mst create issue-456 --tmux-v --setup     # Vertical split with setup
+mst create feature/new --tmux-h --claude-md  # Horizontal split with Claude
+mst create issue-456 --tmux-v --setup        # Vertical split with setup
 
 # Copy environment files to new worktree
 mst create feature/api --copy-file .env --copy-file .env.local

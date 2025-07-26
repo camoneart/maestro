@@ -28,8 +28,8 @@ mst create issue-123     # Created as issue-123
 # Create with tmux session (auto-attaches to the session)
 mst create feature/new-feature --tmux
 
-# Create with tmux session and auto-start Claude Code
-mst create feature/new-feature --tmux --claude
+# Create with tmux session and set up Claude workspace
+mst create feature/new-feature --tmux --claude-md
 
 # Create with tmux pane split options (when already in tmux)
 mst create feature/new-feature --tmux-h  # Horizontal split
@@ -39,7 +39,7 @@ mst create feature/new-feature --tmux-v  # Vertical split
 mst create feature/new-feature --base develop
 
 # Combine all options
-mst create feature/new-feature --base main --open --setup --tmux --claude
+mst create feature/new-feature --base main --open --setup --tmux --claude-md
 ```
 
 ## Options
@@ -52,7 +52,7 @@ mst create feature/new-feature --base main --open --setup --tmux --claude
 | `--tmux`             | `-t`  | Create tmux session and auto-attach                          | `false` |
 | `--tmux-h`           |       | Split tmux pane horizontally (when in tmux)                  | `false` |
 | `--tmux-v`           |       | Split tmux pane vertically (when in tmux)                    | `false` |
-| `--claude`           | `-c`  | Auto-start Claude Code                                        | `false` |
+| `--claude-md`        | `-c`  | Create CLAUDE.md file for Claude Code workspace              | `false` |
 | `--copy-file <file>` |       | Copy files from current worktree (including gitignored files) | none    |
 | `--shell`            |       | Enter shell after creation                                    | `false` |
 | `--exec <command>`   |       | Execute command after creation                                | none    |
@@ -110,18 +110,18 @@ These options create a new pane in your current tmux window and immediately swit
 
 ## Claude Code Integration
 
-Using the `--claude` option automatically starts Claude Code after orchestra member creation:
+Using the `--claude-md` option creates CLAUDE.md workspace files for Claude Code integration:
 
 ```bash
-mst create feature/ai-feature --tmux --claude
+mst create feature/ai-feature --tmux --claude-md
 ```
 
 Executed processes:
 
 1. Worktree creation
 2. tmux session/window creation (with auto-attach if using `--tmux`)
-3. Claude Code startup
-4. Initial command execution (if specified in configuration)
+3. CLAUDE.md file creation for workspace setup
+4. Environment setup (if specified in configuration)
 
 ## Copying Files Feature
 
@@ -190,7 +190,7 @@ The `afterCreate` hook supports both string and array formats:
 
 ```bash
 # Convenient to alias commonly used combinations
-alias mstf='mst create --tmux --claude --setup'
+alias mstf='mst create --tmux --claude-md --setup'
 
 # Usage example
 mstf feature/new-feature
@@ -203,7 +203,7 @@ mstf feature/new-feature
 gh issue list
 
 # Create orchestra member by issue number
-mst create 123 --tmux --claude
+mst create 123 --tmux --claude-md
 
 # Start development
 # Issue information is automatically saved as metadata
