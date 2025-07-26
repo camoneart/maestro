@@ -168,9 +168,25 @@ Settings from `.maestro.json` are automatically applied:
   },
   "hooks": {
     "afterCreate": ["npm install", "npm run setup"]
+  },
+  "claude": {
+    "markdownMode": "shared"  // "shared" | "split"
   }
 }
 ```
+
+### Claude Configuration
+
+The `claude.markdownMode` setting controls how CLAUDE.md files are managed:
+
+| Mode | Behavior | Use Case |
+|------|----------|----------|
+| `"shared"` | Creates symlink to main repository's CLAUDE.md | Share same Claude Code instructions across all worktrees |
+| `"split"` | Creates independent CLAUDE.md for each worktree | Different Claude Code instructions per worktree |
+
+When using `--claude-md` option:
+- `"shared"` mode: Creates a symlink pointing to the main repository's CLAUDE.md
+- `"split"` mode: Creates a new independent CLAUDE.md file in the worktree
 
 ### postCreate Configuration
 
