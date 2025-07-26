@@ -347,7 +347,6 @@ describe('Create Command - Enhanced Coverage', () => {
       expect(mockExeca).toHaveBeenCalledWith('tmux', ['has-session', '-t', 'test-branch'])
       expect(mockExeca).toHaveBeenCalledTimes(1)
     })
-
   })
 
   describe('handleClaudeMarkdown function', () => {

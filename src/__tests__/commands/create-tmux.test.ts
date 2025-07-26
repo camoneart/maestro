@@ -9,7 +9,6 @@ vi.mock('../../utils/tmux.js', () => ({
 }))
 
 describe('createTmuxSession - pane split options', () => {
-
   beforeEach(() => {
     vi.clearAllMocks()
   })
@@ -33,7 +32,6 @@ describe('createTmuxSession - pane split options', () => {
     expect(execa).toHaveBeenCalledWith('tmux', ['select-pane', '-l'])
     expect(execa).toHaveBeenCalledWith('tmux', ['select-pane', '-T', 'feature-test'])
   })
-
 
   it('should create new session with regular --tmux option and auto-attach', async () => {
     const options: CreateOptions = { tmux: true }

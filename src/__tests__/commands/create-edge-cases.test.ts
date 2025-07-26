@@ -113,7 +113,6 @@ describe('create command - edge cases', () => {
       ])
     })
 
-
     it('should handle tmux session creation failure', async () => {
       vi.mocked(execa).mockImplementation(async (cmd, args) => {
         if (cmd === 'tmux' && args?.[0] === 'has-session') {
@@ -128,9 +127,7 @@ describe('create command - edge cases', () => {
       const config = { claude: { autoStart: false } }
 
       // Should not throw error
-      await expect(
-        createTmuxSession('feature/test', '/path/to/worktree')
-      ).resolves.not.toThrow()
+      await expect(createTmuxSession('feature/test', '/path/to/worktree')).resolves.not.toThrow()
     })
 
     it('should sanitize session name', async () => {

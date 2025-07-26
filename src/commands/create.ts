@@ -181,7 +181,6 @@ export async function createTmuxSession(
       // tmuxステータスラインを設定
       await setupTmuxStatusLine()
 
-
       // 新しいペインでシェルのプロンプトを表示
       console.log(
         chalk.green(`✅ tmuxペインを${options.tmuxH ? '水平' : '垂直'}分割しました: ${branchName}`)
@@ -205,7 +204,6 @@ export async function createTmuxSession(
     await execa('tmux', ['rename-window', '-t', sessionName, branchName])
 
     console.log(chalk.green(`✨ tmuxセッション '${sessionName}' を作成しました`))
-
 
     // 自動でセッションにアタッチ
     console.log(chalk.cyan(`🎵 tmuxセッション '${sessionName}' にアタッチしています...`))

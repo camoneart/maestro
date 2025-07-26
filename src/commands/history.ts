@@ -41,9 +41,7 @@ function getHistoryPathForBranch(branchName: string): string {
 }
 
 // 全ての履歴を検索
-async function findAllHistories(
-  gitManager: GitWorktreeManager
-): Promise<ClaudeHistory[]> {
+async function findAllHistories(gitManager: GitWorktreeManager): Promise<ClaudeHistory[]> {
   const histories: ClaudeHistory[] = []
   const worktrees = await gitManager.listWorktrees()
 
