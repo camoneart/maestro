@@ -3,7 +3,6 @@
 [![Node.js >=20.0.0](https://img.shields.io/badge/Node.js-%3E%3D20.0.0-45CC11?labelColor=555555&style=flat&logoColor=FFFFFF)](https://nodejs.org/)
 [![npm version](https://img.shields.io/npm/v/@camoneart/maestro?color=007EC5&labelColor=555555&style=flat&logoColor=FFFFFF)](https://www.npmjs.com/package/@camoneart/maestro)
 [![License MIT](https://img.shields.io/badge/License-MIT-yellow?labelColor=555555&style=flat)](https://opensource.org/licenses/MIT)
-[![CI](https://github.com/camoneart/maestro/actions/workflows/ci.yml/badge.svg)](https://github.com/camoneart/maestro/actions/workflows/ci.yml)
 [![Coverage Status](https://img.shields.io/badge/Coverage-%3E%3D80%25-green?labelColor=555555&style=flat)](https://github.com/camoneart/maestro/actions)
 
 ![maestro](public/image/logo/maestro-logo.png)
