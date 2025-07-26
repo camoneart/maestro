@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { execa } from 'execa'
 import { createTmuxSession } from '../../commands/create.js'
-import { Config } from '../../core/config.js'
 import { CreateOptions } from '../../types/index.js'
 
 vi.mock('execa')
@@ -10,17 +9,6 @@ vi.mock('../../utils/tmux.js', () => ({
 }))
 
 describe('createTmuxSession - pane split options', () => {
-  const mockConfig: Config = {
-    worktrees: { path: '.git/orchestrations' },
-    development: {
-      autoSetup: true,
-      syncFiles: ['.env'],
-      defaultEditor: 'cursor',
-    },
-    claude: {
-      markdownMode: 'shared',
-    },
-  }
 
   beforeEach(() => {
     vi.clearAllMocks()
