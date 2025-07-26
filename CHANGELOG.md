@@ -1,5 +1,25 @@
 # Changelog
 
+## 3.3.1
+
+### Patch Changes
+
+- Fix worktree self-deletion causing ENOENT error
+
+  Resolves issue where attempting to delete a worktree from within the worktree directory itself would cause a `spawn git ENOENT` error and leave the system in an inconsistent state (directory deleted but branch remaining).
+
+  **Changes:**
+  - Added validation to prevent worktree self-deletion attempts
+  - Enhanced error messages with clear guidance for correct usage
+  - Added comprehensive test coverage for directory validation scenarios
+
+  **Fixed behavior:**
+  - Users are now warned when trying to delete a worktree from within itself
+  - Proper error message guides users to run the command from outside the worktree
+  - Prevents system inconsistency and manual cleanup requirements
+
+  Fixes #126
+
 ## 3.3.0
 
 ### Minor Changes
