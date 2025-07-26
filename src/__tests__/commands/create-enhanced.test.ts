@@ -348,58 +348,6 @@ describe('Create Command - Enhanced Coverage', () => {
       expect(mockExeca).toHaveBeenCalledTimes(1)
     })
 
-    it('should handle Claude Code auto-start', async () => {
-      mockExeca
-        .mockRejectedValueOnce(new Error('Session does not exist'))
-        .mockResolvedValueOnce({ stdout: '' })
-        .mockResolvedValueOnce({ stdout: '' })
-        .mockResolvedValueOnce({ stdout: '' }) // claude command
-        .mockResolvedValueOnce({ stdout: '' }) // initial command
-
-      async function createTmuxSession(branchName: string, worktreePath: string) {
-        const sessionName = branchName.replace(/[^a-zA-Z0-9_-]/g, '-')
-
-        try {
-          try {
-            await execa('tmux', ['has-session', '-t', sessionName])
-            return
-          } catch {
-            // セッション作成
-          }
-
-          await execa('tmux', ['new-session', '-d', '-s', sessionName, '-c', worktreePath])
-          await execa('tmux', ['rename-window', '-t', sessionName, branchName])
-
-          if (config.claude?.autoStart) {
-            await execa('tmux', ['send-keys', '-t', sessionName, 'claude', 'Enter'])
-
-            if (config.claude?.initialCommands) {
-              for (const cmd of config.claude.initialCommands) {
-                await execa('tmux', ['send-keys', '-t', sessionName, cmd, 'Enter'])
-              }
-            }
-          }
-        } catch (error) {
-          // エラーハンドリング
-        }
-      }
-
-      await createTmuxSession('test', '/path', {
-        claude: {
-          autoStart: true,
-          initialCommands: ['echo "hello"'],
-        },
-      })
-
-      expect(mockExeca).toHaveBeenCalledWith('tmux', ['send-keys', '-t', 'test', 'claude', 'Enter'])
-      expect(mockExeca).toHaveBeenCalledWith('tmux', [
-        'send-keys',
-        '-t',
-        'test',
-        'echo "hello"',
-        'Enter',
-      ])
-    })
   })
 
   describe('handleClaudeMarkdown function', () => {

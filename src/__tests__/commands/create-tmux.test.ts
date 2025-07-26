@@ -29,7 +29,7 @@ describe('createTmuxSession - pane split options', () => {
   it('should split pane horizontally with --tmux-h option', async () => {
     const options: CreateOptions = { tmuxH: true }
 
-    await createTmuxSession('feature-test', '/path/to/worktree', mockConfig, options)
+    await createTmuxSession('feature-test', '/path/to/worktree', options)
 
     expect(execa).toHaveBeenCalledWith('tmux', ['split-window', '-h', '-c', '/path/to/worktree'])
 
@@ -39,7 +39,7 @@ describe('createTmuxSession - pane split options', () => {
   it('should split pane vertically with --tmux-v option', async () => {
     const options: CreateOptions = { tmuxV: true }
 
-    await createTmuxSession('feature-test', '/path/to/worktree', mockConfig, options)
+    await createTmuxSession('feature-test', '/path/to/worktree', options)
 
     expect(execa).toHaveBeenCalledWith('tmux', ['split-window', '-v', '-c', '/path/to/worktree'])
   })
@@ -49,7 +49,7 @@ describe('createTmuxSession - pane split options', () => {
     const options: CreateOptions = { tmux: true }
     vi.mocked(execa).mockRejectedValueOnce(new Error('no session')) // has-session fails
 
-    await createTmuxSession('feature-test', '/path/to/worktree', mockConfig, options)
+    await createTmuxSession('feature-test', '/path/to/worktree', options)
 
     expect(execa).toHaveBeenCalledWith('tmux', [
       'new-session',
@@ -74,7 +74,7 @@ describe('createTmuxSession - pane split options', () => {
     const originalTmux = process.env.TMUX
     process.env.TMUX = '/tmp/tmux-1000/default,1234,0'
 
-    await createTmuxSession('feature-test', '/path/to/worktree', mockConfig, options)
+    await createTmuxSession('feature-test', '/path/to/worktree', options)
 
     // Should use switch-client instead of attach
     expect(execa).toHaveBeenCalledWith('tmux', ['switch-client', '-t', 'feature-test'], {
