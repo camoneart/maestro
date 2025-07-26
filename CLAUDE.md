@@ -158,6 +158,36 @@ Follow semantic commit prefixes for this project:
 
 **Post-Implementation Requirements**: After completing any issue fixes or feature additions, always run `pnpm format` to ensure code formatting consistency and avoid CI/Lint errors.
 
+## AI Agent Integration
+
+### Automated Command Documentation Updates
+
+**IMPORTANT**: When you modify, add, or delete files in `src/commands/`, you MUST proactively use the `command-docs-updater` agent to maintain documentation consistency. This includes:
+
+- Adding new commands to `src/commands/`
+- Modifying existing command options, flags, or behavior
+- Changing command help text or descriptions
+- Updating command examples or usage patterns
+- Removing or deprecating commands
+
+**Auto-trigger Rules**:
+1. After ANY changes to files in `src/commands/`, immediately use the Task tool to launch the `command-docs-updater` agent
+2. The agent will automatically identify and update:
+   - README.md files at various levels
+   - docs/commands/ directory and individual command docs
+   - docs/COMMANDS.md master command reference
+   - API documentation and command reference guides
+   - CLI help text and usage examples
+   - Any markdown files referencing the commands
+
+**Example Usage**:
+```
+After modifying src/commands/create.ts to add a --template option:
+Use Task tool: "I've updated the create command to add a new --template option. Please use the command-docs-updater agent to update all related documentation."
+```
+
+This ensures documentation always stays in sync with implementation changes without manual intervention.
+
 ## Integration Points
 
 ### Claude Code MCP
