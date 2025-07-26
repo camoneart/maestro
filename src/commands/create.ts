@@ -161,7 +161,7 @@ export async function createTmuxSession(
     // ペイン分割オプションの場合
     if (options?.tmuxH || options?.tmuxV) {
       const isInsideTmux = process.env.TMUX !== undefined
-      
+
       if (!isInsideTmux) {
         // tmux外から実行された場合：新しいセッションを作成
         try {
@@ -176,7 +176,7 @@ export async function createTmuxSession(
 
         // tmuxセッションを作成（detached mode）
         await execa('tmux', ['new-session', '-d', '-s', sessionName, '-c', worktreePath])
-        
+
         // ペイン分割を実行
         const splitArgs = ['split-window', '-t', sessionName]
         if (options.tmuxH) {
@@ -192,15 +192,19 @@ export async function createTmuxSession(
 
         // 新しいペインにタイトルを設定
         await execa('tmux', ['select-pane', '-t', sessionName, '-T', branchName])
-        
+
         // ウィンドウ名を設定
         await execa('tmux', ['rename-window', '-t', sessionName, branchName])
-        
+
         // tmuxステータスラインを設定
         await setupTmuxStatusLine()
-        
-        console.log(chalk.green(`✨ tmuxセッション '${sessionName}' を作成し、ペインを${options.tmuxH ? '水平' : '垂直'}分割しました`))
-        
+
+        console.log(
+          chalk.green(
+            `✨ tmuxセッション '${sessionName}' を作成し、ペインを${options.tmuxH ? '水平' : '垂直'}分割しました`
+          )
+        )
+
         // セッションにアタッチ
         console.log(chalk.cyan(`🎵 tmuxセッション '${sessionName}' にアタッチしています...`))
         await execa('tmux', ['attach', '-t', sessionName], { stdio: 'inherit' })
@@ -229,7 +233,9 @@ export async function createTmuxSession(
 
         // 新しいペインでシェルのプロンプトを表示
         console.log(
-          chalk.green(`✅ tmuxペインを${options.tmuxH ? '水平' : '垂直'}分割しました: ${branchName}`)
+          chalk.green(
+            `✅ tmuxペインを${options.tmuxH ? '水平' : '垂直'}分割しました: ${branchName}`
+          )
         )
         return
       }

@@ -15,7 +15,7 @@ describe('createTmuxSession - pane split options', () => {
 
   it('should split pane horizontally with --tmux-h option (from inside tmux)', async () => {
     const options: CreateOptions = { tmuxH: true }
-    
+
     // Mock being inside tmux
     const originalTmux = process.env.TMUX
     process.env.TMUX = '/tmp/tmux-1000/default,1234,0'
@@ -25,7 +25,7 @@ describe('createTmuxSession - pane split options', () => {
     expect(execa).toHaveBeenCalledWith('tmux', ['split-window', '-h', '-c', '/path/to/worktree'])
     expect(execa).toHaveBeenCalledWith('tmux', ['select-pane', '-l'])
     expect(execa).toHaveBeenCalledWith('tmux', ['select-pane', '-T', 'feature-test'])
-    
+
     // Restore original TMUX env
     if (originalTmux !== undefined) {
       process.env.TMUX = originalTmux
@@ -36,7 +36,7 @@ describe('createTmuxSession - pane split options', () => {
 
   it('should split pane vertically with --tmux-v option (from inside tmux)', async () => {
     const options: CreateOptions = { tmuxV: true }
-    
+
     // Mock being inside tmux
     const originalTmux = process.env.TMUX
     process.env.TMUX = '/tmp/tmux-1000/default,1234,0'
@@ -46,7 +46,7 @@ describe('createTmuxSession - pane split options', () => {
     expect(execa).toHaveBeenCalledWith('tmux', ['split-window', '-v', '-c', '/path/to/worktree'])
     expect(execa).toHaveBeenCalledWith('tmux', ['select-pane', '-l'])
     expect(execa).toHaveBeenCalledWith('tmux', ['select-pane', '-T', 'feature-test'])
-    
+
     // Restore original TMUX env
     if (originalTmux !== undefined) {
       process.env.TMUX = originalTmux
@@ -144,7 +144,12 @@ describe('createTmuxSession - pane split options', () => {
       ])
 
       // Should rename window
-      expect(execa).toHaveBeenCalledWith('tmux', ['rename-window', '-t', 'feature-test', 'feature-test'])
+      expect(execa).toHaveBeenCalledWith('tmux', [
+        'rename-window',
+        '-t',
+        'feature-test',
+        'feature-test',
+      ])
 
       // Should auto-attach to session
       expect(execa).toHaveBeenCalledWith('tmux', ['attach', '-t', 'feature-test'], {
