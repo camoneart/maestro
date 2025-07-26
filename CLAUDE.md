@@ -22,6 +22,7 @@ Maestro is a CLI tool for managing Git worktrees with a conductor/orchestra them
 ### Code Quality
 
 - `pnpm lint` - ESLint checking on TypeScript files
+- `pnpm lint:ci` - CI-specific linting with max 26 warnings threshold
 - `pnpm format` - Format code with Prettier
 - `pnpm prettier:check` - Check code formatting
 
@@ -35,6 +36,7 @@ Maestro is a CLI tool for managing Git worktrees with a conductor/orchestra them
 - `pnpm changeset` - Create a changeset for releases
 - `pnpm version` - Version bump using changesets
 - `pnpm release` - Build and publish to npm
+- `pnpm prepublishOnly` - Pre-publish hook (auto-build and generate completions)
 
 ## Core Architecture
 
@@ -69,8 +71,10 @@ The CLI follows a modular command structure where each command (create, delete, 
 - Interactive prompts using inquirer
 - fzf integration for selection
 - JSON output for scripting
-- tmux integration
+- tmux integration with auto-attach functionality
 - Claude Code integration via MCP
+- GitHub Issue/PR integration with automatic metadata extraction
+- CLAUDE.md file management in shared/split modes
 
 ## Testing Approach
 
@@ -79,7 +83,7 @@ The CLI follows a modular command structure where each command (create, delete, 
 - **Unit tests**: `src/__tests__/commands/` and `src/__tests__/core/`
 - **E2E tests**: `e2e/tests/`
 - **Test utilities**: `src/__tests__/utils/`
-- **Coverage Requirements**: 80% statements minimum, configured in vitest.config.ts
+- **Coverage Requirements**: statements: 80%, branches: 75%, functions: 75%, lines: 80% (configured in vitest.config.ts)
 
 ### Test-Driven Development (TDD)
 
@@ -102,7 +106,14 @@ This project maintains implementation logs in `_docs/templates/` with format `yy
 
 ## MCP Integration
 
-The project includes MCP (Model Context Protocol) server functionality in `src/mcp/server.ts` for Claude Code integration. Commands can be executed through the MCP interface.
+The project includes MCP (Model Context Protocol) server functionality in `src/mcp/server.ts` for Claude Code integration. The MCP server exposes orchestral-themed tools:
+
+- `create_orchestra_member` - Create new worktrees with optional base branch
+- `delete_orchestra_member` - Remove worktrees with force option
+- `exec_in_orchestra_member` - Execute commands within specific worktrees
+- `list_orchestra_members` - List all active worktrees with status
+
+All MCP tools use Zod schemas for validation and follow the orchestra/conductor theme throughout.
 
 ## Package Configuration
 
@@ -154,13 +165,15 @@ Follow semantic commit prefixes for this project:
 - Server implementation in `src/mcp/server.ts`
 - Auto-generates CLAUDE.md files for new worktrees
 - Supports AI-powered code review workflows
+- Provides orchestral-themed tools for worktree management
+- Handles CLAUDE.md file modes: `shared` (symlink to main) or `split` (independent files)
 
 ### External Tool Integration
 
-- **GitHub CLI**: Direct `gh` command integration for PR management
-- **tmux**: Session management and pane splitting
-- **fzf**: Fuzzy finding for interactive selection
-- **Shell Completion**: bash/zsh/fish completion scripts available
+- **GitHub CLI**: Direct `gh` command integration for PR management and Issue/PR metadata extraction
+- **tmux**: Session management with auto-attach functionality for `--tmux`, `--tmux-h`, `--tmux-v` options
+- **fzf**: Fuzzy finding for interactive selection across commands
+- **Shell Completion**: bash/zsh/fish completion scripts available via `mst completion`
 
 
 ## 実装ログ運用ルール
