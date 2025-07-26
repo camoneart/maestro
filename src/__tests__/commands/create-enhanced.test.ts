@@ -287,7 +287,7 @@ describe('Create Command - Enhanced Coverage', () => {
         .mockResolvedValueOnce({ stdout: '' }) // new-session succeeds
         .mockResolvedValueOnce({ stdout: '' }) // rename-window succeeds
 
-      async function createTmuxSession(branchName: string, worktreePath: string, config: any) {
+      async function createTmuxSession(branchName: string, worktreePath: string) {
         const sessionName = branchName.replace(/[^a-zA-Z0-9_-]/g, '-')
 
         try {
@@ -330,7 +330,7 @@ describe('Create Command - Enhanced Coverage', () => {
     it('should handle existing tmux session', async () => {
       mockExeca.mockResolvedValueOnce({ stdout: '' }) // has-session succeeds
 
-      async function createTmuxSession(branchName: string, worktreePath: string, config: any) {
+      async function createTmuxSession(branchName: string, worktreePath: string) {
         const sessionName = branchName.replace(/[^a-zA-Z0-9_-]/g, '-')
 
         try {
@@ -356,7 +356,7 @@ describe('Create Command - Enhanced Coverage', () => {
         .mockResolvedValueOnce({ stdout: '' }) // claude command
         .mockResolvedValueOnce({ stdout: '' }) // initial command
 
-      async function createTmuxSession(branchName: string, worktreePath: string, config: any) {
+      async function createTmuxSession(branchName: string, worktreePath: string) {
         const sessionName = branchName.replace(/[^a-zA-Z0-9_-]/g, '-')
 
         try {

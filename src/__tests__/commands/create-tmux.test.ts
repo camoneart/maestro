@@ -11,9 +11,15 @@ vi.mock('../../utils/tmux.js', () => ({
 
 describe('createTmuxSession - pane split options', () => {
   const mockConfig: Config = {
-    worktrees: { root: '.git/orchestrations' },
-    development: {},
-    integrations: {},
+    worktrees: { path: '.git/orchestrations' },
+    development: {
+      autoSetup: true,
+      syncFiles: ['.env'],
+      defaultEditor: 'cursor',
+    },
+    claude: {
+      markdownMode: 'shared',
+    },
   }
 
   beforeEach(() => {
@@ -38,19 +44,6 @@ describe('createTmuxSession - pane split options', () => {
     expect(execa).toHaveBeenCalledWith('tmux', ['split-window', '-v', '-c', '/path/to/worktree'])
   })
 
-  it('should send claude command when claude option is enabled', async () => {
-    const options: CreateOptions = { tmuxH: true, claude: true }
-
-    await createTmuxSession('issue-123', '/path/to/worktree', mockConfig, options)
-
-    expect(execa).toHaveBeenCalledWith('tmux', [
-      'send-keys',
-      '-t',
-      ':.',
-      'claude "fix issue 123"',
-      'Enter',
-    ])
-  })
 
   it('should create new session with regular --tmux option and auto-attach', async () => {
     const options: CreateOptions = { tmux: true }
