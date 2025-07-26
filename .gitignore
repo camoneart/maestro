@@ -70,6 +70,7 @@ worktrees/
 # Claude Code
 .claude/export-conversations/
 .claude/settings.local.json
+.claude/agents/
 
 # docs
 _docs/
