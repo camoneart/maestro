@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { execa } from 'execa'
 import fs from 'fs/promises'
 import path from 'path'
@@ -308,7 +308,7 @@ describe('Create Command - Enhanced Coverage', () => {
         }
       }
 
-      await createTmuxSession('feature/test', '/path/to/worktree', {})
+      await createTmuxSession('feature/test', '/path/to/worktree')
 
       expect(mockExeca).toHaveBeenCalledWith('tmux', ['has-session', '-t', 'feature-test'])
       expect(mockExeca).toHaveBeenCalledWith('tmux', [
@@ -330,7 +330,7 @@ describe('Create Command - Enhanced Coverage', () => {
     it('should handle existing tmux session', async () => {
       mockExeca.mockResolvedValueOnce({ stdout: '' }) // has-session succeeds
 
-      async function createTmuxSession(branchName: string, worktreePath: string) {
+      async function createTmuxSession(branchName: string, _worktreePath: string) {
         const sessionName = branchName.replace(/[^a-zA-Z0-9_-]/g, '-')
 
         try {
@@ -342,7 +342,7 @@ describe('Create Command - Enhanced Coverage', () => {
         }
       }
 
-      await createTmuxSession('test-branch', '/path/to/worktree', {})
+      await createTmuxSession('test-branch', '/path/to/worktree')
 
       expect(mockExeca).toHaveBeenCalledWith('tmux', ['has-session', '-t', 'test-branch'])
       expect(mockExeca).toHaveBeenCalledTimes(1)
@@ -430,7 +430,7 @@ Add specific instructions for this worktree here.
       mockPath.join.mockReturnValue('/worktree/CLAUDE.md')
       mockFs.access.mockRejectedValue(new Error('File not found'))
 
-      async function handleClaudeMarkdown(worktreePath: string, config: any) {
+      async function handleClaudeMarkdown(_worktreePath: string, _config: any) {
         try {
           const rootClaudePath = path.join(process.cwd(), 'CLAUDE.md')
           if (
