@@ -103,6 +103,7 @@ mst create feature/awesome-feature --tmux --claude
 
 - `mst shell <branch>` lets you enter any performer after creation (fzf prompt when omitted).
 - `--tmux` creates a dedicated tmux session and automatically attaches to it; combine with `--claude` to auto-start Claude Code.
+- `--tmux-h`/`--tmux-v` splits the current tmux pane horizontally/vertically and auto-focuses to the new pane for immediate development.
 
 ### Basic Usage Examples
 
