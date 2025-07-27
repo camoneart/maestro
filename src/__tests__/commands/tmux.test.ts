@@ -231,8 +231,8 @@ describe('tmux command', () => {
       // 直接tmuxセッションが作成されることを確認
       expect(ttyUtils.createAndAttachTmuxSession).toHaveBeenCalledWith(
         expect.stringContaining('feature-1'),
-        '/tmp/repo/worktree-1',
-        undefined
+        '/project/.git/orchestrations/feature-1',
+        ''
       )
     })
 
