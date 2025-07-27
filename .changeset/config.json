@@ -2,7 +2,6 @@
   "$schema": "https://unpkg.com/@changesets/config@3.0.0/schema.json",
   "changelog": ["@changesets/changelog-github", { "repo": "camoneart/maestro" }],
   "commit": false,
-  "___tag": "@camoneart/maestro",
   "fixed": [],
   "linked": [],
   "access": "public",
