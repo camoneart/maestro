@@ -10,6 +10,7 @@ import path from 'path'
 import fs from 'fs/promises'
 import { spawn } from 'child_process'
 import { setupTmuxStatusLine } from '../utils/tmux.js'
+import { attachToTmuxWithProperTTY, switchTmuxClientWithProperTTY } from '../utils/tty.js'
 import { detectPackageManager } from '../utils/packageManager.js'
 import { addToGitignore } from '../utils/gitignore.js'
 
@@ -151,44 +152,12 @@ export async function saveWorktreeMetadata(
 
 // tmuxセッションをアタッチする関数（TTY問題を解決）
 export function attachToTmuxSession(sessionName: string): Promise<void> {
-  return new Promise((resolve, reject) => {
-    const process = spawn('tmux', ['attach', '-t', sessionName], {
-      stdio: 'inherit',
-    })
-
-    process.on('exit', code => {
-      if (code === 0) {
-        resolve()
-      } else {
-        reject(new Error(`tmux attach failed with code ${code}`))
-      }
-    })
-
-    process.on('error', error => {
-      reject(error)
-    })
-  })
+  return attachToTmuxWithProperTTY(sessionName)
 }
 
 // tmuxクライアントをスイッチする関数（TTY問題を解決）
 export function switchTmuxClient(sessionName: string): Promise<void> {
-  return new Promise((resolve, reject) => {
-    const process = spawn('tmux', ['switch-client', '-t', sessionName], {
-      stdio: 'inherit',
-    })
-
-    process.on('exit', code => {
-      if (code === 0) {
-        resolve()
-      } else {
-        reject(new Error(`tmux switch-client failed with code ${code}`))
-      }
-    })
-
-    process.on('error', error => {
-      reject(error)
-    })
-  })
+  return switchTmuxClientWithProperTTY(sessionName)
 }
 
 // tmuxセッションを作成してClaude Codeを起動する関数

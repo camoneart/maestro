@@ -3,6 +3,7 @@ import { execa } from 'execa'
 import { spawn } from 'child_process'
 import { createTmuxSession } from '../../commands/create.js'
 import { CreateOptions } from '../../types/index.js'
+import * as ttyUtils from '../../utils/tty.js'
 
 vi.mock('execa')
 vi.mock('child_process', () => ({
@@ -10,6 +11,10 @@ vi.mock('child_process', () => ({
 }))
 vi.mock('../../utils/tmux.js', () => ({
   setupTmuxStatusLine: vi.fn().mockResolvedValue(undefined),
+}))
+vi.mock('../../utils/tty.js', () => ({
+  attachToTmuxWithProperTTY: vi.fn().mockResolvedValue(undefined),
+  switchTmuxClientWithProperTTY: vi.fn().mockResolvedValue(undefined),
 }))
 
 describe('createTmuxSession - pane split options', () => {
@@ -92,10 +97,8 @@ describe('createTmuxSession - pane split options', () => {
       '-l',
     ])
 
-    // Should auto-attach to the session using spawn (after fix)
-    expect(spawn).toHaveBeenCalledWith('tmux', ['attach', '-t', 'feature-test'], {
-      stdio: 'inherit',
-    })
+    // Should auto-attach to the session using TTY utility
+    expect(ttyUtils.attachToTmuxWithProperTTY).toHaveBeenCalledWith('feature-test')
   })
 
   it('should use switch-client when already inside tmux', async () => {
@@ -108,10 +111,8 @@ describe('createTmuxSession - pane split options', () => {
 
     await createTmuxSession('feature-test', '/path/to/worktree', options)
 
-    // Should use switch-client instead of attach using spawn (after fix)
-    expect(spawn).toHaveBeenCalledWith('tmux', ['switch-client', '-t', 'feature-test'], {
-      stdio: 'inherit',
-    })
+    // Should use switch-client instead of attach using TTY utility
+    expect(ttyUtils.switchTmuxClientWithProperTTY).toHaveBeenCalledWith('feature-test')
 
     // Restore original TMUX env
     if (originalTmux !== undefined) {
@@ -178,9 +179,7 @@ describe('createTmuxSession - pane split options', () => {
       ])
 
       // Should auto-attach to session using spawn (after fix)
-      expect(spawn).toHaveBeenCalledWith('tmux', ['attach', '-t', 'feature-test'], {
-        stdio: 'inherit',
-      })
+      expect(ttyUtils.attachToTmuxWithProperTTY).toHaveBeenCalledWith('feature-test')
     })
 
     it('should create session and split vertically when --tmux-v from terminal', async () => {
@@ -214,9 +213,7 @@ describe('createTmuxSession - pane split options', () => {
       ])
 
       // Should auto-attach to session using spawn (after fix)
-      expect(spawn).toHaveBeenCalledWith('tmux', ['attach', '-t', 'feature-test'], {
-        stdio: 'inherit',
-      })
+      expect(ttyUtils.attachToTmuxWithProperTTY).toHaveBeenCalledWith('feature-test')
     })
 
     it.skip('should attach to existing session when --tmux-h/v and session exists', async () => {
@@ -230,9 +227,7 @@ describe('createTmuxSession - pane split options', () => {
       expect(execa).toHaveBeenCalledWith('tmux', ['has-session', '-t', 'feature-test'])
 
       // Should attach to existing session using spawn (after fix)
-      expect(spawn).toHaveBeenCalledWith('tmux', ['attach', '-t', 'feature-test'], {
-        stdio: 'inherit',
-      })
+      expect(ttyUtils.attachToTmuxWithProperTTY).toHaveBeenCalledWith('feature-test')
 
       // Should NOT create new session or split
       expect(execa).not.toHaveBeenCalledWith('tmux', expect.arrayContaining(['new-session']))
@@ -308,9 +303,7 @@ describe('createTmuxSession - pane split options', () => {
       ])
 
       // After fix: should use spawn for attach (not execa) to handle tty properly
-      expect(spawn).toHaveBeenCalledWith('tmux', ['attach', '-t', 'feature-test'], {
-        stdio: 'inherit',
-      })
+      expect(ttyUtils.attachToTmuxWithProperTTY).toHaveBeenCalledWith('feature-test')
 
       // Should NOT use execa for attach anymore
       expect(execa).not.toHaveBeenCalledWith('tmux', ['attach', '-t', 'feature-test'], {
@@ -326,9 +319,7 @@ describe('createTmuxSession - pane split options', () => {
       await createTmuxSession('feature-test', '/path/to/worktree', options)
 
       // After fix: should use spawn for switch-client to handle tty properly
-      expect(spawn).toHaveBeenCalledWith('tmux', ['switch-client', '-t', 'feature-test'], {
-        stdio: 'inherit',
-      })
+      expect(ttyUtils.switchTmuxClientWithProperTTY).toHaveBeenCalledWith('feature-test')
 
       // Should NOT use execa for switch-client anymore
       expect(execa).not.toHaveBeenCalledWith('tmux', ['switch-client', '-t', 'feature-test'], {
