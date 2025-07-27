@@ -4,6 +4,7 @@ import ora from 'ora'
 import { GitWorktreeManager } from '../core/git.js'
 import { execa } from 'execa'
 import { spawn } from 'child_process'
+import { attachToTmuxWithProperTTY, createAndAttachTmuxSession } from '../utils/tty.js'
 
 // 型定義
 interface TmuxOptions {
@@ -202,12 +203,8 @@ export const tmuxCommand = new Command('tmux')
           }
         } else {
           console.log(chalk.cyan(`\n新しいtmuxセッション '${sessionName}' を作成します...`))
-
-          if (editorCmd) {
-            spawn('tmux', [...tmuxArgs, editorCmd], { stdio: 'inherit' })
-          } else {
-            spawn('tmux', tmuxArgs, { stdio: 'inherit' })
-          }
+          await createAndAttachTmuxSession(sessionName, worktree.path, editorCmd)
+          console.log(chalk.gray('\ntmuxセッションから戻りました'))
         }
         return
       }
@@ -308,18 +305,20 @@ export const tmuxCommand = new Command('tmux')
 
             try {
               // インタラクティブモード
-              if (editorCmd) {
-                spawn('tmux', [...tmuxArgs, editorCmd], { stdio: 'inherit' })
-              } else {
-                spawn('tmux', tmuxArgs, { stdio: 'inherit' })
-              }
-            } catch {
+              await createAndAttachTmuxSession(sessionName, selectedPath, editorCmd)
+              console.log(chalk.gray('\ntmuxセッションから戻りました'))
+            } catch (error) {
               // セッションが既に存在する場合はアタッチ
-              try {
-                spawn('tmux', ['attach-session', '-t', sessionName], { stdio: 'inherit' })
-              } catch {
-                console.error(chalk.red('tmuxセッションの作成/アタッチに失敗しました'))
-                process.exit(1)
+              if (error instanceof Error && error.message?.includes('duplicate session')) {
+                try {
+                  await attachToTmuxWithProperTTY(sessionName)
+                  console.log(chalk.gray('\ntmuxセッションから戻りました'))
+                } catch {
+                  console.error(chalk.red('tmuxセッションの作成/アタッチに失敗しました'))
+                  process.exit(1)
+                }
+              } else {
+                throw error
               }
             }
           }

@@ -7,6 +7,7 @@ import { execa } from 'execa'
 import { ErrorFactory, handleError } from '../utils/errors.js'
 import { startTmuxShell, isInTmuxSession, TmuxPaneType } from '../utils/tmux.js'
 import { selectWorktreeWithFzf, isFzfAvailable } from '../utils/fzf.js'
+import { attachToTmuxWithProperTTY, createAndAttachTmuxSession } from '../utils/tty.js'
 
 interface ShellOptions {
   fzf?: boolean
@@ -176,28 +177,17 @@ export const shellCommand = new Command('shell')
 
             if (sessionExists) {
               console.log(chalk.blue(`📺 既存のtmuxセッション '${sessionName}' にアタッチします`))
-              const tmuxProcess = spawn('tmux', ['attach-session', '-t', sessionName], {
-                stdio: 'inherit',
-              })
-
-              tmuxProcess.on('exit', code => {
-                console.log(chalk.gray(`\ntmuxセッションから戻りました (exit code: ${code})`))
-              })
+              await attachToTmuxWithProperTTY(sessionName)
+              console.log(chalk.gray('\ntmuxセッションから戻りました'))
             } else {
               console.log(chalk.blue(`📺 新しいtmuxセッション '${sessionName}' を作成します`))
-              const tmuxProcess = spawn('tmux', ['new-session', '-s', sessionName], {
-                cwd: targetWorktree.path,
-                stdio: 'inherit',
-                env: {
-                  ...process.env,
-                  MAESTRO_BRANCH: branchName,
-                  MAESTRO_PATH: targetWorktree.path,
-                },
-              })
 
-              tmuxProcess.on('exit', code => {
-                console.log(chalk.gray(`\ntmuxセッションから戻りました (exit code: ${code})`))
-              })
+              // 環境変数を設定
+              process.env.MAESTRO_BRANCH = branchName
+              process.env.MAESTRO_PATH = targetWorktree.path
+
+              await createAndAttachTmuxSession(sessionName, targetWorktree.path)
+              console.log(chalk.gray('\ntmuxセッションから戻りました'))
             }
           } catch (error) {
             console.error(
