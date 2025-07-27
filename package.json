@@ -9,6 +9,7 @@
   },
   "files": [
     "dist",
+    "scripts",
     "completion",
     "README.md",
     "README.ja.md",
