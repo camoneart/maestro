@@ -1,11 +1,33 @@
 import { spawn } from 'child_process'
 import { execa } from 'execa'
+import { NativeTmuxHelper } from './nativeTmux.js'
 
 /**
  * tmuxセッションにアタッチする（適切なTTY制御付き）
- * execを使用してプロセスを完全に置き換える方法を試みる
+ *
+ * This function now uses the native tmux helper to solve TTY corruption issues.
+ * The native helper uses exec() to completely replace the Node.js process with tmux,
+ * ensuring proper TTY control transfer.
+ *
+ * Note: This function never returns when successful, as the process is replaced.
  */
 export async function attachToTmuxWithProperTTY(sessionName: string): Promise<void> {
+  try {
+    // Use the native helper which completely replaces the process
+    // This call never returns on success
+    await NativeTmuxHelper.attachToSession(sessionName)
+  } catch (error) {
+    // If native helper fails, fall back to the old method as a last resort
+    console.warn('Native tmux helper failed, falling back to legacy method:', error)
+    return attachToTmuxWithLegacyTTY(sessionName)
+  }
+}
+
+/**
+ * Legacy TTY implementation (kept for fallback)
+ * This is the old implementation that has TTY corruption issues
+ */
+async function attachToTmuxWithLegacyTTY(sessionName: string): Promise<void> {
   // まず、tmuxセッションが存在するか確認
   try {
     await execa('tmux', ['has-session', '-t', sessionName])
@@ -61,8 +83,25 @@ export async function attachToTmuxWithProperTTY(sessionName: string): Promise<vo
 
 /**
  * tmuxクライアントを切り替える（適切なTTY制御付き）
+ *
+ * Now uses the native helper for consistency, but switch-client doesn't require
+ * process replacement since it's an internal tmux operation.
  */
 export async function switchTmuxClientWithProperTTY(sessionName: string): Promise<void> {
+  try {
+    // Use the native helper for consistency
+    await NativeTmuxHelper.switchClient(sessionName)
+  } catch (error) {
+    // If native helper fails, fall back to the old method
+    console.warn('Native tmux switch failed, falling back to legacy method:', error)
+    return switchTmuxClientWithLegacyTTY(sessionName)
+  }
+}
+
+/**
+ * Legacy switch client implementation (kept for fallback)
+ */
+async function switchTmuxClientWithLegacyTTY(sessionName: string): Promise<void> {
   // tmux内部からのみ使用可能
   if (!process.env.TMUX) {
     throw new Error('tmux switch-client はtmuxセッション内でのみ使用できます')
@@ -80,8 +119,33 @@ export async function switchTmuxClientWithProperTTY(sessionName: string): Promis
 
 /**
  * 新しいtmuxセッションを作成してアタッチする
+ *
+ * This function now uses the native tmux helper to solve TTY corruption issues.
+ * The native helper uses exec() to completely replace the Node.js process with tmux.
+ *
+ * Note: This function never returns when successful, as the process is replaced.
  */
 export async function createAndAttachTmuxSession(
+  sessionName: string,
+  cwd?: string,
+  command?: string
+): Promise<void> {
+  try {
+    // Use the native helper which completely replaces the process
+    // This call never returns on success
+    await NativeTmuxHelper.createAndAttachSession(sessionName, cwd, command)
+  } catch (error) {
+    // If native helper fails, fall back to the old method as a last resort
+    console.warn('Native tmux helper failed, falling back to legacy method:', error)
+    return createAndAttachTmuxSessionLegacy(sessionName, cwd, command)
+  }
+}
+
+/**
+ * Legacy create and attach implementation (kept for fallback)
+ * This is the old implementation that has TTY corruption issues
+ */
+async function createAndAttachTmuxSessionLegacy(
   sessionName: string,
   cwd?: string,
   command?: string

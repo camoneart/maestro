@@ -1,0 +1,101 @@
+#!/bin/bash
+# maestro-tmux-attach - Native tmux attach helper for TTY control
+# This script properly transfers TTY control by using exec to replace the process
+
+set -euo pipefail
+
+# Function to display usage
+usage() {
+    echo "Usage: $0 [attach|new|switch] <session-name> [working-directory] [command]"
+    echo ""
+    echo "Commands:"
+    echo "  attach  - Attach to existing session"
+    echo "  new     - Create new session and attach"
+    echo "  switch  - Switch client to session (from within tmux)"
+    echo ""
+    echo "Examples:"
+    echo "  $0 attach my-session"
+    echo "  $0 new my-session /path/to/dir"
+    echo "  $0 new my-session /path/to/dir 'vim .'"
+    echo "  $0 switch my-session"
+    exit 1
+}
+
+# Validate arguments
+if [ $# -lt 2 ]; then
+    usage
+fi
+
+ACTION="$1"
+SESSION_NAME="$2"
+WORKING_DIR="${3:-}"
+COMMAND="${4:-}"
+
+# Validate session name
+if [ -z "$SESSION_NAME" ]; then
+    echo "Error: Session name cannot be empty" >&2
+    exit 1
+fi
+
+# Sanitize session name (replace non-alphanumeric chars with dashes)
+SESSION_NAME=$(echo "$SESSION_NAME" | sed 's/[^a-zA-Z0-9_-]/-/g')
+
+case "$ACTION" in
+    "attach")
+        # Check if session exists
+        if ! tmux has-session -t "$SESSION_NAME" 2>/dev/null; then
+            echo "Error: tmux session '$SESSION_NAME' does not exist" >&2
+            exit 1
+        fi
+        
+        # Use exec to replace the current process with tmux
+        # This ensures proper TTY control transfer
+        exec tmux attach -t "$SESSION_NAME"
+        ;;
+        
+    "new")
+        # Prepare new-session arguments
+        TMUX_ARGS=("new-session" "-s" "$SESSION_NAME")
+        
+        # Add working directory if specified
+        if [ -n "$WORKING_DIR" ]; then
+            TMUX_ARGS+=("-c" "$WORKING_DIR")
+        fi
+        
+        # Add command if specified
+        if [ -n "$COMMAND" ]; then
+            TMUX_ARGS+=("--" "$COMMAND")
+        fi
+        
+        # Check if session already exists
+        if tmux has-session -t "$SESSION_NAME" 2>/dev/null; then
+            echo "Warning: tmux session '$SESSION_NAME' already exists, attaching instead" >&2
+            exec tmux attach -t "$SESSION_NAME"
+        fi
+        
+        # Use exec to replace the current process with tmux
+        exec tmux "${TMUX_ARGS[@]}"
+        ;;
+        
+    "switch")
+        # Check if we're inside tmux
+        if [ -z "${TMUX:-}" ]; then
+            echo "Error: switch command can only be used from within tmux" >&2
+            exit 1
+        fi
+        
+        # Check if target session exists
+        if ! tmux has-session -t "$SESSION_NAME" 2>/dev/null; then
+            echo "Error: tmux session '$SESSION_NAME' does not exist" >&2
+            exit 1
+        fi
+        
+        # Switch client - no exec needed as this doesn't replace the process
+        tmux switch-client -t "$SESSION_NAME"
+        ;;
+        
+    *)
+        echo "Error: Unknown action '$ACTION'" >&2
+        usage
+        ;;
+esac
