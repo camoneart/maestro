@@ -161,6 +161,23 @@ bind k select-pane -U
 bind l select-pane -R
 ```
 
+### Shell Environment Inheritance
+
+Maestro automatically inherits your shell environment when creating tmux sessions, including:
+
+- **Custom PS1 prompts**: Your shell prompts will be preserved in tmux sessions
+- **Environment variables**: PATH, aliases, and custom variables are inherited
+- **Shell configuration**: `.bashrc`, `.zshrc`, and other config files are sourced
+
+The tmux sessions are created with login shells (`-l` flag) to ensure proper environment loading:
+
+```bash
+# Examples of preserved environments:
+export PS1="mycustom:prompt$ "           # ✅ Preserved
+alias ll="ls -la"                        # ✅ Preserved  
+export CUSTOM_VAR="value"               # ✅ Preserved
+```
+
 ## Session Lifecycle
 
 ### Creating Sessions

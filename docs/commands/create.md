@@ -94,6 +94,7 @@ mst create feature/new-feature --tmux
 **Behavior:**
 - If outside tmux: Creates session and attaches using `tmux attach`
 - If inside tmux: Creates session and switches using `tmux switch-client`
+- **Shell Environment**: Sessions are created with login shells to inherit your custom PS1 prompts, environment variables, and shell configuration files
 
 ### Pane Splitting (when already in tmux)
 
@@ -110,6 +111,7 @@ mst create feature/new-feature --tmux-v
 **Behavior:**
 - Creates a new pane in your current tmux window
 - Automatically switches focus to the new pane (Issue #105 fix)
+- **Shell Environment**: Panes are created with login shells to preserve your custom prompts and environment
 - Sets the working directory to the new worktree
 - Sets pane title to the branch name for easy identification
 
