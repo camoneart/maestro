@@ -11,9 +11,6 @@ importers:
       '@modelcontextprotocol/sdk':
         specifier: 1.17.0
         version: 1.17.0
-      '@types/cli-progress':
-        specifier: 3.11.6
-        version: 3.11.6
       chalk:
         specifier: 5.4.1
         version: 5.4.1
@@ -60,6 +57,9 @@ importers:
       '@eslint/js':
         specifier: 9.31.0
         version: 9.31.0
+      '@types/cli-progress':
+        specifier: 3.11.6
+        version: 3.11.6
       '@types/inquirer':
         specifier: 9.0.8
         version: 9.0.8
