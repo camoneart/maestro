@@ -94,9 +94,9 @@ mst create <branch-name> [options]
 | `--base <branch>` | Specify base branch (default: main) |
 | `--open` | Automatically open in editor |
 | `--setup` | Auto-setup development environment |
-| `--tmux` | Create tmux session and auto-attach |
-| `--tmux-h` | Create in horizontal tmux pane split |
-| `--tmux-v` | Create in vertical tmux pane split |
+| `--tmux` | Create tmux session and auto-attach (preserves shell environment) |
+| `--tmux-h` | Create in horizontal tmux pane split (preserves shell environment) |
+| `--tmux-v` | Create in vertical tmux pane split (preserves shell environment) |
 | `--claude-md` | Create CLAUDE.md for Claude Code |
 | `--copy-file <file>` | Copy files from current worktree |
 | `--yes`, `-y` | Skip confirmations |
@@ -410,6 +410,10 @@ mst tmux
 # Start in detached mode
 mst tmux feature/background --detach
 ```
+
+**Features:**
+- **Shell Environment Inheritance**: Sessions preserve your custom PS1 prompts, environment variables, and shell configuration files
+- **Automatic Focus Management**: Automatically attaches or switches to the created session
 
 ## 📊 Advanced Features
 

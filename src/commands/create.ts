@@ -175,7 +175,18 @@ export async function createTmuxSession(
         }
 
         // tmuxセッションを作成（detached mode）
-        await execa('tmux', ['new-session', '-d', '-s', sessionName, '-c', worktreePath])
+        // ユーザーのシェルをログインシェルとして起動し、環境変数を正しく引き継ぐ
+        const shell = process.env.SHELL || '/bin/bash'
+        await execa('tmux', [
+          'new-session',
+          '-d',
+          '-s',
+          sessionName,
+          '-c',
+          worktreePath,
+          shell,
+          '-l', // -l でログインシェルとして起動
+        ])
 
         // ペイン分割を実行
         const splitArgs = ['split-window', '-t', sessionName]
@@ -185,6 +196,9 @@ export async function createTmuxSession(
           splitArgs.push('-v') // 垂直分割（上下）
         }
         splitArgs.push('-c', worktreePath)
+        // ユーザーのシェルをログインシェルとして起動
+        const splitShell = process.env.SHELL || '/bin/bash'
+        splitArgs.push(splitShell, '-l')
         await execa('tmux', splitArgs)
 
         // 新しいペインへフォーカスを移動
@@ -220,6 +234,9 @@ export async function createTmuxSession(
         }
 
         splitArgs.push('-c', worktreePath)
+        // ユーザーのシェルをログインシェルとして起動
+        const currentShell = process.env.SHELL || '/bin/bash'
+        splitArgs.push(currentShell, '-l')
         await execa('tmux', splitArgs)
 
         // 新しいペインへフォーカスを移動（最後の分割されたペインが選択される）
@@ -251,7 +268,18 @@ export async function createTmuxSession(
     }
 
     // tmuxセッションを作成
-    await execa('tmux', ['new-session', '-d', '-s', sessionName, '-c', worktreePath])
+    // ユーザーのシェルをログインシェルとして起動し、環境変数を正しく引き継ぐ
+    const shell = process.env.SHELL || '/bin/bash'
+    await execa('tmux', [
+      'new-session',
+      '-d',
+      '-s',
+      sessionName,
+      '-c',
+      worktreePath,
+      shell,
+      '-l', // -l でログインシェルとして起動
+    ])
 
     // ウィンドウ名を設定
     await execa('tmux', ['rename-window', '-t', sessionName, branchName])

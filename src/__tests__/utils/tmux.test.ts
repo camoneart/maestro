@@ -15,6 +15,8 @@ describe('tmux utils', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     delete process.env.TMUX
+    // Set consistent shell for testing
+    process.env.SHELL = '/bin/bash'
   })
 
   describe('isInTmuxSession', () => {
@@ -124,7 +126,6 @@ describe('tmux utils', () => {
   describe('startTmuxShell', () => {
     it('should start shell with correct environment variables', async () => {
       process.env.TMUX = '/tmp/tmux-1000/default,1234,0'
-      process.env.SHELL = '/bin/zsh'
 
       const mockSpawn = vi.fn().mockReturnValue({
         on: vi.fn((event, callback) => {
@@ -151,7 +152,7 @@ describe('tmux utils', () => {
           'feature-test',
           '-c',
           '/test/path',
-          '/bin/zsh',
+          '/bin/bash',
         ]),
         expect.objectContaining({
           stdio: 'inherit',
