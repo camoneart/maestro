@@ -1,5 +1,16 @@
 # Changelog
 
+## 3.3.2
+
+### Patch Changes
+
+- fix: tmux session attachment issues
+  - Fixed tmux auto-attach breaking terminal input handling by using spawn instead of execa for proper TTY handling (#130)
+  - Fixed custom PS1 not being applied in tmux sessions by using login shell (#128)
+  - Added dedicated `attachToTmuxSession` and `switchTmuxClient` functions to handle TTY correctly
+  - Resolved issue where Ctrl+C would terminate the mst process instead of being handled by tmux
+  - Ensured tmux key bindings work properly after auto-attach
+
 ## 3.3.1
 
 ### Patch Changes
