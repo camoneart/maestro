@@ -20,6 +20,10 @@ vi.mock('inquirer')
 vi.mock('execa')
 vi.mock('../../utils/tmux')
 vi.mock('../../utils/fzf')
+vi.mock('../../utils/tty', () => ({
+  attachToTmuxWithProperTTY: vi.fn().mockResolvedValue(undefined),
+  createAndAttachTmuxSession: vi.fn().mockResolvedValue(undefined),
+}))
 
 describe('shell command', () => {
   let mockGitManager: any

@@ -21,6 +21,10 @@ vi.mock('child_process', () => ({
 }))
 vi.mock('../../core/config')
 vi.mock('../../core/git')
+vi.mock('../../utils/tty', () => ({
+  attachToTmuxWithProperTTY: vi.fn().mockResolvedValue(undefined),
+  createAndAttachTmuxSession: vi.fn().mockResolvedValue(undefined),
+}))
 vi.mock('ora', () => ({
   default: vi.fn(() => ({
     start: vi.fn().mockReturnThis(),
