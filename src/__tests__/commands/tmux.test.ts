@@ -4,6 +4,7 @@ import { execa } from 'execa'
 import { ConfigManager } from '../../core/config'
 import { GitWorktreeManager } from '../../core/git'
 import { spawn } from 'child_process'
+import * as ttyUtils from '../../utils/tty'
 
 // モック設定
 vi.mock('execa')
@@ -228,10 +229,10 @@ describe('tmux command', () => {
       expect(mockSpawn).not.toHaveBeenCalledWith('fzf', expect.any(Array), expect.any(Object))
 
       // 直接tmuxセッションが作成されることを確認
-      expect(mockSpawn).toHaveBeenCalledWith(
-        'tmux',
-        expect.arrayContaining(['new-session', '-s', expect.stringContaining('feature-1')]),
-        expect.any(Object)
+      expect(ttyUtils.createAndAttachTmuxSession).toHaveBeenCalledWith(
+        expect.stringContaining('feature-1'),
+        '/tmp/repo/worktree-1',
+        undefined
       )
     })
 

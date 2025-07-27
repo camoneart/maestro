@@ -12,6 +12,7 @@ import {
 import { EventEmitter } from 'events'
 import * as tmuxUtils from '../../utils/tmux'
 import * as fzfUtils from '../../utils/fzf'
+import * as ttyUtils from '../../utils/tty'
 
 // モック設定
 vi.mock('../../core/git')
@@ -278,13 +279,7 @@ describe('shell command', () => {
         ['list-sessions', '-F', '#{session_name}'],
         expect.any(Object)
       )
-      expect(spawn).toHaveBeenCalledWith(
-        'tmux',
-        ['attach-session', '-t', 'maestro-feature-a'],
-        expect.objectContaining({
-          stdio: 'inherit',
-        })
-      )
+      expect(ttyUtils.attachToTmuxWithProperTTY).toHaveBeenCalledWith('maestro-feature-a')
       expect(console.log).toHaveBeenCalledWith(
         expect.stringContaining("📺 既存のtmuxセッション 'maestro-feature-a' にアタッチします")
       )
@@ -298,17 +293,9 @@ describe('shell command', () => {
 
       await shellCommand.parseAsync(['node', 'test', 'feature-a', '--tmux'])
 
-      expect(spawn).toHaveBeenCalledWith(
-        'tmux',
-        ['new-session', '-s', 'maestro-feature-a'],
-        expect.objectContaining({
-          cwd: '/repo/worktree-1',
-          stdio: 'inherit',
-          env: expect.objectContaining({
-            MAESTRO_BRANCH: 'feature-a',
-            MAESTRO_PATH: '/repo/worktree-1',
-          }),
-        })
+      expect(ttyUtils.createAndAttachTmuxSession).toHaveBeenCalledWith(
+        'maestro-feature-a',
+        '/repo/worktree-1'
       )
       expect(console.log).toHaveBeenCalledWith(
         expect.stringContaining("📺 新しいtmuxセッション 'maestro-feature-a' を作成します")
