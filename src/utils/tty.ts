@@ -4,11 +4,11 @@ import { NativeTmuxHelper } from './nativeTmux.js'
 
 /**
  * tmuxセッションにアタッチする（適切なTTY制御付き）
- * 
+ *
  * This function now uses the native tmux helper to solve TTY corruption issues.
  * The native helper uses exec() to completely replace the Node.js process with tmux,
  * ensuring proper TTY control transfer.
- * 
+ *
  * Note: This function never returns when successful, as the process is replaced.
  */
 export async function attachToTmuxWithProperTTY(sessionName: string): Promise<void> {
@@ -83,7 +83,7 @@ async function attachToTmuxWithLegacyTTY(sessionName: string): Promise<void> {
 
 /**
  * tmuxクライアントを切り替える（適切なTTY制御付き）
- * 
+ *
  * Now uses the native helper for consistency, but switch-client doesn't require
  * process replacement since it's an internal tmux operation.
  */
@@ -119,10 +119,10 @@ async function switchTmuxClientWithLegacyTTY(sessionName: string): Promise<void>
 
 /**
  * 新しいtmuxセッションを作成してアタッチする
- * 
+ *
  * This function now uses the native tmux helper to solve TTY corruption issues.
  * The native helper uses exec() to completely replace the Node.js process with tmux.
- * 
+ *
  * Note: This function never returns when successful, as the process is replaced.
  */
 export async function createAndAttachTmuxSession(

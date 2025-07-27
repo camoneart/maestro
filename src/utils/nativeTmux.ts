@@ -48,7 +48,7 @@ export class NativeTmuxHelper {
 
     // This promise will never resolve because the process is replaced
     return new Promise((_, reject) => {
-      helperProcess.on('error', (error) => {
+      helperProcess.on('error', error => {
         reject(new Error(`Failed to execute tmux helper: ${error.message}`))
       })
 
@@ -100,7 +100,7 @@ export class NativeTmuxHelper {
 
     // This promise will never resolve because the process is replaced
     return new Promise((_, reject) => {
-      helperProcess.on('error', (error) => {
+      helperProcess.on('error', error => {
         reject(new Error(`Failed to execute tmux helper: ${error.message}`))
       })
 
@@ -165,7 +165,7 @@ export class NativeTmuxHelper {
       const { stdout } = await execa('tmux', [
         'list-sessions',
         '-F',
-        '#{session_name}:#{session_attached}'
+        '#{session_name}:#{session_attached}',
       ])
 
       return stdout
@@ -175,7 +175,7 @@ export class NativeTmuxHelper {
           const [name, attached] = line.split(':')
           return {
             name: name || 'unknown',
-            attached: attached === '1'
+            attached: attached === '1',
           }
         })
     } catch {
