@@ -55,9 +55,6 @@ mst sync --preset env     # .env files only
 mst sync --preset config  # configuration files only
 mst sync --preset all     # all configuration files
 
-# Sync custom specified files
-mst sync --files --custom .env.local,config/app.json
-
 # Interactive file selection
 mst sync --interactive
 ```

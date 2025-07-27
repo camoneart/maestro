@@ -48,6 +48,7 @@ mst create feature/new-feature --base main --open --setup --tmux --claude-md
 | -------------------- | ----- | ------------------------------------------------------------- | ------- |
 | `--base <branch>`    | `-b`  | Specify base branch                                           | `main`  |
 | `--open`             | `-o`  | Open in editor after creation                                 | `false` |
+| `--yes`              | `-y`  | Skip confirmation prompts                                     | `false` |
 | `--setup`            | `-s`  | Run environment setup (npm install, etc.)                     | `false` |
 | `--tmux`             | `-t`  | Create tmux session and auto-attach                          | `false` |
 | `--tmux-h`           |       | Split tmux pane horizontally (when in tmux)                  | `false` |
