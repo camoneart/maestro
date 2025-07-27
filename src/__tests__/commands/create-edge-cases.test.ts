@@ -18,6 +18,8 @@ vi.mock('path')
 describe('create command - edge cases', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    // Set consistent shell for testing
+    process.env.SHELL = '/bin/bash'
   })
 
   describe('saveWorktreeMetadata', () => {
@@ -80,7 +82,7 @@ describe('create command - edge cases', () => {
         'feature-test',
         '-c',
         '/path/to/worktree',
-        '/bin/zsh',
+        '/bin/bash',
         '-l',
       ])
       expect(execa).toHaveBeenCalledWith('tmux', [

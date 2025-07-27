@@ -11,6 +11,8 @@ vi.mock('../../utils/tmux.js', () => ({
 describe('createTmuxSession - pane split options', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    // Set consistent shell for testing
+    process.env.SHELL = '/bin/bash'
   })
 
   it('should split pane horizontally with --tmux-h option (from inside tmux)', async () => {
@@ -27,7 +29,7 @@ describe('createTmuxSession - pane split options', () => {
       '-h',
       '-c',
       '/path/to/worktree',
-      '/bin/zsh',
+      '/bin/bash',
       '-l',
     ])
     expect(execa).toHaveBeenCalledWith('tmux', ['select-pane', '-l'])
@@ -55,7 +57,7 @@ describe('createTmuxSession - pane split options', () => {
       '-v',
       '-c',
       '/path/to/worktree',
-      '/bin/zsh',
+      '/bin/bash',
       '-l',
     ])
     expect(execa).toHaveBeenCalledWith('tmux', ['select-pane', '-l'])
@@ -82,7 +84,7 @@ describe('createTmuxSession - pane split options', () => {
       'feature-test',
       '-c',
       '/path/to/worktree',
-      '/bin/zsh',
+      '/bin/bash',
       '-l',
     ])
 
@@ -135,7 +137,7 @@ describe('createTmuxSession - pane split options', () => {
         'feature-test',
         '-c',
         '/path/to/worktree',
-        '/bin/zsh',
+        '/bin/bash',
         '-l',
       ])
 
@@ -147,7 +149,7 @@ describe('createTmuxSession - pane split options', () => {
         '-h',
         '-c',
         '/path/to/worktree',
-        '/bin/zsh',
+        '/bin/bash',
         '-l',
       ])
 
@@ -191,7 +193,7 @@ describe('createTmuxSession - pane split options', () => {
         'feature-test',
         '-c',
         '/path/to/worktree',
-        '/bin/zsh',
+        '/bin/bash',
         '-l',
       ])
 
@@ -203,7 +205,7 @@ describe('createTmuxSession - pane split options', () => {
         '-v',
         '-c',
         '/path/to/worktree',
-        '/bin/zsh',
+        '/bin/bash',
         '-l',
       ])
 
@@ -254,7 +256,7 @@ describe('createTmuxSession - pane split options', () => {
         '-h',
         '-c',
         '/path/to/worktree',
-        '/bin/zsh',
+        '/bin/bash',
         '-l',
       ])
       expect(execa).toHaveBeenCalledWith('tmux', ['select-pane', '-l'])

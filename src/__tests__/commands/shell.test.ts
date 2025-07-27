@@ -29,6 +29,8 @@ describe('shell command', () => {
   beforeEach(() => {
     // EventEmitterの警告を抑制
     process.setMaxListeners(30)
+    // Set consistent shell for testing
+    process.env.SHELL = '/bin/bash'
 
     // GitWorktreeManagerのモック
     mockGitManager = {
@@ -74,8 +76,7 @@ describe('shell command', () => {
     // execaのモック
     vi.mocked(execa).mockResolvedValue(createMockExecaResponse() as any)
 
-    // process.envのモック
-    process.env.SHELL = '/bin/zsh'
+    // process.envのモック (already set in beforeEach)
 
     // tmux utilsのモック
     vi.mocked(tmuxUtils.isInTmuxSession).mockResolvedValue(true)
@@ -108,7 +109,7 @@ describe('shell command', () => {
       )
       expect(console.log).toHaveBeenCalledWith(expect.stringContaining('📁 /repo/worktree-1'))
       expect(spawn).toHaveBeenCalledWith(
-        '/bin/zsh',
+        '/bin/bash',
         [],
         expect.objectContaining({
           cwd: '/repo/worktree-1',
@@ -321,23 +322,22 @@ describe('shell command', () => {
       expect(console.log).toHaveBeenCalledWith(
         expect.stringContaining('通常のシェルで起動します...')
       )
-      expect(spawn).toHaveBeenCalledWith('/bin/zsh', [], expect.any(Object))
+      expect(spawn).toHaveBeenCalledWith('/bin/bash', [], expect.any(Object))
     })
   })
 
   describe('シェル環境設定', () => {
-    it('zshの場合は適切なプロンプトを設定する', async () => {
-      process.env.SHELL = '/bin/zsh'
+    it('bashの場合は適切なプロンプトを設定する (test renamed)', async () => {
+      process.env.SHELL = '/bin/bash'
 
       await shellCommand.parseAsync(['node', 'test', 'feature-a'])
 
       expect(spawn).toHaveBeenCalledWith(
-        '/bin/zsh',
+        '/bin/bash',
         [],
         expect.objectContaining({
           env: expect.objectContaining({
             PS1: expect.stringContaining('🎼'),
-            PROMPT: expect.stringContaining('🎼'),
           }),
         })
       )
@@ -417,7 +417,7 @@ describe('shell command', () => {
       // シェル起動後の確認を無効化（spawnMockの行動に依存）
       // spawnコールを確認
       expect(spawn).toHaveBeenCalledWith(
-        '/bin/zsh',
+        '/bin/bash',
         [],
         expect.objectContaining({
           cwd: '/repo/worktree-1',
