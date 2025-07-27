@@ -149,6 +149,48 @@ export async function saveWorktreeMetadata(
   }
 }
 
+// tmuxセッションをアタッチする関数（TTY問題を解決）
+export function attachToTmuxSession(sessionName: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const process = spawn('tmux', ['attach', '-t', sessionName], {
+      stdio: 'inherit',
+    })
+
+    process.on('exit', code => {
+      if (code === 0) {
+        resolve()
+      } else {
+        reject(new Error(`tmux attach failed with code ${code}`))
+      }
+    })
+
+    process.on('error', error => {
+      reject(error)
+    })
+  })
+}
+
+// tmuxクライアントをスイッチする関数（TTY問題を解決）
+export function switchTmuxClient(sessionName: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const process = spawn('tmux', ['switch-client', '-t', sessionName], {
+      stdio: 'inherit',
+    })
+
+    process.on('exit', code => {
+      if (code === 0) {
+        resolve()
+      } else {
+        reject(new Error(`tmux switch-client failed with code ${code}`))
+      }
+    })
+
+    process.on('error', error => {
+      reject(error)
+    })
+  })
+}
+
 // tmuxセッションを作成してClaude Codeを起動する関数
 export async function createTmuxSession(
   branchName: string,
@@ -168,7 +210,7 @@ export async function createTmuxSession(
           await execa('tmux', ['has-session', '-t', sessionName])
           console.log(chalk.yellow(`tmuxセッション '${sessionName}' は既に存在します`))
           // 既存セッションにアタッチ
-          await execa('tmux', ['attach', '-t', sessionName], { stdio: 'inherit' })
+          await attachToTmuxSession(sessionName)
           return
         } catch {
           // セッションが存在しない場合は作成
@@ -221,7 +263,7 @@ export async function createTmuxSession(
 
         // セッションにアタッチ
         console.log(chalk.cyan(`🎵 tmuxセッション '${sessionName}' にアタッチしています...`))
-        await execa('tmux', ['attach', '-t', sessionName], { stdio: 'inherit' })
+        await attachToTmuxSession(sessionName)
         return
       } else {
         // tmux内から実行された場合：現在のセッション内でペインを分割
@@ -289,12 +331,12 @@ export async function createTmuxSession(
     // 自動でセッションにアタッチ
     console.log(chalk.cyan(`🎵 tmuxセッション '${sessionName}' にアタッチしています...`))
 
-    // tmux内からはattach-sessionを使用、外からはattachを使用
+    // tmux内からはswitch-clientを使用、外からはattachを使用
     const isInsideTmux = process.env.TMUX !== undefined
     if (isInsideTmux) {
-      await execa('tmux', ['switch-client', '-t', sessionName], { stdio: 'inherit' })
+      await switchTmuxClient(sessionName)
     } else {
-      await execa('tmux', ['attach', '-t', sessionName], { stdio: 'inherit' })
+      await attachToTmuxSession(sessionName)
     }
   } catch (error) {
     console.error(chalk.red(`tmuxセッションの作成に失敗しました: ${error}`))
