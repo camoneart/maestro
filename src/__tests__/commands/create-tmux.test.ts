@@ -22,7 +22,14 @@ describe('createTmuxSession - pane split options', () => {
 
     await createTmuxSession('feature-test', '/path/to/worktree', options)
 
-    expect(execa).toHaveBeenCalledWith('tmux', ['split-window', '-h', '-c', '/path/to/worktree'])
+    expect(execa).toHaveBeenCalledWith('tmux', [
+      'split-window',
+      '-h',
+      '-c',
+      '/path/to/worktree',
+      '/bin/zsh',
+      '-l',
+    ])
     expect(execa).toHaveBeenCalledWith('tmux', ['select-pane', '-l'])
     expect(execa).toHaveBeenCalledWith('tmux', ['select-pane', '-T', 'feature-test'])
 
@@ -43,7 +50,14 @@ describe('createTmuxSession - pane split options', () => {
 
     await createTmuxSession('feature-test', '/path/to/worktree', options)
 
-    expect(execa).toHaveBeenCalledWith('tmux', ['split-window', '-v', '-c', '/path/to/worktree'])
+    expect(execa).toHaveBeenCalledWith('tmux', [
+      'split-window',
+      '-v',
+      '-c',
+      '/path/to/worktree',
+      '/bin/zsh',
+      '-l',
+    ])
     expect(execa).toHaveBeenCalledWith('tmux', ['select-pane', '-l'])
     expect(execa).toHaveBeenCalledWith('tmux', ['select-pane', '-T', 'feature-test'])
 
@@ -68,6 +82,8 @@ describe('createTmuxSession - pane split options', () => {
       'feature-test',
       '-c',
       '/path/to/worktree',
+      '/bin/zsh',
+      '-l',
     ])
 
     // Should auto-attach to the session
@@ -119,6 +135,8 @@ describe('createTmuxSession - pane split options', () => {
         'feature-test',
         '-c',
         '/path/to/worktree',
+        '/bin/zsh',
+        '-l',
       ])
 
       // Should split window horizontally
@@ -129,6 +147,8 @@ describe('createTmuxSession - pane split options', () => {
         '-h',
         '-c',
         '/path/to/worktree',
+        '/bin/zsh',
+        '-l',
       ])
 
       // Should focus new pane
@@ -171,6 +191,8 @@ describe('createTmuxSession - pane split options', () => {
         'feature-test',
         '-c',
         '/path/to/worktree',
+        '/bin/zsh',
+        '-l',
       ])
 
       // Should split window vertically
@@ -181,6 +203,8 @@ describe('createTmuxSession - pane split options', () => {
         '-v',
         '-c',
         '/path/to/worktree',
+        '/bin/zsh',
+        '-l',
       ])
 
       // Should auto-attach to session
@@ -225,7 +249,14 @@ describe('createTmuxSession - pane split options', () => {
       await createTmuxSession('feature-test', '/path/to/worktree', options)
 
       // Should split window horizontally (existing behavior)
-      expect(execa).toHaveBeenCalledWith('tmux', ['split-window', '-h', '-c', '/path/to/worktree'])
+      expect(execa).toHaveBeenCalledWith('tmux', [
+        'split-window',
+        '-h',
+        '-c',
+        '/path/to/worktree',
+        '/bin/zsh',
+        '-l',
+      ])
       expect(execa).toHaveBeenCalledWith('tmux', ['select-pane', '-l'])
       expect(execa).toHaveBeenCalledWith('tmux', ['select-pane', '-T', 'feature-test'])
 

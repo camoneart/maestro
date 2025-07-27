@@ -80,6 +80,8 @@ describe('create command - edge cases', () => {
         'feature-test',
         '-c',
         '/path/to/worktree',
+        '/bin/zsh',
+        '-l',
       ])
       expect(execa).toHaveBeenCalledWith('tmux', [
         'rename-window',
