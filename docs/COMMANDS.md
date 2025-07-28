@@ -505,29 +505,45 @@ mst watch --auto
 
 ### 🔸 config
 
-Manage configuration.
+Manage configuration settings with support for dot notation access.
 
 ```bash
-mst config <command> [options]
+mst config [action] [key] [value] [options]
 ```
 
-#### Subcommands
-- `get <key>` - Get config value
-- `set <key> <value>` - Set config value
-- `list` - List all configs
-- `reset` - Reset config
+#### Actions
+- `init` - Create project configuration file
+- `show` - Display current effective configuration
+- `path` - Show configuration file locations
+- `get <key>` - Get configuration value using dot notation
+- `set <key> <value>` - Set configuration value using dot notation
+- `reset <key>` - Reset configuration value to default
 
 #### Examples
 ```bash
-# List configs
-mst config list
+# Basic configuration management
+mst config init                                    # Create .maestro.json
+mst config show                                    # Show current config
+mst config path                                    # Show config file paths
 
-# Set editor
-mst config set development.defaultEditor cursor
+# Get configuration values
+mst config get ui.pathDisplay                      # Get path display setting
+mst config get development.autoSetup               # Get auto-setup setting
 
-# Get config
-mst config get worktrees.root
+# Set configuration values
+mst config set ui.pathDisplay relative             # Set path display format
+mst config set development.defaultEditor cursor    # Set default editor
+mst config set worktrees.path "../my-worktrees"    # Set worktrees location
+
+# Reset to defaults
+mst config reset ui.pathDisplay                    # Reset path display to default
+mst config reset development.autoSetup             # Reset auto-setup to default
 ```
+
+#### Options
+| Option | Short | Description | Default |
+|--------|-------|-------------|---------|
+| `--global` | `-g` | Target global configuration | `false` |
 
 ### 🔸 where
 

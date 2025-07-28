@@ -97,7 +97,7 @@ mst github <TAB>
 
 ```bash
 mst config <TAB>
-# Suggests: init, show, path
+# Suggests: init, show, path, get, set, reset
 ```
 
 ## Shell-Specific Setup

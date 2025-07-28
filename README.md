@@ -202,6 +202,30 @@ Need more? Run `mst <command> --help`.
 Maestro reads **`.maestro.json` at the project root** to customise behaviour.<br>
 Key settings are summarised below; a full example follows.
 
+### ⚙️ Configuration Management
+
+Maestro provides commands to manage configuration settings using dot notation:
+
+```bash
+# Get configuration values
+mst config get ui.pathDisplay                      # Get path display setting
+mst config get development.autoSetup               # Get auto-setup setting
+
+# Set configuration values  
+mst config set ui.pathDisplay relative             # Set path display format
+mst config set development.defaultEditor cursor    # Set default editor
+mst config set worktrees.path "../my-worktrees"    # Set worktrees location
+
+# Reset to defaults
+mst config reset ui.pathDisplay                    # Reset path display to default
+mst config reset development.autoSetup             # Reset auto-setup to default
+
+# View and manage configuration files
+mst config show                                    # Show current effective config
+mst config path                                    # Show config file locations
+mst config init                                    # Create project configuration
+```
+
 **Claude Configuration:**
 - `markdownMode: "shared"` - Creates symlink to main repository's CLAUDE.md (default)
 - `markdownMode: "split"` - Creates independent CLAUDE.md for each worktree

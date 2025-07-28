@@ -5,7 +5,7 @@ Command to manage maestro configuration settings. Handles both global user setti
 ## Overview
 
 ```bash
-mst config [action] [options]
+mst config [action] [key] [value] [options]
 ```
 
 ## Usage Examples
@@ -26,6 +26,19 @@ mst config show
 mst config path
 ```
 
+### Configuration Management
+
+```bash
+# Get configuration value using dot notation
+mst config get ui.pathDisplay
+
+# Set configuration value using dot notation
+mst config set ui.pathDisplay relative
+
+# Reset configuration value to default
+mst config reset ui.pathDisplay
+```
+
 ### Advanced Usage
 
 ```bash
@@ -34,6 +47,10 @@ mst config show --global
 
 # Initialize project config and edit immediately
 mst config init && code .maestro.json
+
+# Set nested configuration values
+mst config set development.autoSetup false
+mst config set worktrees.path "../my-worktrees"
 ```
 
 ## Actions
@@ -43,6 +60,9 @@ mst config init && code .maestro.json
 | `init` | Create project configuration file | `mst config init` |
 | `show` | Display current effective configuration | `mst config show` |
 | `path` | Show configuration file locations | `mst config path` |
+| `get <key>` | Get configuration value using dot notation | `mst config get ui.pathDisplay` |
+| `set <key> <value>` | Set configuration value using dot notation | `mst config set ui.pathDisplay relative` |
+| `reset <key>` | Reset configuration value to default | `mst config reset ui.pathDisplay` |
 
 ## Options
 
@@ -120,7 +140,107 @@ mst config path
   ❌ /path/to/project/.maestrorc.json (存在しません)
 ```
 
+### Get Configuration Value (`get`)
+
+Retrieves a configuration value using dot notation:
+
+```bash
+mst config get <key>
+```
+
+**Examples:**
+```bash
+# Get UI path display setting
+mst config get ui.pathDisplay
+
+# Get development auto-setup setting
+mst config get development.autoSetup
+
+# Get worktrees root path
+mst config get worktrees.path
+```
+
+**Sample output:**
+```
+relative
+```
+
+If the configuration key doesn't exist:
+```
+設定値が見つかりません: invalid.key
+```
+
+### Set Configuration Value (`set`)
+
+Sets a configuration value using dot notation:
+
+```bash
+mst config set <key> <value>
+```
+
+**Examples:**
+```bash
+# Set path display format
+mst config set ui.pathDisplay relative
+
+# Disable auto-setup
+mst config set development.autoSetup false
+
+# Change worktrees location
+mst config set worktrees.path "../orchestra-members"
+
+# Set default editor
+mst config set development.defaultEditor cursor
+```
+
+**Sample output:**
+```
+✅ ui.pathDisplay を relative に設定しました
+```
+
+### Reset Configuration Value (`reset`)
+
+Resets a configuration value to its default:
+
+```bash
+mst config reset <key>
+```
+
+**Examples:**
+```bash
+# Reset path display to default (absolute)
+mst config reset ui.pathDisplay
+
+# Reset auto-setup to default (true)
+mst config reset development.autoSetup
+
+# Reset worktrees path to default
+mst config reset worktrees.path
+```
+
+**Sample output:**
+```
+✅ ui.pathDisplay をデフォルト値にリセットしました
+現在の値: absolute
+```
+
+## Configuration Keys Reference
+
+Common configuration keys that can be used with `get`, `set`, and `reset`:
+
+| Key | Description | Default Value | Type |
+|-----|-------------|---------------|------|
+| `ui.pathDisplay` | Path display format in commands | `"absolute"` | `"absolute"` \| `"relative"` |
+| `development.autoSetup` | Auto-run setup commands after creation | `true` | boolean |
+| `development.defaultEditor` | Default editor to open | `"cursor"` | string |
+| `worktrees.path` | Directory to store worktrees | `".git/orchestra-members"` | string |
+| `worktrees.branchPrefix` | Prefix for new branches | `"feature/"` | string |
+| `claude.markdownMode` | CLAUDE.md file management mode | `"shared"` | `"shared"` \| `"split"` |
+| `integrations.tmux.enabled` | Enable tmux integration | `true` | boolean |
+| `integrations.claude.enabled` | Enable Claude Code integration | `true` | boolean |
+| `integrations.github.enabled` | Enable GitHub integration | `true` | boolean |
+
 ## Related Commands
 
 - [`mst create`](./create.md) - Uses configuration for worktree creation
-- [`mst template`](./template.md) - Template configuration integration
+- [`mst init`](./init.md) - Creates initial configuration file
