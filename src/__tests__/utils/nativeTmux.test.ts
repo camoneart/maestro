@@ -2,6 +2,8 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { execa } from 'execa'
 import { spawn } from 'child_process'
 import { NativeTmuxHelper } from '../../utils/nativeTmux.js'
+import { fileURLToPath } from 'url'
+import { dirname, join } from 'path'
 
 // Mock dependencies
 vi.mock('execa')
@@ -9,6 +11,14 @@ vi.mock('child_process')
 
 const mockedExeca = vi.mocked(execa)
 const mockedSpawn = vi.mocked(spawn)
+
+// Get the helper script path
+const HELPER_SCRIPT = join(
+  dirname(dirname(dirname(fileURLToPath(import.meta.url)))),
+  '..',
+  'scripts',
+  'maestro-tmux-attach'
+)
 
 describe('NativeTmuxHelper', () => {
   beforeEach(() => {
@@ -110,34 +120,28 @@ describe('NativeTmuxHelper', () => {
     it('should throw error when not in tmux', async () => {
       delete process.env.TMUX
 
+      // Mock the helper script to fail with proper error message
+      mockedExeca.mockRejectedValueOnce(
+        new Error('Error: switch command can only be used from within tmux')
+      )
+
       await expect(NativeTmuxHelper.switchClient('test')).rejects.toThrow(
-        'switch-client can only be used from within tmux'
+        'Failed to switch tmux client: Error: switch command can only be used from within tmux'
       )
     })
 
     it('should throw error when session does not exist', async () => {
-      mockedExeca.mockRejectedValueOnce(new Error('Session not found'))
+      mockedExeca.mockRejectedValueOnce(
+        new Error("Error: tmux session 'non-existent' does not exist")
+      )
 
       await expect(NativeTmuxHelper.switchClient('non-existent')).rejects.toThrow(
-        "Tmux session 'non-existent' does not exist"
+        "Failed to switch tmux client: Error: tmux session 'non-existent' does not exist"
       )
     })
 
     it('should switch client successfully', async () => {
-      // Mock session existence check
-      mockedExeca.mockResolvedValueOnce({
-        stdout: '',
-        stderr: '',
-        exitCode: 0,
-        command: '',
-        escapedCommand: '',
-        failed: false,
-        timedOut: false,
-        isCanceled: false,
-        killed: false,
-      })
-
-      // Mock switch-client command execution
+      // Mock helper script execution success
       mockedExeca.mockResolvedValueOnce({
         stdout: '',
         stderr: '',
@@ -151,24 +155,11 @@ describe('NativeTmuxHelper', () => {
       })
 
       await expect(NativeTmuxHelper.switchClient('test-session')).resolves.toBeUndefined()
-      expect(mockedExeca).toHaveBeenLastCalledWith('tmux', ['switch-client', '-t', 'test-session'])
+      expect(mockedExeca).toHaveBeenLastCalledWith(HELPER_SCRIPT, ['switch', 'test-session'])
     })
 
     it('should throw error when switch-client command fails', async () => {
-      // Mock session existence check
-      mockedExeca.mockResolvedValueOnce({
-        stdout: '',
-        stderr: '',
-        exitCode: 0,
-        command: '',
-        escapedCommand: '',
-        failed: false,
-        timedOut: false,
-        isCanceled: false,
-        killed: false,
-      })
-
-      // Mock switch-client command failure
+      // Mock helper script failure
       mockedExeca.mockRejectedValueOnce(new Error('Switch failed'))
 
       await expect(NativeTmuxHelper.switchClient('test-session')).rejects.toThrow(
@@ -233,8 +224,8 @@ describe('NativeTmuxHelper', () => {
       // Wait a bit for the spawn to be called
       await new Promise(resolve => setTimeout(resolve, 10))
 
-      // Verify spawn was called correctly with direct tmux command
-      expect(mockedSpawn).toHaveBeenCalledWith('tmux', ['attach-session', '-t', 'test-session'], {
+      // Verify spawn was called correctly with helper script
+      expect(mockedSpawn).toHaveBeenCalledWith(HELPER_SCRIPT, ['attach', 'test-session'], {
         stdio: 'inherit',
         detached: false,
       })
@@ -336,15 +327,11 @@ describe('NativeTmuxHelper', () => {
       // Wait a bit for the spawn to be called
       await new Promise(resolve => setTimeout(resolve, 10))
 
-      // Should call attach-session instead of new-session
-      expect(mockedSpawn).toHaveBeenCalledWith(
-        'tmux',
-        ['attach-session', '-t', 'existing-session'],
-        {
-          stdio: 'inherit',
-          detached: false,
-        }
-      )
+      // Should call helper script with attach command instead of new
+      expect(mockedSpawn).toHaveBeenCalledWith(HELPER_SCRIPT, ['attach', 'existing-session'], {
+        stdio: 'inherit',
+        detached: false,
+      })
     })
 
     it('should spawn tmux new-session with correct arguments', async () => {
@@ -369,8 +356,8 @@ describe('NativeTmuxHelper', () => {
 
       // Verify spawn was called with correct arguments
       expect(mockedSpawn).toHaveBeenCalledWith(
-        'tmux',
-        ['new-session', '-s', 'test-session', '-c', '/path/to/dir', '--', 'vim .'],
+        HELPER_SCRIPT,
+        ['new', 'test-session', '/path/to/dir', 'vim .'],
         {
           stdio: 'inherit',
           detached: false,
@@ -404,7 +391,7 @@ describe('NativeTmuxHelper', () => {
       await new Promise(resolve => setTimeout(resolve, 10))
 
       // Verify spawn was called with minimal arguments
-      expect(mockedSpawn).toHaveBeenCalledWith('tmux', ['new-session', '-s', 'test-session'], {
+      expect(mockedSpawn).toHaveBeenCalledWith(HELPER_SCRIPT, ['new', 'test-session'], {
         stdio: 'inherit',
         detached: false,
       })
