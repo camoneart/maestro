@@ -634,14 +634,16 @@ describe('github command error paths', () => {
       const mockOra = vi.mocked(ora)
       const mockFail = vi.fn().mockReturnThis()
       const mockStart = vi.fn().mockReturnThis()
+      const mockStop = vi.fn().mockReturnThis()
       mockOra.mockReturnValue({
         start: mockStart,
         succeed: vi.fn().mockReturnThis(),
         fail: mockFail,
         warn: vi.fn().mockReturnThis(),
         info: vi.fn().mockReturnThis(),
-        stop: vi.fn().mockReturnThis(),
+        stop: mockStop,
         text: '',
+        isSpinning: false, // Issue #140 fix: spinner is stopped after initialization
       } as any)
 
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
@@ -652,9 +654,9 @@ describe('github command error paths', () => {
         expect(error).toBeDefined()
       }
 
-      // スピナーのfailメソッドが呼ばれたことを確認
-      expect(mockFail).toHaveBeenCalledWith('エラーが発生しました')
-      expect(consoleSpy).toHaveBeenCalled()
+      // Issue #140 fix: When spinner is already stopped, console.error is used instead
+      expect(consoleSpy).toHaveBeenCalledWith(chalk.red('✖ エラーが発生しました'))
+      expect(consoleSpy).toHaveBeenCalledWith(chalk.red('PR/Issue #999 が見つかりません'))
       consoleSpy.mockRestore()
     })
 
@@ -688,6 +690,7 @@ describe('github command error paths', () => {
         info: vi.fn().mockReturnThis(),
         stop: vi.fn().mockReturnThis(),
         text: '',
+        isSpinning: false, // Main spinner is stopped after initialization
       } as any)
 
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
@@ -698,8 +701,8 @@ describe('github command error paths', () => {
         expect(error).toBeDefined()
       }
 
-      // スピナーのfailメソッドが呼ばれたことを確認
-      expect(mockFail).toHaveBeenCalledWith('エラーが発生しました')
+      // Comment command has its own spinner handling, so it calls spinner.fail directly
+      expect(mockFail).toHaveBeenCalledWith('PR/Issueの確認に失敗しました')
       expect(consoleSpy).toHaveBeenCalled()
       consoleSpy.mockRestore()
     })
@@ -739,6 +742,7 @@ describe('github command error paths', () => {
         info: vi.fn().mockReturnThis(),
         stop: vi.fn().mockReturnThis(),
         text: '',
+        isSpinning: false, // Main spinner is stopped after initialization
       } as any)
 
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
@@ -749,8 +753,8 @@ describe('github command error paths', () => {
         expect(error).toBeDefined()
       }
 
-      // スピナーのfailメソッドが呼ばれたことを確認
-      expect(mockFail).toHaveBeenCalledWith('エラーが発生しました')
+      // Interactive comment has its own spinner handling, similar to comment command
+      expect(mockFail).toHaveBeenCalledWith('PR/Issueの確認に失敗しました')
       expect(consoleSpy).toHaveBeenCalled()
       consoleSpy.mockRestore()
     })
