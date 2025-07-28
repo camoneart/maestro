@@ -1,5 +1,34 @@
 # Changelog
 
+## 3.5.0
+
+### Minor Changes
+
+- feat: Add CLI configuration commands (set/get/reset)
+
+  **New Commands:**
+  - `mst config get <key>` - Get configuration value using dot notation
+  - `mst config set <key> <value>` - Set configuration value using dot notation
+  - `mst config reset <key>` - Reset configuration value to default
+
+  **Features:**
+  - Dot notation support for nested configurations (e.g., `ui.pathDisplay`)
+  - Automatic type conversion for boolean and number values
+  - Schema validation ensures only valid configurations are saved
+  - Auto-creates `.maestro.json` if it doesn't exist
+  - Removes empty nested objects after reset operations
+
+  **Examples:**
+
+  ```bash
+  mst config set ui.pathDisplay relative
+  mst config set development.autoSetup false
+  mst config get worktrees.path
+  mst config reset ui.pathDisplay
+  ```
+
+  Fixes #152
+
 ## 3.4.0
 
 ### Minor Changes
