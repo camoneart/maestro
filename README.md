@@ -215,6 +215,7 @@ Key settings are summarised below; a full example follows.
 | hooks       | `afterCreate`  | Command after creation                | `npm install`                       |
 |             | `beforeDelete` | Command before deletion               | `echo "Deleting $ORCHESTRA_MEMBER"` |
 | claude      | `markdownMode` | CLAUDE.md file management mode       | `shared` (`shared` or `split`)      |
+| ui          | `pathDisplay`  | Path display format across commands   | `absolute` (`absolute` or `relative`) |
 
 #### Full Example
 
@@ -235,6 +236,9 @@ Key settings are summarised below; a full example follows.
   },
   "claude": {
     "markdownMode": "shared"  // "shared" | "split"
+  },
+  "ui": {
+    "pathDisplay": "absolute"  // "absolute" | "relative"
   }
 }
 ```

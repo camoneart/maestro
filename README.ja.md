@@ -215,6 +215,7 @@ Maestro は **リポジトリ直下の `.maestro.json`** を読み取り、動�
 | hooks       | `afterCreate`  | 作成後に実行する任意コマンド            | `npm install`                       |
 |             | `beforeDelete` | 削除前フック                            | `echo "Deleting $ORCHESTRA_MEMBER"` |
 | claude      | `markdownMode` | CLAUDE.md ファイル管理モード            | `shared` (`shared` または `split`)  |
+| ui          | `pathDisplay`  | 全コマンドでのパス表示形式              | `absolute` (`absolute` または `relative`) |
 
 #### 完全なサンプル
 
@@ -235,6 +236,9 @@ Maestro は **リポジトリ直下の `.maestro.json`** を読み取り、動�
   },
   "claude": {
     "markdownMode": "shared"  // "shared" | "split"
+  },
+  "ui": {
+    "pathDisplay": "absolute"  // "absolute" | "relative"
   }
 }
 ```
