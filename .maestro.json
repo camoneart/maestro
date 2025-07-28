@@ -3,8 +3,15 @@
     "branchPrefix": ""
   },
   "development": {
-    "autoSetup": true,
+    "autoSetup": false,
+    "syncFiles": [
+      ".env",
+      ".env.local"
+    ],
     "defaultEditor": "cursor"
+  },
+  "hooks": {
+    "beforeDelete": "echo \"演奏者を削除します: $ORCHESTRA_MEMBER\""
   },
   "postCreate": {
     "copyFiles": [
@@ -13,8 +20,5 @@
     "commands": [
       "pnpm install"
     ]
-  },
-  "hooks": {
-    "beforeDelete": "echo \"演奏者を削除します: $ORCHESTRA_MEMBER\""
   }
 }
