@@ -30,6 +30,9 @@ describe('config command', () => {
     createProjectConfig: Mock
     getAll: Mock
     getConfigPath: Mock
+    getConfigValue: Mock
+    setConfigValue: Mock
+    resetConfigValue: Mock
   }
 
   beforeEach(() => {
@@ -46,6 +49,9 @@ describe('config command', () => {
         development: { autoSetup: true },
       }),
       getConfigPath: vi.fn().mockReturnValue('/home/user/.config/maestro/config.json'),
+      getConfigValue: vi.fn(),
+      setConfigValue: vi.fn(),
+      resetConfigValue: vi.fn(),
     }
     ;(ConfigManager as any).mockImplementation(() => mockConfigManager)
   })
@@ -165,11 +171,13 @@ describe('config command', () => {
 
       expect(consoleLogSpy).toHaveBeenCalledWith(chalk.yellow('使い方:'))
       expect(consoleLogSpy).toHaveBeenCalledWith(
-        '  maestro config init   # プロジェクト設定ファイルを作成'
+        '  maestro config init           # プロジェクト設定ファイルを作成'
       )
-      expect(consoleLogSpy).toHaveBeenCalledWith('  maestro config show   # 現在の設定を表示')
       expect(consoleLogSpy).toHaveBeenCalledWith(
-        '  maestro config path   # 設定ファイルのパスを表示'
+        '  maestro config show           # 現在の設定を表示'
+      )
+      expect(consoleLogSpy).toHaveBeenCalledWith(
+        '  maestro config path           # 設定ファイルのパスを表示'
       )
     })
 
@@ -196,6 +204,108 @@ describe('config command', () => {
 
       expect(consoleLogSpy).toHaveBeenCalledWith(
         chalk.gray(`\nグローバル設定: ${mockConfigManager.getConfigPath()}`)
+      )
+    })
+  })
+
+  describe('get action', () => {
+    it('should get config value using dot notation', async () => {
+      mockConfigManager.getConfigValue.mockReturnValue('relative')
+
+      await configCommand.parseAsync(['node', 'config', 'get', 'ui.pathDisplay'])
+
+      expect(mockConfigManager.getConfigValue).toHaveBeenCalledWith('ui.pathDisplay')
+      expect(consoleLogSpy).toHaveBeenCalledWith('relative')
+    })
+
+    it('should display message for non-existent config key', async () => {
+      mockConfigManager.getConfigValue.mockReturnValue(undefined)
+
+      await configCommand.parseAsync(['node', 'config', 'get', 'nonexistent.key'])
+
+      expect(consoleLogSpy).toHaveBeenCalledWith(
+        chalk.gray('設定値が見つかりません: nonexistent.key')
+      )
+    })
+
+    it('should handle nested objects correctly', async () => {
+      mockConfigManager.getConfigValue.mockReturnValue({ autoSetup: true, defaultEditor: 'cursor' })
+
+      await configCommand.parseAsync(['node', 'config', 'get', 'development'])
+
+      expect(consoleLogSpy).toHaveBeenCalledWith(
+        JSON.stringify({ autoSetup: true, defaultEditor: 'cursor' }, null, 2)
+      )
+    })
+  })
+
+  describe('set action', () => {
+    it('should set config value using dot notation', async () => {
+      mockConfigManager.setConfigValue.mockResolvedValue(undefined)
+
+      await configCommand.parseAsync(['node', 'config', 'set', 'ui.pathDisplay', 'relative'])
+
+      expect(mockConfigManager.setConfigValue).toHaveBeenCalledWith('ui.pathDisplay', 'relative')
+      expect(consoleLogSpy).toHaveBeenCalledWith(
+        chalk.green('✅ ui.pathDisplay を relative に設定しました')
+      )
+    })
+
+    it('should handle boolean values', async () => {
+      mockConfigManager.setConfigValue.mockResolvedValue(undefined)
+
+      await configCommand.parseAsync(['node', 'config', 'set', 'development.autoSetup', 'false'])
+
+      expect(mockConfigManager.setConfigValue).toHaveBeenCalledWith(
+        'development.autoSetup',
+        'false'
+      )
+    })
+
+    it('should handle number values', async () => {
+      mockConfigManager.setConfigValue.mockResolvedValue(undefined)
+
+      await configCommand.parseAsync(['node', 'config', 'set', 'some.number', '42'])
+
+      expect(mockConfigManager.setConfigValue).toHaveBeenCalledWith('some.number', '42')
+    })
+
+    it('should handle validation errors', async () => {
+      mockConfigManager.setConfigValue.mockRejectedValue(
+        new Error('Invalid value for ui.pathDisplay')
+      )
+
+      await configCommand.parseAsync(['node', 'config', 'set', 'ui.pathDisplay', 'invalid'])
+
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        chalk.red('設定の更新に失敗しました:'),
+        expect.any(Error)
+      )
+    })
+  })
+
+  describe('reset action', () => {
+    it('should reset config value to default', async () => {
+      mockConfigManager.resetConfigValue.mockResolvedValue(undefined)
+      mockConfigManager.getConfigValue.mockReturnValue('absolute')
+
+      await configCommand.parseAsync(['node', 'config', 'reset', 'ui.pathDisplay'])
+
+      expect(mockConfigManager.resetConfigValue).toHaveBeenCalledWith('ui.pathDisplay')
+      expect(consoleLogSpy).toHaveBeenCalledWith(
+        chalk.green('✅ ui.pathDisplay をデフォルト値にリセットしました')
+      )
+      expect(consoleLogSpy).toHaveBeenCalledWith(chalk.gray('現在の値: absolute'))
+    })
+
+    it('should handle reset errors', async () => {
+      mockConfigManager.resetConfigValue.mockRejectedValue(new Error('Reset failed'))
+
+      await configCommand.parseAsync(['node', 'config', 'reset', 'ui.pathDisplay'])
+
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        chalk.red('設定のリセットに失敗しました:'),
+        expect.any(Error)
       )
     })
   })
