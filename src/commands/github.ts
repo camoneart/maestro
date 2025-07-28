@@ -122,7 +122,7 @@ async function fetchItemInfo(number: string, type: 'pr' | 'issue'): Promise<Item
   try {
     const result = await execa('gh', [type, 'view', number, '--json', fields])
     return JSON.parse(result.stdout)
-  } catch (error) {
+  } catch {
     const itemName = type === 'pr' ? 'PR' : 'Issue'
     throw new GithubCommandError(`指定した番号の${itemName}は存在しません (#${number})`)
   }
