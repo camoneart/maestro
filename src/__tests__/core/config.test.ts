@@ -167,6 +167,97 @@ describe('ConfigManager', () => {
     })
   })
 
+  describe('dot notation methods', () => {
+    it('should get nested value using dot notation', () => {
+      configManager.set('ui', { pathDisplay: 'relative' })
+
+      // 新しいメソッドを使用
+      const value = configManager.getConfigValue('ui.pathDisplay')
+      expect(value).toBe('relative')
+    })
+
+    it('should get nested value from project config', async () => {
+      const configData = {
+        ui: { pathDisplay: 'relative' },
+        development: { defaultEditor: 'vscode' },
+      }
+
+      vi.mocked(fs.readFile).mockResolvedValueOnce(JSON.stringify(configData))
+      await configManager.loadProjectConfig()
+
+      expect(configManager.getConfigValue('ui.pathDisplay')).toBe('relative')
+      expect(configManager.getConfigValue('development.defaultEditor')).toBe('vscode')
+    })
+
+    it('should return undefined for non-existent keys', () => {
+      const value = configManager.getConfigValue('nonexistent.key')
+      expect(value).toBeUndefined()
+    })
+
+    it('should set nested value using dot notation', async () => {
+      await configManager.setConfigValue('ui.pathDisplay', 'relative')
+
+      // プロジェクト設定ファイルに書き込まれたかチェック
+      expect(fs.writeFile).toHaveBeenCalledWith(
+        expect.stringContaining('.maestro.json'),
+        expect.stringContaining('"pathDisplay": "relative"'),
+        'utf-8'
+      )
+    })
+
+    it('should create nested structure when setting deep keys', async () => {
+      await configManager.setConfigValue('github.branchNaming.prTemplate', 'pr-{number}-{title}')
+
+      // ネストした構造が作成される
+      expect(fs.writeFile).toHaveBeenCalledWith(
+        expect.stringContaining('.maestro.json'),
+        expect.stringContaining('"github"'),
+        'utf-8'
+      )
+    })
+
+    it('should validate value when setting config', async () => {
+      // バリデーションエラーが発生する場合
+      await expect(
+        configManager.setConfigValue('ui.pathDisplay', 'invalid-value')
+      ).rejects.toThrow()
+    })
+
+    it('should reset config value and remove empty objects', async () => {
+      // fsのモック設定を調整
+      vi.mocked(fs.readFile).mockResolvedValueOnce('{"ui":{"pathDisplay":"relative"}}')
+      vi.mocked(fs.writeFile).mockResolvedValue(undefined)
+
+      // リセット
+      await configManager.resetConfigValue('ui.pathDisplay')
+
+      // 空のオブジェクトが削除されることを確認
+      expect(fs.writeFile).toHaveBeenCalledWith(
+        expect.stringContaining('.maestro.json'),
+        expect.stringMatching(/^((?!ui).)*$/s), // uiキーを含まない
+        'utf-8'
+      )
+    })
+
+    it('should preserve other values when resetting', async () => {
+      // fsのモック設定 - 複数の設定が存在する状態
+      vi.mocked(fs.readFile).mockResolvedValueOnce(
+        '{"ui":{"pathDisplay":"relative"},"development":{"autoSetup":false}}'
+      )
+      vi.mocked(fs.writeFile).mockResolvedValue(undefined)
+
+      // 1つだけリセット
+      await configManager.resetConfigValue('ui.pathDisplay')
+
+      // 他の設定は保持される
+      expect(fs.writeFile).toHaveBeenCalledWith(
+        expect.stringContaining('.maestro.json'),
+        expect.stringContaining('"development"'),
+        'utf-8'
+      )
+    })
+  })
+
   describe('ConfigSchema validation', () => {
     it('should validate correct config', () => {
       const validConfig = {

@@ -190,6 +190,141 @@ export class ConfigManager {
     return this.conf.path
   }
 
+  // ドット記法で設定値を取得
+  getConfigValue(keyPath: string): any {
+    const keys = keyPath.split('.')
+    const config = this.getAll()
+
+    return keys.reduce((obj: any, key: string) => {
+      return obj && obj[key] !== undefined ? obj[key] : undefined
+    }, config)
+  }
+
+  // ドット記法で設定値を設定（プロジェクト設定のみ）
+  async setConfigValue(keyPath: string, value: any): Promise<void> {
+    const configPath = path.join(process.cwd(), '.maestro.json')
+
+    // 既存のプロジェクト設定を読み込む
+    let projectConfig: any = {}
+    try {
+      const configData = await fs.readFile(configPath, 'utf-8')
+      projectConfig = JSON.parse(configData)
+    } catch {
+      // ファイルが存在しない場合は空のオブジェクトから開始
+    }
+
+    // ドット記法でネストしたオブジェクトを作成
+    const keys = keyPath.split('.')
+    let current = projectConfig
+
+    for (let i = 0; i < keys.length - 1; i++) {
+      const key = keys[i]
+      if (!key) continue
+      if (!current[key] || typeof current[key] !== 'object') {
+        current[key] = {}
+      }
+      current = current[key]
+    }
+
+    // 値の型変換
+    const lastKey = keys[keys.length - 1]
+    if (lastKey) {
+      current[lastKey] = this.parseValue(value)
+    }
+
+    // バリデーション
+    const validatedConfig = ConfigSchema.parse(projectConfig)
+
+    // ファイルに保存
+    await fs.writeFile(configPath, JSON.stringify(validatedConfig, null, 2) + '\n', 'utf-8')
+
+    // メモリ上の設定も更新
+    this.projectConfig = validatedConfig
+  }
+
+  // 設定値をリセット（デフォルトに戻す）
+  async resetConfigValue(keyPath: string): Promise<void> {
+    const configPath = path.join(process.cwd(), '.maestro.json')
+
+    // 既存のプロジェクト設定を読み込む
+    let projectConfig: any = {}
+    try {
+      const configData = await fs.readFile(configPath, 'utf-8')
+      projectConfig = JSON.parse(configData)
+    } catch {
+      // ファイルが存在しない場合は何もしない
+      return
+    }
+
+    // ドット記法でキーを削除
+    const keys = keyPath.split('.')
+    let current = projectConfig
+    const parents: Array<{ obj: any; key: string }> = []
+
+    // パスをたどって削除対象を見つける
+    for (let i = 0; i < keys.length - 1; i++) {
+      const key = keys[i]
+      if (!key || !current[key]) {
+        return // キーが存在しない場合は何もしない
+      }
+      parents.push({ obj: current, key })
+      current = current[key]
+    }
+
+    const lastKey = keys[keys.length - 1]
+    if (lastKey && current[lastKey] !== undefined) {
+      delete current[lastKey]
+    }
+
+    // 空のオブジェクトを削除
+    this.cleanEmptyObjects(projectConfig, keyPath.split('.').slice(0, -1))
+
+    // ファイルに保存
+    await fs.writeFile(configPath, JSON.stringify(projectConfig, null, 2) + '\n', 'utf-8')
+
+    // メモリ上の設定も更新
+    this.projectConfig = Object.keys(projectConfig).length > 0 ? projectConfig : null
+  }
+
+  // 値の型変換
+  private parseValue(value: any): any {
+    if (typeof value === 'string') {
+      // boolean値の変換
+      if (value === 'true') return true
+      if (value === 'false') return false
+
+      // 数値の変換
+      if (/^\d+$/.test(value)) return parseInt(value, 10)
+      if (/^\d+\.\d+$/.test(value)) return parseFloat(value)
+    }
+
+    return value
+  }
+
+  // 空のオブジェクトを削除
+  private cleanEmptyObjects(obj: any, keys: string[]): void {
+    if (keys.length === 0) return
+
+    let current = obj
+    for (let i = 0; i < keys.length - 1; i++) {
+      const key = keys[i]
+      if (!key || !current[key]) return
+      current = current[key]
+    }
+
+    const lastKey = keys[keys.length - 1]
+    if (
+      lastKey &&
+      current[lastKey] &&
+      typeof current[lastKey] === 'object' &&
+      Object.keys(current[lastKey]).length === 0
+    ) {
+      delete current[lastKey]
+      // 再帰的にチェック
+      this.cleanEmptyObjects(obj, keys.slice(0, -1))
+    }
+  }
+
   // プロジェクト設定ファイルの作成
   async createProjectConfig(configPath?: string): Promise<void> {
     const targetPath = configPath || path.join(process.cwd(), '.maestro.json')
