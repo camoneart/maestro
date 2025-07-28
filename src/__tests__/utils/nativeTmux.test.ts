@@ -137,7 +137,7 @@ describe('NativeTmuxHelper', () => {
         killed: false,
       })
 
-      // Mock helper script execution
+      // Mock switch-client command execution
       mockedExeca.mockResolvedValueOnce({
         stdout: '',
         stderr: '',
@@ -151,9 +151,10 @@ describe('NativeTmuxHelper', () => {
       })
 
       await expect(NativeTmuxHelper.switchClient('test-session')).resolves.toBeUndefined()
+      expect(mockedExeca).toHaveBeenLastCalledWith('tmux', ['switch-client', '-t', 'test-session'])
     })
 
-    it('should throw error when helper script execution fails', async () => {
+    it('should throw error when switch-client command fails', async () => {
       // Mock session existence check
       mockedExeca.mockResolvedValueOnce({
         stdout: '',
@@ -167,16 +168,26 @@ describe('NativeTmuxHelper', () => {
         killed: false,
       })
 
-      // Mock helper script execution failure
-      mockedExeca.mockRejectedValueOnce(new Error('Helper failed'))
+      // Mock switch-client command failure
+      mockedExeca.mockRejectedValueOnce(new Error('Switch failed'))
 
       await expect(NativeTmuxHelper.switchClient('test-session')).rejects.toThrow(
-        'Failed to switch tmux client: Helper failed'
+        'Failed to switch tmux client: Switch failed'
       )
     })
   })
 
   describe('attachToSession', () => {
+    // Mock process.exit to prevent actual process termination during tests
+    const originalExit = process.exit
+    beforeEach(() => {
+      process.exit = vi.fn() as any
+    })
+
+    afterEach(() => {
+      process.exit = originalExit
+    })
+
     it('should throw error with invalid session name', async () => {
       await expect(NativeTmuxHelper.attachToSession('')).rejects.toThrow(
         'Session name must be a non-empty string'
@@ -187,28 +198,7 @@ describe('NativeTmuxHelper', () => {
       )
     })
 
-    it('should throw error when helper script not found', async () => {
-      mockedExeca.mockRejectedValueOnce(new Error('Script not found'))
-
-      await expect(NativeTmuxHelper.attachToSession('test')).rejects.toThrow(
-        'Tmux helper script not found or not executable'
-      )
-    })
-
     it('should throw error when session does not exist', async () => {
-      // Mock script exists
-      mockedExeca.mockResolvedValueOnce({
-        stdout: '',
-        stderr: '',
-        exitCode: 0,
-        command: '',
-        escapedCommand: '',
-        failed: false,
-        timedOut: false,
-        isCanceled: false,
-        killed: false,
-      })
-
       // Mock session check failure
       mockedExeca.mockRejectedValueOnce(new Error('Session not found'))
 
@@ -217,20 +207,7 @@ describe('NativeTmuxHelper', () => {
       )
     })
 
-    it('should spawn helper process successfully', async () => {
-      // Mock script exists
-      mockedExeca.mockResolvedValueOnce({
-        stdout: '',
-        stderr: '',
-        exitCode: 0,
-        command: '',
-        escapedCommand: '',
-        failed: false,
-        timedOut: false,
-        isCanceled: false,
-        killed: false,
-      })
-
+    it('should spawn tmux process successfully', async () => {
       // Mock session exists
       mockedExeca.mockResolvedValueOnce({
         stdout: '',
@@ -256,40 +233,31 @@ describe('NativeTmuxHelper', () => {
       // Wait a bit for the spawn to be called
       await new Promise(resolve => setTimeout(resolve, 10))
 
-      // Verify spawn was called correctly
-      expect(mockedSpawn).toHaveBeenCalledWith(
-        expect.stringContaining('maestro-tmux-attach'),
-        ['attach', 'test-session'],
-        {
-          stdio: 'inherit',
-          detached: false,
-        }
-      )
+      // Verify spawn was called correctly with direct tmux command
+      expect(mockedSpawn).toHaveBeenCalledWith('tmux', ['attach-session', '-t', 'test-session'], {
+        stdio: 'inherit',
+        detached: false,
+      })
 
       // Verify event listeners were set up
       expect(mockProcess.on).toHaveBeenCalledWith('error', expect.any(Function))
       expect(mockProcess.on).toHaveBeenCalledWith('exit', expect.any(Function))
 
-      // The promise should not resolve in normal operation
-      // but we can test error conditions by triggering them
-      const errorHandler = mockProcess.on.mock.calls.find(call => call[0] === 'error')?.[1]
-      if (errorHandler) {
-        errorHandler(new Error('Test error'))
+      // Test normal exit behavior
+      const exitHandler = mockProcess.on.mock.calls.find(call => call[0] === 'exit')?.[1]
+      if (exitHandler) {
+        exitHandler(0) // Normal exit
       }
 
-      await expect(promise).rejects.toThrow('Failed to execute tmux helper: Test error')
-    })
-  })
+      // Verify process.exit was called
+      expect(process.exit).toHaveBeenCalledWith(0)
 
-  describe('createAndAttachSession', () => {
-    it('should throw error with invalid session name', async () => {
-      await expect(NativeTmuxHelper.createAndAttachSession('')).rejects.toThrow(
-        'Session name must be a non-empty string'
-      )
+      // The promise never resolves since process.exit() is called
+      // This is expected behavior
     })
 
-    it('should spawn helper process with correct arguments', async () => {
-      // Mock script exists
+    it('should handle tmux process errors', async () => {
+      // Mock session exists
       mockedExeca.mockResolvedValueOnce({
         stdout: '',
         stderr: '',
@@ -309,36 +277,41 @@ describe('NativeTmuxHelper', () => {
       mockedSpawn.mockReturnValueOnce(mockProcess as any)
 
       // Start the promise
-      const promise = NativeTmuxHelper.createAndAttachSession(
-        'test-session',
-        '/path/to/dir',
-        'vim .'
-      )
+      const promise = NativeTmuxHelper.attachToSession('test-session')
 
       // Wait a bit for the spawn to be called
       await new Promise(resolve => setTimeout(resolve, 10))
 
-      // Verify spawn was called with correct arguments
-      expect(mockedSpawn).toHaveBeenCalledWith(
-        expect.stringContaining('maestro-tmux-attach'),
-        ['new', 'test-session', '/path/to/dir', 'vim .'],
-        {
-          stdio: 'inherit',
-          detached: false,
-        }
-      )
-
-      // Trigger error to end the promise
+      // Trigger error
       const errorHandler = mockProcess.on.mock.calls.find(call => call[0] === 'error')?.[1]
       if (errorHandler) {
-        errorHandler(new Error('Test error'))
+        errorHandler(new Error('Spawn error'))
       }
 
-      await expect(promise).rejects.toThrow('Failed to execute tmux helper: Test error')
+      // Verify process.exit was called with error code
+      expect(process.exit).toHaveBeenCalledWith(1)
+    })
+  })
+
+  describe('createAndAttachSession', () => {
+    // Mock process.exit to prevent actual process termination during tests
+    const originalExit = process.exit
+    beforeEach(() => {
+      process.exit = vi.fn() as any
     })
 
-    it('should handle missing optional parameters', async () => {
-      // Mock script exists
+    afterEach(() => {
+      process.exit = originalExit
+    })
+
+    it('should throw error with invalid session name', async () => {
+      await expect(NativeTmuxHelper.createAndAttachSession('')).rejects.toThrow(
+        'Session name must be a non-empty string'
+      )
+    })
+
+    it('should attach to existing session if it exists', async () => {
+      // Mock session already exists
       mockedExeca.mockResolvedValueOnce({
         stdout: '',
         stderr: '',
@@ -350,6 +323,73 @@ describe('NativeTmuxHelper', () => {
         isCanceled: false,
         killed: false,
       })
+
+      // Mock the attach process
+      const mockAttachProcess = {
+        on: vi.fn(),
+      }
+      mockedSpawn.mockReturnValueOnce(mockAttachProcess as any)
+
+      // Start the promise
+      const promise = NativeTmuxHelper.createAndAttachSession('existing-session')
+
+      // Wait a bit for the spawn to be called
+      await new Promise(resolve => setTimeout(resolve, 10))
+
+      // Should call attach-session instead of new-session
+      expect(mockedSpawn).toHaveBeenCalledWith(
+        'tmux',
+        ['attach-session', '-t', 'existing-session'],
+        {
+          stdio: 'inherit',
+          detached: false,
+        }
+      )
+    })
+
+    it('should spawn tmux new-session with correct arguments', async () => {
+      // Mock session doesn't exist
+      mockedExeca.mockRejectedValueOnce(new Error('Session not found'))
+
+      // Mock spawn
+      const mockProcess = {
+        on: vi.fn(),
+      }
+      mockedSpawn.mockReturnValueOnce(mockProcess as any)
+
+      // Start the promise
+      const promise = NativeTmuxHelper.createAndAttachSession(
+        'test-session',
+        '/path/to/dir',
+        'vim .'
+      )
+
+      // Wait a bit for the spawn to be called
+      await new Promise(resolve => setTimeout(resolve, 10))
+
+      // Verify spawn was called with correct arguments
+      expect(mockedSpawn).toHaveBeenCalledWith(
+        'tmux',
+        ['new-session', '-s', 'test-session', '-c', '/path/to/dir', '--', 'vim .'],
+        {
+          stdio: 'inherit',
+          detached: false,
+        }
+      )
+
+      // Test normal exit behavior
+      const exitHandler = mockProcess.on.mock.calls.find(call => call[0] === 'exit')?.[1]
+      if (exitHandler) {
+        exitHandler(0) // Normal exit
+      }
+
+      // Verify process.exit was called
+      expect(process.exit).toHaveBeenCalledWith(0)
+    })
+
+    it('should handle missing optional parameters', async () => {
+      // Mock session doesn't exist
+      mockedExeca.mockRejectedValueOnce(new Error('Session not found'))
 
       // Mock spawn
       const mockProcess = {
@@ -364,22 +404,19 @@ describe('NativeTmuxHelper', () => {
       await new Promise(resolve => setTimeout(resolve, 10))
 
       // Verify spawn was called with minimal arguments
-      expect(mockedSpawn).toHaveBeenCalledWith(
-        expect.stringContaining('maestro-tmux-attach'),
-        ['new', 'test-session'],
-        {
-          stdio: 'inherit',
-          detached: false,
-        }
-      )
+      expect(mockedSpawn).toHaveBeenCalledWith('tmux', ['new-session', '-s', 'test-session'], {
+        stdio: 'inherit',
+        detached: false,
+      })
 
-      // Trigger exit with non-zero code
+      // Test error exit behavior
       const exitHandler = mockProcess.on.mock.calls.find(call => call[0] === 'exit')?.[1]
       if (exitHandler) {
-        exitHandler(1, null)
+        exitHandler(1) // Error exit
       }
 
-      await expect(promise).rejects.toThrow('Tmux helper exited with code 1 signal null')
+      // Verify process.exit was called with error code
+      expect(process.exit).toHaveBeenCalledWith(1)
     })
   })
 

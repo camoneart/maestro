@@ -1,35 +1,19 @@
 import { spawn } from 'child_process'
 import { execa } from 'execa'
-import path from 'path'
-import { fileURLToPath } from 'url'
-
-// ES modules compatibility
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
-
-// Path to the native tmux helper script
-const TMUX_HELPER_SCRIPT = path.join(__dirname, '../../scripts/maestro-tmux-attach')
 
 /**
- * Native tmux attach helper that uses exec() to properly transfer TTY control
- * This solves the TTY corruption issue by completely replacing the Node.js process
+ * Native tmux helper that uses direct tmux commands with proper TTY control
+ * This solves the TTY corruption issue by using spawn + process.exit()
  */
 export class NativeTmuxHelper {
   /**
-   * Attach to an existing tmux session using the native helper
+   * Attach to an existing tmux session using direct tmux command
    * This function replaces the current Node.js process with tmux
    */
   static async attachToSession(sessionName: string): Promise<never> {
     // Validate session name
     if (!sessionName || typeof sessionName !== 'string') {
       throw new Error('Session name must be a non-empty string')
-    }
-
-    // Check if the helper script exists
-    try {
-      await execa('test', ['-x', TMUX_HELPER_SCRIPT])
-    } catch {
-      throw new Error(`Tmux helper script not found or not executable: ${TMUX_HELPER_SCRIPT}`)
     }
 
     // Check if session exists before attempting to attach
@@ -39,30 +23,30 @@ export class NativeTmuxHelper {
       throw new Error(`Tmux session '${sessionName}' does not exist`)
     }
 
-    // Use the native helper to attach with proper TTY control
-    // This will replace the current process and never return
-    const helperProcess = spawn(TMUX_HELPER_SCRIPT, ['attach', sessionName], {
+    // Use spawn with stdio: 'inherit' to transfer TTY control to tmux
+    // This provides the most direct interaction with tmux process
+    const tmuxProcess = spawn('tmux', ['attach-session', '-t', sessionName], {
       stdio: 'inherit',
       detached: false,
     })
 
-    // This promise will never resolve because the process is replaced
-    return new Promise((_, reject) => {
-      helperProcess.on('error', error => {
-        reject(new Error(`Failed to execute tmux helper: ${error.message}`))
-      })
+    // Wait for tmux to exit, then terminate Node.js process
+    tmuxProcess.on('exit', code => {
+      // Exit with the same code as tmux to maintain proper exit status
+      process.exit(code || 0)
+    })
 
-      // If we get an exit event, something went wrong
-      helperProcess.on('exit', (code, signal) => {
-        if (code !== 0) {
-          reject(new Error(`Tmux helper exited with code ${code} signal ${signal}`))
-        }
-      })
-    }) as Promise<never>
+    tmuxProcess.on('error', error => {
+      console.error(`Failed to attach to tmux session: ${error.message}`)
+      process.exit(1)
+    })
+
+    // This promise never resolves because process.exit() terminates Node.js
+    return new Promise(() => {}) as Promise<never>
   }
 
   /**
-   * Create a new tmux session and attach using the native helper
+   * Create a new tmux session and attach using direct tmux command
    * This function replaces the current Node.js process with tmux
    */
   static async createAndAttachSession(
@@ -75,42 +59,43 @@ export class NativeTmuxHelper {
       throw new Error('Session name must be a non-empty string')
     }
 
-    // Check if the helper script exists
+    // Check if session already exists, attach if it does
     try {
-      await execa('test', ['-x', TMUX_HELPER_SCRIPT])
+      await execa('tmux', ['has-session', '-t', sessionName])
+      console.warn(`Warning: tmux session '${sessionName}' already exists, attaching instead`)
+      return this.attachToSession(sessionName)
     } catch {
-      throw new Error(`Tmux helper script not found or not executable: ${TMUX_HELPER_SCRIPT}`)
+      // Session doesn't exist, continue with creation
     }
 
-    // Prepare arguments for the helper script
-    const args = ['new', sessionName]
+    // Prepare arguments for tmux new-session
+    const args = ['new-session', '-s', sessionName]
     if (workingDirectory) {
-      args.push(workingDirectory)
+      args.push('-c', workingDirectory)
     }
     if (command) {
-      args.push(command)
+      args.push('--', command)
     }
 
-    // Use the native helper to create and attach with proper TTY control
-    // This will replace the current process and never return
-    const helperProcess = spawn(TMUX_HELPER_SCRIPT, args, {
+    // Use spawn with stdio: 'inherit' to transfer TTY control to tmux
+    const tmuxProcess = spawn('tmux', args, {
       stdio: 'inherit',
       detached: false,
     })
 
-    // This promise will never resolve because the process is replaced
-    return new Promise((_, reject) => {
-      helperProcess.on('error', error => {
-        reject(new Error(`Failed to execute tmux helper: ${error.message}`))
-      })
+    // Wait for tmux to exit, then terminate Node.js process
+    tmuxProcess.on('exit', code => {
+      // Exit with the same code as tmux to maintain proper exit status
+      process.exit(code || 0)
+    })
 
-      // If we get an exit event, something went wrong
-      helperProcess.on('exit', (code, signal) => {
-        if (code !== 0) {
-          reject(new Error(`Tmux helper exited with code ${code} signal ${signal}`))
-        }
-      })
-    }) as Promise<never>
+    tmuxProcess.on('error', error => {
+      console.error(`Failed to create tmux session: ${error.message}`)
+      process.exit(1)
+    })
+
+    // This promise never resolves because process.exit() terminates Node.js
+    return new Promise(() => {}) as Promise<never>
   }
 
   /**
@@ -135,9 +120,9 @@ export class NativeTmuxHelper {
       throw new Error(`Tmux session '${sessionName}' does not exist`)
     }
 
-    // Use the native helper for consistency
+    // Use direct tmux switch-client command
     try {
-      await execa(TMUX_HELPER_SCRIPT, ['switch', sessionName])
+      await execa('tmux', ['switch-client', '-t', sessionName])
     } catch (error) {
       throw new Error(
         `Failed to switch tmux client: ${error instanceof Error ? error.message : 'Unknown error'}`
