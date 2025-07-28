@@ -32,7 +32,10 @@ async function handleInitAction(configManager: ConfigManager): Promise<void> {
   }
 }
 
-async function handleShowAction(configManager: ConfigManager, options?: { global?: boolean }): Promise<void> {
+async function handleShowAction(
+  configManager: ConfigManager,
+  options?: { global?: boolean }
+): Promise<void> {
   const config = configManager.getAll()
   console.log(chalk.bold('\n🎼 maestro 設定:\n'))
   console.log(JSON.stringify(config, null, 2))
@@ -81,7 +84,11 @@ function handleGetAction(configManager: ConfigManager, key?: string): void {
   }
 }
 
-async function handleSetAction(configManager: ConfigManager, key?: string, value?: string): Promise<void> {
+async function handleSetAction(
+  configManager: ConfigManager,
+  key?: string,
+  value?: string
+): Promise<void> {
   if (!key || value === undefined) {
     console.error(chalk.red('設定キーと値を指定してください'))
     console.log(chalk.gray('使用例: maestro config set ui.pathDisplay relative'))
@@ -106,7 +113,7 @@ async function handleResetAction(configManager: ConfigManager, key?: string): Pr
   try {
     await configManager.resetConfigValue(key)
     console.log(chalk.green(`✅ ${key} をデフォルト値にリセットしました`))
-    
+
     // リセット後の値を表示
     const currentValue = configManager.getConfigValue(key)
     if (currentValue !== undefined) {
