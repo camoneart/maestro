@@ -1,5 +1,40 @@
 # Changelog
 
+## 3.4.0
+
+### Minor Changes
+
+- feat: Add configurable path display format (absolute/relative)
+
+  **New Feature:**
+  - Added `ui.pathDisplay` configuration option in `.maestro.json`
+  - Choose between `"absolute"` (default) or `"relative"` path display
+  - Affects path display across all major commands
+
+  **Affected Commands:**
+  - `mst create` - Creation confirmation message
+  - `mst list` - Worktree listing (respects configuration)
+  - `mst where` - Current location display
+  - `mst delete` - Deletion confirmation
+  - `mst sync` - Sync target selection
+
+  **Configuration Example:**
+
+  ```json
+  {
+    "ui": {
+      "pathDisplay": "relative" // or "absolute"
+    }
+  }
+  ```
+
+  **Benefits:**
+  - Consistent path display across all commands
+  - User preference for compact (relative) or explicit (absolute) paths
+  - Better integration with different workflow preferences
+
+  Fixes #150
+
 ## 3.3.5
 
 ### Patch Changes
