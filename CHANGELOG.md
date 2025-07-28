@@ -1,5 +1,29 @@
 # Changelog
 
+## 3.3.5
+
+### Patch Changes
+
+- 🐛 Fix: Inquirer prompt fails due to Promise.allSettled conflict (Issue #148)
+
+  **What was fixed:**
+  - Separated tmux session creation from parallel task execution in `executePostCreationTasks`
+  - Added TTY environment check before showing interactive prompts
+  - Non-TTY environments now skip prompts and show manual attach instructions
+
+  **Technical details:**
+  - Interactive tmux confirmation prompts were conflicting with concurrent Promise execution
+  - Now executes non-interactive tasks (setup, editor, CLAUDE.md) in parallel first
+  - Then runs tmux session creation separately to avoid stdin/stdout conflicts
+  - Prevents "User force closed the prompt" errors in inquirer
+
+  **User impact:**
+  - Interactive tmux attach confirmation now works reliably
+  - Non-TTY environments (CI, scripts) gracefully skip prompts
+  - Better user experience with proper prompt handling
+
+  Fixes #148
+
 ## 3.3.4
 
 ### Patch Changes
