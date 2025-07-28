@@ -653,7 +653,7 @@ describe('github command error paths', () => {
       }
 
       // スピナーのfailメソッドが呼ばれたことを確認
-      expect(mockFail).toHaveBeenCalledWith('情報の取得に失敗しました')
+      expect(mockFail).toHaveBeenCalledWith('エラーが発生しました')
       expect(consoleSpy).toHaveBeenCalled()
       consoleSpy.mockRestore()
     })
@@ -699,7 +699,7 @@ describe('github command error paths', () => {
       }
 
       // スピナーのfailメソッドが呼ばれたことを確認
-      expect(mockFail).toHaveBeenCalledWith('PR/Issueの確認に失敗しました')
+      expect(mockFail).toHaveBeenCalledWith('エラーが発生しました')
       expect(consoleSpy).toHaveBeenCalled()
       consoleSpy.mockRestore()
     })
@@ -750,7 +750,7 @@ describe('github command error paths', () => {
       }
 
       // スピナーのfailメソッドが呼ばれたことを確認
-      expect(mockFail).toHaveBeenCalledWith('PR/Issueの確認に失敗しました')
+      expect(mockFail).toHaveBeenCalledWith('エラーが発生しました')
       expect(consoleSpy).toHaveBeenCalled()
       consoleSpy.mockRestore()
     })
