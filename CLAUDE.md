@@ -206,13 +206,124 @@ This ensures documentation always stays in sync with implementation changes with
 - **Shell Completion**: bash/zsh/fish completion scripts available via `mst completion`
 
 
+## Pre-Release Testing Guidelines
+
+**CRITICAL**: Before releasing any version, especially with critical bug fixes, thorough testing must be performed to ensure quality and prevent regressions.
+
+### Local Testing Workflow
+
+1. **Build and Test Locally**
+   ```bash
+   # Build the project
+   pnpm build
+   
+   # Run the built CLI directly
+   node dist/cli.js create test-branch --tmux
+   
+   # Or use npm link for global testing
+   npm link
+   mst create test-branch --tmux-h
+   ```
+
+2. **Run Comprehensive Test Suite**
+   ```bash
+   # Unit tests
+   pnpm test
+   
+   # E2E tests
+   pnpm test:e2e
+   
+   # Coverage report
+   pnpm test:coverage
+   
+   # Type checking
+   pnpm typecheck
+   
+   # Linting
+   pnpm lint
+   ```
+
+3. **Manual Testing Checklist**
+   Create a checklist for critical features being modified:
+   ```markdown
+   ## Manual Test Checklist for [Feature]
+   - [ ] Basic functionality works as expected
+   - [ ] Edge cases are handled properly
+   - [ ] No regressions in related features
+   - [ ] Performance is acceptable
+   - [ ] Error messages are helpful
+   
+   ## Example: tmux Integration Testing
+   - [ ] `mst create test --tmux` creates session and attaches
+   - [ ] Keyboard input works normally (no escape sequences)
+   - [ ] Ctrl+C interrupts commands without detaching
+   - [ ] Ctrl+B, D detaches properly
+   - [ ] Terminal remains functional after detach
+   - [ ] `--tmux-h` creates horizontal split
+   - [ ] `--tmux-v` creates vertical split
+   ```
+
+4. **Pre-Release Testing**
+   ```bash
+   # Create a beta/canary release for testing
+   pnpm changeset version --snapshot beta
+   pnpm release --tag beta
+   
+   # Users can test with:
+   npm install -g @camoneart/maestro@beta
+   ```
+
+5. **CI/CD Integration Testing**
+   Ensure CI passes all checks:
+   - Build succeeds
+   - All tests pass
+   - Coverage meets thresholds
+   - No linting errors
+   - Type checking passes
+
+### Testing Critical Features
+
+For features that interact with external systems (tmux, GitHub, etc.):
+
+1. **Create dedicated test scripts**
+   ```bash
+   # scripts/test-tmux-integration.sh
+   #!/bin/bash
+   set -e
+   
+   echo "Testing tmux integration..."
+   mst create test-tmux --tmux
+   # Add automated checks here
+   ```
+
+2. **Document expected behavior**
+   - What should happen
+   - What should NOT happen
+   - Known limitations
+
+3. **Test on multiple environments**
+   - Different OS versions
+   - Different terminal emulators
+   - Different shell configurations
+
+### Beta Release Process
+
+For major changes or critical fixes:
+
+1. Create beta changeset: `pnpm changeset --snapshot beta`
+2. Publish beta: `pnpm release --tag beta`
+3. Announce beta for testing
+4. Collect feedback for at least 24-48 hours
+5. Fix any issues found
+6. Only then proceed with stable release
+
 ## Release Guidelines
 
 **IMPORTANT**: Always follow these formats when creating releases.
 
 ### Git Tag Format
-- **Tag name**: `v{version}` (e.g., `v3.3.2`)
-- Automatically created by changeset
+- **Tag name**: `maestro@{version}` (e.g., `maestro@3.3.2`)
+- Created by changeset as `v{version}`, then manually corrected
 
 ### GitHub Release Format
 - **Title**: `maestro@{version}` (e.g., `maestro@3.3.2`)
@@ -234,15 +345,22 @@ This ensures documentation always stays in sync with implementation changes with
   ```
 
 ### Release Process
-1. `pnpm changeset` - Create a changeset
-2. `pnpm changeset version` - Update version
-3. `git add` and `git commit` - Commit changes
-4. `git push` - Push to main
-5. `pnpm release` - Publish to npm and create tag
-6. `git push --tags` - Push tags
-7. `gh release create` - Create GitHub Release following above format
+1. **TEST THOROUGHLY** (see Pre-Release Testing above)
+2. `pnpm changeset` - Create a changeset
+3. `pnpm changeset version` - Update version
+4. `git add` and `git commit` - Commit changes
+5. `git push` - Push to main
+6. `pnpm release` - Publish to npm and create tag
+7. Fix tag format: 
+   ```bash
+   git tag -d v{version}
+   git push origin --delete v{version}
+   git tag maestro@{version}
+   git push origin maestro@{version}
+   ```
+8. `gh release create` - Create GitHub Release following above format
 
-**Note**: If GitHub Actions automation doesn't work, manually create the release following the format above.
+**Note**: Consider beta releases for critical changes before stable release.
 
 ## Implementation Log Guidelines
 
