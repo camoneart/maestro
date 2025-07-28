@@ -1,5 +1,20 @@
 # Changelog
 
+## 3.3.3
+
+### Patch Changes
+
+- Critical fixes for tmux TTY corruption and spinner hanging issues
+
+  **Fixed:**
+  - 🚨 Resolved severe TTY corruption when using tmux auto-attach options (`--tmux`, `--tmux-h`, `--tmux-v`)
+  - 🐛 Fixed spinner hanging indefinitely when specifying non-existent issue/PR numbers
+  - 🔧 Improved tmux session environment handling with proper PATH configuration
+  - 🛡️ Added maestro-exec helper for proper process replacement in tmux attach
+
+  **Impact:**
+  These fixes resolve critical issues that made tmux integration features unusable and could leave terminals in a corrupted state requiring restart.
+
 ## 3.3.2
 
 ### Patch Changes
