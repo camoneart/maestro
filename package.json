@@ -32,7 +32,8 @@
     "changeset": "changeset",
     "version": "changeset version",
     "release": "pnpm build && changeset publish --access public",
-    "prepublishOnly": "pnpm build && node scripts/generate-completions.js"
+    "prepublishOnly": "pnpm build && node scripts/generate-completions.js",
+    "postinstall": "node -e \"try { require('fs').chmodSync(require('path').join(__dirname, 'scripts', 'maestro-tmux-attach'), '755'); } catch (e) { /* ignore */ }\""
   },
   "keywords": [
     "git",

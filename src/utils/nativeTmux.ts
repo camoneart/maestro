@@ -2,6 +2,7 @@ import { spawn } from 'child_process'
 import { execa } from 'execa'
 import { fileURLToPath } from 'url'
 import { dirname, join } from 'path'
+import { existsSync, chmodSync } from 'fs'
 
 /**
  * Native tmux helper that uses shell script with exec() for proper TTY control
@@ -9,11 +10,44 @@ import { dirname, join } from 'path'
  */
 export class NativeTmuxHelper {
   // Path to the native tmux helper script
-  private static readonly HELPER_SCRIPT = join(
-    dirname(dirname(dirname(fileURLToPath(import.meta.url)))),
-    'scripts',
-    'maestro-tmux-attach'
-  )
+  private static readonly HELPER_SCRIPT = (() => {
+    // Get current file directory
+    const currentDir = dirname(fileURLToPath(import.meta.url))
+    
+    // Try multiple possible paths for different installation scenarios
+    const possiblePaths = [
+      // Built package: dist/utils -> ../../scripts/ (from issue-144/dist/utils to issue-144/scripts)
+      join(dirname(dirname(currentDir)), 'scripts', 'maestro-tmux-attach'),
+      // Development/source: src/utils -> ../../scripts/ (from issue-144/src/utils to issue-144/scripts)  
+      join(dirname(dirname(currentDir)), 'scripts', 'maestro-tmux-attach'),
+      // npm package root: node_modules/@camoneart/maestro/dist/utils -> ../../../scripts/
+      join(dirname(dirname(dirname(currentDir))), 'scripts', 'maestro-tmux-attach'),
+      // Direct path for current development structure
+      join(process.cwd(), 'scripts', 'maestro-tmux-attach'),
+    ]
+    
+    let scriptPath: string | null = null
+    for (const path of possiblePaths) {
+      if (existsSync(path)) {
+        scriptPath = path
+        break
+      }
+    }
+    
+    if (!scriptPath) {
+      throw new Error(`Maestro tmux helper script not found. Searched paths: ${possiblePaths.join(', ')}`)
+    }
+
+    // Set executable permissions
+    try {
+      chmodSync(scriptPath, '755')
+    } catch {
+      // Ignore permission errors in case of read-only filesystem
+      console.warn(`Warning: Could not set executable permissions for ${scriptPath}`)
+    }
+
+    return scriptPath
+  })()
   /**
    * Attach to an existing tmux session using native shell script with exec
    * This function replaces the current Node.js process with tmux
