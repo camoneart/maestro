@@ -230,21 +230,30 @@ export async function createTmuxSession(
           )
         )
 
-        // インタラクティブ確認プロンプト
-        const { shouldAttach } = await inquirer.prompt([
-          {
-            type: 'confirm',
-            name: 'shouldAttach',
-            message: 'セッションにアタッチしますか？',
-            default: true,
-          },
-        ])
+        // TTY環境でのみインタラクティブ確認プロンプトを表示
+        if (process.stdout.isTTY && process.stdin.isTTY) {
+          const { shouldAttach } = await inquirer.prompt([
+            {
+              type: 'confirm',
+              name: 'shouldAttach',
+              message: 'セッションにアタッチしますか？',
+              default: true,
+            },
+          ])
 
-        if (shouldAttach) {
-          console.log(chalk.cyan(`🎵 tmuxセッション '${sessionName}' にアタッチしています...`))
-          await attachToTmuxSession(sessionName)
+          if (shouldAttach) {
+            console.log(chalk.cyan(`🎵 tmuxセッション '${sessionName}' にアタッチしています...`))
+            await attachToTmuxSession(sessionName)
+          } else {
+            console.log(chalk.yellow(`\n📝 後でアタッチするには以下のコマンドを実行してください:`))
+            console.log(chalk.white(`   tmux attach -t ${sessionName}`))
+            console.log(chalk.gray(`\n💡 ヒント: Ctrl+B, D でセッションからデタッチできます`))
+          }
         } else {
-          console.log(chalk.yellow(`\n📝 後でアタッチするには以下のコマンドを実行してください:`))
+          // 非TTY環境では自動的にアタッチしない
+          console.log(
+            chalk.yellow(`\n📝 tmuxセッションにアタッチするには以下のコマンドを実行してください:`)
+          )
           console.log(chalk.white(`   tmux attach -t ${sessionName}`))
           console.log(chalk.gray(`\n💡 ヒント: Ctrl+B, D でセッションからデタッチできます`))
         }
@@ -312,28 +321,37 @@ export async function createTmuxSession(
 
     console.log(chalk.green(`✨ tmuxセッション '${sessionName}' を作成しました`))
 
-    // インタラクティブ確認プロンプト
-    const { shouldAttach } = await inquirer.prompt([
-      {
-        type: 'confirm',
-        name: 'shouldAttach',
-        message: 'セッションにアタッチしますか？',
-        default: true,
-      },
-    ])
+    // TTY環境でのみインタラクティブ確認プロンプトを表示
+    if (process.stdout.isTTY && process.stdin.isTTY) {
+      const { shouldAttach } = await inquirer.prompt([
+        {
+          type: 'confirm',
+          name: 'shouldAttach',
+          message: 'セッションにアタッチしますか？',
+          default: true,
+        },
+      ])
 
-    if (shouldAttach) {
-      console.log(chalk.cyan(`🎵 tmuxセッション '${sessionName}' にアタッチしています...`))
+      if (shouldAttach) {
+        console.log(chalk.cyan(`🎵 tmuxセッション '${sessionName}' にアタッチしています...`))
 
-      // tmux内からはswitch-clientを使用、外からはattachを使用
-      const isInsideTmux = process.env.TMUX !== undefined
-      if (isInsideTmux) {
-        await switchTmuxClient(sessionName)
+        // tmux内からはswitch-clientを使用、外からはattachを使用
+        const isInsideTmux = process.env.TMUX !== undefined
+        if (isInsideTmux) {
+          await switchTmuxClient(sessionName)
+        } else {
+          await attachToTmuxSession(sessionName)
+        }
       } else {
-        await attachToTmuxSession(sessionName)
+        console.log(chalk.yellow(`\n📝 後でアタッチするには以下のコマンドを実行してください:`))
+        console.log(chalk.white(`   tmux attach -t ${sessionName}`))
+        console.log(chalk.gray(`\n💡 ヒント: Ctrl+B, D でセッションからデタッチできます`))
       }
     } else {
-      console.log(chalk.yellow(`\n📝 後でアタッチするには以下のコマンドを実行してください:`))
+      // 非TTY環境では自動的にアタッチしない
+      console.log(
+        chalk.yellow(`\n📝 tmuxセッションにアタッチするには以下のコマンドを実行してください:`)
+      )
       console.log(chalk.white(`   tmux attach -t ${sessionName}`))
       console.log(chalk.gray(`\n💡 ヒント: Ctrl+B, D でセッションからデタッチできます`))
     }
@@ -608,30 +626,30 @@ export async function executePostCreationTasks(
   options: CreateOptions & { template?: string },
   config: Config
 ): Promise<void> {
-  const tasks = []
+  const parallelTasks = []
 
   // 環境セットアップ
   if (options.setup || config.development?.autoSetup) {
-    tasks.push(setupEnvironment(worktreePath, config))
+    parallelTasks.push(setupEnvironment(worktreePath, config))
   }
 
   // エディタで開く
   if (options.open) {
-    tasks.push(openInEditor(worktreePath, config))
-  }
-
-  // tmuxセッション作成
-  if (options.tmux || options.tmuxH || options.tmuxV || config.tmux?.enabled) {
-    tasks.push(createTmuxSession(branchName, worktreePath, options))
+    parallelTasks.push(openInEditor(worktreePath, config))
   }
 
   // Claude.md処理
   if (options.claudeMd) {
-    tasks.push(handleClaudeMarkdown(worktreePath, config))
+    parallelTasks.push(handleClaudeMarkdown(worktreePath, config))
   }
 
-  // 並行実行
-  await Promise.allSettled(tasks)
+  // 非インタラクティブなタスクを並行実行
+  await Promise.allSettled(parallelTasks)
+
+  // tmuxセッション作成（インタラクティブなので単独で実行）
+  if (options.tmux || options.tmuxH || options.tmuxV || config.tmux?.enabled) {
+    await createTmuxSession(branchName, worktreePath, options)
+  }
 
   // postCreate設定の処理
   if (config.postCreate) {

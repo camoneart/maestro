@@ -85,9 +85,11 @@ describe('createTmuxSession - pane split options', () => {
     }
   })
 
-  it('should create new session with regular --tmux option and auto-attach', async () => {
+  it('should create new session with regular --tmux option and show attach instructions in non-TTY', async () => {
     const options: CreateOptions = { tmux: true }
     vi.mocked(execa).mockRejectedValueOnce(new Error('no session')) // has-session fails
+
+    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
 
     await createTmuxSession('feature-test', '/path/to/worktree', options)
 
@@ -102,11 +104,19 @@ describe('createTmuxSession - pane split options', () => {
       '-l',
     ])
 
-    // Should auto-attach to the session using TTY utility
-    expect(ttyUtils.attachToTmuxWithProperTTY).toHaveBeenCalledWith('feature-test')
+    // Should not auto-attach in non-TTY environment
+    expect(ttyUtils.attachToTmuxWithProperTTY).not.toHaveBeenCalled()
+
+    // Should show manual attach instructions
+    expect(consoleSpy).toHaveBeenCalledWith(
+      expect.stringContaining('tmuxセッションにアタッチするには')
+    )
+    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('tmux attach -t feature-test'))
+
+    consoleSpy.mockRestore()
   })
 
-  it('should use switch-client when already inside tmux', async () => {
+  it('should create session and skip prompt when inside tmux in non-TTY', async () => {
     const options: CreateOptions = { tmux: true }
     vi.mocked(execa).mockRejectedValueOnce(new Error('no session')) // has-session fails
 
@@ -114,10 +124,19 @@ describe('createTmuxSession - pane split options', () => {
     const originalTmux = process.env.TMUX
     process.env.TMUX = '/tmp/tmux-1000/default,1234,0'
 
+    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
+
     await createTmuxSession('feature-test', '/path/to/worktree', options)
 
-    // Should use switch-client instead of attach using TTY utility
-    expect(ttyUtils.switchTmuxClientWithProperTTY).toHaveBeenCalledWith('feature-test')
+    // Should not use switch-client in non-TTY environment
+    expect(ttyUtils.switchTmuxClientWithProperTTY).not.toHaveBeenCalled()
+
+    // Should show manual attach instructions
+    expect(consoleSpy).toHaveBeenCalledWith(
+      expect.stringContaining('tmuxセッションにアタッチするには')
+    )
+
+    consoleSpy.mockRestore()
 
     // Restore original TMUX env
     if (originalTmux !== undefined) {
@@ -127,9 +146,9 @@ describe('createTmuxSession - pane split options', () => {
     }
   })
 
-  it('should skip attach when user chooses not to attach', async () => {
+  it('should skip prompt in non-TTY environment', async () => {
     const inquirer = await import('inquirer')
-    vi.mocked(inquirer.default.prompt).mockResolvedValueOnce({ shouldAttach: false })
+    const promptSpy = vi.spyOn(inquirer.default, 'prompt')
 
     const options: CreateOptions = { tmux: true }
     vi.mocked(execa).mockRejectedValueOnce(new Error('no session')) // has-session fails
@@ -138,12 +157,17 @@ describe('createTmuxSession - pane split options', () => {
 
     await createTmuxSession('feature-test', '/path/to/worktree', options)
 
+    // Should not show prompt in non-TTY
+    expect(promptSpy).not.toHaveBeenCalled()
+
     // Should not attach
     expect(ttyUtils.attachToTmuxWithProperTTY).not.toHaveBeenCalled()
     expect(ttyUtils.switchTmuxClientWithProperTTY).not.toHaveBeenCalled()
 
     // Should show manual attach instructions
-    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('後でアタッチするには'))
+    expect(consoleSpy).toHaveBeenCalledWith(
+      expect.stringContaining('tmuxセッションにアタッチするには')
+    )
     expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('tmux attach -t feature-test'))
 
     consoleSpy.mockRestore()
@@ -205,8 +229,8 @@ describe('createTmuxSession - pane split options', () => {
         'feature-test',
       ])
 
-      // Should auto-attach to session using spawn (after fix)
-      expect(ttyUtils.attachToTmuxWithProperTTY).toHaveBeenCalledWith('feature-test')
+      // Should not auto-attach in non-TTY environment
+      expect(ttyUtils.attachToTmuxWithProperTTY).not.toHaveBeenCalled()
     })
 
     it('should create session and split vertically when --tmux-v from terminal', async () => {
@@ -239,8 +263,8 @@ describe('createTmuxSession - pane split options', () => {
         '-l',
       ])
 
-      // Should auto-attach to session using spawn (after fix)
-      expect(ttyUtils.attachToTmuxWithProperTTY).toHaveBeenCalledWith('feature-test')
+      // Should not auto-attach in non-TTY environment
+      expect(ttyUtils.attachToTmuxWithProperTTY).not.toHaveBeenCalled()
     })
 
     it.skip('should attach to existing session when --tmux-h/v and session exists', async () => {
@@ -311,9 +335,11 @@ describe('createTmuxSession - pane split options', () => {
       vi.mocked(spawn).mockReturnValue(mockProcess as any)
     })
 
-    it('should use spawn instead of execa for tmux attach to handle tty properly', async () => {
+    it('should skip auto-attach in non-TTY environment', async () => {
       const options: CreateOptions = { tmux: true }
       vi.mocked(execa).mockRejectedValueOnce(new Error('no session')) // has-session fails
+
+      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
 
       await createTmuxSession('feature-test', '/path/to/worktree', options)
 
@@ -329,29 +355,35 @@ describe('createTmuxSession - pane split options', () => {
         '-l',
       ])
 
-      // After fix: should use spawn for attach (not execa) to handle tty properly
-      expect(ttyUtils.attachToTmuxWithProperTTY).toHaveBeenCalledWith('feature-test')
+      // Should not auto-attach in non-TTY environment
+      expect(ttyUtils.attachToTmuxWithProperTTY).not.toHaveBeenCalled()
 
-      // Should NOT use execa for attach anymore
-      expect(execa).not.toHaveBeenCalledWith('tmux', ['attach', '-t', 'feature-test'], {
-        stdio: 'inherit',
-      })
+      // Should show manual attach instructions
+      expect(consoleSpy).toHaveBeenCalledWith(
+        expect.stringContaining('tmuxセッションにアタッチするには')
+      )
+
+      consoleSpy.mockRestore()
     })
 
-    it('should use spawn for switch-client when inside tmux', async () => {
+    it('should skip switch-client in non-TTY when inside tmux', async () => {
       const options: CreateOptions = { tmux: true }
       process.env.TMUX = '/tmp/tmux-1000/default,1234,0'
       vi.mocked(execa).mockRejectedValueOnce(new Error('no session')) // has-session fails
 
+      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
+
       await createTmuxSession('feature-test', '/path/to/worktree', options)
 
-      // After fix: should use spawn for switch-client to handle tty properly
-      expect(ttyUtils.switchTmuxClientWithProperTTY).toHaveBeenCalledWith('feature-test')
+      // Should not use switch-client in non-TTY environment
+      expect(ttyUtils.switchTmuxClientWithProperTTY).not.toHaveBeenCalled()
 
-      // Should NOT use execa for switch-client anymore
-      expect(execa).not.toHaveBeenCalledWith('tmux', ['switch-client', '-t', 'feature-test'], {
-        stdio: 'inherit',
-      })
+      // Should show manual attach instructions
+      expect(consoleSpy).toHaveBeenCalledWith(
+        expect.stringContaining('tmuxセッションにアタッチするには')
+      )
+
+      consoleSpy.mockRestore()
 
       delete process.env.TMUX
     })
