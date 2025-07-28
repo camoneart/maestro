@@ -65,6 +65,14 @@ export const ConfigSchema = z.object({
     })
     .optional(),
 
+  // UI表示設定
+  ui: z
+    .object({
+      // パス表示形式 ('absolute' | 'relative')
+      pathDisplay: z.enum(['absolute', 'relative']).default('absolute'),
+    })
+    .optional(),
+
   // カスタムコマンドとファイルコピー設定
   hooks: z
     .object({
@@ -109,6 +117,9 @@ const DEFAULT_CONFIG: Config = {
   },
   github: {
     autoFetch: true,
+  },
+  ui: {
+    pathDisplay: 'absolute',
   },
   hooks: {},
 }

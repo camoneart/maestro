@@ -6,6 +6,8 @@ import { GitWorktreeManager } from '../core/git.js'
 import { DeleteOptions, Worktree } from '../types/index.js'
 import { execa } from 'execa'
 import { spawn } from 'child_process'
+import { ConfigManager, Config } from '../core/config.js'
+import { formatPath } from '../utils/path.js'
 
 // エラークラス
 class DeleteCommandError extends Error {
@@ -332,7 +334,7 @@ async function determineTargetWorktrees(
 }
 
 // 削除対象の詳細を表示
-async function displayDeletionDetails(targetWorktrees: Worktree[]): Promise<void> {
+async function displayDeletionDetails(targetWorktrees: Worktree[], config: Config): Promise<void> {
   console.log(chalk.bold('\n🗑️  解散対象の演奏者:\n'))
 
   const deletionDetails = await Promise.all(
@@ -344,10 +346,9 @@ async function displayDeletionDetails(targetWorktrees: Worktree[]): Promise<void
   )
 
   deletionDetails.forEach(({ branch, size, worktree }) => {
+    const displayPath = formatPath(worktree.path, config)
     console.log(
-      `  ${chalk.cyan(branch || 'unknown')} ${chalk.gray(`(${size})`)} - ${chalk.gray(
-        worktree.path
-      )}`
+      `  ${chalk.cyan(branch || 'unknown')} ${chalk.gray(`(${size})`)} - ${chalk.gray(displayPath)}`
     )
     if (worktree.locked) {
       console.log(`    ${chalk.red('⚠️  ロックされています')}: ${worktree.reason || '理由不明'}`)
@@ -445,6 +446,9 @@ export const deleteCommand = new Command('delete')
 
       try {
         const gitManager = new GitWorktreeManager()
+        const configManager = new ConfigManager()
+        await configManager.loadProjectConfig()
+        const config = configManager.getAll()
 
         // Gitリポジトリかチェック
         const isGitRepo = await gitManager.isGitRepository()
@@ -493,7 +497,7 @@ export const deleteCommand = new Command('delete')
           }
         }
 
-        await displayDeletionDetails(targetWorktrees)
+        await displayDeletionDetails(targetWorktrees, config)
 
         // fzf使用時は selectWorktreesWithFzf 内で確認済み、そうでなければここで確認
         if (!options.force && !(options.fzf && !branchName)) {

@@ -183,6 +183,9 @@ describe('ConfigManager', () => {
           enabled: true,
           openIn: 'window' as const,
         },
+        ui: {
+          pathDisplay: 'relative' as const,
+        },
         github: {
           autoFetch: true,
           branchNaming: {
@@ -220,6 +223,39 @@ describe('ConfigManager', () => {
       expect(result.development?.autoSetup).toBe(true)
       expect(result.development?.syncFiles).toEqual(['.env', '.env.local'])
       expect(result.development?.defaultEditor).toBe('cursor')
+    })
+
+    it('should validate ui.pathDisplay settings', () => {
+      const configWithAbsolute = {
+        ui: {
+          pathDisplay: 'absolute' as const,
+        },
+      }
+
+      const configWithRelative = {
+        ui: {
+          pathDisplay: 'relative' as const,
+        },
+      }
+
+      expect(ConfigSchema.safeParse(configWithAbsolute).success).toBe(true)
+      expect(ConfigSchema.safeParse(configWithRelative).success).toBe(true)
+    })
+
+    it('should reject invalid pathDisplay values', () => {
+      const invalidConfig = {
+        ui: {
+          pathDisplay: 'invalid' as any,
+        },
+      }
+
+      const result = ConfigSchema.safeParse(invalidConfig)
+      expect(result.success).toBe(false)
+    })
+
+    it('should use default pathDisplay value', () => {
+      const result = ConfigSchema.parse({ ui: {} })
+      expect(result.ui?.pathDisplay).toBe('absolute')
     })
   })
 })

@@ -47,8 +47,19 @@ mst list --full-path
 
 ### Normal Output
 
-By default, paths are shown relative to the repository root:
+Path display format depends on the `ui.pathDisplay` configuration setting in `.maestro.json`:
 
+**With `"pathDisplay": "absolute"` (default):**
+```
+🎼 Orchestra Members:
+
+📍 refs/heads/main                /Users/user/project
+🎼 feature/auth                   /Users/user/project/.git/orchestrations/feature-auth
+🎼 bugfix/login                   /Users/user/project/.git/orchestrations/bugfix-login
+🎼 issue-123                      /Users/user/project/.git/orchestrations/issue-123
+```
+
+**With `"pathDisplay": "relative"`:**
 ```
 🎼 Orchestra Members:
 
@@ -59,6 +70,8 @@ By default, paths are shown relative to the repository root:
 ```
 
 ### Full Path Output (`--full-path`)
+
+The `--full-path` option always shows absolute paths regardless of the `ui.pathDisplay` configuration:
 
 ```
 🎼 Orchestra Members:

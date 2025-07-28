@@ -69,12 +69,29 @@ mst delete --merged --dry-run
 
 ## Deletion Confirmation
 
-Normally, a confirmation prompt is displayed before deletion:
+Normally, a confirmation prompt is displayed before deletion. The path display format follows the `ui.pathDisplay` configuration setting in `.maestro.json`:
 
+**With `"pathDisplay": "absolute"` (default):**
 ```
 🗑️  Are you sure you want to delete worktree 'feature/old-feature'?
    Branch: feature/old-feature
    Path: /Users/user/project/.git/orchestra-members/feature-old-feature
+   Status: 3 uncommitted changes
+
+   ⚠️  This will delete:
+   • Worktree directory and all its contents
+   • Local branch 'feature/old-feature'
+
+   This action cannot be undone.
+
+? Delete worktree? (y/N)
+```
+
+**With `"pathDisplay": "relative"`:**
+```
+🗑️  Are you sure you want to delete worktree 'feature/old-feature'?
+   Branch: feature/old-feature
+   Path: .git/orchestra-members/feature-old-feature
    Status: 3 uncommitted changes
 
    ⚠️  This will delete:

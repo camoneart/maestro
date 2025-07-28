@@ -13,6 +13,7 @@ import { setupTmuxStatusLine } from '../utils/tmux.js'
 import { attachToTmuxWithProperTTY, switchTmuxClientWithProperTTY } from '../utils/tty.js'
 import { detectPackageManager } from '../utils/packageManager.js'
 import { addToGitignore } from '../utils/gitignore.js'
+import { formatPath } from '../utils/path.js'
 
 // GitHubラベル型定義
 interface GithubLabel {
@@ -609,7 +610,8 @@ export async function createWorktreeWithProgress(
         : undefined,
     })
 
-    spinner.succeed(chalk.green(`✨ 新しい演奏者を招集しました: ${worktreePath}`))
+    const displayPath = formatPath(worktreePath, config)
+    spinner.succeed(chalk.green(`✨ 新しい演奏者を招集しました: ${displayPath}`))
 
     // 後処理の実行
     await executePostCreationTasks(worktreePath, branchName, options, config)

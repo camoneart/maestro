@@ -791,6 +791,19 @@ Customize settings with `.maestro.json`:
 - `markdownMode: "shared"` - Creates symlink to main repository's CLAUDE.md (default)
 - `markdownMode: "split"` - Creates independent CLAUDE.md for each worktree
 
+### UI Configuration
+- `pathDisplay: "absolute"` - Display full absolute paths in all commands (default)
+- `pathDisplay: "relative"` - Display paths relative to current working directory
+
+This setting affects path display in the following commands:
+- `create` - Creation confirmation message paths
+- `list` - Worktree listing display paths
+- `where` - Path display and fzf selection screen
+- `delete` - Deletion confirmation screen paths
+- `sync` - Sync target selection screen paths
+
+Note: The `--full-path` option in the `list` command will always show absolute paths regardless of this setting.
+
 ```json
 {
   "worktrees": {
@@ -831,7 +844,8 @@ Customize settings with `.maestro.json`:
   "ui": {
     "theme": "orchestra",
     "colors": true,
-    "animations": true
+    "animations": true,
+    "pathDisplay": "absolute"  // "absolute" | "relative"
   }
 }
 ```

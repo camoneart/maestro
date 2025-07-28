@@ -20,7 +20,7 @@ mst sync feature-branch
 # Sync to all orchestra members
 mst sync --all
 
-# Interactive selection
+# Interactive selection (path display follows ui.pathDisplay configuration)
 mst sync
 
 # Sync with rebase (default is merge)
