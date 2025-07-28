@@ -717,7 +717,7 @@ export const githubCommand = new Command('github')
         // スピナーが停止済みの場合は直接エラーメッセージを表示
         console.error(chalk.red('✖ エラーが発生しました'))
       }
-      
+
       if (error instanceof GithubCommandError) {
         console.error(chalk.red(error.message))
         process.exitCode = 1

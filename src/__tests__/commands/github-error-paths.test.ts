@@ -753,7 +753,7 @@ describe('github command error paths', () => {
         expect(error).toBeDefined()
       }
 
-      // Interactive comment has its own spinner handling, similar to comment command  
+      // Interactive comment has its own spinner handling, similar to comment command
       expect(mockFail).toHaveBeenCalledWith('PR/Issueの確認に失敗しました')
       expect(consoleSpy).toHaveBeenCalled()
       consoleSpy.mockRestore()
