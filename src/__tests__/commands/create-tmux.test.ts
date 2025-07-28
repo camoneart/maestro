@@ -16,6 +16,11 @@ vi.mock('../../utils/tty.js', () => ({
   attachToTmuxWithProperTTY: vi.fn().mockResolvedValue(undefined),
   switchTmuxClientWithProperTTY: vi.fn().mockResolvedValue(undefined),
 }))
+vi.mock('inquirer', () => ({
+  default: {
+    prompt: vi.fn().mockResolvedValue({ shouldAttach: true }),
+  },
+}))
 
 describe('createTmuxSession - pane split options', () => {
   beforeEach(() => {
@@ -120,6 +125,28 @@ describe('createTmuxSession - pane split options', () => {
     } else {
       delete process.env.TMUX
     }
+  })
+
+  it('should skip attach when user chooses not to attach', async () => {
+    const inquirer = await import('inquirer')
+    vi.mocked(inquirer.default.prompt).mockResolvedValueOnce({ shouldAttach: false })
+
+    const options: CreateOptions = { tmux: true }
+    vi.mocked(execa).mockRejectedValueOnce(new Error('no session')) // has-session fails
+
+    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
+
+    await createTmuxSession('feature-test', '/path/to/worktree', options)
+
+    // Should not attach
+    expect(ttyUtils.attachToTmuxWithProperTTY).not.toHaveBeenCalled()
+    expect(ttyUtils.switchTmuxClientWithProperTTY).not.toHaveBeenCalled()
+
+    // Should show manual attach instructions
+    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('後でアタッチするには'))
+    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('tmux attach -t feature-test'))
+
+    consoleSpy.mockRestore()
   })
 
   describe('--tmux-h/v from terminal (Issue #116)', () => {
