@@ -5,6 +5,8 @@ import { Worktree } from '../types/index.js'
 import { spawn } from 'child_process'
 import fs from 'fs'
 import path from 'path'
+import { ConfigManager, Config } from '../core/config.js'
+import { formatPath as formatDisplayPath } from '../utils/path.js'
 
 // 拡張Worktree型定義
 interface EnhancedWorktree extends Worktree {
@@ -32,25 +34,12 @@ interface WorktreeMetadata {
   template?: string
 }
 
-// パスを短縮表示する関数（リポジトリルートからの相対パス）
-async function formatPath(fullPath: string, gitManager: GitWorktreeManager): Promise<string> {
-  try {
-    // Gitリポジトリのルートディレクトリを取得
-    const repoRoot = await gitManager.getRepositoryRoot()
-
-    // リポジトリルートからの相対パスを計算
-    const relativePath = path.relative(repoRoot, fullPath)
-
-    // 現在のディレクトリと同じ場合
-    if (relativePath === '' || relativePath === '.') {
-      return '.'
-    }
-
-    return relativePath
-  } catch {
-    // リポジトリルート取得に失敗した場合はディレクトリ名のみ
-    return path.basename(fullPath)
+// パスを設定に基づいて表示する関数
+function formatPath(fullPath: string, config: Config, fullPathOverride: boolean = false): string {
+  if (fullPathOverride) {
+    return fullPath
   }
+  return formatDisplayPath(fullPath, config)
 }
 
 export const listCommand = new Command('list')
@@ -79,6 +68,9 @@ export const listCommand = new Command('list')
     ) => {
       try {
         const gitManager = new GitWorktreeManager()
+        const configManager = new ConfigManager()
+        await configManager.loadProjectConfig()
+        const config = configManager.getAll()
 
         // Gitリポジトリかチェック
         const isGitRepo = await gitManager.isGitRepository()
@@ -170,7 +162,7 @@ export const listCommand = new Command('list')
               if (w.prunable) status.push(chalk.yellow('削除可能'))
 
               const statusStr = status.length > 0 ? ` [${status.join(', ')}]` : ''
-              const displayPath = options.fullPath ? w.path : await formatPath(w.path, gitManager)
+              const displayPath = formatPath(w.path, config, options.fullPath || false)
               return `${w.branch}${statusStr} | ${displayPath}`
             })
           )
@@ -232,6 +224,7 @@ export const listCommand = new Command('list')
             mainWorktree,
             true,
             gitManager,
+            config,
             options.lastCommit,
             options.metadata,
             options.fullPath
@@ -243,6 +236,7 @@ export const listCommand = new Command('list')
             wt,
             false,
             gitManager,
+            config,
             options.lastCommit,
             options.metadata,
             options.fullPath
@@ -293,7 +287,8 @@ async function sortWorktrees(worktrees: Worktree[], sortBy: string): Promise<voi
 async function displayWorktree(
   worktree: Worktree,
   isMain: boolean,
-  gitManager: GitWorktreeManager,
+  _gitManager: GitWorktreeManager,
+  config: Config,
   showLastCommit?: boolean,
   showMetadata?: boolean,
   showFullPath?: boolean
@@ -327,7 +322,7 @@ async function displayWorktree(
   }
 
   // パス表示の決定
-  const displayPath = showFullPath ? worktree.path : await formatPath(worktree.path, gitManager)
+  const displayPath = formatPath(worktree.path, config, showFullPath)
 
   let output =
     `${prefix} ${chalk.cyan(branchName.padEnd(30))} ` +

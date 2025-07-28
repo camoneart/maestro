@@ -3,7 +3,8 @@ import chalk from 'chalk'
 import ora, { type Ora } from 'ora'
 import inquirer from 'inquirer'
 import { GitWorktreeManager } from '../core/git.js'
-import { ConfigManager } from '../core/config.js'
+import { ConfigManager, Config } from '../core/config.js'
+import { formatPath } from '../utils/path.js'
 import { execa } from 'execa'
 import { spawn } from 'child_process'
 import cliProgress from 'cli-progress'
@@ -151,6 +152,7 @@ function filterWorktrees(orchestraMembers: Worktree[], options: SyncOptions): Wo
 // 同期対象を選択
 async function selectTargetWorktrees(
   orchestraMembers: Worktree[],
+  config: Config,
   branchName?: string,
   options: SyncOptions = {}
 ): Promise<Worktree[]> {
@@ -190,8 +192,9 @@ async function selectTargetWorktrees(
       message: '同期する演奏者を選択してください:',
       choices: filteredWorktrees.map(wt => {
         const branchName = wt.branch?.replace('refs/heads/', '') || wt.branch
+        const displayPath = formatPath(wt.path, config)
         return {
-          name: `${chalk.cyan(branchName)} ${chalk.gray(wt.path)}`,
+          name: `${chalk.cyan(branchName)} ${chalk.gray(displayPath)}`,
           value: wt,
         }
       }),
@@ -404,12 +407,22 @@ async function executeSyncCommand(branchName?: string, options: SyncOptions = {}
   const spinner = ora('演奏者を確認中...').start()
 
   try {
+    // 設定を取得
+    const configManager = new ConfigManager()
+    await configManager.loadProjectConfig()
+    const config = configManager.getAll()
+
     // 初期化
     const { worktrees, orchestraMembers, mainBranch } = await initializeSync(spinner, options)
 
     // 同期対象を選択
     spinner.stop()
-    const targetWorktrees = await selectTargetWorktrees(orchestraMembers, branchName, options)
+    const targetWorktrees = await selectTargetWorktrees(
+      orchestraMembers,
+      config,
+      branchName,
+      options
+    )
     spinner.start()
 
     // メインブランチを更新

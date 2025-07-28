@@ -2,6 +2,8 @@ import { Command } from 'commander'
 import chalk from 'chalk'
 import { GitWorktreeManager } from '../core/git.js'
 import { spawn } from 'child_process'
+import { ConfigManager } from '../core/config.js'
+import { formatPath } from '../utils/path.js'
 
 export const whereCommand = new Command('where')
   .alias('w')
@@ -12,6 +14,9 @@ export const whereCommand = new Command('where')
   .action(async (branchName?: string, options: { fzf?: boolean; current?: boolean } = {}) => {
     try {
       const gitManager = new GitWorktreeManager()
+      const configManager = new ConfigManager()
+      await configManager.loadProjectConfig()
+      const config = configManager.getAll()
 
       // Gitリポジトリかチェック
       const isGitRepo = await gitManager.isGitRepository()
@@ -22,7 +27,8 @@ export const whereCommand = new Command('where')
 
       // 現在のworktreeのパスを表示
       if (options?.current) {
-        console.log(process.cwd())
+        const currentPath = formatPath(process.cwd(), config)
+        console.log(currentPath)
         return
       }
 
@@ -44,7 +50,8 @@ export const whereCommand = new Command('where')
             if (w.prunable) status.push(chalk.yellow('削除可能'))
 
             const statusStr = status.length > 0 ? ` [${status.join(', ')}]` : ''
-            return `${w.branch}${statusStr} | ${w.path}`
+            const displayPath = formatPath(w.path, config)
+            return `${w.branch}${statusStr} | ${displayPath}`
           })
           .join('\n')
 
@@ -131,7 +138,8 @@ export const whereCommand = new Command('where')
       }
 
       // パスを表示
-      console.log(worktree.path)
+      const displayPath = formatPath(worktree.path, config)
+      console.log(displayPath)
     } catch (error) {
       console.error(chalk.red('エラー:'), error instanceof Error ? error.message : '不明なエラー')
       process.exit(1)
