@@ -2,8 +2,6 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { execa } from 'execa'
 import { spawn } from 'child_process'
 import { NativeTmuxHelper } from '../../utils/nativeTmux.js'
-import { fileURLToPath } from 'url'
-import { dirname, join } from 'path'
 
 // Mock dependencies
 vi.mock('execa')
@@ -21,13 +19,8 @@ const { existsSync, chmodSync } = await import('fs')
 const mockedExistsSync = vi.mocked(existsSync)
 const mockedChmodSync = vi.mocked(chmodSync)
 
-// Get the helper script path
-const HELPER_SCRIPT = join(
-  dirname(dirname(dirname(fileURLToPath(import.meta.url)))),
-  '..',
-  'scripts',
-  'maestro-tmux-attach'
-)
+// Get the helper script path (mock in test environment)
+const HELPER_SCRIPT = '/mock/path/maestro-tmux-attach'
 
 describe('NativeTmuxHelper', () => {
   beforeEach(() => {

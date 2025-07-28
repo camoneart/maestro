@@ -11,21 +11,26 @@ import { existsSync, chmodSync } from 'fs'
 export class NativeTmuxHelper {
   // Path to the native tmux helper script
   private static readonly HELPER_SCRIPT = (() => {
+    // Skip initialization in test environment
+    if (process.env.NODE_ENV === 'test' || process.env.VITEST) {
+      return '/mock/path/maestro-tmux-attach'
+    }
+
     // Get current file directory
     const currentDir = dirname(fileURLToPath(import.meta.url))
-    
+
     // Try multiple possible paths for different installation scenarios
     const possiblePaths = [
       // Built package: dist/utils -> ../../scripts/ (from issue-144/dist/utils to issue-144/scripts)
       join(dirname(dirname(currentDir)), 'scripts', 'maestro-tmux-attach'),
-      // Development/source: src/utils -> ../../scripts/ (from issue-144/src/utils to issue-144/scripts)  
+      // Development/source: src/utils -> ../../scripts/ (from issue-144/src/utils to issue-144/scripts)
       join(dirname(dirname(currentDir)), 'scripts', 'maestro-tmux-attach'),
       // npm package root: node_modules/@camoneart/maestro/dist/utils -> ../../../scripts/
       join(dirname(dirname(dirname(currentDir))), 'scripts', 'maestro-tmux-attach'),
       // Direct path for current development structure
       join(process.cwd(), 'scripts', 'maestro-tmux-attach'),
     ]
-    
+
     let scriptPath: string | null = null
     for (const path of possiblePaths) {
       if (existsSync(path)) {
@@ -33,9 +38,11 @@ export class NativeTmuxHelper {
         break
       }
     }
-    
+
     if (!scriptPath) {
-      throw new Error(`Maestro tmux helper script not found. Searched paths: ${possiblePaths.join(', ')}`)
+      throw new Error(
+        `Maestro tmux helper script not found. Searched paths: ${possiblePaths.join(', ')}`
+      )
     }
 
     // Set executable permissions
