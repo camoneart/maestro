@@ -610,4 +610,149 @@ describe('github command error paths', () => {
       consoleSpy.mockRestore()
     })
   })
+
+  describe('spinner handling on non-existent issue/PR', () => {
+    it('should stop spinner properly when issue does not exist during worktree creation', async () => {
+      mockExeca.mockImplementation((cmd: string, args: string[]) => {
+        if (cmd === 'gh' && args[0] === '--version') {
+          return Promise.resolve(mockGhVersion())
+        }
+        if (cmd === 'gh' && args[0] === 'auth' && args[1] === 'status') {
+          return Promise.resolve(mockGhAuthStatus())
+        }
+        if (cmd === 'gh' && args[0] === 'pr' && args[1] === 'view' && args[2] === '999') {
+          throw new Error('no pull requests found')
+        }
+        if (cmd === 'gh' && args[0] === 'issue' && args[1] === 'view' && args[2] === '999') {
+          throw new Error('no issues found')
+        }
+        return Promise.resolve({ stdout: '', stderr: '', exitCode: 0 } as any)
+      })
+
+      // oraモックのfailメソッドが呼ばれるかをチェック
+      const { default: ora } = await import('ora')
+      const mockOra = vi.mocked(ora)
+      const mockFail = vi.fn().mockReturnThis()
+      const mockStart = vi.fn().mockReturnThis()
+      mockOra.mockReturnValue({
+        start: mockStart,
+        succeed: vi.fn().mockReturnThis(),
+        fail: mockFail,
+        warn: vi.fn().mockReturnThis(),
+        info: vi.fn().mockReturnThis(),
+        stop: vi.fn().mockReturnThis(),
+        text: '',
+      } as any)
+
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+
+      try {
+        await program.parseAsync(['node', 'test', 'github', 'checkout', '999'])
+      } catch (error) {
+        expect(error).toBeDefined()
+      }
+
+      // スピナーのfailメソッドが呼ばれたことを確認
+      expect(mockFail).toHaveBeenCalledWith('情報の取得に失敗しました')
+      expect(consoleSpy).toHaveBeenCalled()
+      consoleSpy.mockRestore()
+    })
+
+    it('should stop spinner properly when issue does not exist during comment command', async () => {
+      mockExeca.mockImplementation((cmd: string, args: string[]) => {
+        if (cmd === 'gh' && args[0] === '--version') {
+          return Promise.resolve(mockGhVersion())
+        }
+        if (cmd === 'gh' && args[0] === 'auth' && args[1] === 'status') {
+          return Promise.resolve(mockGhAuthStatus())
+        }
+        if (cmd === 'gh' && args[0] === 'pr' && args[1] === 'view' && args[2] === '888') {
+          throw new Error('no pull requests found')
+        }
+        if (cmd === 'gh' && args[0] === 'issue' && args[1] === 'view' && args[2] === '888') {
+          throw new Error('no issues found')
+        }
+        return Promise.resolve({ stdout: '', stderr: '', exitCode: 0 } as any)
+      })
+
+      // oraモックのfailメソッドが呼ばれるかをチェック
+      const { default: ora } = await import('ora')
+      const mockOra = vi.mocked(ora)
+      const mockFail = vi.fn().mockReturnThis()
+      const mockStart = vi.fn().mockReturnThis()
+      mockOra.mockReturnValue({
+        start: mockStart,
+        succeed: vi.fn().mockReturnThis(),
+        fail: mockFail,
+        warn: vi.fn().mockReturnThis(),
+        info: vi.fn().mockReturnThis(),
+        stop: vi.fn().mockReturnThis(),
+        text: '',
+      } as any)
+
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+
+      try {
+        await program.parseAsync(['node', 'test', 'github', 'comment', '888', '-m', 'test comment'])
+      } catch (error) {
+        expect(error).toBeDefined()
+      }
+
+      // スピナーのfailメソッドが呼ばれたことを確認
+      expect(mockFail).toHaveBeenCalledWith('PR/Issueの確認に失敗しました')
+      expect(consoleSpy).toHaveBeenCalled()
+      consoleSpy.mockRestore()
+    })
+
+    it('should stop spinner properly when issue does not exist during interactive comment', async () => {
+      mockExeca.mockImplementation((cmd: string, args: string[]) => {
+        if (cmd === 'gh' && args[0] === '--version') {
+          return Promise.resolve(mockGhVersion())
+        }
+        if (cmd === 'gh' && args[0] === 'auth' && args[1] === 'status') {
+          return Promise.resolve(mockGhAuthStatus())
+        }
+        if (cmd === 'gh' && args[0] === 'pr' && args[1] === 'view' && args[2] === '777') {
+          throw new Error('no pull requests found')
+        }
+        if (cmd === 'gh' && args[0] === 'issue' && args[1] === 'view' && args[2] === '777') {
+          throw new Error('no issues found')
+        }
+        return Promise.resolve({ stdout: '', stderr: '', exitCode: 0 } as any)
+      })
+
+      mockInquirer.prompt
+        .mockResolvedValueOnce({ selectType: 'comment' })
+        .mockResolvedValueOnce({ inputNumber: '777' })
+        .mockResolvedValueOnce({ comment: 'test comment' })
+
+      // oraモックのfailメソッドが呼ばれるかをチェック
+      const { default: ora } = await import('ora')
+      const mockOra = vi.mocked(ora)
+      const mockFail = vi.fn().mockReturnThis()
+      const mockStart = vi.fn().mockReturnThis()
+      mockOra.mockReturnValue({
+        start: mockStart,
+        succeed: vi.fn().mockReturnThis(),
+        fail: mockFail,
+        warn: vi.fn().mockReturnThis(),
+        info: vi.fn().mockReturnThis(),
+        stop: vi.fn().mockReturnThis(),
+        text: '',
+      } as any)
+
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+
+      try {
+        await program.parseAsync(['node', 'test', 'github'])
+      } catch (error) {
+        expect(error).toBeDefined()
+      }
+
+      // スピナーのfailメソッドが呼ばれたことを確認
+      expect(mockFail).toHaveBeenCalledWith('PR/Issueの確認に失敗しました')
+      expect(consoleSpy).toHaveBeenCalled()
+      consoleSpy.mockRestore()
+    })
+  })
 })
