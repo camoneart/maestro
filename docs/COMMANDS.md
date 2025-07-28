@@ -94,7 +94,7 @@ mst create <branch-name> [options]
 | `--base <branch>` | Specify base branch (default: main) |
 | `--open` | Automatically open in editor |
 | `--setup` | Auto-setup development environment |
-| `--tmux` | Create tmux session and auto-attach (preserves shell environment) |
+| `--tmux` | Create tmux session with attachment prompt (TTY) or auto-attach (non-TTY) |
 | `--tmux-h` | Create in horizontal tmux pane split (preserves shell environment) |
 | `--tmux-v` | Create in vertical tmux pane split (preserves shell environment) |
 | `--claude-md` | Create CLAUDE.md for Claude Code |
@@ -413,7 +413,7 @@ mst tmux feature/background --detach
 
 **Features:**
 - **Shell Environment Inheritance**: Sessions preserve your custom PS1 prompts, environment variables, and shell configuration files
-- **Automatic Focus Management**: Automatically attaches or switches to the created session
+- **Interactive Focus Management**: Prompts for attachment in TTY environments, auto-attaches in non-TTY
 
 ## 📊 Advanced Features
 
@@ -821,7 +821,7 @@ Customize settings with `.maestro.json`:
     },
     "tmux": {
       "enabled": true,
-      "autoAttach": true
+      "interactiveAttach": true  // Prompts for attachment in TTY environments
     },
     "github": {
       "enabled": true,

@@ -127,14 +127,14 @@ mst create feature/awesome-feature            # create only
 mst shell feature/awesome-feature             # open a shell inside
 
 # ── one-liner (tmux + Claude) ──
-# Create the worktree, automatically attach to a tmux session, and set up Claude Code workspace
+# Create the worktree, prompt for tmux session attachment, and set up Claude Code workspace
 mst create feature/awesome-feature --tmux --claude-md
 ```
 
 #### Tips
 
 - `mst shell <branch>` lets you enter any performer after creation (fzf prompt when omitted).
-- `--tmux` creates a dedicated tmux session and automatically attaches to it; combine with `--claude-md` to set up Claude Code workspace files.
+- `--tmux` creates a dedicated tmux session and prompts for attachment (automatically attaches in non-TTY environments); combine with `--claude-md` to set up Claude Code workspace files.
 - `--tmux-h`/`--tmux-v` splits the current tmux pane horizontally/vertically and auto-focuses to the new pane for immediate development.
 
 ### Basic Usage Examples

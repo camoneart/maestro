@@ -25,7 +25,7 @@ mst create issue-123     # Created as issue-123
 ### Advanced Usage
 
 ```bash
-# Create with tmux session (auto-attaches to the session)
+# Create with tmux session (prompts for attachment in TTY, auto-attaches in non-TTY)
 mst create feature/new-feature --tmux
 
 # Create with tmux session and set up Claude workspace
@@ -50,7 +50,7 @@ mst create feature/new-feature --base main --open --setup --tmux --claude-md
 | `--open`             | `-o`  | Open in editor after creation                                 | `false` |
 | `--yes`              | `-y`  | Skip confirmation prompts                                     | `false` |
 | `--setup`            | `-s`  | Run environment setup (npm install, etc.)                     | `false` |
-| `--tmux`             | `-t`  | Create tmux session and auto-attach                          | `false` |
+| `--tmux`             | `-t`  | Create tmux session with attachment prompt (TTY) or auto-attach (non-TTY) | `false` |
 | `--tmux-h`           |       | Split tmux pane horizontally (when in tmux)                  | `false` |
 | `--tmux-v`           |       | Split tmux pane vertically (when in tmux)                    | `false` |
 | `--claude-md`        | `-c`  | Create CLAUDE.md file for Claude Code workspace              | `false` |
@@ -82,18 +82,24 @@ Retrieved information:
 
 ## tmux Integration
 
-### Session Creation with Auto-Attach
+### Session Creation with Interactive Attachment
 
-Using the `--tmux` option creates a new tmux session and automatically attaches to it:
+Using the `--tmux` option creates a new tmux session and prompts for attachment:
 
 ```bash
-# Creates session and attaches immediately
+# Creates session and prompts for attachment
 mst create feature/new-feature --tmux
 ```
 
 **Behavior:**
-- If outside tmux: Creates session and attaches using `tmux attach`
-- If inside tmux: Creates session and switches using `tmux switch-client`
+- **In TTY environments (interactive terminals)**:
+  - Shows confirmation prompt: "セッションにアタッチしますか？" (Do you want to attach to the session?)
+  - User can choose Yes/No for attachment
+  - If No is selected, shows manual attach instructions
+- **In non-TTY environments (scripts, CI/CD)**:
+  - Automatically attaches without prompting
+  - If outside tmux: Attaches using `tmux attach`
+  - If inside tmux: Switches using `tmux switch-client`
 - **Shell Environment**: Sessions are created with login shells to inherit your custom PS1 prompts, environment variables, and shell configuration files
 
 ### Pane Splitting (when already in tmux)
@@ -129,7 +135,7 @@ mst create feature/ai-feature --tmux --claude-md
 Executed processes:
 
 1. Worktree creation
-2. tmux session/window creation (with auto-attach if using `--tmux`)
+2. tmux session/window creation (with attachment prompt if using `--tmux`)
 3. CLAUDE.md file creation for workspace setup
 4. Environment setup (if specified in configuration)
 
