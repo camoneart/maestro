@@ -183,7 +183,7 @@ describe('NativeTmuxHelper', () => {
     beforeEach(() => {
       process.exit = vi.fn() as any
     })
-    
+
     afterEach(() => {
       process.exit = originalExit
     })
@@ -234,14 +234,10 @@ describe('NativeTmuxHelper', () => {
       await new Promise(resolve => setTimeout(resolve, 10))
 
       // Verify spawn was called correctly with direct tmux command
-      expect(mockedSpawn).toHaveBeenCalledWith(
-        'tmux',
-        ['attach-session', '-t', 'test-session'],
-        {
-          stdio: 'inherit',
-          detached: false,
-        }
-      )
+      expect(mockedSpawn).toHaveBeenCalledWith('tmux', ['attach-session', '-t', 'test-session'], {
+        stdio: 'inherit',
+        detached: false,
+      })
 
       // Verify event listeners were set up
       expect(mockProcess.on).toHaveBeenCalledWith('error', expect.any(Function))
@@ -303,7 +299,7 @@ describe('NativeTmuxHelper', () => {
     beforeEach(() => {
       process.exit = vi.fn() as any
     })
-    
+
     afterEach(() => {
       process.exit = originalExit
     })
@@ -408,14 +404,10 @@ describe('NativeTmuxHelper', () => {
       await new Promise(resolve => setTimeout(resolve, 10))
 
       // Verify spawn was called with minimal arguments
-      expect(mockedSpawn).toHaveBeenCalledWith(
-        'tmux',
-        ['new-session', '-s', 'test-session'],
-        {
-          stdio: 'inherit',
-          detached: false,
-        }
-      )
+      expect(mockedSpawn).toHaveBeenCalledWith('tmux', ['new-session', '-s', 'test-session'], {
+        stdio: 'inherit',
+        detached: false,
+      })
 
       // Test error exit behavior
       const exitHandler = mockProcess.on.mock.calls.find(call => call[0] === 'exit')?.[1]

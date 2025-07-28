@@ -14,7 +14,6 @@ export async function attachToTmuxWithProperTTY(sessionName: string): Promise<vo
   await NativeTmuxHelper.attachToSession(sessionName)
 }
 
-
 /**
  * tmuxクライアントを切り替える（適切なTTY制御付き）
  *
@@ -25,7 +24,6 @@ export async function switchTmuxClientWithProperTTY(sessionName: string): Promis
   // Use the improved native helper which directly calls tmux
   await NativeTmuxHelper.switchClient(sessionName)
 }
-
 
 /**
  * 新しいtmuxセッションを作成してアタッチする
@@ -44,4 +42,3 @@ export async function createAndAttachTmuxSession(
   // This call never returns on success due to process.exit()
   await NativeTmuxHelper.createAndAttachSession(sessionName, cwd, command)
 }
-

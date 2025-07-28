@@ -31,12 +31,12 @@ export class NativeTmuxHelper {
     })
 
     // Wait for tmux to exit, then terminate Node.js process
-    tmuxProcess.on('exit', (code) => {
+    tmuxProcess.on('exit', code => {
       // Exit with the same code as tmux to maintain proper exit status
       process.exit(code || 0)
     })
 
-    tmuxProcess.on('error', (error) => {
+    tmuxProcess.on('error', error => {
       console.error(`Failed to attach to tmux session: ${error.message}`)
       process.exit(1)
     })
@@ -84,12 +84,12 @@ export class NativeTmuxHelper {
     })
 
     // Wait for tmux to exit, then terminate Node.js process
-    tmuxProcess.on('exit', (code) => {
+    tmuxProcess.on('exit', code => {
       // Exit with the same code as tmux to maintain proper exit status
       process.exit(code || 0)
     })
 
-    tmuxProcess.on('error', (error) => {
+    tmuxProcess.on('error', error => {
       console.error(`Failed to create tmux session: ${error.message}`)
       process.exit(1)
     })
