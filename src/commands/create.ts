@@ -230,9 +230,24 @@ export async function createTmuxSession(
           )
         )
 
-        // セッションにアタッチ
-        console.log(chalk.cyan(`🎵 tmuxセッション '${sessionName}' にアタッチしています...`))
-        await attachToTmuxSession(sessionName)
+        // インタラクティブ確認プロンプト
+        const { shouldAttach } = await inquirer.prompt([
+          {
+            type: 'confirm',
+            name: 'shouldAttach',
+            message: 'セッションにアタッチしますか？',
+            default: true,
+          },
+        ])
+
+        if (shouldAttach) {
+          console.log(chalk.cyan(`🎵 tmuxセッション '${sessionName}' にアタッチしています...`))
+          await attachToTmuxSession(sessionName)
+        } else {
+          console.log(chalk.yellow(`\n📝 後でアタッチするには以下のコマンドを実行してください:`))
+          console.log(chalk.white(`   tmux attach -t ${sessionName}`))
+          console.log(chalk.gray(`\n💡 ヒント: Ctrl+B, D でセッションからデタッチできます`))
+        }
         return
       } else {
         // tmux内から実行された場合：現在のセッション内でペインを分割
@@ -297,15 +312,30 @@ export async function createTmuxSession(
 
     console.log(chalk.green(`✨ tmuxセッション '${sessionName}' を作成しました`))
 
-    // 自動でセッションにアタッチ
-    console.log(chalk.cyan(`🎵 tmuxセッション '${sessionName}' にアタッチしています...`))
+    // インタラクティブ確認プロンプト
+    const { shouldAttach } = await inquirer.prompt([
+      {
+        type: 'confirm',
+        name: 'shouldAttach',
+        message: 'セッションにアタッチしますか？',
+        default: true,
+      },
+    ])
 
-    // tmux内からはswitch-clientを使用、外からはattachを使用
-    const isInsideTmux = process.env.TMUX !== undefined
-    if (isInsideTmux) {
-      await switchTmuxClient(sessionName)
+    if (shouldAttach) {
+      console.log(chalk.cyan(`🎵 tmuxセッション '${sessionName}' にアタッチしています...`))
+
+      // tmux内からはswitch-clientを使用、外からはattachを使用
+      const isInsideTmux = process.env.TMUX !== undefined
+      if (isInsideTmux) {
+        await switchTmuxClient(sessionName)
+      } else {
+        await attachToTmuxSession(sessionName)
+      }
     } else {
-      await attachToTmuxSession(sessionName)
+      console.log(chalk.yellow(`\n📝 後でアタッチするには以下のコマンドを実行してください:`))
+      console.log(chalk.white(`   tmux attach -t ${sessionName}`))
+      console.log(chalk.gray(`\n💡 ヒント: Ctrl+B, D でセッションからデタッチできます`))
     }
   } catch (error) {
     console.error(chalk.red(`tmuxセッションの作成に失敗しました: ${error}`))
