@@ -7,9 +7,11 @@ import path from 'path'
 
 export const configCommand = new Command('config')
   .description('設定を管理')
-  .argument('[action]', 'アクション (init, show, path)')
+  .argument('[action]', 'アクション (init, show, path, get, set, reset)')
+  .argument('[key]', '設定キー（ドット記法）')
+  .argument('[value]', '設定値（setアクションの場合）')
   .option('-g, --global', 'グローバル設定を対象にする')
-  .action(async (action?: string, options?: { global?: boolean }) => {
+  .action(async (action?: string, key?: string, value?: string, options?: { global?: boolean }) => {
     const configManager = new ConfigManager()
     await configManager.loadProjectConfig()
 
@@ -78,11 +80,75 @@ export const configCommand = new Command('config')
         break
       }
 
+      case 'get': {
+        if (!key) {
+          console.error(chalk.red('設定キーを指定してください'))
+          console.log(chalk.gray('使用例: maestro config get ui.pathDisplay'))
+          return
+        }
+
+        const value = configManager.getConfigValue(key)
+        if (value === undefined) {
+          console.log(chalk.gray(`設定値が見つかりません: ${key}`))
+        } else if (typeof value === 'object') {
+          console.log(JSON.stringify(value, null, 2))
+        } else {
+          console.log(value)
+        }
+        break
+      }
+
+      case 'set': {
+        if (!key || value === undefined) {
+          console.error(chalk.red('設定キーと値を指定してください'))
+          console.log(chalk.gray('使用例: maestro config set ui.pathDisplay relative'))
+          return
+        }
+
+        try {
+          await configManager.setConfigValue(key, value)
+          console.log(chalk.green(`✅ ${key} を ${value} に設定しました`))
+        } catch (error) {
+          console.error(chalk.red('設定の更新に失敗しました:'), error)
+        }
+        break
+      }
+
+      case 'reset': {
+        if (!key) {
+          console.error(chalk.red('設定キーを指定してください'))
+          console.log(chalk.gray('使用例: maestro config reset ui.pathDisplay'))
+          return
+        }
+
+        try {
+          await configManager.resetConfigValue(key)
+          console.log(chalk.green(`✅ ${key} をデフォルト値にリセットしました`))
+
+          // リセット後の値を表示
+          const currentValue = configManager.getConfigValue(key)
+          if (currentValue !== undefined) {
+            console.log(chalk.gray(`現在の値: ${currentValue}`))
+          }
+        } catch (error) {
+          console.error(chalk.red('設定のリセットに失敗しました:'), error)
+        }
+        break
+      }
+
       default: {
         console.log(chalk.yellow('使い方:'))
-        console.log('  maestro config init   # プロジェクト設定ファイルを作成')
-        console.log('  maestro config show   # 現在の設定を表示')
-        console.log('  maestro config path   # 設定ファイルのパスを表示')
+        console.log('  maestro config init           # プロジェクト設定ファイルを作成')
+        console.log('  maestro config show           # 現在の設定を表示')
+        console.log('  maestro config path           # 設定ファイルのパスを表示')
+        console.log('  maestro config get <key>      # 設定値を取得')
+        console.log('  maestro config set <key> <value> # 設定値を設定')
+        console.log('  maestro config reset <key>   # 設定値をリセット')
+        console.log(chalk.gray('\n使用例:'))
+        console.log('  maestro config get ui.pathDisplay')
+        console.log('  maestro config set ui.pathDisplay relative')
+        console.log('  maestro config set development.autoSetup false')
+        console.log('  maestro config reset ui.pathDisplay')
         console.log(chalk.gray('\nオプション:'))
         console.log('  -g, --global      # グローバル設定を対象にする')
       }
