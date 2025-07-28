@@ -1,5 +1,24 @@
 # Changelog
 
+## 3.3.4
+
+### Patch Changes
+
+- Use existing shell script helper for tmux auto-attach TTY fix
+
+  **Fixed:**
+  - 🚀 Integrated existing `scripts/maestro-tmux-attach` shell script that uses proper `exec()` system call
+  - 🛠️ Resolved persistent TTY corruption when using `--tmux`, `--tmux-h`, `--tmux-v` options
+  - ✨ Proper process replacement ensures tmux gets full TTY control
+  - 🎯 No more keyboard input corruption or terminal breakage after detach
+
+  **Technical Details:**
+  - Utilizes shell's `exec` command for true process replacement
+  - Avoids Node.js process lingering and competing for TTY control
+  - Works immediately without requiring C compilation
+
+  Fixes #142
+
 ## 3.3.3
 
 ### Patch Changes
