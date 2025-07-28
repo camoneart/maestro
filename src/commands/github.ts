@@ -119,8 +119,13 @@ async function detectType(number: string): Promise<'pr' | 'issue'> {
 // PR/Issue情報を取得
 async function fetchItemInfo(number: string, type: 'pr' | 'issue'): Promise<ItemInfo> {
   const fields = type === 'pr' ? 'number,title,headRefName,author' : 'number,title,author'
-  const result = await execa('gh', [type, 'view', number, '--json', fields])
-  return JSON.parse(result.stdout)
+  try {
+    const result = await execa('gh', [type, 'view', number, '--json', fields])
+    return JSON.parse(result.stdout)
+  } catch (error) {
+    const itemName = type === 'pr' ? 'PR' : 'Issue'
+    throw new GithubCommandError(`指定した番号の${itemName}は存在しません (#${number})`)
+  }
 }
 
 // コメント追加処理
@@ -460,7 +465,8 @@ async function createWorktreeFromGithub(
     info = await fetchItemInfo(number, type)
     spinner.succeed(`${type === 'pr' ? 'PR' : 'Issue'} #${number}: ${info.title}`)
   } catch (error) {
-    spinner.fail('情報の取得に失敗しました')
+    const itemName = type === 'pr' ? 'PR' : 'Issue'
+    spinner.fail(`${itemName} #${number} が見つかりません`)
     throw error
   }
 
@@ -660,7 +666,7 @@ async function executeGithubCommand(
     }
   }
 
-  // typeの自動判定
+  // typeの自動判定（明示的にpr/issueが指定された場合はスキップ）
   if (finalType === 'checkout' || !finalType) {
     finalType = await detectType(finalNumber!)
   }
@@ -704,7 +710,14 @@ export const githubCommand = new Command('github')
       // メイン処理を実行
       await executeGithubCommand(args.type, args.number, options, gitManager, config)
     } catch (error) {
-      spinner.fail('エラーが発生しました')
+      // スピナーが既に停止している場合は新しいスピナーを作成しない
+      if (spinner.isSpinning) {
+        spinner.fail('エラーが発生しました')
+      } else {
+        // スピナーが停止済みの場合は直接エラーメッセージを表示
+        console.error(chalk.red('✖ エラーが発生しました'))
+      }
+      
       if (error instanceof GithubCommandError) {
         console.error(chalk.red(error.message))
         process.exitCode = 1
