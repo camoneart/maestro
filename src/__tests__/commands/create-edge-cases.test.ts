@@ -14,6 +14,18 @@ import path from 'path'
 vi.mock('execa')
 vi.mock('fs/promises')
 vi.mock('path')
+vi.mock('inquirer', () => ({
+  default: {
+    prompt: vi.fn().mockResolvedValue({ shouldAttach: true }),
+  },
+}))
+vi.mock('../../utils/tty.js', () => ({
+  attachToTmuxWithProperTTY: vi.fn().mockResolvedValue(undefined),
+  switchTmuxClientWithProperTTY: vi.fn().mockResolvedValue(undefined),
+}))
+vi.mock('../../utils/tmux.js', () => ({
+  setupTmuxStatusLine: vi.fn().mockResolvedValue(undefined),
+}))
 
 describe('create command - edge cases', () => {
   beforeEach(() => {
