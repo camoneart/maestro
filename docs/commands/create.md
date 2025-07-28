@@ -180,9 +180,21 @@ Settings from `.maestro.json` are automatically applied:
   },
   "claude": {
     "markdownMode": "shared"  // "shared" | "split"
+  },
+  "ui": {
+    "pathDisplay": "absolute"  // "absolute" | "relative"
   }
 }
 ```
+
+### UI Configuration
+
+The `ui.pathDisplay` setting controls how paths are displayed in creation confirmation messages:
+
+| Option | Description |
+|--------|-------------|
+| `"absolute"` | Show full absolute paths in creation confirmations (default) |
+| `"relative"` | Show paths relative to current working directory |
 
 ### Claude Configuration
 

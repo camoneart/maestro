@@ -49,10 +49,17 @@ echo "Working in: $WORKTREE_PATH"
 
 ### Direct Path Lookup
 
+Path display format depends on the `ui.pathDisplay` configuration setting in `.maestro.json`:
+
 ```bash
 # Get path for specific branch
 mst where feature/authentication
+
+# With "pathDisplay": "absolute" (default)
 # Output: /project/.git/orchestrations/feature-authentication
+
+# With "pathDisplay": "relative"  
+# Output: .git/orchestrations/feature-authentication
 ```
 
 ### Current Location
@@ -60,7 +67,12 @@ mst where feature/authentication
 ```bash
 # Show current worktree path
 mst where --current
+
+# With "pathDisplay": "absolute" (default)
 # Output: /project/.git/orchestrations/feature-auth
+
+# With "pathDisplay": "relative"
+# Output: .git/orchestrations/feature-auth
 ```
 
 ### Interactive Selection
@@ -69,7 +81,8 @@ mst where --current
 # Select worktree interactively
 mst where --fzf
 # Shows fzf interface with all worktrees
-# Returns selected worktree path
+# Path display in fzf selection screen follows ui.pathDisplay setting
+# Returns selected worktree path in the configured format
 ```
 
 ## Integration Examples
