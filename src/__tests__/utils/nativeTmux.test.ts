@@ -8,9 +8,18 @@ import { dirname, join } from 'path'
 // Mock dependencies
 vi.mock('execa')
 vi.mock('child_process')
+vi.mock('fs', () => ({
+  existsSync: vi.fn().mockReturnValue(true),
+  chmodSync: vi.fn(),
+}))
 
 const mockedExeca = vi.mocked(execa)
 const mockedSpawn = vi.mocked(spawn)
+
+// Import fs mocks
+const { existsSync, chmodSync } = await import('fs')
+const mockedExistsSync = vi.mocked(existsSync)
+const mockedChmodSync = vi.mocked(chmodSync)
 
 // Get the helper script path
 const HELPER_SCRIPT = join(
@@ -23,25 +32,26 @@ const HELPER_SCRIPT = join(
 describe('NativeTmuxHelper', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    // Default mock behaviors
+    mockedExistsSync.mockReturnValue(true)
+    mockedChmodSync.mockImplementation(() => {})
   })
 
   afterEach(() => {
     vi.restoreAllMocks()
   })
 
+  describe('script initialization', () => {
+    it('should initialize without errors when script exists', () => {
+      // Since the class has already been initialized during import,
+      // we just verify that no errors were thrown
+      expect(NativeTmuxHelper).toBeDefined()
+    })
+  })
+
   describe('sessionExists', () => {
     it('should return true when session exists', async () => {
-      mockedExeca.mockResolvedValueOnce({
-        stdout: '',
-        stderr: '',
-        exitCode: 0,
-        command: '',
-        escapedCommand: '',
-        failed: false,
-        timedOut: false,
-        isCanceled: false,
-        killed: false,
-      })
+      mockedExeca.mockResolvedValueOnce({} as any)
 
       const result = await NativeTmuxHelper.sessionExists('test-session')
       expect(result).toBe(true)
@@ -67,15 +77,7 @@ describe('NativeTmuxHelper', () => {
     it('should parse session list correctly', async () => {
       mockedExeca.mockResolvedValueOnce({
         stdout: 'session1:1\nsession2:0\nsession3:1',
-        stderr: '',
-        exitCode: 0,
-        command: '',
-        escapedCommand: '',
-        failed: false,
-        timedOut: false,
-        isCanceled: false,
-        killed: false,
-      })
+      } as any)
 
       const result = await NativeTmuxHelper.listSessions()
       expect(result).toEqual([
@@ -88,15 +90,7 @@ describe('NativeTmuxHelper', () => {
     it('should handle malformed session output', async () => {
       mockedExeca.mockResolvedValueOnce({
         stdout: '::\nvalid-session:1\n:',
-        stderr: '',
-        exitCode: 0,
-        command: '',
-        escapedCommand: '',
-        failed: false,
-        timedOut: false,
-        isCanceled: false,
-        killed: false,
-      })
+      } as any)
 
       const result = await NativeTmuxHelper.listSessions()
       expect(result).toEqual([
@@ -142,17 +136,7 @@ describe('NativeTmuxHelper', () => {
 
     it('should switch client successfully', async () => {
       // Mock helper script execution success
-      mockedExeca.mockResolvedValueOnce({
-        stdout: '',
-        stderr: '',
-        exitCode: 0,
-        command: '',
-        escapedCommand: '',
-        failed: false,
-        timedOut: false,
-        isCanceled: false,
-        killed: false,
-      })
+      mockedExeca.mockResolvedValueOnce({} as any)
 
       await expect(NativeTmuxHelper.switchClient('test-session')).resolves.toBeUndefined()
       expect(mockedExeca).toHaveBeenLastCalledWith(HELPER_SCRIPT, ['switch', 'test-session'])
@@ -200,17 +184,7 @@ describe('NativeTmuxHelper', () => {
 
     it('should spawn tmux process successfully', async () => {
       // Mock session exists
-      mockedExeca.mockResolvedValueOnce({
-        stdout: '',
-        stderr: '',
-        exitCode: 0,
-        command: '',
-        escapedCommand: '',
-        failed: false,
-        timedOut: false,
-        isCanceled: false,
-        killed: false,
-      })
+      mockedExeca.mockResolvedValueOnce({} as any)
 
       // Mock spawn
       const mockProcess = {
@@ -219,7 +193,7 @@ describe('NativeTmuxHelper', () => {
       mockedSpawn.mockReturnValueOnce(mockProcess as any)
 
       // Start the promise but don't await it initially
-      const promise = NativeTmuxHelper.attachToSession('test-session')
+      NativeTmuxHelper.attachToSession('test-session')
 
       // Wait a bit for the spawn to be called
       await new Promise(resolve => setTimeout(resolve, 10))
@@ -249,17 +223,7 @@ describe('NativeTmuxHelper', () => {
 
     it('should handle tmux process errors', async () => {
       // Mock session exists
-      mockedExeca.mockResolvedValueOnce({
-        stdout: '',
-        stderr: '',
-        exitCode: 0,
-        command: '',
-        escapedCommand: '',
-        failed: false,
-        timedOut: false,
-        isCanceled: false,
-        killed: false,
-      })
+      mockedExeca.mockResolvedValueOnce({} as any)
 
       // Mock spawn
       const mockProcess = {
@@ -268,7 +232,7 @@ describe('NativeTmuxHelper', () => {
       mockedSpawn.mockReturnValueOnce(mockProcess as any)
 
       // Start the promise
-      const promise = NativeTmuxHelper.attachToSession('test-session')
+      NativeTmuxHelper.attachToSession('test-session')
 
       // Wait a bit for the spawn to be called
       await new Promise(resolve => setTimeout(resolve, 10))
@@ -303,17 +267,7 @@ describe('NativeTmuxHelper', () => {
 
     it('should attach to existing session if it exists', async () => {
       // Mock session already exists
-      mockedExeca.mockResolvedValueOnce({
-        stdout: '',
-        stderr: '',
-        exitCode: 0,
-        command: '',
-        escapedCommand: '',
-        failed: false,
-        timedOut: false,
-        isCanceled: false,
-        killed: false,
-      })
+      mockedExeca.mockResolvedValueOnce({} as any)
 
       // Mock the attach process
       const mockAttachProcess = {
@@ -322,7 +276,7 @@ describe('NativeTmuxHelper', () => {
       mockedSpawn.mockReturnValueOnce(mockAttachProcess as any)
 
       // Start the promise
-      const promise = NativeTmuxHelper.createAndAttachSession('existing-session')
+      NativeTmuxHelper.createAndAttachSession('existing-session')
 
       // Wait a bit for the spawn to be called
       await new Promise(resolve => setTimeout(resolve, 10))
@@ -345,11 +299,7 @@ describe('NativeTmuxHelper', () => {
       mockedSpawn.mockReturnValueOnce(mockProcess as any)
 
       // Start the promise
-      const promise = NativeTmuxHelper.createAndAttachSession(
-        'test-session',
-        '/path/to/dir',
-        'vim .'
-      )
+      NativeTmuxHelper.createAndAttachSession('test-session', '/path/to/dir', 'vim .')
 
       // Wait a bit for the spawn to be called
       await new Promise(resolve => setTimeout(resolve, 10))
@@ -385,7 +335,7 @@ describe('NativeTmuxHelper', () => {
       mockedSpawn.mockReturnValueOnce(mockProcess as any)
 
       // Start the promise with minimal arguments
-      const promise = NativeTmuxHelper.createAndAttachSession('test-session')
+      NativeTmuxHelper.createAndAttachSession('test-session')
 
       // Wait a bit for the spawn to be called
       await new Promise(resolve => setTimeout(resolve, 10))
