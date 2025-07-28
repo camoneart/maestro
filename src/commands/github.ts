@@ -219,8 +219,15 @@ async function openInEditor(
 // コメントコマンドの処理
 async function handleCommentCommand(number: string, options: GithubOptions): Promise<void> {
   const spinner = ora('PR/Issueを確認中...').start()
-  const targetType = await detectType(number)
-  spinner.stop()
+
+  let targetType: 'pr' | 'issue'
+  try {
+    targetType = await detectType(number)
+    spinner.stop()
+  } catch (error) {
+    spinner.fail('PR/Issueの確認に失敗しました')
+    throw error
+  }
 
   // コメント処理
   if (options.message) {
@@ -316,8 +323,15 @@ async function handleInteractiveComment(): Promise<void> {
   ])
 
   const spinner = ora('PR/Issueを確認中...').start()
-  const targetType = await detectType(inputNumber)
-  spinner.stop()
+
+  let targetType: 'pr' | 'issue'
+  try {
+    targetType = await detectType(inputNumber)
+    spinner.stop()
+  } catch (error) {
+    spinner.fail('PR/Issueの確認に失敗しました')
+    throw error
+  }
 
   await addComment(inputNumber, comment, targetType)
 }
@@ -440,9 +454,15 @@ async function createWorktreeFromGithub(
 ): Promise<string> {
   const spinner = ora('情報を取得中...').start()
 
-  // PR/Issueの情報を取得
-  const info = await fetchItemInfo(number, type)
-  spinner.succeed(`${type === 'pr' ? 'PR' : 'Issue'} #${number}: ${info.title}`)
+  let info: ItemInfo
+  try {
+    // PR/Issueの情報を取得
+    info = await fetchItemInfo(number, type)
+    spinner.succeed(`${type === 'pr' ? 'PR' : 'Issue'} #${number}: ${info.title}`)
+  } catch (error) {
+    spinner.fail('情報の取得に失敗しました')
+    throw error
+  }
 
   // ブランチ名を生成
   const branchName = await generateBranchForItem(type, number, info, config)
