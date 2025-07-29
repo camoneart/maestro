@@ -248,9 +248,11 @@ describe('Multi-pane tmux session creation', () => {
 
       // Mock tmux session creation success
       mockExeca.mockResolvedValueOnce({ stdout: '', stderr: '' } as any)
-      
+
       // Mock "no space for new pane" error
-      const noSpaceError = new Error('Command failed with exit code 1: tmux split-window -t test-branch -h -c /path/to/test-branch /bin/zsh -l\n\nno space for new pane')
+      const noSpaceError = new Error(
+        'Command failed with exit code 1: tmux split-window -t test-branch -h -c /path/to/test-branch /bin/zsh -l\n\nno space for new pane'
+      )
       mockExeca.mockRejectedValueOnce(noSpaceError)
 
       const options: CreateOptions = {
@@ -272,9 +274,11 @@ describe('Multi-pane tmux session creation', () => {
 
       // Mock tmux session creation success
       mockExeca.mockResolvedValueOnce({ stdout: '', stderr: '' } as any)
-      
+
       // Mock "no space for new pane" error
-      const noSpaceError = new Error('Command failed with exit code 1: tmux split-window -t test-branch -v -c /path/to/test-branch /bin/zsh -l\n\nno space for new pane')
+      const noSpaceError = new Error(
+        'Command failed with exit code 1: tmux split-window -t test-branch -v -c /path/to/test-branch /bin/zsh -l\n\nno space for new pane'
+      )
       mockExeca.mockRejectedValueOnce(noSpaceError)
 
       const options: CreateOptions = {

@@ -199,7 +199,7 @@ async function createMultiplePanes(
     splitArgs.push('-c', worktreePath)
     const shell = process.env.SHELL || '/bin/bash'
     splitArgs.push(shell, '-l')
-    
+
     try {
       await execa('tmux', splitArgs)
     } catch (error) {
@@ -210,7 +210,7 @@ async function createMultiplePanes(
           `画面サイズに対してペイン数（${paneCount}個）が多すぎます。ターミナルウィンドウを大きくするか、ペイン数を減らしてください。（${splitType}分割）`
         )
       }
-      
+
       // その他のtmuxエラーの汎用的な処理
       const errorMessage = error instanceof Error ? error.message : String(error)
       throw new Error(`tmuxペインの作成に失敗しました: ${errorMessage}`)
