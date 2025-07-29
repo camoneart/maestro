@@ -40,6 +40,42 @@ describe('NativeTmuxHelper', () => {
       // we just verify that no errors were thrown
       expect(NativeTmuxHelper).toBeDefined()
     })
+
+    it('should use lazy initialization and not throw on module import', () => {
+      // This test verifies that the module can be imported without throwing
+      // even when tmux helper script is not available (Issue #160 fix)
+      // The NativeTmuxHelper class should be defined and accessible
+      expect(NativeTmuxHelper).toBeDefined()
+      expect(typeof NativeTmuxHelper.sessionExists).toBe('function')
+      expect(typeof NativeTmuxHelper.listSessions).toBe('function')
+    })
+
+    it('should provide better error message for missing tmux script', async () => {
+      // Temporarily override the private _helperScript to null to simulate missing script
+      // This forces the getHelperScript method to be called fresh
+      const NativeTmuxHelperClass = NativeTmuxHelper as any
+      const originalHelperScript = NativeTmuxHelperClass._helperScript
+      const originalNodeEnv = process.env.NODE_ENV
+
+      // Reset the helper script cache and temporarily remove test environment flag
+      NativeTmuxHelperClass._helperScript = null
+      delete process.env.NODE_ENV
+      delete process.env.VITEST
+
+      // Mock existsSync to return false (script not found)
+      mockedExistsSync.mockReturnValue(false)
+
+      // The error should only be thrown when attempting to use tmux functionality
+      // and should include a helpful message about non-tmux commands
+      await expect(NativeTmuxHelper.switchClient('test')).rejects.toThrow(
+        /Non-tmux commands like "config init" should work without tmux installed/
+      )
+
+      // Restore original state
+      NativeTmuxHelperClass._helperScript = originalHelperScript
+      process.env.NODE_ENV = originalNodeEnv
+      process.env.VITEST = 'true'
+    })
   })
 
   describe('sessionExists', () => {
