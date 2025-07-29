@@ -131,6 +131,14 @@ mst create feature/mobile --tmux-v-panes 2 --tmux-layout main-vertical
 mst create feature/api --copy-file .env --copy-file .env.local
 ```
 
+#### Error Handling
+The `create` command includes enhanced error handling for tmux multi-pane creation:
+
+- **Terminal size errors**: Provides clear guidance when terminal is too small for requested pane count
+- **User-friendly messages**: Shows specific pane count and split type causing the issue
+- **Solution suggestions**: Recommends resizing terminal or reducing pane count
+- **Layout alternatives**: Suggests switching between horizontal/vertical layouts for better space usage
+
 ### 🔸 push
 
 Push current branch to remote and optionally create Pull Request.
@@ -893,6 +901,27 @@ maestro properly handles the following errors:
 - Network errors
 - Permission errors
 - Configuration errors
+- **tmux pane creation errors** (enhanced in latest version)
+
+### tmux Multi-Pane Error Handling
+
+The `create` command now provides enhanced error handling for tmux multi-pane creation:
+
+**Common Error**: Terminal size limitations
+```
+Error: 画面サイズに対してペイン数（4個）が多すぎます。ターミナルウィンドウを大きくするか、ペイン数を減らしてください。（水平分割）
+```
+
+**Quick Solutions**:
+- Resize terminal window
+- Reduce pane count: `--tmux-h-panes 2` instead of `--tmux-h-panes 4`
+- Switch split direction: `--tmux-v-panes` instead of `--tmux-h-panes`
+- Use efficient layouts: `--tmux-layout main-vertical` or `--tmux-layout tiled`
+
+**Terminal Size Guidelines**:
+- Small terminals (80x24): 2-3 panes maximum
+- Medium terminals (120x40): 4-6 panes optimal
+- Large terminals (200x60+): 6+ panes supported
 
 If an error occurs, use the `--verbose` option for detailed information.
 

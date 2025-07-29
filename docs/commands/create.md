@@ -488,6 +488,64 @@ mst create feature/testing --tmux-h-panes 4 --tmux-layout even-horizontal
    ```
    Solution: Authenticate GitHub CLI with `gh auth login`
 
+### tmux Error Handling
+
+The create command now includes enhanced error handling for tmux pane creation, providing user-friendly messages when terminal space limitations occur:
+
+4. **No space for new pane error**
+
+   ```
+   Error: 画面サイズに対してペイン数（4個）が多すぎます。ターミナルウィンドウを大きくするか、ペイン数を減らしてください。（水平分割）
+   ```
+
+   **Cause**: The terminal window is too small to accommodate the requested number of panes with `--tmux-h-panes` or `--tmux-v-panes` options.
+
+   **Solutions**:
+   - Increase terminal window size by dragging corners or maximizing
+   - Reduce the number of panes (e.g., use `--tmux-h-panes 2` instead of `--tmux-h-panes 4`)
+   - Use a different layout with `--tmux-layout` option
+   - Switch to vertical splitting if using horizontal (`--tmux-v-panes` instead of `--tmux-h-panes`)
+
+5. **Other tmux pane creation errors**
+
+   ```
+   Error: tmuxペインの作成に失敗しました: [specific error message]
+   ```
+
+   **Cause**: Various tmux configuration or environment issues.
+
+   **Solutions**:
+   - Ensure tmux is properly installed: `brew install tmux`
+   - Check tmux configuration in `~/.tmux.conf`
+   - Verify terminal compatibility with tmux
+   - Restart tmux session: `tmux kill-server && tmux`
+
+### Troubleshooting Multi-Pane Creation
+
+When using `--tmux-h-panes` or `--tmux-v-panes`, consider these factors:
+
+- **Minimum pane size**: tmux enforces minimum pane dimensions
+- **Terminal resolution**: Higher resolution allows more panes
+- **Font size**: Smaller fonts allow more panes in the same space
+- **Layout efficiency**: Some layouts use space more efficiently than others
+
+**Recommended pane counts by terminal size**:
+- Small terminals (80x24): 2-3 panes maximum
+- Medium terminals (120x40): 4-6 panes
+- Large terminals (200x60+): 6+ panes
+
+**Example error resolution**:
+```bash
+# If this fails due to space constraints:
+mst create feature/api --tmux-h-panes 6
+
+# Try reducing pane count:
+mst create feature/api --tmux-h-panes 3
+
+# Or use vertical splitting for better space usage:
+mst create feature/api --tmux-v-panes 4 --tmux-layout main-vertical
+```
+
 ## Related Commands
 
 - [`mst list`](./list.md) - Display list of created orchestra members

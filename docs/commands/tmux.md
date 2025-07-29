@@ -310,6 +310,69 @@ tmux kill-session -t session-name
    mst create feature/branch
    ```
 
+### Multi-Pane Creation Errors
+
+When using `mst create` with multi-pane options (`--tmux-h-panes` or `--tmux-v-panes`), you may encounter space-related errors:
+
+4. **No space for new pane**
+   ```
+   Error: 画面サイズに対してペイン数（4個）が多すぎます。ターミナルウィンドウを大きくするか、ペイン数を減らしてください。（水平分割）
+   ```
+
+   **Immediate Solutions**:
+   - Resize terminal window (drag corners or maximize)
+   - Reduce pane count: `--tmux-h-panes 2` instead of `--tmux-h-panes 4`
+   - Switch split direction: `--tmux-v-panes` may fit better than `--tmux-h-panes`
+   - Use efficient layouts: `--tmux-layout main-vertical` or `--tmux-layout tiled`
+
+   **Terminal Size Guidelines**:
+   - **80x24 (small)**: Maximum 2-3 panes
+   - **120x40 (medium)**: Optimal for 4-6 panes  
+   - **200x60+ (large)**: Supports 6+ panes comfortably
+
+5. **General tmux pane errors**
+   ```
+   Error: tmuxペインの作成に失敗しました: [error details]
+   ```
+
+   **Troubleshooting Steps**:
+   ```bash
+   # 1. Check tmux version
+   tmux -V
+   
+   # 2. Test basic tmux functionality
+   tmux new-session -d test-session
+   tmux kill-session -t test-session
+   
+   # 3. Reset tmux if needed
+   tmux kill-server && tmux
+   
+   # 4. Check configuration
+   tmux show-options -g
+   ```
+
+### Pane Layout Optimization
+
+**Space-Efficient Layouts by Use Case**:
+
+```bash
+# Horizontal development (code + terminal)
+mst create feature/dev --tmux-h-panes 2 --tmux-layout even-horizontal
+
+# Vertical stack (editor + terminal + logs)  
+mst create feature/stack --tmux-v-panes 3 --tmux-layout even-vertical
+
+# Main focus with helpers (large editor + small panels)
+mst create feature/focus --tmux-v-panes 3 --tmux-layout main-vertical
+```
+
+**Layout Performance by Terminal Size**:
+- **tiled**: Best for square terminals, 4+ panes
+- **main-vertical**: Optimal for wide terminals  
+- **main-horizontal**: Good for tall terminals
+- **even-horizontal**: Simple, works in most sizes
+- **even-vertical**: Compact, good for narrow terminals
+
 ## Best Practices
 
 ### 1. Consistent Session Naming
