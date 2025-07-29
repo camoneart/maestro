@@ -1,10 +1,6 @@
 import { vi, describe, it, expect, beforeEach } from 'vitest'
 import { execa } from 'execa'
-import {
-  createTmuxSession,
-  executeCreateCommand,
-  CreateOptions,
-} from '../../commands/create.js'
+import { createTmuxSession, executeCreateCommand, CreateOptions } from '../../commands/create.js'
 import { GitWorktreeManager } from '../../core/git.js'
 import { ConfigManager } from '../../core/config.js'
 
@@ -26,10 +22,10 @@ const mockConfigManager = vi.mocked(ConfigManager)
 describe('Multi-pane tmux session creation', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    
+
     // Git repository check mock
     mockGitWorktreeManager.prototype.isGitRepository = vi.fn().mockResolvedValue(true)
-    
+
     // Config manager mock
     const mockConfig = {
       worktrees: {},
@@ -37,7 +33,7 @@ describe('Multi-pane tmux session creation', () => {
     }
     mockConfigManager.prototype.loadProjectConfig = vi.fn().mockResolvedValue(undefined)
     mockConfigManager.prototype.getAll = vi.fn().mockReturnValue(mockConfig)
-    
+
     // Environment variable mock
     delete process.env.TMUX
   })
@@ -47,13 +43,13 @@ describe('Multi-pane tmux session creation', () => {
       const branchName = 'test-branch'
       const worktreePath = '/test/path'
       const sessionName = 'test-branch'
-      
+
       // Mock tmux session doesn't exist
       mockExeca.mockRejectedValueOnce(new Error('Session not found'))
-      
+
       // Mock successful tmux commands
       mockExeca.mockResolvedValue({ stdout: '', stderr: '' } as any)
-      
+
       const options: CreateOptions = {
         tmuxHPanes: 3,
       }
@@ -83,10 +79,10 @@ describe('Multi-pane tmux session creation', () => {
         expect.any(String), // shell
         '-l', // login shell
       ])
-      
+
       // Verify that split was called twice for 3 panes total
-      const splitCalls = mockExeca.mock.calls.filter(call => 
-        call[0] === 'tmux' && call[1][0] === 'split-window'
+      const splitCalls = mockExeca.mock.calls.filter(
+        call => call[0] === 'tmux' && call[1][0] === 'split-window'
       )
       expect(splitCalls).toHaveLength(2)
     })
@@ -95,13 +91,13 @@ describe('Multi-pane tmux session creation', () => {
       const branchName = 'test-branch'
       const worktreePath = '/test/path'
       const sessionName = 'test-branch'
-      
+
       // Mock tmux session doesn't exist
       mockExeca.mockRejectedValueOnce(new Error('Session not found'))
-      
+
       // Mock successful tmux commands
       mockExeca.mockResolvedValue({ stdout: '', stderr: '' } as any)
-      
+
       const options: CreateOptions = {
         tmuxVPanes: 4,
       }
@@ -119,10 +115,10 @@ describe('Multi-pane tmux session creation', () => {
         expect.any(String), // shell
         '-l', // login shell
       ])
-      
+
       // Should create 3 additional panes (4 total - 1 initial = 3)
-      const splitCalls = mockExeca.mock.calls.filter(call => 
-        call[0] === 'tmux' && call[1][0] === 'split-window'
+      const splitCalls = mockExeca.mock.calls.filter(
+        call => call[0] === 'tmux' && call[1][0] === 'split-window'
       )
       expect(splitCalls).toHaveLength(3)
     })
@@ -133,13 +129,13 @@ describe('Multi-pane tmux session creation', () => {
       const branchName = 'test-branch'
       const worktreePath = '/test/path'
       const sessionName = 'test-branch'
-      
+
       // Mock tmux session doesn't exist
       mockExeca.mockRejectedValueOnce(new Error('Session not found'))
-      
+
       // Mock successful tmux commands
       mockExeca.mockResolvedValue({ stdout: '', stderr: '' } as any)
-      
+
       const options: CreateOptions = {
         tmuxHPanes: 4,
         tmuxLayout: 'tiled',
@@ -148,25 +144,20 @@ describe('Multi-pane tmux session creation', () => {
       await createTmuxSession(branchName, worktreePath, options)
 
       // Verify custom layout is applied
-      expect(mockExeca).toHaveBeenCalledWith('tmux', [
-        'select-layout',
-        '-t',
-        sessionName,
-        'tiled',
-      ])
+      expect(mockExeca).toHaveBeenCalledWith('tmux', ['select-layout', '-t', sessionName, 'tiled'])
     })
 
     it('should apply default even-horizontal layout for horizontal multi-panes', async () => {
       const branchName = 'test-branch'
       const worktreePath = '/test/path'
       const sessionName = 'test-branch'
-      
+
       // Mock tmux session doesn't exist
       mockExeca.mockRejectedValueOnce(new Error('Session not found'))
-      
+
       // Mock successful tmux commands
       mockExeca.mockResolvedValue({ stdout: '', stderr: '' } as any)
-      
+
       const options: CreateOptions = {
         tmuxHPanes: 5,
       }
@@ -186,13 +177,13 @@ describe('Multi-pane tmux session creation', () => {
       const branchName = 'test-branch'
       const worktreePath = '/test/path'
       const sessionName = 'test-branch'
-      
+
       // Mock tmux session doesn't exist
       mockExeca.mockRejectedValueOnce(new Error('Session not found'))
-      
+
       // Mock successful tmux commands
       mockExeca.mockResolvedValue({ stdout: '', stderr: '' } as any)
-      
+
       const options: CreateOptions = {
         tmuxVPanes: 6,
       }
@@ -213,13 +204,13 @@ describe('Multi-pane tmux session creation', () => {
     it('should split current session panes when inside tmux', async () => {
       // Mock being inside tmux
       process.env.TMUX = 'tmux-socket,12345,0'
-      
+
       const branchName = 'test-branch'
       const worktreePath = '/test/path'
-      
+
       // Mock successful tmux commands
       mockExeca.mockResolvedValue({ stdout: '', stderr: '' } as any)
-      
+
       const options: CreateOptions = {
         tmuxVPanes: 3,
       }
@@ -235,13 +226,13 @@ describe('Multi-pane tmux session creation', () => {
         expect.any(String), // shell
         '-l', // login shell
       ])
-      
+
       // Should create 2 additional panes
-      const splitCalls = mockExeca.mock.calls.filter(call => 
-        call[0] === 'tmux' && call[1][0] === 'split-window'
+      const splitCalls = mockExeca.mock.calls.filter(
+        call => call[0] === 'tmux' && call[1][0] === 'split-window'
       )
       expect(splitCalls).toHaveLength(2)
-      
+
       // Clean up
       delete process.env.TMUX
     })
@@ -251,21 +242,20 @@ describe('Multi-pane tmux session creation', () => {
     it('should handle tmux command failures gracefully', async () => {
       const branchName = 'test-branch'
       const worktreePath = '/test/path'
-      
+
       // Mock tmux session doesn't exist
       mockExeca.mockRejectedValueOnce(new Error('Session not found'))
-      
+
       // Mock tmux session creation success but split failure
       mockExeca.mockResolvedValueOnce({ stdout: '', stderr: '' } as any)
       mockExeca.mockRejectedValueOnce(new Error('Split failed'))
-      
+
       const options: CreateOptions = {
         tmuxHPanes: 3,
       }
 
       // The function should handle the error internally and not throw
-      await expect(createTmuxSession(branchName, worktreePath, options))
-        .resolves.toBeUndefined()
+      await expect(createTmuxSession(branchName, worktreePath, options)).resolves.toBeUndefined()
     })
   })
 })
