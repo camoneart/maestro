@@ -293,6 +293,8 @@ export async function createTmuxSession(
 ): Promise<void> {
   const sessionName = branchName.replace(/[^a-zA-Z0-9_-]/g, '-')
 
+  try {
+
   // ペイン分割オプションの場合
   if (
     options?.tmuxH ||
@@ -407,6 +409,15 @@ export async function createTmuxSession(
     )
     console.log(chalk.white(`   tmux attach -t ${sessionName}`))
     console.log(chalk.gray(`\n💡 ヒント: Ctrl+B, D でセッションからデタッチできます`))
+  }
+  } catch (error) {
+    // エラーメッセージの重複を避けるため、詳細なエラーメッセージのみ表示
+    if (error instanceof Error) {
+      console.error(chalk.red(`✖ ${error.message}`))
+    } else {
+      console.error(chalk.red(`✖ tmuxセッションの作成に失敗しました: ${error}`))
+    }
+    throw error
   }
 }
 
