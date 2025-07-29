@@ -1,5 +1,15 @@
 # Changelog
 
+## 3.5.4
+
+### Patch Changes
+
+- fix: Set unified branch name titles for all tmux panes
+
+  When creating multiple tmux panes with options like `--tmux-h-panes` or `--tmux-v-panes`, all panes now display the branch name as their title instead of only the last pane. This provides better visual consistency and makes it easier to identify which worktree you're working in across all panes.
+
+  Fixes #165
+
 ## 3.5.3
 
 ### Patch Changes
