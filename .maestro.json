@@ -10,6 +10,9 @@
     ],
     "defaultEditor": "cursor"
   },
+  "ui": {
+    "pathDisplay": "absolute"
+  },
   "hooks": {
     "beforeDelete": "echo \"演奏者を削除します: $ORCHESTRA_MEMBER\""
   },
