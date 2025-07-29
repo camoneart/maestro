@@ -214,20 +214,20 @@ describe('createTmuxSession - pane split options', () => {
       ])
 
       // Should focus first pane
-      expect(execa).toHaveBeenCalledWith('tmux', ['select-pane', '-t', 'feature-test:0'])
+      expect(execa).toHaveBeenCalledWith('tmux', ['select-pane', '-t', 'feature-test:0.0'])
 
       // Should set pane titles for all panes individually (Issue #167 fix)
       expect(execa).toHaveBeenCalledWith('tmux', [
         'select-pane',
         '-t',
-        'feature-test:0',
+        'feature-test:0.0',
         '-T',
         'feature-test',
       ])
       expect(execa).toHaveBeenCalledWith('tmux', [
         'select-pane',
         '-t',
-        'feature-test:1',
+        'feature-test:0.1',
         '-T',
         'feature-test',
       ])

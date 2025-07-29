@@ -256,25 +256,25 @@ describe('Multi-pane tmux session creation', () => {
 
       await createTmuxSession(branchName, worktreePath, options)
 
-      // Verify that select-pane with title is called for each pane (0, 1, 2)
+      // Verify that select-pane with title is called for each pane (0.0, 0.1, 0.2)
       expect(mockExeca).toHaveBeenCalledWith('tmux', [
         'select-pane',
         '-t',
-        `${sessionName}:0`,
+        `${sessionName}:0.0`,
         '-T',
         branchName,
       ])
       expect(mockExeca).toHaveBeenCalledWith('tmux', [
         'select-pane',
         '-t',
-        `${sessionName}:1`,
+        `${sessionName}:0.1`,
         '-T',
         branchName,
       ])
       expect(mockExeca).toHaveBeenCalledWith('tmux', [
         'select-pane',
         '-t',
-        `${sessionName}:2`,
+        `${sessionName}:0.2`,
         '-T',
         branchName,
       ])
@@ -297,8 +297,8 @@ describe('Multi-pane tmux session creation', () => {
 
       await createTmuxSession(branchName, worktreePath, options)
 
-      // Verify that focus is moved to first pane (0)
-      expect(mockExeca).toHaveBeenCalledWith('tmux', ['select-pane', '-t', `${sessionName}:0`])
+      // Verify that focus is moved to first pane (0.0)
+      expect(mockExeca).toHaveBeenCalledWith('tmux', ['select-pane', '-t', `${sessionName}:0.0`])
     })
 
     it('should handle inside tmux session with proper pane titles', async () => {
@@ -327,6 +327,51 @@ describe('Multi-pane tmux session creation', () => {
 
       // Clean up
       delete process.env.TMUX
+    })
+
+    it('should use correct pane specification format for new sessions (Issue #169)', async () => {
+      const branchName = 'issue-169-test'
+      const worktreePath = '/test/path'
+      const sessionName = 'issue-169-test'
+
+      // Mock tmux session doesn't exist
+      mockExeca.mockRejectedValueOnce(new Error('Session not found'))
+
+      // Mock successful tmux commands
+      mockExeca.mockResolvedValue({ stdout: '', stderr: '' } as any)
+
+      const options: CreateOptions = {
+        tmuxHPanes: 3,
+        tmuxLayout: 'tiled',
+      }
+
+      await createTmuxSession(branchName, worktreePath, options)
+
+      // Verify correct pane specification format: sessionName:0.paneIndex
+      expect(mockExeca).toHaveBeenCalledWith('tmux', [
+        'select-pane',
+        '-t',
+        `${sessionName}:0.0`,
+        '-T',
+        branchName,
+      ])
+      expect(mockExeca).toHaveBeenCalledWith('tmux', [
+        'select-pane',
+        '-t',
+        `${sessionName}:0.1`,
+        '-T',
+        branchName,
+      ])
+      expect(mockExeca).toHaveBeenCalledWith('tmux', [
+        'select-pane',
+        '-t',
+        `${sessionName}:0.2`,
+        '-T',
+        branchName,
+      ])
+
+      // Verify correct focus specification: sessionName:0.0
+      expect(mockExeca).toHaveBeenCalledWith('tmux', ['select-pane', '-t', `${sessionName}:0.0`])
     })
   })
 
