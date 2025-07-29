@@ -132,12 +132,24 @@ mst create feature/api --copy-file .env --copy-file .env.local
 ```
 
 #### Error Handling
-The `create` command includes enhanced error handling for tmux multi-pane creation:
+The `create` command includes enhanced error handling for tmux multi-pane creation with user-friendly Japanese messages:
 
-- **Terminal size errors**: Provides clear guidance when terminal is too small for requested pane count
-- **User-friendly messages**: Shows specific pane count and split type causing the issue
-- **Solution suggestions**: Recommends resizing terminal or reducing pane count
-- **Layout alternatives**: Suggests switching between horizontal/vertical layouts for better space usage
+**Terminal Size Errors**: 
+```
+Error: 画面サイズに対してペイン数（4個）が多すぎます。ターミナルウィンドウを大きくするか、ペイン数を減らしてください。（水平分割）
+```
+
+**Generic tmux Errors**:
+```
+Error: tmuxペインの作成に失敗しました: [specific error details]
+```
+
+**Error Message Features**:
+- **Japanese localization**: User-friendly error messages in Japanese
+- **Specific pane count**: Shows exact number of panes that couldn't be created
+- **Split direction indication**: Displays 水平分割 (horizontal) or 垂直分割 (vertical)
+- **Actionable solutions**: Provides immediate guidance in the error message
+- **Debug information**: Preserves original tmux error details for troubleshooting
 
 ### 🔸 push
 
@@ -905,15 +917,29 @@ maestro properly handles the following errors:
 
 ### tmux Multi-Pane Error Handling
 
-The `create` command now provides enhanced error handling for tmux multi-pane creation:
+The `create` command provides enhanced error handling for tmux multi-pane creation with improved user experience:
 
-**Common Error**: Terminal size limitations
-```
-Error: 画面サイズに対してペイン数（4個）が多すぎます。ターミナルウィンドウを大きくするか、ペイン数を減らしてください。（水平分割）
-```
+**Enhanced Error Messages**:
+
+1. **Terminal Size Limitations**:
+   ```
+   Error: 画面サイズに対してペイン数（4個）が多すぎます。ターミナルウィンドウを大きくするか、ペイン数を減らしてください。（水平分割）
+   ```
+   - **Japanese localization** for better user experience
+   - **Specific pane count** that failed to create
+   - **Split direction** indicator (水平分割/垂直分割)
+   - **Immediate solutions** within the error message
+
+2. **Generic tmux Failures**:
+   ```
+   Error: tmuxペインの作成に失敗しました: [original tmux error message]
+   ```
+   - **Consistent Japanese messaging** across the application
+   - **Preserves original error** details for debugging
+   - **Fallback handler** for all other tmux-related issues
 
 **Quick Solutions**:
-- Resize terminal window
+- Resize terminal window (maximize or drag corners)
 - Reduce pane count: `--tmux-h-panes 2` instead of `--tmux-h-panes 4`
 - Switch split direction: `--tmux-v-panes` instead of `--tmux-h-panes`
 - Use efficient layouts: `--tmux-layout main-vertical` or `--tmux-layout tiled`
@@ -922,6 +948,12 @@ Error: 画面サイズに対してペイン数（4個）が多すぎます。タ
 - Small terminals (80x24): 2-3 panes maximum
 - Medium terminals (120x40): 4-6 panes optimal
 - Large terminals (200x60+): 6+ panes supported
+
+**Error Handling Features**:
+- **Intelligent error parsing** detects specific tmux failure types
+- **Contextual solutions** provided based on error type
+- **Preserves debugging information** while improving user experience
+- **Consistent error formatting** across all commands
 
 If an error occurs, use the `--verbose` option for detailed information.
 
