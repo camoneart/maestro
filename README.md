@@ -179,6 +179,7 @@ All sub-commands and options are documented in the [Command Reference](./docs/CO
 ```bash
 mst create feature/my-ui --tmux --claude-md   # create + AI + tmux
 mst create feature/api --tmux-h-panes 3       # create + 3 horizontal panes
+mst create feature/tdd --tmux-h-panes 4 --tmux-layout tiled  # 4-pane grid layout
 mst list                                       # list performers
 mst tmux                                       # switch via fzf
 mst push --pr                                  # push with PR

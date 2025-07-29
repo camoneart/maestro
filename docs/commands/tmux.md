@@ -121,6 +121,62 @@ mst create feature/service --tmux-v-panes 2 --tmux-layout main-vertical
 mst create feature/ai-feature --tmux-h-panes 2 --tmux-layout tiled --claude-md
 ```
 
+**Multi-Pane Layout Examples:**
+
+```bash
+# Even Horizontal (3 panes) - Services side by side
+mst create feature/services --tmux-h-panes 3
+┌──────────┬──────────┬──────────┐
+│ Frontend │ Backend  │ Database │
+│  :3000   │  :8080   │  :5432   │
+└──────────┴──────────┴──────────┘
+
+# Main Vertical (4 panes) - Main editor with side panels
+mst create feature/monitoring --tmux-v-panes 4 --tmux-layout main-vertical
+┌──────────┬──────────┐
+│          │ Logs     │
+│  Main    ├──────────┤
+│  Editor  │ Metrics  │
+│          ├──────────┤
+│          │ Alerts   │
+└──────────┴──────────┘
+
+# Tiled Layout (4 panes) - Balanced grid for testing
+mst create feature/testing --tmux-h-panes 4 --tmux-layout tiled
+┌──────────┬──────────┐
+│  Tests   │ Coverage │
+├──────────┼──────────┤
+│  Lint    │  Build   │
+└──────────┴──────────┘
+```
+
+**Common Multi-Pane Use Cases:**
+
+1. **Full-Stack Development (3 horizontal panes)**
+   ```bash
+   mst create feature/fullstack --tmux-h-panes 3
+   # Pane 1: pnpm run dev (frontend)
+   # Pane 2: pnpm run server (backend)
+   # Pane 3: docker-compose up (database)
+   ```
+
+2. **Test-Driven Development (4 tiled panes)**
+   ```bash
+   mst create feature/tdd --tmux-h-panes 4 --tmux-layout tiled
+   # Pane 1: Code editor
+   # Pane 2: Test runner (watch mode)
+   # Pane 3: Coverage report
+   # Pane 4: Git operations
+   ```
+
+3. **Microservices (main-vertical with 3 panes)**
+   ```bash
+   mst create feature/microservice --tmux-v-panes 3 --tmux-layout main-vertical
+   # Main: Primary service code
+   # Side 1: API Gateway logs
+   # Side 2: Message queue monitor
+   ```
+
 **Auto-Focus Feature:**
 - New panes are automatically focused after creation (Issue #105 fix)
 - No manual pane switching required - ready for immediate development
@@ -134,9 +190,11 @@ mst create feature/ai-feature --tmux-h-panes 2 --tmux-layout tiled --claude-md
 - `tiled` - Tiled layout that balances all panes
 
 **Multi-Pane Features:**
-- Supports 2+ panes per worktree creation
+- Supports 2-10 panes per worktree creation (recommended: 2-6)
 - Automatic layout application for optimal space usage
 - All panes inherit shell environment and working directory
+- Each pane starts in the worktree directory
+- MAESTRO environment variables set in all panes
 
 ### Editor Integration
 

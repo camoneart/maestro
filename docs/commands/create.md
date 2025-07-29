@@ -153,19 +153,156 @@ mst create feature/dashboard --tmux-h-panes 3 --tmux-layout even-horizontal
 mst create feature/microservice --tmux-v-panes 2 --tmux-layout main-vertical
 ```
 
-**Available Layouts:**
-- `even-horizontal` - Evenly distribute panes horizontally
-- `even-vertical` - Evenly distribute panes vertically  
-- `main-horizontal` - Large main pane at top, smaller panes below
-- `main-vertical` - Large main pane on left, smaller panes on right
-- `tiled` - Tiled layout that balances all panes
+#### Layout Types and Visual Examples
 
-**Multi-Pane Behavior:**
-- **Outside tmux**: Creates new session with multiple panes and prompts for attachment
-- **Inside tmux**: Creates multiple panes in current window and focuses to the last created pane
-- **Default Layout**: When no layout is specified, applies `even-horizontal` for horizontal panes or `even-vertical` for vertical panes
-- **Pane Count**: Minimum 2 panes, maximum limited by terminal size
-- **Shell Environment**: All panes inherit your login shell environment
+**1. `even-horizontal` - Equal horizontal splits**
+```
+┌──────────┬──────────┬──────────┐
+│  Pane 1  │  Pane 2  │  Pane 3  │
+│          │          │          │
+│          │          │          │
+└──────────┴──────────┴──────────┘
+```
+Use case: Running frontend, backend, and database servers side by side
+
+**2. `even-vertical` - Equal vertical splits**
+```
+┌─────────────────────┐
+│      Pane 1         │
+├─────────────────────┤
+│      Pane 2         │
+├─────────────────────┤
+│      Pane 3         │
+└─────────────────────┘
+```
+Use case: Editor at top, terminal in middle, logs at bottom
+
+**3. `main-horizontal` - Large top pane with smaller bottom panes**
+```
+┌─────────────────────┐
+│                     │
+│    Main Pane        │
+│                     │
+├──────────┬──────────┤
+│  Pane 2  │  Pane 3  │
+└──────────┴──────────┘
+```
+Use case: Main editor at top, terminal and test runner below
+
+**4. `main-vertical` - Large left pane with smaller right panes**
+```
+┌──────────┬──────────┐
+│          │  Pane 2  │
+│   Main   ├──────────┤
+│   Pane   │  Pane 3  │
+│          ├──────────┤
+│          │  Pane 4  │
+└──────────┴──────────┘
+```
+Use case: Main editor on left, file explorer and terminals on right
+
+**5. `tiled` - Balanced grid layout**
+```
+┌──────────┬──────────┐
+│  Pane 1  │  Pane 2  │
+├──────────┼──────────┤
+│  Pane 3  │  Pane 4  │
+└──────────┴──────────┘
+```
+Use case: Multiple service monitoring or test runners
+
+#### Practical Examples by Use Case
+
+**Frontend + Backend + Database Development**
+```bash
+# 3 horizontal panes for full-stack development
+mst create feature/fullstack --tmux-h-panes 3 --tmux-layout even-horizontal
+# Pane 1: npm run dev (frontend)
+# Pane 2: npm run server (backend)  
+# Pane 3: docker-compose up (database)
+```
+
+**Test-Driven Development Setup**
+```bash
+# 4 panes in grid layout for TDD workflow
+mst create feature/tdd --tmux-h-panes 4 --tmux-layout tiled
+# Pane 1: Editor (code)
+# Pane 2: Test runner (watch mode)
+# Pane 3: Coverage report
+# Pane 4: Git status/commands
+```
+
+**Microservices Development**
+```bash
+# Main service with supporting services
+mst create feature/microservice --tmux-v-panes 3 --tmux-layout main-vertical
+# Main pane: Primary service development
+# Pane 2: API Gateway logs
+# Pane 3: Message queue monitor
+```
+
+**Documentation and Development**
+```bash
+# Split for code and documentation
+mst create feature/docs --tmux-h-panes 2 --tmux-layout even-horizontal --claude-md
+# Pane 1: Code editor
+# Pane 2: Documentation preview server
+```
+
+#### Advanced Usage Tips
+
+**1. Dynamic Pane Creation**
+```bash
+# Start with 2 panes, add more as needed
+mst create feature/dynamic --tmux-h-panes 2
+# Later: Ctrl+B, % (add vertical pane) or Ctrl+B, " (add horizontal pane)
+```
+
+**2. Combining with Other Options**
+```bash
+# Full setup with multiple panes, Claude integration, and auto-setup
+mst create feature/complete --base develop \
+  --tmux-h-panes 3 \
+  --tmux-layout main-horizontal \
+  --claude-md \
+  --setup \
+  --open
+```
+
+**3. Session Management**
+```bash
+# Create detached session with multiple panes
+mst create feature/background --tmux-v-panes 4
+# Choose "No" when prompted to attach
+# Later: tmux attach -t feature-background
+```
+
+#### Multi-Pane Behavior Details
+
+- **Outside tmux**: 
+  - Creates new tmux session with specified panes
+  - Interactive prompt asks if you want to attach
+  - Session continues running if you choose not to attach
+  
+- **Inside tmux**: 
+  - Creates panes in current window
+  - Automatically focuses the last created pane
+  - Preserves existing panes in the window
+  
+- **Default Layouts**: 
+  - Horizontal panes (`--tmux-h-panes`): Uses `even-horizontal` 
+  - Vertical panes (`--tmux-v-panes`): Uses `even-vertical`
+  - Can be overridden with `--tmux-layout`
+  
+- **Limitations**:
+  - Minimum: 2 panes (including the initial pane)
+  - Maximum: Limited by terminal size and tmux configuration
+  - Recommended: 2-6 panes for usability
+  
+- **Shell Environment**: 
+  - All panes start in the worktree directory
+  - Inherit your login shell and environment variables
+  - MAESTRO environment variables are set in each pane
 
 ## Claude Code Integration
 
