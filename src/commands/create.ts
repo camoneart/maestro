@@ -608,9 +608,7 @@ export async function executeCreateCommand(
     }
 
     // その他のエラー
-    // tmuxエラーの場合はすでにspinner.failで表示済みなので、エラーメッセージのみ表示
-    const errorMessage = error instanceof Error ? error.message : String(error)
-    console.error(chalk.red(`✖ ${errorMessage}`))
+    // エラーは既に下位層で表示済みなので、ここでは何も表示せずにexit
     process.exit(1)
   }
 }
