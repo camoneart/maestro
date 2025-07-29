@@ -293,9 +293,8 @@ export async function createTmuxSession(
 ): Promise<void> {
   const sessionName = branchName.replace(/[^a-zA-Z0-9_-]/g, '-')
 
-  try {
-    // ペイン分割オプションの場合
-    if (
+  // ペイン分割オプションの場合
+  if (
       options?.tmuxH ||
       options?.tmuxV ||
       options?.tmuxHPanes ||
@@ -409,10 +408,6 @@ export async function createTmuxSession(
       console.log(chalk.white(`   tmux attach -t ${sessionName}`))
       console.log(chalk.gray(`\n💡 ヒント: Ctrl+B, D でセッションからデタッチできます`))
     }
-  } catch (error) {
-    console.error(chalk.red(`tmuxセッションの作成に失敗しました: ${error}`))
-    throw error
-  }
 }
 
 // Claude.mdの処理
@@ -603,11 +598,9 @@ export async function executeCreateCommand(
     }
 
     // その他のエラー
-    console.error(
-      chalk.red(
-        `✖ 演奏者の招集に失敗しました: ${error instanceof Error ? error.message : String(error)}`
-      )
-    )
+    // tmuxエラーの場合はすでにspinner.failで表示済みなので、エラーメッセージのみ表示
+    const errorMessage = error instanceof Error ? error.message : String(error)
+    console.error(chalk.red(`✖ ${errorMessage}`))
     process.exit(1)
   }
 }
@@ -670,7 +663,8 @@ export async function createWorktreeWithProgress(
     // 後処理の実行
     await executePostCreationTasks(worktreePath, branchName, options, config)
   } catch (error) {
-    spinner.fail(chalk.red(`演奏者の招集に失敗しました: ${error}`))
+    // spinnerを失敗状態にするが、エラーメッセージは上位層で処理
+    spinner.fail(chalk.red('演奏者の招集に失敗しました'))
     throw error
   }
 }
