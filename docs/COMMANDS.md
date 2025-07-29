@@ -542,9 +542,10 @@ mst config get ui.pathDisplay                      # Get path display setting
 mst config get development.autoSetup               # Get auto-setup setting
 
 # Set configuration values
-mst config set ui.pathDisplay relative             # Set path display format
-mst config set development.defaultEditor cursor    # Set default editor
-mst config set worktrees.path "../my-worktrees"    # Set worktrees location
+mst config set ui.pathDisplay relative             # Auto-detects as user setting
+mst config set --user ui.pathDisplay relative     # Explicitly save to user settings
+mst config set --project worktrees.path "../"     # Explicitly save to project settings
+mst config set development.defaultEditor cursor    # Set default editor (user setting)
 
 # Reset to defaults
 mst config reset ui.pathDisplay                    # Reset path display to default
@@ -555,6 +556,8 @@ mst config reset development.autoSetup             # Reset auto-setup to default
 | Option | Short | Description | Default |
 |--------|-------|-------------|---------|
 | `--global` | `-g` | Target global configuration | `false` |
+| `--user` | `-u` | Target user settings (.maestro.local.json) | `false` |
+| `--project` | `-p` | Target project settings (.maestro.json) | `false` |
 
 ### 🔸 where
 

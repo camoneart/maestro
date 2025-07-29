@@ -66,6 +66,7 @@ worktrees/
 .maestro-config.json
 .maestro/
 .maestro-metadata.json
+.maestro.local.json
 
 # Claude Code
 .claude/export-conversations/

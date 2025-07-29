@@ -245,9 +245,9 @@ describe('config command', () => {
 
       await configCommand.parseAsync(['node', 'config', 'set', 'ui.pathDisplay', 'relative'])
 
-      expect(mockConfigManager.setConfigValue).toHaveBeenCalledWith('ui.pathDisplay', 'relative')
+      expect(mockConfigManager.setConfigValue).toHaveBeenCalledWith('ui.pathDisplay', 'relative', 'user')
       expect(consoleLogSpy).toHaveBeenCalledWith(
-        chalk.green('✅ ui.pathDisplay を relative に設定しました')
+        chalk.green('✅ ui.pathDisplay を relative に設定しました (ユーザー設定: .maestro.local.json)')
       )
     })
 
@@ -258,7 +258,8 @@ describe('config command', () => {
 
       expect(mockConfigManager.setConfigValue).toHaveBeenCalledWith(
         'development.autoSetup',
-        'false'
+        'false',
+        'project'
       )
     })
 
@@ -267,7 +268,7 @@ describe('config command', () => {
 
       await configCommand.parseAsync(['node', 'config', 'set', 'some.number', '42'])
 
-      expect(mockConfigManager.setConfigValue).toHaveBeenCalledWith('some.number', '42')
+      expect(mockConfigManager.setConfigValue).toHaveBeenCalledWith('some.number', '42', 'project')
     })
 
     it('should handle validation errors', async () => {

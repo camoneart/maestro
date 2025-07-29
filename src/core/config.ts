@@ -127,6 +127,7 @@ const DEFAULT_CONFIG: Config = {
 export class ConfigManager {
   private conf: Conf<Config>
   private projectConfig: Config | null = null
+  private userConfig: Config | null = null
 
   constructor() {
     // グローバル設定（ユーザーホーム）
@@ -138,6 +139,9 @@ export class ConfigManager {
 
   async loadProjectConfig(): Promise<void> {
     try {
+      // ユーザー設定ファイル(.maestro.local.json)を先に読み込む
+      await this.loadUserConfig()
+
       // プロジェクトルートの設定ファイルを探す
       const configPaths = [
         path.join(process.cwd(), '.maestro.json'),
@@ -163,8 +167,23 @@ export class ConfigManager {
     }
   }
 
-  // 設定を取得（プロジェクト設定 > グローバル設定 > デフォルト）
+  async loadUserConfig(): Promise<void> {
+    try {
+      const userConfigPath = path.join(process.cwd(), '.maestro.local.json')
+      const configData = await fs.readFile(userConfigPath, 'utf-8')
+      const parsedConfig = JSON.parse(configData)
+      this.userConfig = ConfigSchema.parse(parsedConfig)
+    } catch {
+      // ユーザー設定ファイルが存在しない場合は無視
+      this.userConfig = null
+    }
+  }
+
+  // 設定を取得（ユーザー設定 > プロジェクト設定 > グローバル設定 > デフォルト）
   get<K extends keyof Config>(key: K): Config[K] {
+    if (this.userConfig && this.userConfig[key] !== undefined) {
+      return this.userConfig[key]
+    }
     if (this.projectConfig && this.projectConfig[key] !== undefined) {
       return this.projectConfig[key]
     }
@@ -179,10 +198,12 @@ export class ConfigManager {
   // 全設定を取得
   getAll(): Config {
     const globalConfig = this.conf.store
-    if (this.projectConfig) {
-      return { ...DEFAULT_CONFIG, ...globalConfig, ...this.projectConfig }
+    return { 
+      ...DEFAULT_CONFIG, 
+      ...globalConfig, 
+      ...(this.projectConfig || {}),
+      ...(this.userConfig || {})
     }
-    return { ...DEFAULT_CONFIG, ...globalConfig }
   }
 
   // 設定ファイルのパスを取得
@@ -200,8 +221,59 @@ export class ConfigManager {
     }, config)
   }
 
-  // ドット記法で設定値を設定（プロジェクト設定のみ）
-  async setConfigValue(keyPath: string, value: any): Promise<void> {
+  // ドット記法で設定値を設定
+  async setConfigValue(keyPath: string, value: any, target: 'user' | 'project' = 'project'): Promise<void> {
+    if (target === 'user') {
+      await this.setUserConfigValue(keyPath, value)
+    } else {
+      await this.setProjectConfigValue(keyPath, value)
+    }
+  }
+
+  // ユーザー設定を設定
+  async setUserConfigValue(keyPath: string, value: any): Promise<void> {
+    const configPath = path.join(process.cwd(), '.maestro.local.json')
+
+    // 既存のユーザー設定を読み込む
+    let userConfig: any = {}
+    try {
+      const configData = await fs.readFile(configPath, 'utf-8')
+      userConfig = JSON.parse(configData)
+    } catch {
+      // ファイルが存在しない場合は空のオブジェクトから開始
+    }
+
+    // ドット記法でネストしたオブジェクトを作成
+    const keys = keyPath.split('.')
+    let current = userConfig
+
+    for (let i = 0; i < keys.length - 1; i++) {
+      const key = keys[i]
+      if (!key) continue
+      if (!current[key] || typeof current[key] !== 'object') {
+        current[key] = {}
+      }
+      current = current[key]
+    }
+
+    // 値の型変換
+    const lastKey = keys[keys.length - 1]
+    if (lastKey) {
+      current[lastKey] = this.parseValue(value)
+    }
+
+    // バリデーション
+    const validatedConfig = ConfigSchema.parse(userConfig)
+
+    // ファイルに保存
+    await fs.writeFile(configPath, JSON.stringify(validatedConfig, null, 2) + '\n', 'utf-8')
+
+    // メモリ上の設定も更新
+    this.userConfig = validatedConfig
+  }
+
+  // プロジェクト設定を設定
+  async setProjectConfigValue(keyPath: string, value: any): Promise<void> {
     const configPath = path.join(process.cwd(), '.maestro.json')
 
     // 既存のプロジェクト設定を読み込む
