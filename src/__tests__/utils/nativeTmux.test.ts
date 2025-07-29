@@ -56,12 +56,12 @@ describe('NativeTmuxHelper', () => {
       const NativeTmuxHelperClass = NativeTmuxHelper as any
       const originalHelperScript = NativeTmuxHelperClass._helperScript
       const originalNodeEnv = process.env.NODE_ENV
-      
+
       // Reset the helper script cache and temporarily remove test environment flag
       NativeTmuxHelperClass._helperScript = null
       delete process.env.NODE_ENV
       delete process.env.VITEST
-      
+
       // Mock existsSync to return false (script not found)
       mockedExistsSync.mockReturnValue(false)
 

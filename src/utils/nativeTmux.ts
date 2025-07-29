@@ -54,8 +54,8 @@ export class NativeTmuxHelper {
     if (!scriptPath) {
       throw new Error(
         `Maestro tmux helper script not found. Searched paths: ${possiblePaths.join(', ')}\n` +
-        'Note: This error occurs only when tmux functionality is used. ' +
-        'Non-tmux commands like "config init" should work without tmux installed.'
+          'Note: This error occurs only when tmux functionality is used. ' +
+          'Non-tmux commands like "config init" should work without tmux installed.'
       )
     }
 
