@@ -142,8 +142,10 @@ describe('create command - edge cases', () => {
 
       const config = { claude: { autoStart: false } }
 
-      // Should not throw error
-      await expect(createTmuxSession('feature/test', '/path/to/worktree')).resolves.not.toThrow()
+      // Should throw error with proper message
+      await expect(createTmuxSession('feature/test', '/path/to/worktree')).rejects.toThrow(
+        'tmux failed'
+      )
     })
 
     it('should sanitize session name', async () => {

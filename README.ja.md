@@ -350,6 +350,7 @@ mst completion fish > ~/.config/fish/completions/mst.fish
 | **fzf が見つからない**                    | fzf 未インストール               | `brew install fzf`                |
 | **tmux が見つからない**                   | tmux 未インストール              | `brew install tmux`               |
 | **Claude Code が起動しない**              | MCP サーバー未起動 or ポート競合 | `mst mcp status` → `mst mcp stop` |
+| **tmux ペインが多すぎる**<br>`no space for new pane` | ターミナルウィンドウに対してペイン数が過多 | ウィンドウのリサイズまたはペイン数を削減 |
 
 ### その他のエラーコード例
 
@@ -357,6 +358,30 @@ mst completion fish > ~/.config/fish/completions/mst.fish
 | ------------ | ------------------------------ | ----------------------------------- |
 | `EADDRINUSE` | MCP サーバーのポート競合       | `mst mcp stop` で既存プロセスを停止 |
 | `ENOENT`     | Git 実行ファイルが見つからない | Git の PATH を確認、再インストール  |
+
+### ⚠️ tmux マルチペイン トラブルシューティング
+
+マルチペイン作成オプション（`--tmux-h-panes` または `--tmux-v-panes`）使用時に、ターミナルサイズの制限に関するエラーが発生する場合があります。以下の方法で解決できます：
+
+**クイック解決法**:
+```bash
+# ターミナルサイズが原因で失敗する場合:
+mst create feature/api --tmux-h-panes 6
+
+# ペイン数を減らして試す:
+mst create feature/api --tmux-h-panes 3
+
+# 垂直レイアウトに変更:
+mst create feature/api --tmux-v-panes 4 --tmux-layout main-vertical
+
+# 効率的なレイアウトを使用:
+mst create feature/api --tmux-h-panes 4 --tmux-layout tiled
+```
+
+**ターミナルサイズガイドライン**:
+- **小 (80x24)**: 最大2-3ペイン
+- **中 (120x40)**: 4-6ペインが最適
+- **大 (200x60+)**: 6+ペインに対応
 
 上記で解決しない場合は [Issues](https://github.com/camoneart/maestro/issues) で検索または新規 Issue を作成してください。
 
