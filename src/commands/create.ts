@@ -164,7 +164,7 @@ export function switchTmuxClient(sessionName: string): Promise<void> {
 // ペイン設定用のヘルパー関数
 function getPaneConfiguration(options?: CreateOptions) {
   const paneCount = options?.tmuxHPanes || options?.tmuxVPanes || 2
-  const isHorizontal = options?.tmuxH || options?.tmuxHPanes
+  const isHorizontal = Boolean(options?.tmuxH || options?.tmuxHPanes)
   return { paneCount, isHorizontal }
 }
 
