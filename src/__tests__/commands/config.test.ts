@@ -245,9 +245,15 @@ describe('config command', () => {
 
       await configCommand.parseAsync(['node', 'config', 'set', 'ui.pathDisplay', 'relative'])
 
-      expect(mockConfigManager.setConfigValue).toHaveBeenCalledWith('ui.pathDisplay', 'relative', 'user')
+      expect(mockConfigManager.setConfigValue).toHaveBeenCalledWith(
+        'ui.pathDisplay',
+        'relative',
+        'user'
+      )
       expect(consoleLogSpy).toHaveBeenCalledWith(
-        chalk.green('✅ ui.pathDisplay を relative に設定しました (ユーザー設定: .maestro.local.json)')
+        chalk.green(
+          '✅ ui.pathDisplay を relative に設定しました (ユーザー設定: .maestro.local.json)'
+        )
       )
     })
 

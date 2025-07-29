@@ -198,11 +198,11 @@ export class ConfigManager {
   // 全設定を取得
   getAll(): Config {
     const globalConfig = this.conf.store
-    return { 
-      ...DEFAULT_CONFIG, 
-      ...globalConfig, 
+    return {
+      ...DEFAULT_CONFIG,
+      ...globalConfig,
       ...(this.projectConfig || {}),
-      ...(this.userConfig || {})
+      ...(this.userConfig || {}),
     }
   }
 
@@ -225,7 +225,11 @@ export class ConfigManager {
   }
 
   // ドット記法で設定値を設定
-  async setConfigValue(keyPath: string, value: unknown, target: 'user' | 'project' = 'project'): Promise<void> {
+  async setConfigValue(
+    keyPath: string,
+    value: unknown,
+    target: 'user' | 'project' = 'project'
+  ): Promise<void> {
     if (target === 'user') {
       await this.setUserConfigValue(keyPath, value)
     } else {
@@ -256,7 +260,7 @@ export class ConfigManager {
       if (!current[key] || typeof current[key] !== 'object') {
         current[key] = {}
       }
-      current = current[key]
+      current = current[key] as Record<string, unknown>
     }
 
     // 値の型変換
@@ -298,7 +302,7 @@ export class ConfigManager {
       if (!current[key] || typeof current[key] !== 'object') {
         current[key] = {}
       }
-      current = current[key]
+      current = current[key] as Record<string, unknown>
     }
 
     // 値の型変換

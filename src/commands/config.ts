@@ -101,7 +101,7 @@ async function handleSetAction(
   try {
     // ユーザー設定向きの設定かどうかを判定
     const isUserSetting = key.startsWith('ui.') || key.startsWith('development.defaultEditor')
-    
+
     let target: 'user' | 'project'
     if (options?.user) {
       target = 'user'
@@ -113,13 +113,21 @@ async function handleSetAction(
     }
 
     await configManager.setConfigValue(key, value, target)
-    
+
     const targetName = target === 'user' ? 'ユーザー設定' : 'プロジェクト設定'
     const targetFile = target === 'user' ? '.maestro.local.json' : '.maestro.json'
     console.log(chalk.green(`✅ ${key} を ${value} に設定しました (${targetName}: ${targetFile})`))
 
-    if (target === 'user' && !key.startsWith('ui.') && !key.startsWith('development.defaultEditor')) {
-      console.log(chalk.yellow('⚠️  この設定はプロジェクト全体で共有される設定です。--project フラグの使用を検討してください。'))
+    if (
+      target === 'user' &&
+      !key.startsWith('ui.') &&
+      !key.startsWith('development.defaultEditor')
+    ) {
+      console.log(
+        chalk.yellow(
+          '⚠️  この設定はプロジェクト全体で共有される設定です。--project フラグの使用を検討してください。'
+        )
+      )
     }
   } catch (error) {
     console.error(chalk.red('設定の更新に失敗しました:'), error)
@@ -158,8 +166,12 @@ function showUsage(): void {
   console.log(chalk.gray('\n使用例:'))
   console.log('  maestro config get ui.pathDisplay')
   console.log('  maestro config set ui.pathDisplay relative        # 自動判定（ユーザー設定）')
-  console.log('  maestro config set --user ui.pathDisplay relative # ユーザー設定（.maestro.local.json）')
-  console.log('  maestro config set --project worktrees.path "../" # プロジェクト設定（.maestro.json）')
+  console.log(
+    '  maestro config set --user ui.pathDisplay relative # ユーザー設定（.maestro.local.json）'
+  )
+  console.log(
+    '  maestro config set --project worktrees.path "../" # プロジェクト設定（.maestro.json）'
+  )
   console.log('  maestro config reset ui.pathDisplay')
   console.log(chalk.gray('\nオプション:'))
   console.log('  -g, --global      # グローバル設定を対象にする')
@@ -183,36 +195,43 @@ export const configCommand = new Command('config')
   .option('-g, --global', 'グローバル設定を対象にする')
   .option('-u, --user', 'ユーザー設定（.maestro.local.json）を対象にする')
   .option('-p, --project', 'プロジェクト設定（.maestro.json）を対象にする')
-  .action(async (action?: string, key?: string, value?: string, options?: { global?: boolean; user?: boolean; project?: boolean }) => {
-    const configManager = new ConfigManager()
-    await configManager.loadProjectConfig()
+  .action(
+    async (
+      action?: string,
+      key?: string,
+      value?: string,
+      options?: { global?: boolean; user?: boolean; project?: boolean }
+    ) => {
+      const configManager = new ConfigManager()
+      await configManager.loadProjectConfig()
 
-    switch (action) {
-      case 'init':
-        await handleInitAction(configManager)
-        break
+      switch (action) {
+        case 'init':
+          await handleInitAction(configManager)
+          break
 
-      case 'show':
-        await handleShowAction(configManager, options)
-        break
+        case 'show':
+          await handleShowAction(configManager, options)
+          break
 
-      case 'path':
-        await handlePathAction(configManager)
-        break
+        case 'path':
+          await handlePathAction(configManager)
+          break
 
-      case 'get':
-        handleGetAction(configManager, key)
-        break
+        case 'get':
+          handleGetAction(configManager, key)
+          break
 
-      case 'set':
-        await handleSetAction(configManager, key, value, options)
-        break
+        case 'set':
+          await handleSetAction(configManager, key, value, options)
+          break
 
-      case 'reset':
-        await handleResetAction(configManager, key)
-        break
+        case 'reset':
+          await handleResetAction(configManager, key)
+          break
 
-      default:
-        showUsage()
+        default:
+          showUsage()
+      }
     }
-  })
+  )
