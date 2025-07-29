@@ -129,13 +129,13 @@ mst create feature/new-feature --tmux-v
 
 **Behavior:**
 - Creates a new pane in your current tmux window
-- Automatically switches focus to the new pane (Issue #105 fix)
+- **Improved Focus Management**: Automatically focuses the first pane (top-left) for better user experience
 - **Shell Environment**: Panes are created with login shells to preserve your custom prompts and environment
 - Sets the working directory to the new worktree
-- Sets pane title to the branch name for easy identification
+- **Unified Pane Titles**: ALL panes are now titled with the branch name for consistent identification
 
 **Focus Management:**
-The new pane is automatically focused after creation, providing a seamless workflow from creation to development. This eliminates the need to manually switch panes after worktree creation.
+The first pane (top-left) is automatically focused after creation, providing a more intuitive and consistent workflow. This improvement ensures that focus lands in the primary workspace position regardless of how many panes are created.
 
 ### Multi-Pane Creation
 
@@ -286,8 +286,9 @@ mst create feature/background --tmux-v-panes 4
   
 - **Inside tmux**: 
   - Creates panes in current window
-  - Automatically focuses the last created pane
+  - **Automatically focuses the first pane (top-left)** for consistent user experience
   - Preserves existing panes in the window
+  - **All panes receive unified titles** showing the branch name
   
 - **Default Layouts**: 
   - Horizontal panes (`--tmux-h-panes`): Uses `even-horizontal` 
@@ -303,6 +304,7 @@ mst create feature/background --tmux-v-panes 4
   - All panes start in the worktree directory
   - Inherit your login shell and environment variables
   - MAESTRO environment variables are set in each pane
+  - **Consistent pane titles**: All panes display the branch name for easy identification
 
 ## Claude Code Integration
 

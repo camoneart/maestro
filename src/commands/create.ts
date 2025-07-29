@@ -239,6 +239,29 @@ async function applyTmuxLayout(
   }
 }
 
+// 全ペインにタイトルを設定する関数
+async function setTitleForAllPanes(
+  sessionName: string | null,
+  branchName: string,
+  paneCount: number
+): Promise<void> {
+  for (let i = 0; i < paneCount; i++) {
+    const selectArgs = sessionName
+      ? ['select-pane', '-t', `${sessionName}:${i}`]
+      : ['select-pane', '-t', `${i}`]
+
+    try {
+      await execa('tmux', selectArgs)
+      const titleArgs = sessionName
+        ? ['select-pane', '-t', sessionName, '-T', branchName]
+        : ['select-pane', '-T', branchName]
+      await execa('tmux', titleArgs)
+    } catch {
+      // ペインが存在しない場合はスキップ
+    }
+  }
+}
+
 // 新しいセッションでペイン分割を処理する関数
 async function handleNewSessionPaneSplit(
   sessionName: string,
@@ -258,9 +281,11 @@ async function handleNewSessionPaneSplit(
   // レイアウトを適用
   await applyTmuxLayout(sessionName, options, paneCount, isHorizontal)
 
-  // 新しいペインへフォーカスを移動とタイトル設定
-  await execa('tmux', ['select-pane', '-t', sessionName, '-l'])
-  await execa('tmux', ['select-pane', '-t', sessionName, '-T', branchName])
+  // 全ペインにタイトルを設定
+  await setTitleForAllPanes(sessionName, branchName, paneCount)
+
+  // 最初のペイン（左上）にフォーカスを移動
+  await execa('tmux', ['select-pane', '-t', `${sessionName}:0`])
   await execa('tmux', ['rename-window', '-t', sessionName, branchName])
   await setupTmuxStatusLine()
 }
@@ -279,9 +304,11 @@ async function handleInsideTmuxPaneSplit(
   // レイアウトを適用
   await applyTmuxLayout(null, options, paneCount, isHorizontal)
 
-  // 新しいペインへフォーカスを移動とタイトル設定
-  await execa('tmux', ['select-pane', '-l'])
-  await execa('tmux', ['select-pane', '-T', branchName])
+  // 全ペインにタイトルを設定
+  await setTitleForAllPanes(null, branchName, paneCount)
+
+  // 最初のペイン（左上）にフォーカスを移動
+  await execa('tmux', ['select-pane', '-t', '0'])
   await setupTmuxStatusLine()
 }
 
