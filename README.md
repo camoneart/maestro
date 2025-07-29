@@ -350,6 +350,7 @@ mst completion fish > ~/.config/fish/completions/mst.fish
 | **fzf not found**                              | fzf not installed                       | `brew install fzf`                |
 | **tmux not found**                             | tmux not installed                      | `brew install tmux`               |
 | **Claude Code won't start**                    | MCP server not running or port conflict | `mst mcp status` → `mst mcp stop` |
+| **Too many tmux panes** <br>`no space for new pane` | Terminal window too small for requested panes | Resize window or use fewer panes |
 
 ### Other error codes
 
@@ -357,6 +358,30 @@ mst completion fish > ~/.config/fish/completions/mst.fish
 | ------------ | ---------------------- | --------------------------------------- |
 | `EADDRINUSE` | MCP server port in use | `mst mcp stop` to kill previous process |
 | `ENOENT`     | Git binary not found   | Check PATH or reinstall Git             |
+
+### ⚠️ tmux Multi-Pane Troubleshooting
+
+When using multi-pane creation (`--tmux-h-panes` or `--tmux-v-panes`), you may encounter space limitations. Here's how to resolve them:
+
+**Quick Solutions**:
+```bash
+# If this fails due to terminal size:
+mst create feature/api --tmux-h-panes 6
+
+# Try reducing panes:
+mst create feature/api --tmux-h-panes 3
+
+# Or switch to vertical layout:
+mst create feature/api --tmux-v-panes 4 --tmux-layout main-vertical
+
+# Use space-efficient layouts:
+mst create feature/api --tmux-h-panes 4 --tmux-layout tiled
+```
+
+**Terminal Size Guidelines**:
+- **Small (80x24)**: 2-3 panes maximum
+- **Medium (120x40)**: 4-6 panes optimal
+- **Large (200x60+)**: 6+ panes supported
 
 If the issue persists, search or open a new ticket in the [Issues](https://github.com/camoneart/maestro/issues).
 
