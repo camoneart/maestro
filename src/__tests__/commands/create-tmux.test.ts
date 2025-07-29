@@ -46,7 +46,7 @@ describe('createTmuxSession - pane split options', () => {
       '/bin/bash',
       '-l',
     ])
-    expect(execa).toHaveBeenCalledWith('tmux', ['select-pane', '-l'])
+    expect(execa).toHaveBeenCalledWith('tmux', ['select-pane', '-t', '0'])
     expect(execa).toHaveBeenCalledWith('tmux', ['select-pane', '-T', 'feature-test'])
 
     // Restore original TMUX env
@@ -74,7 +74,7 @@ describe('createTmuxSession - pane split options', () => {
       '/bin/bash',
       '-l',
     ])
-    expect(execa).toHaveBeenCalledWith('tmux', ['select-pane', '-l'])
+    expect(execa).toHaveBeenCalledWith('tmux', ['select-pane', '-t', '0'])
     expect(execa).toHaveBeenCalledWith('tmux', ['select-pane', '-T', 'feature-test'])
 
     // Restore original TMUX env
@@ -209,8 +209,8 @@ describe('createTmuxSession - pane split options', () => {
         '-l',
       ])
 
-      // Should focus new pane
-      expect(execa).toHaveBeenCalledWith('tmux', ['select-pane', '-t', 'feature-test', '-l'])
+      // Should focus first pane
+      expect(execa).toHaveBeenCalledWith('tmux', ['select-pane', '-t', 'feature-test:0'])
 
       // Should set pane title
       expect(execa).toHaveBeenCalledWith('tmux', [
@@ -310,7 +310,7 @@ describe('createTmuxSession - pane split options', () => {
         '/bin/bash',
         '-l',
       ])
-      expect(execa).toHaveBeenCalledWith('tmux', ['select-pane', '-l'])
+      expect(execa).toHaveBeenCalledWith('tmux', ['select-pane', '-t', '0'])
       expect(execa).toHaveBeenCalledWith('tmux', ['select-pane', '-T', 'feature-test'])
 
       // Should NOT create new session or attach

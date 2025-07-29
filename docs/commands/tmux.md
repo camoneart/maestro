@@ -103,10 +103,10 @@ mst tmux feature/database --split-pane
 Use `mst create` with tmux split options for immediate worktree creation and pane setup:
 
 ```bash
-# Create worktree and split horizontally (auto-focus to new pane)
+# Create worktree and split horizontally (auto-focus to first pane)
 mst create feature/new-ui --tmux-h
 
-# Create worktree and split vertically (auto-focus to new pane)  
+# Create worktree and split vertically (auto-focus to first pane)  
 mst create bugfix/critical --tmux-v
 
 # Create worktree with multiple panes
@@ -177,10 +177,11 @@ mst create feature/testing --tmux-h-panes 4 --tmux-layout tiled
    # Side 2: Message queue monitor
    ```
 
-**Auto-Focus Feature:**
-- New panes are automatically focused after creation (Issue #105 fix)
+**Improved Auto-Focus & Title Management:**
+- **First pane (top-left) is automatically focused** after creation for optimal workflow positioning
+- **All panes receive unified titles** displaying the branch name for consistent identification
 - No manual pane switching required - ready for immediate development
-- Pane title is set to branch name for easy identification
+- Better user experience with consistent focus behavior across all pane creation scenarios
 
 **Layout Options:**
 - `even-horizontal` - Evenly distribute panes horizontally
@@ -192,6 +193,8 @@ mst create feature/testing --tmux-h-panes 4 --tmux-layout tiled
 **Multi-Pane Features:**
 - Supports 2-10 panes per worktree creation (recommended: 2-6)
 - Automatic layout application for optimal space usage
+- **Unified pane titles**: All panes display the branch name consistently
+- **Improved focus management**: First pane (top-left) is automatically focused
 - All panes inherit shell environment and working directory
 - Each pane starts in the worktree directory
 - MAESTRO environment variables set in all panes

@@ -115,7 +115,7 @@ mst create feature/full-setup --tmux --claude-md --open --setup
 # Create from GitHub Issue
 mst create 123  # Auto-generates branch name from Issue #123
 
-# Create with tmux pane split (auto-focus to new pane)
+# Create with tmux pane split (auto-focus to first pane for better UX)
 mst create feature/new --tmux-h --claude-md  # Horizontal split with Claude
 mst create issue-456 --tmux-v --setup        # Vertical split with setup
 
@@ -445,6 +445,8 @@ mst tmux feature/background --detach
 **Features:**
 - **Shell Environment Inheritance**: Sessions preserve your custom PS1 prompts, environment variables, and shell configuration files
 - **Interactive Focus Management**: Prompts for attachment in TTY environments, auto-attaches in non-TTY
+- **Unified Pane Titles**: All panes display consistent branch names for easy identification
+- **Improved Focus Positioning**: Automatically focuses the first pane (top-left) for optimal workflow
 
 ## 📊 Advanced Features
 
