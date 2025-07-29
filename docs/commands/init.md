@@ -99,7 +99,7 @@ The init command creates a `.maestro.json` file with structure like:
 ```json
 {
   "worktrees": {
-    "path": ".git/orchestra-members"
+    "path": "../maestro-{branch}"
   },
   "development": {
     "autoSetup": true,
@@ -108,23 +108,44 @@ The init command creates a `.maestro.json` file with structure like:
 }
 ```
 
-### Full Configuration
+### Full Configuration with Defaults
 
 ```json
 {
   "worktrees": {
-    "path": ".git/orchestra-members",
-    "branchPrefix": "feature/"
+    "path": "../maestro-{branch}",       // Default: "../maestro-{branch}"
+    "directoryPrefix": "",                // Default: "" (empty string)
+    "branchPrefix": "feature/"            // Custom prefix for new branches
   },
   "development": {
-    "autoSetup": true,
-    "defaultEditor": "cursor"
+    "autoSetup": true,                    // Default: true
+    "syncFiles": [".env", ".env.local"],  // Default: [".env", ".env.local"]
+    "defaultEditor": "cursor"             // Default: "cursor"
+  },
+  "tmux": {
+    "enabled": false,                     // Default: false
+    "openIn": "window",                   // Default: "window"
+    "sessionNaming": "{branch}"           // Default: "{branch}"
+  },
+  "claude": {
+    "markdownMode": "shared"              // Default: "shared"
+  },
+  "github": {
+    "autoFetch": true,                    // Default: true
+    "branchNaming": {
+      "prTemplate": "pr-{number}",        // Default: "pr-{number}"
+      "issueTemplate": "issue-{number}"   // Default: "issue-{number}"
+    }
+  },
+  "ui": {
+    "pathDisplay": "absolute"             // Default: "absolute"
   },
   "postCreate": {
     "copyFiles": [".env", ".env.local"],
     "commands": ["pnpm install"]
   },
   "hooks": {
+    "afterCreate": "pnpm install",
     "beforeDelete": "echo \"演奏者を削除します: $ORCHESTRA_MEMBER\""
   }
 }

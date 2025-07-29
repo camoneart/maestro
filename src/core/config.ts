@@ -354,6 +354,9 @@ export class ConfigManager {
           issueTemplate: 'issue-{number}',
         },
       },
+      ui: {
+        pathDisplay: 'absolute',
+      },
       hooks: {
         afterCreate: 'npm install',
         beforeDelete: 'echo "オーケストラメンバーを解散します: $MAESTRO_BRANCH"',

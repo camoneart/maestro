@@ -834,14 +834,32 @@ Note: The `--full-path` option in the `list` command will always show absolute p
 ```json
 {
   "worktrees": {
-    "root": "../worktrees",
-    "branchPrefix": "feature/",
-    "autoCleanup": true
+    "path": "../maestro-{branch}",       // Default: "../maestro-{branch}"
+    "directoryPrefix": "",                // Default: "" (empty string)
+    "branchPrefix": "feature/"            // Custom prefix for new branches
   },
   "development": {
-    "defaultEditor": "cursor",
-    "autoSetup": true,
-    "syncFiles": [".env", ".env.local"]
+    "autoSetup": true,                    // Default: true
+    "syncFiles": [".env", ".env.local"],  // Default: [".env", ".env.local"]
+    "defaultEditor": "cursor"             // Default: "cursor"
+  },
+  "tmux": {
+    "enabled": false,                     // Default: false
+    "openIn": "window",                   // Default: "window" (options: "window" | "pane")
+    "sessionNaming": "{branch}"           // Default: "{branch}"
+  },
+  "claude": {
+    "markdownMode": "shared"              // Default: "shared" (options: "shared" | "split")
+  },
+  "github": {
+    "autoFetch": true,                    // Default: true
+    "branchNaming": {
+      "prTemplate": "pr-{number}",        // Default: "pr-{number}"
+      "issueTemplate": "issue-{number}"   // Default: "issue-{number}"
+    }
+  },
+  "ui": {
+    "pathDisplay": "absolute"             // Default: "absolute" (options: "absolute" | "relative")
   },
   "postCreate": {
     "copyFiles": [".env", ".env.local"],
@@ -850,29 +868,6 @@ Note: The `--full-path` option in the `list` command will always show absolute p
   "hooks": {
     "afterCreate": ["npm install", "npm run setup"],
     "beforeDelete": "echo 'Cleaning up worktree'"
-  },
-  "claude": {
-    "markdownMode": "shared"  // "shared" | "split"
-  },
-  "integrations": {
-    "claude": {
-      "enabled": true,
-      "autoGenerate": true
-    },
-    "tmux": {
-      "enabled": true,
-      "interactiveAttach": true  // Prompts for attachment in TTY environments
-    },
-    "github": {
-      "enabled": true,
-      "autoLink": true
-    }
-  },
-  "ui": {
-    "theme": "orchestra",
-    "colors": true,
-    "animations": true,
-    "pathDisplay": "absolute"  // "absolute" | "relative"
   }
 }
 ```

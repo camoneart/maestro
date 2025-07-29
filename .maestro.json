@@ -1,6 +1,8 @@
 {
   "worktrees": {
-    "branchPrefix": ""
+    "path": "../maestro-{branch}",
+    "branchPrefix": "",
+    "directoryPrefix": ""
   },
   "development": {
     "autoSetup": false,
@@ -9,6 +11,21 @@
       ".env.local"
     ],
     "defaultEditor": "cursor"
+  },
+  "tmux": {
+    "enabled": false,
+    "openIn": "window",
+    "sessionNaming": "{branch}"
+  },
+  "claude": {
+    "markdownMode": "shared"
+  },
+  "github": {
+    "autoFetch": true,
+    "branchNaming": {
+      "prTemplate": "pr-{number}",
+      "issueTemplate": "issue-{number}"
+    }
   },
   "ui": {
     "pathDisplay": "absolute"

@@ -211,37 +211,58 @@ Maestro は **リポジトリ直下の `.maestro.json`** を読み取り、動�
 
 | カテゴリ    | 主なキー       | 役割                                    | 例 / デフォルト                     |
 | ----------- | -------------- | --------------------------------------- | ----------------------------------- |
-| worktrees   | `path`         | worktree（演奏者）の格納先              | `.git/orchestra-members`            |
+| worktrees   | `path`         | worktree（演奏者）の格納先              | `../maestro-{branch}`               |
+|             | `directoryPrefix` | worktreeディレクトリのプレフィックス | `""` (空文字列)                     |
 |             | `branchPrefix` | 作成時のブランチ接頭辞                  | `feature/`                          |
 | development | `autoSetup`    | 作成直後に `npm install` などを自動実行 | `true`                              |
 |             | `syncFiles`    | 共有したいファイルの配列                | `[".env", ".env.local"]`            |
+|             | `defaultEditor`| デフォルトのエディタ                    | `cursor`                            |
+| tmux        | `enabled`      | tmux統合を有効化                        | `false`                             |
+|             | `openIn`       | ウィンドウかペインで開く                | `window` (`window` または `pane`)   |
+|             | `sessionNaming`| セッション名のパターン                  | `{branch}`                          |
+| claude      | `markdownMode` | CLAUDE.md ファイル管理モード            | `shared` (`shared` または `split`)  |
+| github      | `autoFetch`    | 操作前に自動でfetch                     | `true`                              |
+|             | `branchNaming.prTemplate` | PRブランチ名テンプレート      | `pr-{number}`                       |
+|             | `branchNaming.issueTemplate` | Issueブランチ名テンプレート | `issue-{number}`                    |
+| ui          | `pathDisplay`  | 全コマンドでのパス表示形式              | `absolute` (`absolute` または `relative`) |
 | hooks       | `afterCreate`  | 作成後に実行する任意コマンド            | `npm install`                       |
 |             | `beforeDelete` | 削除前フック                            | `echo "Deleting $ORCHESTRA_MEMBER"` |
-| claude      | `markdownMode` | CLAUDE.md ファイル管理モード            | `shared` (`shared` または `split`)  |
-| ui          | `pathDisplay`  | 全コマンドでのパス表示形式              | `absolute` (`absolute` または `relative`) |
 
-#### 完全なサンプル
+#### デフォルト値付き完全なサンプル
 
 ```json
 {
   "worktrees": {
-    "path": ".git/orchestra-members",
-    "branchPrefix": "feature/"
+    "path": "../maestro-{branch}",     // デフォルト: "../maestro-{branch}"
+    "directoryPrefix": "",              // デフォルト: "" (空文字列)
+    "branchPrefix": "feature/"          // カスタムブランチプレフィックス
   },
   "development": {
-    "autoSetup": true,
-    "syncFiles": [".env", ".env.local"],
-    "defaultEditor": "cursor"
+    "autoSetup": true,                  // デフォルト: true
+    "syncFiles": [".env", ".env.local"], // デフォルト: [".env", ".env.local"]
+    "defaultEditor": "cursor"           // デフォルト: "cursor"
+  },
+  "tmux": {
+    "enabled": false,                   // デフォルト: false
+    "openIn": "window",                 // デフォルト: "window" (オプション: "window" | "pane")
+    "sessionNaming": "{branch}"         // デフォルト: "{branch}"
+  },
+  "claude": {
+    "markdownMode": "shared"            // デフォルト: "shared" (オプション: "shared" | "split")
+  },
+  "github": {
+    "autoFetch": true,                  // デフォルト: true
+    "branchNaming": {
+      "prTemplate": "pr-{number}",       // デフォルト: "pr-{number}"
+      "issueTemplate": "issue-{number}"  // デフォルト: "issue-{number}"
+    }
+  },
+  "ui": {
+    "pathDisplay": "absolute"           // デフォルト: "absolute" (オプション: "absolute" | "relative")
   },
   "hooks": {
     "afterCreate": "npm install",
     "beforeDelete": "echo \"演奏者を削除します: $ORCHESTRA_MEMBER\""
-  },
-  "claude": {
-    "markdownMode": "shared"  // "shared" | "split"
-  },
-  "ui": {
-    "pathDisplay": "absolute"  // "absolute" | "relative"
   }
 }
 ```

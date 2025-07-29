@@ -235,37 +235,58 @@ mst config init                                    # Create project configuratio
 
 | Category    | Key            | Purpose                               | Default / Example                   |
 | ----------- | -------------- | ------------------------------------- | ----------------------------------- |
-| worktrees   | `path`         | Where to store performers             | `.git/orchestra-members`            |
+| worktrees   | `path`         | Where to store performers             | `../maestro-{branch}`               |
+|             | `directoryPrefix` | Prefix for worktree directories    | `""` (empty string)                 |
 |             | `branchPrefix` | Prefix for new branches               | `feature/`                          |
 | development | `autoSetup`    | Auto-run `npm install` after `create` | `true`                              |
 |             | `syncFiles`    | Files to sync across worktrees        | `[".env", ".env.local"]`            |
+|             | `defaultEditor`| Default editor for opening            | `cursor`                            |
+| tmux        | `enabled`      | Enable tmux integration               | `false`                             |
+|             | `openIn`       | Open in window or pane                | `window` (`window` or `pane`)       |
+|             | `sessionNaming`| Session naming pattern                | `{branch}`                          |
+| claude      | `markdownMode` | CLAUDE.md file management mode        | `shared` (`shared` or `split`)      |
+| github      | `autoFetch`    | Auto-fetch before operations          | `true`                              |
+|             | `branchNaming.prTemplate` | PR branch naming template    | `pr-{number}`                       |
+|             | `branchNaming.issueTemplate` | Issue branch naming template | `issue-{number}`                 |
+| ui          | `pathDisplay`  | Path display format across commands   | `absolute` (`absolute` or `relative`) |
 | hooks       | `afterCreate`  | Command after creation                | `npm install`                       |
 |             | `beforeDelete` | Command before deletion               | `echo "Deleting $ORCHESTRA_MEMBER"` |
-| claude      | `markdownMode` | CLAUDE.md file management mode       | `shared` (`shared` or `split`)      |
-| ui          | `pathDisplay`  | Path display format across commands   | `absolute` (`absolute` or `relative`) |
 
-#### Full Example
+#### Full Example with Default Values
 
 ```json
 {
   "worktrees": {
-    "path": ".git/orchestra-members",
-    "branchPrefix": "feature/"
+    "path": "../maestro-{branch}",     // Default: "../maestro-{branch}"
+    "directoryPrefix": "",              // Default: "" (empty string)
+    "branchPrefix": "feature/"          // Custom prefix for new branches
   },
   "development": {
-    "autoSetup": true,
-    "syncFiles": [".env", ".env.local"],
-    "defaultEditor": "cursor"
+    "autoSetup": true,                  // Default: true
+    "syncFiles": [".env", ".env.local"], // Default: [".env", ".env.local"]
+    "defaultEditor": "cursor"           // Default: "cursor"
+  },
+  "tmux": {
+    "enabled": false,                   // Default: false
+    "openIn": "window",                 // Default: "window" (options: "window" | "pane")
+    "sessionNaming": "{branch}"         // Default: "{branch}"
+  },
+  "claude": {
+    "markdownMode": "shared"            // Default: "shared" (options: "shared" | "split")
+  },
+  "github": {
+    "autoFetch": true,                  // Default: true
+    "branchNaming": {
+      "prTemplate": "pr-{number}",       // Default: "pr-{number}"
+      "issueTemplate": "issue-{number}"  // Default: "issue-{number}"
+    }
+  },
+  "ui": {
+    "pathDisplay": "absolute"           // Default: "absolute" (options: "absolute" | "relative")
   },
   "hooks": {
     "afterCreate": "npm install",
     "beforeDelete": "echo \"Deleting performer: $ORCHESTRA_MEMBER\""
-  },
-  "claude": {
-    "markdownMode": "shared"  // "shared" | "split"
-  },
-  "ui": {
-    "pathDisplay": "absolute"  // "absolute" | "relative"
   }
 }
 ```

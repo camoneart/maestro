@@ -232,13 +232,18 @@ Common configuration keys that can be used with `get`, `set`, and `reset`:
 |-----|-------------|---------------|------|
 | `ui.pathDisplay` | Path display format in commands | `"absolute"` | `"absolute"` \| `"relative"` |
 | `development.autoSetup` | Auto-run setup commands after creation | `true` | boolean |
+| `development.syncFiles` | Files to sync across worktrees | `[".env", ".env.local"]` | array |
 | `development.defaultEditor` | Default editor to open | `"cursor"` | string |
-| `worktrees.path` | Directory to store worktrees | `".git/orchestra-members"` | string |
-| `worktrees.branchPrefix` | Prefix for new branches | `"feature/"` | string |
+| `worktrees.path` | Directory to store worktrees | `"../maestro-{branch}"` | string |
+| `worktrees.directoryPrefix` | Prefix for worktree directories | `""` | string |
+| `worktrees.branchPrefix` | Prefix for new branches | `""` | string |
+| `tmux.enabled` | Enable tmux integration | `false` | boolean |
+| `tmux.openIn` | Open in window or pane | `"window"` | `"window"` \| `"pane"` |
+| `tmux.sessionNaming` | Session naming pattern | `"{branch}"` | string |
 | `claude.markdownMode` | CLAUDE.md file management mode | `"shared"` | `"shared"` \| `"split"` |
-| `integrations.tmux.enabled` | Enable tmux integration | `true` | boolean |
-| `integrations.claude.enabled` | Enable Claude Code integration | `true` | boolean |
-| `integrations.github.enabled` | Enable GitHub integration | `true` | boolean |
+| `github.autoFetch` | Auto-fetch before operations | `true` | boolean |
+| `github.branchNaming.prTemplate` | PR branch naming template | `"pr-{number}"` | string |
+| `github.branchNaming.issueTemplate` | Issue branch naming template | `"issue-{number}"` | string |
 
 ## Related Commands
 
