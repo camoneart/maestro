@@ -246,15 +246,11 @@ async function setTitleForAllPanes(
   paneCount: number
 ): Promise<void> {
   for (let i = 0; i < paneCount; i++) {
-    const selectArgs = sessionName
-      ? ['select-pane', '-t', `${sessionName}:${i}`]
-      : ['select-pane', '-t', `${i}`]
-
     try {
-      await execa('tmux', selectArgs)
+      // 各ペインに直接タイトルを設定
       const titleArgs = sessionName
-        ? ['select-pane', '-t', sessionName, '-T', branchName]
-        : ['select-pane', '-T', branchName]
+        ? ['select-pane', '-t', `${sessionName}:${i}`, '-T', branchName]
+        : ['select-pane', '-t', `${i}`, '-T', branchName]
       await execa('tmux', titleArgs)
     } catch {
       // ペインが存在しない場合はスキップ
