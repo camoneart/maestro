@@ -238,6 +238,98 @@ describe('Multi-pane tmux session creation', () => {
     })
   })
 
+  describe('Pane title and focus management (Issue #167)', () => {
+    it('should set title for all panes individually', async () => {
+      const branchName = 'test-branch'
+      const worktreePath = '/test/path'
+      const sessionName = 'test-branch'
+
+      // Mock tmux session doesn't exist
+      mockExeca.mockRejectedValueOnce(new Error('Session not found'))
+
+      // Mock successful tmux commands
+      mockExeca.mockResolvedValue({ stdout: '', stderr: '' } as any)
+
+      const options: CreateOptions = {
+        tmuxHPanes: 3,
+      }
+
+      await createTmuxSession(branchName, worktreePath, options)
+
+      // Verify that select-pane with title is called for each pane (0, 1, 2)
+      expect(mockExeca).toHaveBeenCalledWith('tmux', [
+        'select-pane',
+        '-t',
+        `${sessionName}:0`,
+        '-T',
+        branchName,
+      ])
+      expect(mockExeca).toHaveBeenCalledWith('tmux', [
+        'select-pane',
+        '-t',
+        `${sessionName}:1`,
+        '-T',
+        branchName,
+      ])
+      expect(mockExeca).toHaveBeenCalledWith('tmux', [
+        'select-pane',
+        '-t',
+        `${sessionName}:2`,
+        '-T',
+        branchName,
+      ])
+    })
+
+    it('should focus on first pane (0) after setup', async () => {
+      const branchName = 'test-branch'
+      const worktreePath = '/test/path'
+      const sessionName = 'test-branch'
+
+      // Mock tmux session doesn't exist
+      mockExeca.mockRejectedValueOnce(new Error('Session not found'))
+
+      // Mock successful tmux commands
+      mockExeca.mockResolvedValue({ stdout: '', stderr: '' } as any)
+
+      const options: CreateOptions = {
+        tmuxHPanes: 3,
+      }
+
+      await createTmuxSession(branchName, worktreePath, options)
+
+      // Verify that focus is moved to first pane (0)
+      expect(mockExeca).toHaveBeenCalledWith('tmux', ['select-pane', '-t', `${sessionName}:0`])
+    })
+
+    it('should handle inside tmux session with proper pane titles', async () => {
+      // Mock being inside tmux
+      process.env.TMUX = 'tmux-socket,12345,0'
+
+      const branchName = 'test-branch'
+      const worktreePath = '/test/path'
+
+      // Mock successful tmux commands
+      mockExeca.mockResolvedValue({ stdout: '', stderr: '' } as any)
+
+      const options: CreateOptions = {
+        tmuxVPanes: 3,
+      }
+
+      await createTmuxSession(branchName, worktreePath, options)
+
+      // Verify that titles are set for each pane without session name
+      expect(mockExeca).toHaveBeenCalledWith('tmux', ['select-pane', '-t', '0', '-T', branchName])
+      expect(mockExeca).toHaveBeenCalledWith('tmux', ['select-pane', '-t', '1', '-T', branchName])
+      expect(mockExeca).toHaveBeenCalledWith('tmux', ['select-pane', '-t', '2', '-T', branchName])
+
+      // Verify focus moves to first pane
+      expect(mockExeca).toHaveBeenCalledWith('tmux', ['select-pane', '-t', '0'])
+
+      // Clean up
+      delete process.env.TMUX
+    })
+  })
+
   describe('Error handling', () => {
     it('should handle "no space for new pane" error with user-friendly message', async () => {
       const branchName = 'test-branch'

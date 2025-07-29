@@ -47,7 +47,9 @@ describe('createTmuxSession - pane split options', () => {
       '-l',
     ])
     expect(execa).toHaveBeenCalledWith('tmux', ['select-pane', '-t', '0'])
-    expect(execa).toHaveBeenCalledWith('tmux', ['select-pane', '-T', 'feature-test'])
+    // Verify that titles are set for each pane individually (Issue #167 fix)
+    expect(execa).toHaveBeenCalledWith('tmux', ['select-pane', '-t', '0', '-T', 'feature-test'])
+    expect(execa).toHaveBeenCalledWith('tmux', ['select-pane', '-t', '1', '-T', 'feature-test'])
 
     // Restore original TMUX env
     if (originalTmux !== undefined) {
@@ -75,7 +77,9 @@ describe('createTmuxSession - pane split options', () => {
       '-l',
     ])
     expect(execa).toHaveBeenCalledWith('tmux', ['select-pane', '-t', '0'])
-    expect(execa).toHaveBeenCalledWith('tmux', ['select-pane', '-T', 'feature-test'])
+    // Verify that titles are set for each pane individually (Issue #167 fix)
+    expect(execa).toHaveBeenCalledWith('tmux', ['select-pane', '-t', '0', '-T', 'feature-test'])
+    expect(execa).toHaveBeenCalledWith('tmux', ['select-pane', '-t', '1', '-T', 'feature-test'])
 
     // Restore original TMUX env
     if (originalTmux !== undefined) {
@@ -212,11 +216,18 @@ describe('createTmuxSession - pane split options', () => {
       // Should focus first pane
       expect(execa).toHaveBeenCalledWith('tmux', ['select-pane', '-t', 'feature-test:0'])
 
-      // Should set pane title
+      // Should set pane titles for all panes individually (Issue #167 fix)
       expect(execa).toHaveBeenCalledWith('tmux', [
         'select-pane',
         '-t',
+        'feature-test:0',
+        '-T',
         'feature-test',
+      ])
+      expect(execa).toHaveBeenCalledWith('tmux', [
+        'select-pane',
+        '-t',
+        'feature-test:1',
         '-T',
         'feature-test',
       ])
@@ -311,7 +322,9 @@ describe('createTmuxSession - pane split options', () => {
         '-l',
       ])
       expect(execa).toHaveBeenCalledWith('tmux', ['select-pane', '-t', '0'])
-      expect(execa).toHaveBeenCalledWith('tmux', ['select-pane', '-T', 'feature-test'])
+      // Verify that titles are set for each pane individually (Issue #167 fix)
+      expect(execa).toHaveBeenCalledWith('tmux', ['select-pane', '-t', '0', '-T', 'feature-test'])
+      expect(execa).toHaveBeenCalledWith('tmux', ['select-pane', '-t', '1', '-T', 'feature-test'])
 
       // Should NOT create new session or attach
       expect(execa).not.toHaveBeenCalledWith('tmux', expect.arrayContaining(['new-session']))
