@@ -350,7 +350,7 @@ mst completion fish > ~/.config/fish/completions/mst.fish
 | **fzf not found**                              | fzf not installed                       | `brew install fzf`                |
 | **tmux not found**                             | tmux not installed                      | `brew install tmux`               |
 | **Claude Code won't start**                    | MCP server not running or port conflict | `mst mcp status` → `mst mcp stop` |
-| **Too many tmux panes** <br>`no space for new pane` | Terminal window too small for requested panes | Resize window or use fewer panes |
+| **Too many tmux panes** <br>`画面サイズに対してペイン数（N個）が多すぎます` | Terminal window too small for requested panes | Resize window or use fewer panes |
 
 ### Other error codes
 
@@ -361,7 +361,16 @@ mst completion fish > ~/.config/fish/completions/mst.fish
 
 ### ⚠️ tmux Multi-Pane Troubleshooting
 
-When using multi-pane creation (`--tmux-h-panes` or `--tmux-v-panes`), you may encounter space limitations. Here's how to resolve them:
+When using multi-pane creation (`--tmux-h-panes` or `--tmux-v-panes`), you may encounter space limitations. The create command now provides enhanced error handling with user-friendly Japanese messages:
+
+**Enhanced Error Messages**:
+```bash
+# New Japanese error message format:
+Error: 画面サイズに対してペイン数（4個）が多すぎます。ターミナルウィンドウを大きくするか、ペイン数を減らしてください。（水平分割）
+
+# Generic tmux error fallback:
+Error: tmuxペインの作成に失敗しました: [specific error details]
+```
 
 **Quick Solutions**:
 ```bash
@@ -382,6 +391,11 @@ mst create feature/api --tmux-h-panes 4 --tmux-layout tiled
 - **Small (80x24)**: 2-3 panes maximum
 - **Medium (120x40)**: 4-6 panes optimal
 - **Large (200x60+)**: 6+ panes supported
+
+**Error Message Features**:
+- Displays number of panes that couldn't be created
+- Indicates split direction (水平分割 for horizontal, 垂直分割 for vertical)
+- Provides actionable solutions directly in the error message
 
 If the issue persists, search or open a new ticket in the [Issues](https://github.com/camoneart/maestro/issues).
 

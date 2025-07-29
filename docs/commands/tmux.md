@@ -312,12 +312,18 @@ tmux kill-session -t session-name
 
 ### Multi-Pane Creation Errors
 
-When using `mst create` with multi-pane options (`--tmux-h-panes` or `--tmux-v-panes`), you may encounter space-related errors:
+When using `mst create` with multi-pane options (`--tmux-h-panes` or `--tmux-v-panes`), you may encounter space-related errors. The create command now provides enhanced error handling with user-friendly Japanese messages:
 
 4. **No space for new pane**
    ```
    Error: 画面サイズに対してペイン数（4個）が多すぎます。ターミナルウィンドウを大きくするか、ペイン数を減らしてください。（水平分割）
    ```
+
+   **Enhanced Error Message Features**:
+   - Displays in Japanese for better user experience
+   - Shows the exact number of panes that couldn't be created
+   - Indicates split direction: 水平分割 (horizontal) or 垂直分割 (vertical)
+   - Provides immediate solutions in the error message itself
 
    **Immediate Solutions**:
    - Resize terminal window (drag corners or maximize)
@@ -334,6 +340,11 @@ When using `mst create` with multi-pane options (`--tmux-h-panes` or `--tmux-v-p
    ```
    Error: tmuxペインの作成に失敗しました: [error details]
    ```
+
+   **Improved Error Handling**:
+   - Generic fallback for all other tmux pane creation failures
+   - Preserves original tmux error message for debugging purposes
+   - Consistent Japanese error messaging throughout the application
 
    **Troubleshooting Steps**:
    ```bash

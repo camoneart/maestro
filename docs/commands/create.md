@@ -490,7 +490,7 @@ mst create feature/testing --tmux-h-panes 4 --tmux-layout even-horizontal
 
 ### tmux Error Handling
 
-The create command now includes enhanced error handling for tmux pane creation, providing user-friendly messages when terminal space limitations occur:
+The create command includes enhanced error handling for tmux pane creation, providing user-friendly Japanese error messages when issues occur:
 
 4. **No space for new pane error**
 
@@ -499,6 +499,12 @@ The create command now includes enhanced error handling for tmux pane creation, 
    ```
 
    **Cause**: The terminal window is too small to accommodate the requested number of panes with `--tmux-h-panes` or `--tmux-v-panes` options.
+
+   **Error Message Details**:
+   - Displays in Japanese for better user experience
+   - Shows the specific number of panes that failed to create
+   - Indicates whether it was horizontal (水平分割) or vertical (垂直分割) splitting
+   - Provides actionable solutions directly in the error message
 
    **Solutions**:
    - Increase terminal window size by dragging corners or maximizing
@@ -513,6 +519,11 @@ The create command now includes enhanced error handling for tmux pane creation, 
    ```
 
    **Cause**: Various tmux configuration or environment issues.
+
+   **Error Message Features**:
+   - Generic fallback for all other tmux pane creation failures
+   - Preserves the original tmux error message for debugging
+   - Consistent Japanese error messaging across the application
 
    **Solutions**:
    - Ensure tmux is properly installed: `brew install tmux`
