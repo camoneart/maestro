@@ -1,5 +1,23 @@
 # Changelog
 
+## 3.5.3
+
+### Patch Changes
+
+- fix: Complete elimination of duplicate error messages
+
+  Removes the final redundant error display in executeCreateCommand that was causing
+  triple error messages when tmux operations failed. Now shows clean, single error
+  messages as intended.
+
+  **Fixed behavior:**
+  - Error messages now display only twice instead of three times
+  - Eliminated redundant error output in CLI error handling
+  - Cleaner error experience for users
+
+  Completes fix for #163
+  EOF < /dev/null
+
 ## 3.5.2
 
 ### Patch Changes
