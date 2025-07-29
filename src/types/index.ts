@@ -28,6 +28,9 @@ export interface CreateOptions {
   tmuxV?: boolean
   tmuxVertical?: boolean
   tmuxHorizontal?: boolean
+  tmuxHPanes?: number
+  tmuxVPanes?: number
+  tmuxLayout?: 'even-horizontal' | 'even-vertical' | 'main-horizontal' | 'main-vertical' | 'tiled'
   claudeMd?: boolean
   yes?: boolean
   shell?: boolean
