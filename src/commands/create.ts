@@ -199,7 +199,22 @@ async function createMultiplePanes(
     splitArgs.push('-c', worktreePath)
     const shell = process.env.SHELL || '/bin/bash'
     splitArgs.push(shell, '-l')
-    await execa('tmux', splitArgs)
+    
+    try {
+      await execa('tmux', splitArgs)
+    } catch (error) {
+      // tmuxエラーを解析してユーザーフレンドリーなメッセージを表示
+      if (error instanceof Error && error.message.includes('no space for new pane')) {
+        const splitType = isHorizontal ? '水平' : '垂直'
+        throw new Error(
+          `画面サイズに対してペイン数（${paneCount}個）が多すぎます。ターミナルウィンドウを大きくするか、ペイン数を減らしてください。（${splitType}分割）`
+        )
+      }
+      
+      // その他のtmuxエラーの汎用的な処理
+      const errorMessage = error instanceof Error ? error.message : String(error)
+      throw new Error(`tmuxペインの作成に失敗しました: ${errorMessage}`)
+    }
   }
 }
 
@@ -396,6 +411,7 @@ export async function createTmuxSession(
     }
   } catch (error) {
     console.error(chalk.red(`tmuxセッションの作成に失敗しました: ${error}`))
+    throw error
   }
 }
 
