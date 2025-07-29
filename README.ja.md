@@ -205,6 +205,31 @@ Maestro が提供する “もう一歩進んだ” 機能を一覧で把握で�
 Maestro は **リポジトリ直下の `.maestro.json`** を読み取り、動作をカスタマイズできます。<br>
 よく使うキーを以下の表にまとめ、完全なサンプルは表に続くコードブロックで確認できます。
 
+### ⚙️ 設定管理
+
+Maestroはドット記法を使って設定を管理するコマンドを提供します:
+
+```bash
+# 設定値を取得
+mst config get ui.pathDisplay                      # パス表示設定を取得
+mst config get development.autoSetup               # 自動セットアップ設定を取得
+
+# 設定値を設定  
+mst config set ui.pathDisplay relative             # 自動的にユーザー設定として保存
+mst config set --user ui.pathDisplay relative     # 明示的にユーザー設定に保存
+mst config set --project worktrees.path "../"     # 明示的にプロジェクト設定に保存
+mst config set development.defaultEditor cursor    # デフォルトエディタを設定（ユーザー設定）
+
+# デフォルト値にリセット
+mst config reset ui.pathDisplay                    # パス表示をデフォルトにリセット
+mst config reset development.autoSetup             # 自動セットアップをデフォルトにリセット
+
+# 設定ファイルの表示と管理
+mst config show                                    # 現在の有効な設定を表示
+mst config path                                    # 設定ファイルの場所を表示
+mst config init                                    # プロジェクト設定を作成
+```
+
 **Claude設定:**
 - `markdownMode: "shared"` - メインリポジトリのCLAUDE.mdへのシンボリックリンクを作成（デフォルト）
 - `markdownMode: "split"` - 各worktreeに独立したCLAUDE.mdファイルを作成

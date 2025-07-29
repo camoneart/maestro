@@ -48,9 +48,13 @@ mst config show --global
 # Initialize project config and edit immediately
 mst config init && code .maestro.json
 
-# Set nested configuration values
-mst config set development.autoSetup false
-mst config set worktrees.path "../my-worktrees"
+# Set nested configuration values with explicit targets
+mst config set --user ui.pathDisplay relative
+mst config set --project development.autoSetup false
+mst config set --project worktrees.path "../my-worktrees"
+
+# Override automatic detection
+mst config set --project ui.pathDisplay relative  # Force save to project settings
 ```
 
 ## Actions
@@ -69,15 +73,18 @@ mst config set worktrees.path "../my-worktrees"
 | Option | Short | Description | Default |
 |--------|-------|-------------|---------|
 | `--global` | `-g` | Target global configuration | `false` |
+| `--user` | `-u` | Target user settings (.maestro.local.json) | `false` |
+| `--project` | `-p` | Target project settings (.maestro.json) | `false` |
 
 ## Configuration Files
 
 ### File Priority (highest to lowest)
 
-1. **`.maestro.json`** - Primary project configuration
-2. **`.maestrorc.json`** - Alternative project configuration  
-3. **`maestro.config.json`** - Legacy project configuration
-4. **Global config** - User-wide settings
+1. **`.maestro.local.json`** - User-specific settings (gitignored)
+2. **`.maestro.json`** - Primary project configuration
+3. **`.maestrorc.json`** - Alternative project configuration  
+4. **`maestro.config.json`** - Legacy project configuration
+5. **Global config** - User-wide settings
 
 ## Configuration Actions
 
@@ -175,28 +182,38 @@ If the configuration key doesn't exist:
 Sets a configuration value using dot notation:
 
 ```bash
-mst config set <key> <value>
+mst config set <key> <value> [options]
 ```
+
+**Options:**
+- `--user` or `-u` - Save to user settings (.maestro.local.json) 
+- `--project` or `-p` - Save to project settings (.maestro.json)
+- Without options - Auto-detects based on key (UI settings → user, others → project)
 
 **Examples:**
 ```bash
-# Set path display format
+# Set path display format (auto-detects as user setting)
 mst config set ui.pathDisplay relative
 
-# Disable auto-setup
+# Explicitly save to user settings
+mst config set --user ui.pathDisplay relative
+
+# Explicitly save to project settings
+mst config set --project worktrees.path "../orchestra-members"
+
+# Disable auto-setup (auto-detects as project setting)
 mst config set development.autoSetup false
 
-# Change worktrees location
-mst config set worktrees.path "../orchestra-members"
-
-# Set default editor
+# Set default editor (auto-detects as user setting)
 mst config set development.defaultEditor cursor
 ```
 
 **Sample output:**
 ```
-✅ ui.pathDisplay を relative に設定しました
+✅ ui.pathDisplay を relative に設定しました (ユーザー設定: .maestro.local.json)
 ```
+
+**Note:** User settings (ui.* and development.defaultEditor) are automatically saved to `.maestro.local.json` which is gitignored, keeping personal preferences separate from shared project configuration.
 
 ### Reset Configuration Value (`reset`)
 
@@ -228,12 +245,19 @@ mst config reset worktrees.path
 
 Common configuration keys that can be used with `get`, `set`, and `reset`:
 
+### User Settings (stored in `.maestro.local.json`, gitignored)
+
 | Key | Description | Default Value | Type |
 |-----|-------------|---------------|------|
 | `ui.pathDisplay` | Path display format in commands | `"absolute"` | `"absolute"` \| `"relative"` |
+| `development.defaultEditor` | Default editor to open | `"cursor"` | string |
+
+### Project Settings (stored in `.maestro.json`, git-tracked)
+
+| Key | Description | Default Value | Type |
+|-----|-------------|---------------|------|
 | `development.autoSetup` | Auto-run setup commands after creation | `true` | boolean |
 | `development.syncFiles` | Files to sync across worktrees | `[".env", ".env.local"]` | array |
-| `development.defaultEditor` | Default editor to open | `"cursor"` | string |
 | `worktrees.path` | Directory to store worktrees | `"../maestro-{branch}"` | string |
 | `worktrees.directoryPrefix` | Prefix for worktree directories | `""` | string |
 | `worktrees.branchPrefix` | Prefix for new branches | `""` | string |
@@ -244,6 +268,9 @@ Common configuration keys that can be used with `get`, `set`, and `reset`:
 | `github.autoFetch` | Auto-fetch before operations | `true` | boolean |
 | `github.branchNaming.prTemplate` | PR branch naming template | `"pr-{number}"` | string |
 | `github.branchNaming.issueTemplate` | Issue branch naming template | `"issue-{number}"` | string |
+| `hooks.*` | Hook configurations | varies | object |
+
+**Note:** When using `mst config set`, user settings are automatically detected and saved to `.maestro.local.json`. Use `--project` flag to override this behavior if needed.
 
 ## Related Commands
 
