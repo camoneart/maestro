@@ -1,5 +1,26 @@
 # Changelog
 
+## 3.5.1
+
+### Patch Changes
+
+- feat: Add multi-pane support for tmux options (#157)
+  - Added `--tmux-h-panes <number>` and `--tmux-v-panes <number>` options for creating multiple tmux panes
+  - Added `--tmux-layout <type>` option for applying tmux layout (even-horizontal, even-vertical, main-horizontal, main-vertical, tiled)
+  - Improved tmux integration with automatic layout application for optimal space usage
+
+  fix: Improve tmux pane creation error handling (#161)
+  - Enhanced error messages when tmux pane creation fails due to insufficient screen space
+  - Better user feedback with specific guidance on resolution (e.g., "画面サイズに対してペイン数が多すぎます")
+
+  fix: Lazy initialization for tmux helper to resolve path resolution issues (#162)
+  - Fixed issue where CLI commands failed when run from directories outside the maestro project root
+  - Tmux helper path is now resolved only when tmux features are actually used
+  - Non-tmux commands (like `config init`) now work correctly from any directory
+
+  Fixes #159, #160
+  EOF < /dev/null
+
 ## 3.5.0
 
 ### Minor Changes
