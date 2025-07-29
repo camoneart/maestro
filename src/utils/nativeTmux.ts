@@ -9,11 +9,23 @@ import { existsSync, chmodSync } from 'fs'
  * This solves the TTY corruption issue by using exec to replace the process
  */
 export class NativeTmuxHelper {
-  // Path to the native tmux helper script
-  private static readonly HELPER_SCRIPT = (() => {
+  // Cached path to the native tmux helper script (lazy initialization)
+  private static _helperScript: string | null = null
+
+  /**
+   * Get the path to the tmux helper script with lazy initialization
+   * Only resolves the path when tmux functionality is actually needed
+   */
+  private static getHelperScript(): string {
+    // Return cached value if already resolved
+    if (this._helperScript !== null) {
+      return this._helperScript
+    }
+
     // Skip initialization in test environment
     if (process.env.NODE_ENV === 'test' || process.env.VITEST) {
-      return '/mock/path/maestro-tmux-attach'
+      this._helperScript = '/mock/path/maestro-tmux-attach'
+      return this._helperScript
     }
 
     // Get current file directory
@@ -41,7 +53,9 @@ export class NativeTmuxHelper {
 
     if (!scriptPath) {
       throw new Error(
-        `Maestro tmux helper script not found. Searched paths: ${possiblePaths.join(', ')}`
+        `Maestro tmux helper script not found. Searched paths: ${possiblePaths.join(', ')}\n` +
+        'Note: This error occurs only when tmux functionality is used. ' +
+        'Non-tmux commands like "config init" should work without tmux installed.'
       )
     }
 
@@ -53,8 +67,9 @@ export class NativeTmuxHelper {
       console.warn(`Warning: Could not set executable permissions for ${scriptPath}`)
     }
 
-    return scriptPath
-  })()
+    this._helperScript = scriptPath
+    return this._helperScript
+  }
   /**
    * Attach to an existing tmux session using native shell script with exec
    * This function replaces the current Node.js process with tmux
@@ -73,7 +88,7 @@ export class NativeTmuxHelper {
     }
 
     // Use the native helper script which properly uses exec to replace the process
-    const helperProcess = spawn(this.HELPER_SCRIPT, ['attach', sessionName], {
+    const helperProcess = spawn(this.getHelperScript(), ['attach', sessionName], {
       stdio: 'inherit',
       detached: false,
     })
@@ -126,7 +141,7 @@ export class NativeTmuxHelper {
     }
 
     // Use the native helper script which properly uses exec to replace the process
-    const helperProcess = spawn(this.HELPER_SCRIPT, args, {
+    const helperProcess = spawn(this.getHelperScript(), args, {
       stdio: 'inherit',
       detached: false,
     })
@@ -158,7 +173,7 @@ export class NativeTmuxHelper {
 
     // Use the native helper script for consistency
     try {
-      await execa(this.HELPER_SCRIPT, ['switch', sessionName])
+      await execa(this.getHelperScript(), ['switch', sessionName])
     } catch (error) {
       throw new Error(
         `Failed to switch tmux client: ${error instanceof Error ? error.message : 'Unknown error'}`
