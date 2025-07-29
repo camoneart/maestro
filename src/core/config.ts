@@ -212,17 +212,20 @@ export class ConfigManager {
   }
 
   // ドット記法で設定値を取得
-  getConfigValue(keyPath: string): any {
+  getConfigValue(keyPath: string): unknown {
     const keys = keyPath.split('.')
     const config = this.getAll()
 
-    return keys.reduce((obj: any, key: string) => {
-      return obj && obj[key] !== undefined ? obj[key] : undefined
-    }, config)
+    return keys.reduce((obj: unknown, key: string) => {
+      if (obj && typeof obj === 'object' && key in obj) {
+        return (obj as Record<string, unknown>)[key]
+      }
+      return undefined
+    }, config as unknown)
   }
 
   // ドット記法で設定値を設定
-  async setConfigValue(keyPath: string, value: any, target: 'user' | 'project' = 'project'): Promise<void> {
+  async setConfigValue(keyPath: string, value: unknown, target: 'user' | 'project' = 'project'): Promise<void> {
     if (target === 'user') {
       await this.setUserConfigValue(keyPath, value)
     } else {
@@ -231,11 +234,11 @@ export class ConfigManager {
   }
 
   // ユーザー設定を設定
-  async setUserConfigValue(keyPath: string, value: any): Promise<void> {
+  async setUserConfigValue(keyPath: string, value: unknown): Promise<void> {
     const configPath = path.join(process.cwd(), '.maestro.local.json')
 
     // 既存のユーザー設定を読み込む
-    let userConfig: any = {}
+    let userConfig: Record<string, unknown> = {}
     try {
       const configData = await fs.readFile(configPath, 'utf-8')
       userConfig = JSON.parse(configData)
@@ -273,11 +276,11 @@ export class ConfigManager {
   }
 
   // プロジェクト設定を設定
-  async setProjectConfigValue(keyPath: string, value: any): Promise<void> {
+  async setProjectConfigValue(keyPath: string, value: unknown): Promise<void> {
     const configPath = path.join(process.cwd(), '.maestro.json')
 
     // 既存のプロジェクト設定を読み込む
-    let projectConfig: any = {}
+    let projectConfig: Record<string, unknown> = {}
     try {
       const configData = await fs.readFile(configPath, 'utf-8')
       projectConfig = JSON.parse(configData)
@@ -319,7 +322,7 @@ export class ConfigManager {
     const configPath = path.join(process.cwd(), '.maestro.json')
 
     // 既存のプロジェクト設定を読み込む
-    let projectConfig: any = {}
+    let projectConfig: Record<string, unknown> = {}
     try {
       const configData = await fs.readFile(configPath, 'utf-8')
       projectConfig = JSON.parse(configData)
@@ -331,7 +334,7 @@ export class ConfigManager {
     // ドット記法でキーを削除
     const keys = keyPath.split('.')
     let current = projectConfig
-    const parents: Array<{ obj: any; key: string }> = []
+    const parents: Array<{ obj: Record<string, unknown>; key: string }> = []
 
     // パスをたどって削除対象を見つける
     for (let i = 0; i < keys.length - 1; i++) {
@@ -340,7 +343,7 @@ export class ConfigManager {
         return // キーが存在しない場合は何もしない
       }
       parents.push({ obj: current, key })
-      current = current[key]
+      current = current[key] as Record<string, unknown>
     }
 
     const lastKey = keys[keys.length - 1]
@@ -359,7 +362,7 @@ export class ConfigManager {
   }
 
   // 値の型変換
-  private parseValue(value: any): any {
+  private parseValue(value: unknown): unknown {
     if (typeof value === 'string') {
       // boolean値の変換
       if (value === 'true') return true
@@ -374,14 +377,14 @@ export class ConfigManager {
   }
 
   // 空のオブジェクトを削除
-  private cleanEmptyObjects(obj: any, keys: string[]): void {
+  private cleanEmptyObjects(obj: Record<string, unknown>, keys: string[]): void {
     if (keys.length === 0) return
 
     let current = obj
     for (let i = 0; i < keys.length - 1; i++) {
       const key = keys[i]
       if (!key || !current[key]) return
-      current = current[key]
+      current = current[key] as Record<string, unknown>
     }
 
     const lastKey = keys[keys.length - 1]
@@ -389,7 +392,7 @@ export class ConfigManager {
       lastKey &&
       current[lastKey] &&
       typeof current[lastKey] === 'object' &&
-      Object.keys(current[lastKey]).length === 0
+      Object.keys(current[lastKey] as Record<string, unknown>).length === 0
     ) {
       delete current[lastKey]
       // 再帰的にチェック
