@@ -109,14 +109,34 @@ mst create feature/new-ui --tmux-h
 # Create worktree and split vertically (auto-focus to new pane)  
 mst create bugfix/critical --tmux-v
 
+# Create worktree with multiple panes
+mst create feature/api --tmux-h-panes 3      # 3 horizontal panes
+mst create feature/ui --tmux-v-panes 4       # 4 vertical panes
+
+# Create with specific layouts
+mst create feature/dashboard --tmux-h-panes 3 --tmux-layout even-horizontal
+mst create feature/service --tmux-v-panes 2 --tmux-layout main-vertical
+
 # Combine with Claude Code for AI-assisted development
-mst create feature/ai-feature --tmux-h --claude
+mst create feature/ai-feature --tmux-h-panes 2 --tmux-layout tiled --claude-md
 ```
 
 **Auto-Focus Feature:**
 - New panes are automatically focused after creation (Issue #105 fix)
 - No manual pane switching required - ready for immediate development
 - Pane title is set to branch name for easy identification
+
+**Layout Options:**
+- `even-horizontal` - Evenly distribute panes horizontally
+- `even-vertical` - Evenly distribute panes vertically
+- `main-horizontal` - Large main pane at top, smaller panes below  
+- `main-vertical` - Large main pane on left, smaller panes on right
+- `tiled` - Tiled layout that balances all panes
+
+**Multi-Pane Features:**
+- Supports 2+ panes per worktree creation
+- Automatic layout application for optimal space usage
+- All panes inherit shell environment and working directory
 
 ### Editor Integration
 

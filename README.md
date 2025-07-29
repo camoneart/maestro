@@ -136,6 +136,8 @@ mst create feature/awesome-feature --tmux --claude-md
 - `mst shell <branch>` lets you enter any performer after creation (fzf prompt when omitted).
 - `--tmux` creates a dedicated tmux session and prompts for attachment (automatically attaches in non-TTY environments); combine with `--claude-md` to set up Claude Code workspace files.
 - `--tmux-h`/`--tmux-v` splits the current tmux pane horizontally/vertically and auto-focuses to the new pane for immediate development.
+- `--tmux-h-panes <number>`/`--tmux-v-panes <number>` creates multiple horizontal/vertical panes with specified count.
+- `--tmux-layout <type>` applies specific tmux layout (even-horizontal, even-vertical, main-horizontal, main-vertical, tiled).
 
 ### Basic Usage Examples
 
@@ -176,10 +178,11 @@ All sub-commands and options are documented in the [Command Reference](./docs/CO
 
 ```bash
 mst create feature/my-ui --tmux --claude-md   # create + AI + tmux
-mst list                                   # list performers
-mst tmux                                   # switch via fzf
-mst push --pr                              # push with PR
-mst review --auto-flow                     # auto review & merge
+mst create feature/api --tmux-h-panes 3       # create + 3 horizontal panes
+mst list                                       # list performers
+mst tmux                                       # switch via fzf
+mst push --pr                                  # push with PR
+mst review --auto-flow                         # auto review & merge
 ```
 
 ## Advanced Features
