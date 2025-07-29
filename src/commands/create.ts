@@ -249,7 +249,7 @@ async function setTitleForAllPanes(
     try {
       // 各ペインに直接タイトルを設定
       const titleArgs = sessionName
-        ? ['select-pane', '-t', `${sessionName}:${i}`, '-T', branchName]
+        ? ['select-pane', '-t', `${sessionName}:0.${i}`, '-T', branchName]
         : ['select-pane', '-t', `${i}`, '-T', branchName]
       await execa('tmux', titleArgs)
     } catch {
@@ -281,7 +281,7 @@ async function handleNewSessionPaneSplit(
   await setTitleForAllPanes(sessionName, branchName, paneCount)
 
   // 最初のペイン（左上）にフォーカスを移動
-  await execa('tmux', ['select-pane', '-t', `${sessionName}:0`])
+  await execa('tmux', ['select-pane', '-t', `${sessionName}:0.0`])
   await execa('tmux', ['rename-window', '-t', sessionName, branchName])
   await setupTmuxStatusLine()
 }
