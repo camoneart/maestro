@@ -171,7 +171,7 @@ export async function createTmuxSession(
 
   try {
     // ペイン分割オプションの場合
-    if (options?.tmuxH || options?.tmuxV) {
+    if (options?.tmuxH || options?.tmuxV || options?.tmuxHPanes || options?.tmuxVPanes || options?.tmuxLayout) {
       const isInsideTmux = process.env.TMUX !== undefined
 
       if (!isInsideTmux) {
@@ -201,17 +201,32 @@ export async function createTmuxSession(
         ])
 
         // ペイン分割を実行
-        const splitArgs = ['split-window', '-t', sessionName]
-        if (options.tmuxH) {
-          splitArgs.push('-h') // 水平分割（左右）
-        } else if (options.tmuxV) {
-          splitArgs.push('-v') // 垂直分割（上下）
+        const paneCount = options.tmuxHPanes || options.tmuxVPanes || 2
+        const isHorizontal = options.tmuxH || options.tmuxHPanes
+        
+        // 複数ペインを作成
+        for (let i = 1; i < paneCount; i++) {
+          const splitArgs = ['split-window', '-t', sessionName]
+          if (isHorizontal) {
+            splitArgs.push('-h') // 水平分割（左右）
+          } else {
+            splitArgs.push('-v') // 垂直分割（上下）
+          }
+          splitArgs.push('-c', worktreePath)
+          // ユーザーのシェルをログインシェルとして起動
+          const splitShell = process.env.SHELL || '/bin/bash'
+          splitArgs.push(splitShell, '-l')
+          await execa('tmux', splitArgs)
         }
-        splitArgs.push('-c', worktreePath)
-        // ユーザーのシェルをログインシェルとして起動
-        const splitShell = process.env.SHELL || '/bin/bash'
-        splitArgs.push(splitShell, '-l')
-        await execa('tmux', splitArgs)
+        
+        // レイアウトを適用
+        if (options.tmuxLayout) {
+          await execa('tmux', ['select-layout', '-t', sessionName, options.tmuxLayout])
+        } else if (paneCount > 2) {
+          // デフォルトレイアウトを適用
+          const defaultLayout = isHorizontal ? 'even-horizontal' : 'even-vertical'
+          await execa('tmux', ['select-layout', '-t', sessionName, defaultLayout])
+        }
 
         // 新しいペインへフォーカスを移動
         await execa('tmux', ['select-pane', '-t', sessionName, '-l'])
@@ -225,9 +240,15 @@ export async function createTmuxSession(
         // tmuxステータスラインを設定
         await setupTmuxStatusLine()
 
+        const paneCountMsg = options.tmuxHPanes || options.tmuxVPanes
+          ? `${options.tmuxHPanes || options.tmuxVPanes}つのペインに`
+          : ''
+        const splitTypeMsg = (options.tmuxH || options.tmuxHPanes) ? '水平' : '垂直'
+        const layoutMsg = options.tmuxLayout ? ` (${options.tmuxLayout}レイアウト)` : ''
+        
         console.log(
           chalk.green(
-            `✨ tmuxセッション '${sessionName}' を作成し、ペインを${options.tmuxH ? '水平' : '垂直'}分割しました`
+            `✨ tmuxセッション '${sessionName}' を作成し、${paneCountMsg}${splitTypeMsg}分割しました${layoutMsg}`
           )
         )
 
@@ -261,19 +282,32 @@ export async function createTmuxSession(
         return
       } else {
         // tmux内から実行された場合：現在のセッション内でペインを分割
-        const splitArgs = ['split-window']
-
-        if (options.tmuxH) {
-          splitArgs.push('-h') // 水平分割（左右）
-        } else if (options.tmuxV) {
-          splitArgs.push('-v') // 垂直分割（上下）
+        const paneCount = options.tmuxHPanes || options.tmuxVPanes || 2
+        const isHorizontal = options.tmuxH || options.tmuxHPanes
+        
+        // 複数ペインを作成
+        for (let i = 1; i < paneCount; i++) {
+          const splitArgs = ['split-window']
+          if (isHorizontal) {
+            splitArgs.push('-h') // 水平分割（左右）
+          } else {
+            splitArgs.push('-v') // 垂直分割（上下）
+          }
+          splitArgs.push('-c', worktreePath)
+          // ユーザーのシェルをログインシェルとして起動
+          const currentShell = process.env.SHELL || '/bin/bash'
+          splitArgs.push(currentShell, '-l')
+          await execa('tmux', splitArgs)
         }
-
-        splitArgs.push('-c', worktreePath)
-        // ユーザーのシェルをログインシェルとして起動
-        const currentShell = process.env.SHELL || '/bin/bash'
-        splitArgs.push(currentShell, '-l')
-        await execa('tmux', splitArgs)
+        
+        // レイアウトを適用
+        if (options.tmuxLayout) {
+          await execa('tmux', ['select-layout', options.tmuxLayout])
+        } else if (paneCount > 2) {
+          // デフォルトレイアウトを適用
+          const defaultLayout = isHorizontal ? 'even-horizontal' : 'even-vertical'
+          await execa('tmux', ['select-layout', defaultLayout])
+        }
 
         // 新しいペインへフォーカスを移動（最後の分割されたペインが選択される）
         await execa('tmux', ['select-pane', '-l'])
@@ -285,9 +319,15 @@ export async function createTmuxSession(
         await setupTmuxStatusLine()
 
         // 新しいペインでシェルのプロンプトを表示
+        const paneCountMsg = options.tmuxHPanes || options.tmuxVPanes
+          ? `${options.tmuxHPanes || options.tmuxVPanes}つのペインに`
+          : ''
+        const splitTypeMsg = (options.tmuxH || options.tmuxHPanes) ? '水平' : '垂直'
+        const layoutMsg = options.tmuxLayout ? ` (${options.tmuxLayout}レイアウト)` : ''
+        
         console.log(
           chalk.green(
-            `✅ tmuxペインを${options.tmuxH ? '水平' : '垂直'}分割しました: ${branchName}`
+            `✅ tmuxペインを${paneCountMsg}${splitTypeMsg}分割しました${layoutMsg}: ${branchName}`
           )
         )
         return
@@ -649,7 +689,7 @@ export async function executePostCreationTasks(
   await Promise.allSettled(parallelTasks)
 
   // tmuxセッション作成（インタラクティブなので単独で実行）
-  if (options.tmux || options.tmuxH || options.tmuxV || config.tmux?.enabled) {
+  if (options.tmux || options.tmuxH || options.tmuxV || options.tmuxHPanes || options.tmuxVPanes || options.tmuxLayout || config.tmux?.enabled) {
     await createTmuxSession(branchName, worktreePath, options)
   }
 
@@ -870,6 +910,9 @@ export const createCommand = new Command('create')
   .option('-t, --tmux', 'tmuxセッションを作成してClaude Codeを起動')
   .option('--tmux-h', 'tmuxペインを水平分割して作成')
   .option('--tmux-v', 'tmuxペインを垂直分割して作成')
+  .option('--tmux-h-panes <number>', 'tmuxペインを指定数で水平分割', parseInt)
+  .option('--tmux-v-panes <number>', 'tmuxペインを指定数で垂直分割', parseInt)
+  .option('--tmux-layout <type>', 'tmuxレイアウトタイプ (even-horizontal, even-vertical, main-horizontal, main-vertical, tiled)')
   .option('-c, --claude-md', 'CLAUDE.mdファイルを管理')
   .option('-y, --yes', '確認をスキップ')
   .option('--shell', '作成後にシェルに入る')
