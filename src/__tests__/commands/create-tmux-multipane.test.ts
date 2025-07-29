@@ -239,6 +239,75 @@ describe('Multi-pane tmux session creation', () => {
   })
 
   describe('Error handling', () => {
+    it('should handle "no space for new pane" error with user-friendly message', async () => {
+      const branchName = 'test-branch'
+      const worktreePath = '/test/path'
+
+      // Mock tmux session doesn't exist
+      mockExeca.mockRejectedValueOnce(new Error('Session not found'))
+
+      // Mock tmux session creation success
+      mockExeca.mockResolvedValueOnce({ stdout: '', stderr: '' } as any)
+      
+      // Mock "no space for new pane" error
+      const noSpaceError = new Error('Command failed with exit code 1: tmux split-window -t test-branch -h -c /path/to/test-branch /bin/zsh -l\n\nno space for new pane')
+      mockExeca.mockRejectedValueOnce(noSpaceError)
+
+      const options: CreateOptions = {
+        tmuxHPanes: 10,
+      }
+
+      // Should throw with user-friendly message
+      await expect(createTmuxSession(branchName, worktreePath, options)).rejects.toThrow(
+        '画面サイズに対してペイン数（10個）が多すぎます。ターミナルウィンドウを大きくするか、ペイン数を減らしてください。（水平分割）'
+      )
+    })
+
+    it('should handle "no space for new pane" error for vertical panes', async () => {
+      const branchName = 'test-branch'
+      const worktreePath = '/test/path'
+
+      // Mock tmux session doesn't exist
+      mockExeca.mockRejectedValueOnce(new Error('Session not found'))
+
+      // Mock tmux session creation success
+      mockExeca.mockResolvedValueOnce({ stdout: '', stderr: '' } as any)
+      
+      // Mock "no space for new pane" error
+      const noSpaceError = new Error('Command failed with exit code 1: tmux split-window -t test-branch -v -c /path/to/test-branch /bin/zsh -l\n\nno space for new pane')
+      mockExeca.mockRejectedValueOnce(noSpaceError)
+
+      const options: CreateOptions = {
+        tmuxVPanes: 8,
+      }
+
+      // Should throw with user-friendly message
+      await expect(createTmuxSession(branchName, worktreePath, options)).rejects.toThrow(
+        '画面サイズに対してペイン数（8個）が多すぎます。ターミナルウィンドウを大きくするか、ペイン数を減らしてください。（垂直分割）'
+      )
+    })
+
+    it('should handle other tmux errors with generic message', async () => {
+      const branchName = 'test-branch'
+      const worktreePath = '/test/path'
+
+      // Mock tmux session doesn't exist
+      mockExeca.mockRejectedValueOnce(new Error('Session not found'))
+
+      // Mock tmux session creation success but other split failure
+      mockExeca.mockResolvedValueOnce({ stdout: '', stderr: '' } as any)
+      mockExeca.mockRejectedValueOnce(new Error('Connection refused'))
+
+      const options: CreateOptions = {
+        tmuxHPanes: 3,
+      }
+
+      // Should throw with generic error message
+      await expect(createTmuxSession(branchName, worktreePath, options)).rejects.toThrow(
+        'tmuxペインの作成に失敗しました: Connection refused'
+      )
+    })
+
     it('should handle tmux command failures gracefully', async () => {
       const branchName = 'test-branch'
       const worktreePath = '/test/path'
@@ -254,8 +323,10 @@ describe('Multi-pane tmux session creation', () => {
         tmuxHPanes: 3,
       }
 
-      // The function should handle the error internally and not throw
-      await expect(createTmuxSession(branchName, worktreePath, options)).resolves.toBeUndefined()
+      // The function should throw the error with console.error logging
+      await expect(createTmuxSession(branchName, worktreePath, options)).rejects.toThrow(
+        'tmuxペインの作成に失敗しました: Split failed'
+      )
     })
   })
 })
