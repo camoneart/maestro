@@ -1,5 +1,21 @@
 # Changelog
 
+## 3.5.2
+
+### Patch Changes
+
+- fix: Reduce duplicate error messages in tmux pane creation
+
+  When tmux pane creation fails due to insufficient screen space or other errors, the error message was displayed multiple times at different levels of the error handling chain. This fix consolidates error display to show clear, single error messages.
+
+  **Fixed behavior:**
+  - Error messages are now displayed once instead of 2-3 times
+  - Better error handling hierarchy prevents redundant spinner failures
+  - Cleaner user experience when tmux operations fail
+
+  Fixes #163
+  EOF < /dev/null
+
 ## 3.5.1
 
 ### Patch Changes
