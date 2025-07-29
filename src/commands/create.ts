@@ -295,119 +295,119 @@ export async function createTmuxSession(
 
   // ペイン分割オプションの場合
   if (
-      options?.tmuxH ||
-      options?.tmuxV ||
-      options?.tmuxHPanes ||
-      options?.tmuxVPanes ||
-      options?.tmuxLayout
-    ) {
-      const isInsideTmux = process.env.TMUX !== undefined
+    options?.tmuxH ||
+    options?.tmuxV ||
+    options?.tmuxHPanes ||
+    options?.tmuxVPanes ||
+    options?.tmuxLayout
+  ) {
+    const isInsideTmux = process.env.TMUX !== undefined
 
-      if (!isInsideTmux) {
-        // 既存セッションチェック
-        try {
-          await execa('tmux', ['has-session', '-t', sessionName])
-          console.log(chalk.yellow(`tmuxセッション '${sessionName}' は既に存在します`))
-          await attachToTmuxSession(sessionName)
-          return
-        } catch {
-          // セッションが存在しない場合は作成
-        }
+    if (!isInsideTmux) {
+      // 既存セッションチェック
+      try {
+        await execa('tmux', ['has-session', '-t', sessionName])
+        console.log(chalk.yellow(`tmuxセッション '${sessionName}' は既に存在します`))
+        await attachToTmuxSession(sessionName)
+        return
+      } catch {
+        // セッションが存在しない場合は作成
+      }
 
-        await handleNewSessionPaneSplit(sessionName, branchName, worktreePath, options)
+      await handleNewSessionPaneSplit(sessionName, branchName, worktreePath, options)
 
-        const { paneCountMsg, splitTypeMsg, layoutMsg } = generateTmuxMessage(options)
-        console.log(
-          chalk.green(
-            `✨ tmuxセッション '${sessionName}' を作成し、${paneCountMsg}${splitTypeMsg}分割しました${layoutMsg}`
-          )
+      const { paneCountMsg, splitTypeMsg, layoutMsg } = generateTmuxMessage(options)
+      console.log(
+        chalk.green(
+          `✨ tmuxセッション '${sessionName}' を作成し、${paneCountMsg}${splitTypeMsg}分割しました${layoutMsg}`
         )
+      )
 
-        // アタッチメント処理
-        if (process.stdout.isTTY && process.stdin.isTTY) {
-          const { shouldAttach } = await inquirer.prompt([
-            {
-              type: 'confirm',
-              name: 'shouldAttach',
-              message: 'セッションにアタッチしますか？',
-              default: true,
-            },
-          ])
+      // アタッチメント処理
+      if (process.stdout.isTTY && process.stdin.isTTY) {
+        const { shouldAttach } = await inquirer.prompt([
+          {
+            type: 'confirm',
+            name: 'shouldAttach',
+            message: 'セッションにアタッチしますか？',
+            default: true,
+          },
+        ])
 
-          if (shouldAttach) {
-            console.log(chalk.cyan(`🎵 tmuxセッション '${sessionName}' にアタッチしています...`))
-            await attachToTmuxSession(sessionName)
-          } else {
-            console.log(chalk.yellow(`\n📝 後でアタッチするには以下のコマンドを実行してください:`))
-            console.log(chalk.white(`   tmux attach -t ${sessionName}`))
-            console.log(chalk.gray(`\n💡 ヒント: Ctrl+B, D でセッションからデタッチできます`))
-          }
+        if (shouldAttach) {
+          console.log(chalk.cyan(`🎵 tmuxセッション '${sessionName}' にアタッチしています...`))
+          await attachToTmuxSession(sessionName)
         } else {
-          console.log(
-            chalk.yellow(`\n📝 tmuxセッションにアタッチするには以下のコマンドを実行してください:`)
-          )
+          console.log(chalk.yellow(`\n📝 後でアタッチするには以下のコマンドを実行してください:`))
           console.log(chalk.white(`   tmux attach -t ${sessionName}`))
           console.log(chalk.gray(`\n💡 ヒント: Ctrl+B, D でセッションからデタッチできます`))
         }
-        return
       } else {
-        await handleInsideTmuxPaneSplit(branchName, worktreePath, options)
-
-        const { paneCountMsg, splitTypeMsg, layoutMsg } = generateTmuxMessage(options)
         console.log(
-          chalk.green(
-            `✅ tmuxペインを${paneCountMsg}${splitTypeMsg}分割しました${layoutMsg}: ${branchName}`
-          )
+          chalk.yellow(`\n📝 tmuxセッションにアタッチするには以下のコマンドを実行してください:`)
         )
-        return
-      }
-    }
-
-    // 通常のtmuxセッション作成
-    try {
-      await execa('tmux', ['has-session', '-t', sessionName])
-      console.log(chalk.yellow(`tmuxセッション '${sessionName}' は既に存在します`))
-      return
-    } catch {
-      // セッションが存在しない場合は作成
-    }
-
-    const shell = process.env.SHELL || '/bin/bash'
-    await execa('tmux', ['new-session', '-d', '-s', sessionName, '-c', worktreePath, shell, '-l'])
-
-    await execa('tmux', ['rename-window', '-t', sessionName, branchName])
-    console.log(chalk.green(`✨ tmuxセッション '${sessionName}' を作成しました`))
-
-    if (process.stdout.isTTY && process.stdin.isTTY) {
-      const { shouldAttach } = await inquirer.prompt([
-        {
-          type: 'confirm',
-          name: 'shouldAttach',
-          message: 'セッションにアタッチしますか？',
-          default: true,
-        },
-      ])
-
-      if (shouldAttach) {
-        console.log(chalk.cyan(`🎵 tmuxセッション '${sessionName}' にアタッチしています...`))
-        const isInsideTmux = process.env.TMUX !== undefined
-        if (isInsideTmux) {
-          await switchTmuxClient(sessionName)
-        } else {
-          await attachToTmuxSession(sessionName)
-        }
-      } else {
-        console.log(chalk.yellow(`\n📝 後でアタッチするには以下のコマンドを実行してください:`))
         console.log(chalk.white(`   tmux attach -t ${sessionName}`))
         console.log(chalk.gray(`\n💡 ヒント: Ctrl+B, D でセッションからデタッチできます`))
       }
+      return
     } else {
+      await handleInsideTmuxPaneSplit(branchName, worktreePath, options)
+
+      const { paneCountMsg, splitTypeMsg, layoutMsg } = generateTmuxMessage(options)
       console.log(
-        chalk.yellow(`\n📝 tmuxセッションにアタッチするには以下のコマンドを実行してください:`)
+        chalk.green(
+          `✅ tmuxペインを${paneCountMsg}${splitTypeMsg}分割しました${layoutMsg}: ${branchName}`
+        )
       )
+      return
+    }
+  }
+
+  // 通常のtmuxセッション作成
+  try {
+    await execa('tmux', ['has-session', '-t', sessionName])
+    console.log(chalk.yellow(`tmuxセッション '${sessionName}' は既に存在します`))
+    return
+  } catch {
+    // セッションが存在しない場合は作成
+  }
+
+  const shell = process.env.SHELL || '/bin/bash'
+  await execa('tmux', ['new-session', '-d', '-s', sessionName, '-c', worktreePath, shell, '-l'])
+
+  await execa('tmux', ['rename-window', '-t', sessionName, branchName])
+  console.log(chalk.green(`✨ tmuxセッション '${sessionName}' を作成しました`))
+
+  if (process.stdout.isTTY && process.stdin.isTTY) {
+    const { shouldAttach } = await inquirer.prompt([
+      {
+        type: 'confirm',
+        name: 'shouldAttach',
+        message: 'セッションにアタッチしますか？',
+        default: true,
+      },
+    ])
+
+    if (shouldAttach) {
+      console.log(chalk.cyan(`🎵 tmuxセッション '${sessionName}' にアタッチしています...`))
+      const isInsideTmux = process.env.TMUX !== undefined
+      if (isInsideTmux) {
+        await switchTmuxClient(sessionName)
+      } else {
+        await attachToTmuxSession(sessionName)
+      }
+    } else {
+      console.log(chalk.yellow(`\n📝 後でアタッチするには以下のコマンドを実行してください:`))
       console.log(chalk.white(`   tmux attach -t ${sessionName}`))
       console.log(chalk.gray(`\n💡 ヒント: Ctrl+B, D でセッションからデタッチできます`))
     }
+  } else {
+    console.log(
+      chalk.yellow(`\n📝 tmuxセッションにアタッチするには以下のコマンドを実行してください:`)
+    )
+    console.log(chalk.white(`   tmux attach -t ${sessionName}`))
+    console.log(chalk.gray(`\n💡 ヒント: Ctrl+B, D でセッションからデタッチできます`))
+  }
 }
 
 // Claude.mdの処理
