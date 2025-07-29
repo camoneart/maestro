@@ -97,6 +97,9 @@ mst create <branch-name> [options]
 | `--tmux` | Create tmux session with attachment prompt (TTY) or auto-attach (non-TTY) |
 | `--tmux-h` | Create in horizontal tmux pane split (preserves shell environment) |
 | `--tmux-v` | Create in vertical tmux pane split (preserves shell environment) |
+| `--tmux-h-panes <number>` | Create specified number of horizontal tmux panes |
+| `--tmux-v-panes <number>` | Create specified number of vertical tmux panes |
+| `--tmux-layout <type>` | Apply tmux layout (even-horizontal, even-vertical, main-horizontal, main-vertical, tiled) |
 | `--claude-md` | Create CLAUDE.md for Claude Code |
 | `--copy-file <file>` | Copy files from current worktree |
 | `--yes`, `-y` | Skip confirmations |
@@ -115,6 +118,14 @@ mst create 123  # Auto-generates branch name from Issue #123
 # Create with tmux pane split (auto-focus to new pane)
 mst create feature/new --tmux-h --claude-md  # Horizontal split with Claude
 mst create issue-456 --tmux-v --setup        # Vertical split with setup
+
+# Create with multiple tmux panes
+mst create feature/api --tmux-h-panes 3      # 3 horizontal panes
+mst create feature/ui --tmux-v-panes 4       # 4 vertical panes
+
+# Create with specific tmux layout
+mst create feature/dashboard --tmux-h-panes 3 --tmux-layout even-horizontal
+mst create feature/mobile --tmux-v-panes 2 --tmux-layout main-vertical
 
 # Copy environment files to new worktree
 mst create feature/api --copy-file .env --copy-file .env.local

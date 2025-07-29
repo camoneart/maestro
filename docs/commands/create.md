@@ -35,11 +35,21 @@ mst create feature/new-feature --tmux --claude-md
 mst create feature/new-feature --tmux-h  # Horizontal split
 mst create feature/new-feature --tmux-v  # Vertical split
 
+# Create with multiple tmux panes
+mst create feature/api --tmux-h-panes 3       # 3 horizontal panes
+mst create feature/ui --tmux-v-panes 4        # 4 vertical panes
+mst create feature/dashboard --tmux-h-panes 2 # 2 horizontal panes
+
+# Create with specific layouts
+mst create feature/backend --tmux-v-panes 3 --tmux-layout even-vertical
+mst create feature/frontend --tmux-h-panes 4 --tmux-layout main-horizontal
+mst create feature/testing --tmux-h-panes 2 --tmux-layout tiled
+
 # Create with specified base branch
 mst create feature/new-feature --base develop
 
 # Combine all options
-mst create feature/new-feature --base main --open --setup --tmux --claude-md
+mst create feature/new-feature --base main --open --setup --tmux-h-panes 3 --tmux-layout even-horizontal --claude-md
 ```
 
 ## Options
@@ -53,6 +63,9 @@ mst create feature/new-feature --base main --open --setup --tmux --claude-md
 | `--tmux`             | `-t`  | Create tmux session with attachment prompt (TTY) or auto-attach (non-TTY) | `false` |
 | `--tmux-h`           |       | Split tmux pane horizontally (when in tmux)                  | `false` |
 | `--tmux-v`           |       | Split tmux pane vertically (when in tmux)                    | `false` |
+| `--tmux-h-panes <number>` |   | Create specified number of horizontal tmux panes             | none    |
+| `--tmux-v-panes <number>` |   | Create specified number of vertical tmux panes               | none    |
+| `--tmux-layout <type>`    |   | Apply tmux layout (even-horizontal, even-vertical, main-horizontal, main-vertical, tiled) | none |
 | `--claude-md`        | `-c`  | Create CLAUDE.md file for Claude Code workspace              | `false` |
 | `--copy-file <file>` |       | Copy files from current worktree (including gitignored files) | none    |
 | `--shell`            |       | Enter shell after creation                                    | `false` |
@@ -123,6 +136,36 @@ mst create feature/new-feature --tmux-v
 
 **Focus Management:**
 The new pane is automatically focused after creation, providing a seamless workflow from creation to development. This eliminates the need to manually switch panes after worktree creation.
+
+### Multi-Pane Creation
+
+Create multiple panes at once for complex development workflows:
+
+```bash
+# Create 3 horizontal panes
+mst create feature/api --tmux-h-panes 3
+
+# Create 4 vertical panes
+mst create feature/ui --tmux-v-panes 4
+
+# Combine with layouts for optimal organization
+mst create feature/dashboard --tmux-h-panes 3 --tmux-layout even-horizontal
+mst create feature/microservice --tmux-v-panes 2 --tmux-layout main-vertical
+```
+
+**Available Layouts:**
+- `even-horizontal` - Evenly distribute panes horizontally
+- `even-vertical` - Evenly distribute panes vertically  
+- `main-horizontal` - Large main pane at top, smaller panes below
+- `main-vertical` - Large main pane on left, smaller panes on right
+- `tiled` - Tiled layout that balances all panes
+
+**Multi-Pane Behavior:**
+- **Outside tmux**: Creates new session with multiple panes and prompts for attachment
+- **Inside tmux**: Creates multiple panes in current window and focuses to the last created pane
+- **Default Layout**: When no layout is specified, applies `even-horizontal` for horizontal panes or `even-vertical` for vertical panes
+- **Pane Count**: Minimum 2 panes, maximum limited by terminal size
+- **Shell Environment**: All panes inherit your login shell environment
 
 ## Claude Code Integration
 
@@ -264,6 +307,22 @@ mst create feature/sub-feature --tmux --new-window
 
 # Bug fix (yet another window)
 mst create bugfix/urgent-fix --tmux --new-window
+
+# Multi-service development with multiple panes
+mst create feature/microservice --tmux-h-panes 3 --tmux-layout main-horizontal
+# Pane 1: API server, Pane 2: Database, Pane 3: Logs
+```
+
+### 4. Development Environment Layouts
+
+```bash
+# Full-stack development setup
+mst create feature/fullstack --tmux-v-panes 3 --tmux-layout main-vertical
+# Main pane: Editor, Top pane: Frontend server, Bottom pane: Backend server
+
+# Testing environment
+mst create feature/testing --tmux-h-panes 4 --tmux-layout even-horizontal
+# Pane 1: Tests, Pane 2: Coverage, Pane 3: Linting, Pane 4: Build
 ```
 
 ## Error Handling

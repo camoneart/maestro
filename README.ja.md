@@ -134,6 +134,8 @@ mst create feature/awesome-feature --tmux --claude-md
 - `mst shell <ブランチ名>` でいつでも演奏者に入れます（省略すると fzf で選択）。
 - `--tmux` を付けると専用 tmux セッションを作成してアタッチを確認し（非TTY環境では自動アタッチ）、`--claude-md` を併用すると Claude Code ワークスペースファイルを設定します。
 - `--tmux-h`/`--tmux-v` は現在の tmux ペインを水平/垂直分割し、新しいペインに自動フォーカスして即座に開発開始できます。
+- `--tmux-h-panes <数>`/`--tmux-v-panes <数>` は指定数の水平/垂直ペインを作成します。
+- `--tmux-layout <種類>` は特定の tmux レイアウト（even-horizontal、even-vertical、main-horizontal、main-vertical、tiled）を適用します。
 
 ### 基本的な使用例
 
@@ -175,10 +177,11 @@ mst create feature/awesome-feature --tmux --claude-md
 ```bash
 # 代表的な操作
 mst create feature/my-ui --tmux --claude-md   # 作成 + AI + tmux
-mst list                                   # 一覧
-mst tmux                                   # fzf で切替
-mst push --pr                              # push with PR
-mst review --auto-flow                     # 自動レビュー〜マージ
+mst create feature/api --tmux-h-panes 3       # 作成 + 3つの水平ペイン
+mst list                                       # 一覧
+mst tmux                                       # fzf で切替
+mst push --pr                                  # push with PR
+mst review --auto-flow                         # 自動レビュー〜マージ
 ```
 
 ## 高度な機能
