@@ -315,7 +315,7 @@ tmux kill-session -t session-name
 
 ### Multi-Pane Creation Errors
 
-When using `mst create` with multi-pane options (`--tmux-h-panes` or `--tmux-v-panes`), you may encounter space-related errors. The create command now provides enhanced error handling with user-friendly Japanese messages:
+When using `mst create` with multi-pane options (`--tmux-h-panes` or `--tmux-v-panes`), you may encounter space-related errors. The create command now provides enhanced error handling with user-friendly Japanese messages and **automatic rollback protection** to prevent orphaned worktrees:
 
 4. **No space for new pane**
    ```
@@ -339,6 +339,15 @@ When using `mst create` with multi-pane options (`--tmux-h-panes` or `--tmux-v-p
    - **120x40 (medium)**: Optimal for 4-6 panes  
    - **200x60+ (large)**: Supports 6+ panes comfortably
 
+   **Automatic Rollback Protection**:
+   When tmux pane creation fails, the `create` command automatically cleans up any created worktrees:
+   ```bash
+   # If pane creation fails, you'll see:
+   ⚠️  後処理でエラーが発生したため、作成したリソースをクリーンアップします...
+   ✅ クリーンアップが完了しました
+   ```
+   This prevents orphaned worktrees and maintains repository cleanliness.
+
 5. **General tmux pane errors**
    ```
    Error: tmuxペインの作成に失敗しました: [error details]
@@ -348,6 +357,7 @@ When using `mst create` with multi-pane options (`--tmux-h-panes` or `--tmux-v-p
    - Generic fallback for all other tmux pane creation failures
    - Preserves original tmux error message for debugging purposes
    - Consistent Japanese error messaging throughout the application
+   - **Automatic rollback**: Created worktrees are automatically deleted when tmux errors occur
 
    **Troubleshooting Steps**:
    ```bash

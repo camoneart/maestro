@@ -466,6 +466,41 @@ mst create feature/testing --tmux-h-panes 4 --tmux-layout even-horizontal
 
 ## Error Handling
 
+### Automatic Rollback Functionality
+
+The create command includes intelligent automatic rollback functionality to prevent orphaned worktrees when post-creation tasks fail. This ensures your repository remains clean even when errors occur during tmux session creation or other post-processing steps.
+
+**How Automatic Rollback Works:**
+
+1. **Tracks Worktree Creation**: The command monitors whether a worktree was successfully created
+2. **Detects Post-Creation Failures**: If tmux session creation, environment setup, or other post-creation tasks fail
+3. **Automatic Cleanup**: Immediately attempts to remove the created worktree and branch
+4. **User Notification**: Provides clear feedback about the cleanup process
+5. **Fallback Instructions**: If automatic cleanup fails, provides manual cleanup commands
+
+**Example Rollback Scenario:**
+```bash
+# Command fails during tmux session creation
+mst create feature/new-feature --tmux
+
+# Output shows automatic rollback:
+⚠️  後処理でエラーが発生したため、作成したリソースをクリーンアップします...
+✅ クリーンアップが完了しました
+```
+
+**Manual Cleanup (if automatic rollback fails):**
+```bash
+# Commands provided in error message for manual cleanup:
+git worktree remove --force /path/to/worktree
+git branch -D branch-name
+```
+
+**Benefits:**
+- **Prevents Orphaned Worktrees**: No leftover directories when creation fails
+- **Maintains Clean Repository**: Automatic cleanup keeps your Git state consistent  
+- **Better Error Recovery**: Clear feedback and recovery instructions
+- **Improved User Experience**: Less manual cleanup required after failures
+
 ### Common Errors
 
 1. **Branch already exists**
@@ -492,7 +527,7 @@ mst create feature/testing --tmux-h-panes 4 --tmux-layout even-horizontal
 
 ### tmux Error Handling
 
-The create command includes enhanced error handling for tmux pane creation, providing user-friendly Japanese error messages when issues occur:
+The create command includes enhanced error handling for tmux pane creation, providing user-friendly Japanese error messages when issues occur. **Important**: When tmux-related errors occur, the automatic rollback functionality will clean up any created worktrees to prevent orphaned directories.
 
 4. **No space for new pane error**
 

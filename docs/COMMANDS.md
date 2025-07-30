@@ -131,6 +131,32 @@ mst create feature/mobile --tmux-v-panes 2 --tmux-layout main-vertical
 mst create feature/api --copy-file .env --copy-file .env.local
 ```
 
+#### Automatic Rollback Protection
+
+The `create` command includes **intelligent automatic rollback functionality** that prevents orphaned worktrees when post-creation tasks fail:
+
+**How It Works:**
+- **Creation State Tracking**: Monitors whether worktree creation succeeded
+- **Post-Creation Failure Detection**: Catches errors during tmux session creation, environment setup, or other post-processing steps  
+- **Automatic Cleanup**: Immediately removes created worktrees and branches when failures occur
+- **User Feedback**: Provides clear messages about the cleanup process
+- **Fallback Instructions**: Shows manual cleanup commands if automatic rollback fails
+
+**Example Rollback Scenario:**
+```bash
+# Command fails during tmux session creation
+mst create feature/new-feature --tmux
+
+# Automatic rollback output:
+⚠️  後処理でエラーが発生したため、作成したリソースをクリーンアップします...
+✅ クリーンアップが完了しました
+```
+
+**Benefits:**
+- **No Orphaned Worktrees**: Maintains clean repository state even when errors occur
+- **Better Error Recovery**: Reduces manual cleanup required after failures
+- **Improved User Experience**: Clear feedback and recovery instructions
+
 #### Error Handling
 The `create` command includes enhanced error handling for tmux multi-pane creation with user-friendly Japanese messages:
 
@@ -150,6 +176,7 @@ Error: tmuxペインの作成に失敗しました: [specific error details]
 - **Split direction indication**: Displays 水平分割 (horizontal) or 垂直分割 (vertical)
 - **Actionable solutions**: Provides immediate guidance in the error message
 - **Debug information**: Preserves original tmux error details for troubleshooting
+- **Automatic rollback**: Cleans up created worktrees when tmux-related errors occur
 
 ### 🔸 push
 
@@ -916,10 +943,11 @@ maestro properly handles the following errors:
 - Permission errors
 - Configuration errors
 - **tmux pane creation errors** (enhanced in latest version)
+- **Automatic rollback protection** (prevents orphaned worktrees)
 
 ### tmux Multi-Pane Error Handling
 
-The `create` command provides enhanced error handling for tmux multi-pane creation with improved user experience:
+The `create` command provides enhanced error handling for tmux multi-pane creation with improved user experience and **automatic rollback protection**:
 
 **Enhanced Error Messages**:
 

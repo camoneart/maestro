@@ -50,6 +50,7 @@ Maestro is a CLI that makes Git worktree management intuitive. When working on m
 | 🔄 **Auto Sync**          | Propagate file changes in real time                 |
 | 📸 **Snapshot**           | Save / restore any state with one command           |
 | 🏥 **Health Check**       | Detect & auto-fix orphaned / conflicting branches   |
+| 🛡️ **Auto Rollback**      | Intelligent cleanup prevents orphaned worktrees     |
 
 ## Installation
 
@@ -342,6 +343,32 @@ mst completion fish > ~/.config/fish/completions/mst.fish
 
 ## Troubleshooting
 
+### 🛡️ Automatic Rollback Protection
+
+Maestro includes **intelligent automatic rollback functionality** that prevents orphaned worktrees when creation fails during post-processing steps:
+
+**How It Works:**
+- **Tracks Creation State**: Monitors whether worktree creation succeeded
+- **Detects Post-Creation Failures**: Catches errors during tmux session creation, environment setup, or other post-processing
+- **Automatic Cleanup**: Immediately removes created worktrees and branches when failures occur
+- **Clear Feedback**: Provides user-friendly messages about cleanup process
+- **Fallback Instructions**: Shows manual cleanup commands if automatic rollback fails
+
+**Example:**
+```bash
+# If tmux session creation fails:
+mst create feature/new-feature --tmux
+
+# Maestro automatically cleans up:
+⚠️  後処理でエラーが発生したため、作成したリソースをクリーンアップします...
+✅ クリーンアップが完了しました
+```
+
+**Benefits:**
+- **No Orphaned Worktrees**: Maintains clean repository state even when errors occur
+- **Better Error Recovery**: Reduces manual cleanup required after failures
+- **Improved User Experience**: Clear feedback and recovery instructions
+
 ### ❓ Common Errors and Fixes
 
 | Error                                          | Likely Cause                            | One-line Fix                      |
@@ -361,7 +388,7 @@ mst completion fish > ~/.config/fish/completions/mst.fish
 
 ### ⚠️ tmux Multi-Pane Troubleshooting
 
-When using multi-pane creation (`--tmux-h-panes` or `--tmux-v-panes`), you may encounter space limitations. The create command now provides enhanced error handling with user-friendly Japanese messages:
+When using multi-pane creation (`--tmux-h-panes` or `--tmux-v-panes`), you may encounter space limitations. The create command now provides enhanced error handling with user-friendly Japanese messages and **automatic rollback** to prevent orphaned worktrees:
 
 **Enhanced Error Messages**:
 ```bash
