@@ -377,7 +377,7 @@ mst create feature/new-feature --tmux
 | **fzf not found**                              | fzf not installed                       | `brew install fzf`                |
 | **tmux not found**                             | tmux not installed                      | `brew install tmux`               |
 | **Claude Code won't start**                    | MCP server not running or port conflict | `mst mcp status` → `mst mcp stop` |
-| **Too many tmux panes** <br>`画面サイズに対してペイン数（N個）が多すぎます` | Terminal window too small for requested panes | Resize window or use fewer panes |
+| **Too many tmux panes** <br>`画面サイズに対してペイン数（N個）が多すぎるため、セッションが作成できませんでした` | Terminal window too small for requested panes | Resize window or reduce panes (max: 10 horizontal, 15 vertical) |
 
 ### Other error codes
 
@@ -386,43 +386,49 @@ mst create feature/new-feature --tmux
 | `EADDRINUSE` | MCP server port in use | `mst mcp stop` to kill previous process |
 | `ENOENT`     | Git binary not found   | Check PATH or reinstall Git             |
 
-### ⚠️ tmux Multi-Pane Troubleshooting
+### ⚠️ tmux Multi-Pane Validation and Error Handling
 
-When using multi-pane creation (`--tmux-h-panes` or `--tmux-v-panes`), you may encounter space limitations. The create command now provides enhanced error handling with user-friendly Japanese messages and **automatic rollback** to prevent orphaned worktrees:
+Maestro now includes **early validation for tmux pane creation** to prevent resource waste and provide better user experience:
+
+**Smart Pre-Validation**:
+- **Early Detection**: Validates pane count limits BEFORE creating any resources (worktree, branch, tmux session)
+- **Prevents Resource Creation**: Command exits with error code 1 immediately when validation fails
+- **No Cleanup Needed**: Since no resources are created, no rollback is required
+- **Maximum Limits**: 10 panes for horizontal splits, 15 panes for vertical splits
 
 **Enhanced Error Messages**:
 ```bash
-# New Japanese error message format:
-Error: 画面サイズに対してペイン数（4個）が多すぎます。ターミナルウィンドウを大きくするか、ペイン数を減らしてください。（水平分割）
+# Early validation error message:
+Error: 画面サイズに対してペイン数（20個）が多すぎるため、セッションが作成できませんでした。ターミナルウィンドウを大きくするか、ペイン数を減らしてください。（水平分割）
 
-# Generic tmux error fallback:
-Error: tmuxペインの作成に失敗しました: [specific error details]
+# Command exits immediately - no resources created
 ```
 
 **Quick Solutions**:
 ```bash
-# If this fails due to terminal size:
-mst create feature/api --tmux-h-panes 6
+# If this fails due to pane limit:
+mst create feature/api --tmux-h-panes 20
 
-# Try reducing panes:
-mst create feature/api --tmux-h-panes 3
+# Reduce to allowed limit:
+mst create feature/api --tmux-h-panes 8
 
-# Or switch to vertical layout:
-mst create feature/api --tmux-v-panes 4 --tmux-layout main-vertical
+# Switch to vertical for higher limits:
+mst create feature/api --tmux-v-panes 12 --tmux-layout main-vertical
 
 # Use space-efficient layouts:
-mst create feature/api --tmux-h-panes 4 --tmux-layout tiled
+mst create feature/api --tmux-h-panes 6 --tmux-layout tiled
 ```
 
-**Terminal Size Guidelines**:
-- **Small (80x24)**: 2-3 panes maximum
-- **Medium (120x40)**: 4-6 panes optimal
-- **Large (200x60+)**: 6+ panes supported
+**Validation Benefits**:
+- **Clean Exit**: Command exits with error code 1 when validation fails
+- **No Resource Waste**: Prevents creation of worktrees that would need cleanup
+- **Better Performance**: Immediate feedback without waiting for tmux operations
+- **Clear Guidance**: Specific error messages with actionable solutions
 
-**Error Message Features**:
-- Displays number of panes that couldn't be created
-- Indicates split direction (水平分割 for horizontal, 垂直分割 for vertical)
-- Provides actionable solutions directly in the error message
+**Pane Limits**:
+- **Horizontal splits**: Maximum 10 panes (smaller screen space per pane)
+- **Vertical splits**: Maximum 15 panes (more vertical space available)
+- **Validation triggers**: Only for multi-pane options (`--tmux-h-panes` > 2, `--tmux-v-panes` > 2)
 
 If the issue persists, search or open a new ticket in the [Issues](https://github.com/camoneart/maestro/issues).
 

@@ -168,6 +168,19 @@ function getPaneConfiguration(options?: CreateOptions) {
   return { paneCount, isHorizontal }
 }
 
+// ペイン数が妥当かどうかを事前検証する関数
+function validatePaneCount(paneCount: number, isHorizontal: boolean): void {
+  // 簡易的な画面サイズ検証（より厳密にはtmuxの実際の画面サイズを取得すべき）
+  const maxReasonablePanes = isHorizontal ? 10 : 15 // 水平分割の方が制限が厳しい
+  
+  if (paneCount > maxReasonablePanes) {
+    const splitType = isHorizontal ? '水平' : '垂直'
+    throw new Error(
+      `画面サイズに対してペイン数（${paneCount}個）が多すぎるため、セッションが作成できませんでした。ターミナルウィンドウを大きくするか、ペイン数を減らしてください。（${splitType}分割）`
+    )
+  }
+}
+
 // メッセージ生成用のヘルパー関数
 function generateTmuxMessage(options?: CreateOptions) {
   const paneCountMsg =
@@ -599,6 +612,29 @@ export async function executeCreateCommand(
     if (!confirmed) {
       console.log(chalk.yellow('キャンセルされました'))
       return
+    }
+  }
+
+  // tmuxオプションが指定されている場合、事前にペイン数を検証
+  if (
+    options.tmuxHPanes ||
+    options.tmuxVPanes ||
+    options.tmuxH ||
+    options.tmuxV ||
+    options.tmuxLayout ||
+    options.tmux ||
+    config.tmux?.enabled
+  ) {
+    const { paneCount, isHorizontal } = getPaneConfiguration(options)
+    if (paneCount > 2) {
+      try {
+        validatePaneCount(paneCount, isHorizontal)
+      } catch (error) {
+        if (error instanceof Error) {
+          console.error(chalk.red(`✖ ${error.message}`))
+        }
+        process.exit(1)
+      }
     }
   }
 
