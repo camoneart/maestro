@@ -1,5 +1,26 @@
 # Changelog
 
+## 3.5.5
+
+### Patch Changes
+
+- fix: tmuxペインタイトル設定とフォーカス位置のバグ修正
+
+  Properly set unified branch name titles for all tmux panes and ensure focus is correctly set to the first pane (top-left).
+
+  **Fixed:**
+  - Use correct tmux pane specification format `sessionName:0.paneIndex` instead of `sessionName:paneIndex`
+  - All panes now properly display the branch name as their title
+  - Focus is correctly set to the first pane (0.0) after pane creation
+  - Both new session and inside-tmux scenarios work correctly
+
+  **Changes:**
+  - Fixed `setTitleForAllPanes` function to use correct pane targeting format
+  - Fixed `handleNewSessionPaneSplit` to focus on `sessionName:0.0` instead of `sessionName:0`
+  - Added comprehensive tests for pane title and focus behavior
+
+  Fixes #167, #169
+
 ## 3.5.4
 
 ### Patch Changes
