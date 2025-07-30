@@ -18,10 +18,10 @@ vi.mock('../../core/config.js', () => ({
     loadProjectConfig: vi.fn().mockResolvedValue(undefined),
     getAll: vi.fn().mockReturnValue({
       ui: {
-        pathDisplay: 'relative'
-      }
-    })
-  }))
+        pathDisplay: 'relative',
+      },
+    }),
+  })),
 }))
 
 describe('where command', () => {
