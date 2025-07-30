@@ -382,7 +382,7 @@ export async function createTmuxSession(
               console.log(chalk.white(`   tmux attach -t ${sessionName}`))
               console.log(chalk.gray(`\n💡 ヒント: Ctrl+B, D でセッションからデタッチできます`))
             }
-          } catch (error) {
+          } catch {
             // Ctrl+Cでキャンセルされた場合も正常な終了として扱う
             console.log(chalk.yellow(`\n📝 後でアタッチするには以下のコマンドを実行してください:`))
             console.log(chalk.white(`   tmux attach -t ${sessionName}`))
@@ -448,7 +448,7 @@ export async function createTmuxSession(
           console.log(chalk.white(`   tmux attach -t ${sessionName}`))
           console.log(chalk.gray(`\n💡 ヒント: Ctrl+B, D でセッションからデタッチできます`))
         }
-      } catch (error) {
+      } catch {
         // Ctrl+Cでキャンセルされた場合も正常な終了として扱う
         console.log(chalk.yellow(`\n📝 後でアタッチするには以下のコマンドを実行してください:`))
         console.log(chalk.white(`   tmux attach -t ${sessionName}`))
