@@ -131,25 +131,60 @@ mst create feature/mobile --tmux-v-panes 2 --tmux-layout main-vertical
 mst create feature/api --copy-file .env --copy-file .env.local
 ```
 
-#### Error Handling
-The `create` command includes enhanced error handling for tmux multi-pane creation with user-friendly Japanese messages:
+#### Automatic Rollback Protection
 
-**Terminal Size Errors**: 
-```
-Error: 画面サイズに対してペイン数（4個）が多すぎます。ターミナルウィンドウを大きくするか、ペイン数を減らしてください。（水平分割）
+The `create` command includes **intelligent automatic rollback functionality** that prevents orphaned worktrees when post-creation tasks fail:
+
+**How It Works:**
+- **Creation State Tracking**: Monitors whether worktree creation succeeded
+- **Post-Creation Failure Detection**: Catches errors during tmux session creation, environment setup, or other post-processing steps  
+- **Automatic Cleanup**: Immediately removes created worktrees and branches when failures occur
+- **User Feedback**: Provides clear messages about the cleanup process
+- **Fallback Instructions**: Shows manual cleanup commands if automatic rollback fails
+
+**Example Rollback Scenario:**
+```bash
+# Command fails during tmux session creation
+mst create feature/new-feature --tmux
+
+# Automatic rollback output:
+⚠️  後処理でエラーが発生したため、作成したリソースをクリーンアップします...
+✅ クリーンアップが完了しました
 ```
 
-**Generic tmux Errors**:
-```
-Error: tmuxペインの作成に失敗しました: [specific error details]
+**Benefits:**
+- **No Orphaned Worktrees**: Maintains clean repository state even when errors occur
+- **Better Error Recovery**: Reduces manual cleanup required after failures
+- **Improved User Experience**: Clear feedback and recovery instructions
+
+#### tmux Pane Validation and Error Handling
+
+The `create` command now includes **early validation for tmux pane creation** to prevent resource waste and provide better user experience:
+
+**Smart Pre-Validation**:
+- **Early Detection**: Validates pane count limits BEFORE creating any resources (worktree, branch, tmux session)
+- **Prevents Resource Creation**: Command exits with error code 1 immediately when validation fails
+- **No Cleanup Needed**: Since no resources are created, no rollback is required
+- **Maximum Limits**: 10 panes for horizontal splits, 15 panes for vertical splits
+
+**Enhanced Error Messages**:
+```bash
+# Early validation error message:
+Error: 画面サイズに対してペイン数（20個）が多すぎるため、セッションが作成できませんでした。ターミナルウィンドウを大きくするか、ペイン数を減らしてください。（水平分割）
+
+# Command exits immediately - no resources created
 ```
 
-**Error Message Features**:
-- **Japanese localization**: User-friendly error messages in Japanese
-- **Specific pane count**: Shows exact number of panes that couldn't be created
-- **Split direction indication**: Displays 水平分割 (horizontal) or 垂直分割 (vertical)
-- **Actionable solutions**: Provides immediate guidance in the error message
-- **Debug information**: Preserves original tmux error details for troubleshooting
+**Validation Benefits**:
+- **Clean Exit**: Command exits with error code 1 when validation fails
+- **No Resource Waste**: Prevents creation of worktrees that would need cleanup
+- **Better Performance**: Immediate feedback without waiting for tmux operations
+- **Clear Guidance**: Specific error messages with actionable solutions
+
+**Pane Limits**:
+- **Horizontal splits**: Maximum 10 panes (smaller screen space per pane)
+- **Vertical splits**: Maximum 15 panes (more vertical space available)
+- **Validation triggers**: Only for multi-pane options (`--tmux-h-panes` > 2, `--tmux-v-panes` > 2)
 
 ### 🔸 push
 
@@ -916,46 +951,41 @@ maestro properly handles the following errors:
 - Permission errors
 - Configuration errors
 - **tmux pane creation errors** (enhanced in latest version)
+- **Automatic rollback protection** (prevents orphaned worktrees)
 
-### tmux Multi-Pane Error Handling
+### tmux Multi-Pane Validation and Error Handling
 
-The `create` command provides enhanced error handling for tmux multi-pane creation with improved user experience:
+The `create` command now includes **early validation for tmux pane creation** to prevent resource waste and provide better user experience:
+
+**Smart Pre-Validation**:
+- **Early Detection**: Validates pane count limits BEFORE creating any resources (worktree, branch, tmux session)
+- **Prevents Resource Creation**: Command exits with error code 1 immediately when validation fails
+- **No Cleanup Needed**: Since no resources are created, no rollback is required
+- **Maximum Limits**: 10 panes for horizontal splits, 15 panes for vertical splits
 
 **Enhanced Error Messages**:
+```bash
+# Early validation error message:
+Error: 画面サイズに対してペイン数（20個）が多すぎるため、セッションが作成できませんでした。ターミナルウィンドウを大きくするか、ペイン数を減らしてください。（水平分割）
 
-1. **Terminal Size Limitations**:
-   ```
-   Error: 画面サイズに対してペイン数（4個）が多すぎます。ターミナルウィンドウを大きくするか、ペイン数を減らしてください。（水平分割）
-   ```
-   - **Japanese localization** for better user experience
-   - **Specific pane count** that failed to create
-   - **Split direction** indicator (水平分割/垂直分割)
-   - **Immediate solutions** within the error message
-
-2. **Generic tmux Failures**:
-   ```
-   Error: tmuxペインの作成に失敗しました: [original tmux error message]
-   ```
-   - **Consistent Japanese messaging** across the application
-   - **Preserves original error** details for debugging
-   - **Fallback handler** for all other tmux-related issues
+# Command exits immediately - no resources created
+```
 
 **Quick Solutions**:
-- Resize terminal window (maximize or drag corners)
-- Reduce pane count: `--tmux-h-panes 2` instead of `--tmux-h-panes 4`
-- Switch split direction: `--tmux-v-panes` instead of `--tmux-h-panes`
+- Reduce pane count: `--tmux-h-panes 8` instead of `--tmux-h-panes 20`
+- Switch split direction: `--tmux-v-panes 12` instead of `--tmux-h-panes 12`
 - Use efficient layouts: `--tmux-layout main-vertical` or `--tmux-layout tiled`
 
-**Terminal Size Guidelines**:
-- Small terminals (80x24): 2-3 panes maximum
-- Medium terminals (120x40): 4-6 panes optimal
-- Large terminals (200x60+): 6+ panes supported
+**Validation Benefits**:
+- **Clean Exit**: Command exits with error code 1 when validation fails
+- **No Resource Waste**: Prevents creation of worktrees that would need cleanup
+- **Better Performance**: Immediate feedback without waiting for tmux operations
+- **Clear Guidance**: Specific error messages with actionable solutions
 
-**Error Handling Features**:
-- **Intelligent error parsing** detects specific tmux failure types
-- **Contextual solutions** provided based on error type
-- **Preserves debugging information** while improving user experience
-- **Consistent error formatting** across all commands
+**Pane Limits**:
+- **Horizontal splits**: Maximum 10 panes (smaller screen space per pane)
+- **Vertical splits**: Maximum 15 panes (more vertical space available)
+- **Validation triggers**: Only for multi-pane options (`--tmux-h-panes` > 2, `--tmux-v-panes` > 2)
 
 If an error occurs, use the `--verbose` option for detailed information.
 

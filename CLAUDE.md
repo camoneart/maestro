@@ -201,7 +201,7 @@ This ensures documentation always stays in sync with implementation changes with
 ### External Tool Integration
 
 - **GitHub CLI**: Direct `gh` command integration for PR management and Issue/PR metadata extraction
-- **tmux**: Session management with auto-attach functionality for `--tmux`, `--tmux-h`, `--tmux-v` options
+- **tmux**: Session management with auto-attach functionality and smart pane validation for `--tmux`, `--tmux-h`, `--tmux-v` options
 - **fzf**: Fuzzy finding for interactive selection across commands
 - **Shell Completion**: bash/zsh/fish completion scripts available via `mst completion`
 
@@ -261,6 +261,10 @@ This ensures documentation always stays in sync with implementation changes with
    - [ ] Terminal remains functional after detach
    - [ ] `--tmux-h` creates horizontal split
    - [ ] `--tmux-v` creates vertical split
+   - [ ] Pane validation works: `--tmux-h-panes 20` fails with clear error
+   - [ ] Pane validation allows reasonable counts: `--tmux-h-panes 6` succeeds
+   - [ ] Early validation prevents resource creation when limits exceeded
+   - [ ] Error messages are in Japanese and provide clear guidance
    ```
 
 4. **Pre-Release Testing**

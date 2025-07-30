@@ -466,6 +466,41 @@ mst create feature/testing --tmux-h-panes 4 --tmux-layout even-horizontal
 
 ## Error Handling
 
+### Automatic Rollback Functionality
+
+The create command includes intelligent automatic rollback functionality to prevent orphaned worktrees when post-creation tasks fail. This ensures your repository remains clean even when errors occur during tmux session creation or other post-processing steps.
+
+**How Automatic Rollback Works:**
+
+1. **Tracks Worktree Creation**: The command monitors whether a worktree was successfully created
+2. **Detects Post-Creation Failures**: If tmux session creation, environment setup, or other post-creation tasks fail
+3. **Automatic Cleanup**: Immediately attempts to remove the created worktree and branch
+4. **User Notification**: Provides clear feedback about the cleanup process
+5. **Fallback Instructions**: If automatic cleanup fails, provides manual cleanup commands
+
+**Example Rollback Scenario:**
+```bash
+# Command fails during tmux session creation
+mst create feature/new-feature --tmux
+
+# Output shows automatic rollback:
+⚠️  後処理でエラーが発生したため、作成したリソースをクリーンアップします...
+✅ クリーンアップが完了しました
+```
+
+**Manual Cleanup (if automatic rollback fails):**
+```bash
+# Commands provided in error message for manual cleanup:
+git worktree remove --force /path/to/worktree
+git branch -D branch-name
+```
+
+**Benefits:**
+- **Prevents Orphaned Worktrees**: No leftover directories when creation fails
+- **Maintains Clean Repository**: Automatic cleanup keeps your Git state consistent  
+- **Better Error Recovery**: Clear feedback and recovery instructions
+- **Improved User Experience**: Less manual cleanup required after failures
+
 ### Common Errors
 
 1. **Branch already exists**
@@ -490,29 +525,50 @@ mst create feature/testing --tmux-h-panes 4 --tmux-layout even-horizontal
    ```
    Solution: Authenticate GitHub CLI with `gh auth login`
 
-### tmux Error Handling
+### tmux Pane Validation and Error Handling
 
-The create command includes enhanced error handling for tmux pane creation, providing user-friendly Japanese error messages when issues occur:
+The create command now includes **early validation for tmux pane creation** to prevent resource waste and provide better user experience:
 
-4. **No space for new pane error**
+**Smart Pre-Validation**:
+- **Early Detection**: Validates pane count limits BEFORE creating any resources (worktree, branch, tmux session)
+- **Prevents Resource Creation**: Command exits with error code 1 immediately when validation fails
+- **No Cleanup Needed**: Since no resources are created, no rollback is required
+- **Maximum Limits**: 10 panes for horizontal splits, 15 panes for vertical splits
+
+**Enhanced Error Messages**:
+```bash
+# Early validation error message:
+Error: 画面サイズに対してペイン数（20個）が多すぎるため、セッションが作成できませんでした。ターミナルウィンドウを大きくするか、ペイン数を減らしてください。（水平分割）
+
+# Command exits immediately - no resources created
+```
+
+4. **Pane count validation error (new enhanced validation)**
 
    ```
-   Error: 画面サイズに対してペイン数（4個）が多すぎます。ターミナルウィンドウを大きくするか、ペイン数を減らしてください。（水平分割）
+   Error: 画面サイズに対してペイン数（20個）が多すぎるため、セッションが作成できませんでした。ターミナルウィンドウを大きくするか、ペイン数を減らしてください。（水平分割）
    ```
 
-   **Cause**: The terminal window is too small to accommodate the requested number of panes with `--tmux-h-panes` or `--tmux-v-panes` options.
+   **Cause**: The requested number of panes exceeds the maximum limits (10 for horizontal, 15 for vertical splits).
 
    **Error Message Details**:
+   - **Early validation** prevents creation of ANY resources
    - Displays in Japanese for better user experience
-   - Shows the specific number of panes that failed to create
+   - Shows the specific number of panes that was requested
    - Indicates whether it was horizontal (水平分割) or vertical (垂直分割) splitting
    - Provides actionable solutions directly in the error message
+   - **No cleanup required** since no resources were created
 
    **Solutions**:
-   - Increase terminal window size by dragging corners or maximizing
-   - Reduce the number of panes (e.g., use `--tmux-h-panes 2` instead of `--tmux-h-panes 4`)
-   - Use a different layout with `--tmux-layout` option
-   - Switch to vertical splitting if using horizontal (`--tmux-v-panes` instead of `--tmux-h-panes`)
+   - Reduce pane count to within limits: `--tmux-h-panes 8` instead of `--tmux-h-panes 20`
+   - Switch to vertical splitting for higher limits: `--tmux-v-panes 12` instead of `--tmux-h-panes 12`  
+   - Use efficient layouts: `--tmux-layout main-vertical` or `--tmux-layout tiled`
+
+   **Validation Benefits**:
+   - **Clean Exit**: Command exits with error code 1 when validation fails
+   - **No Resource Waste**: Prevents creation of worktrees that would need cleanup
+   - **Better Performance**: Immediate feedback without waiting for tmux operations
+   - **Clear Guidance**: Specific error messages with actionable solutions
 
 5. **Other tmux pane creation errors**
 
@@ -535,29 +591,36 @@ The create command includes enhanced error handling for tmux pane creation, prov
 
 ### Troubleshooting Multi-Pane Creation
 
-When using `--tmux-h-panes` or `--tmux-v-panes`, consider these factors:
+The create command now includes **early validation** to prevent issues before any resources are created:
 
-- **Minimum pane size**: tmux enforces minimum pane dimensions
-- **Terminal resolution**: Higher resolution allows more panes
-- **Font size**: Smaller fonts allow more panes in the same space
-- **Layout efficiency**: Some layouts use space more efficiently than others
+**Smart Validation Features**:
+- **Pane Limits**: 10 maximum for horizontal splits, 15 maximum for vertical splits
+- **Early Detection**: Validates limits before creating worktrees, branches, or tmux sessions
+- **Immediate Feedback**: Command exits with error code 1 when limits are exceeded
+- **No Cleanup Required**: Since no resources are created during validation failures
 
-**Recommended pane counts by terminal size**:
-- Small terminals (80x24): 2-3 panes maximum
-- Medium terminals (120x40): 4-6 panes
-- Large terminals (200x60+): 6+ panes
+**Pane Count Guidelines**:
+- **Horizontal splits (`--tmux-h-panes`)**: Maximum 10 panes (smaller screen space per pane)
+- **Vertical splits (`--tmux-v-panes`)**: Maximum 15 panes (more vertical space available)
+- **Validation triggers**: Only for multi-pane options (> 2 panes)
 
-**Example error resolution**:
+**Example validation scenarios**:
 ```bash
-# If this fails due to space constraints:
-mst create feature/api --tmux-h-panes 6
+# This will be rejected during validation (exceeds limit):
+mst create feature/api --tmux-h-panes 20
+# Error: 画面サイズに対してペイン数（20個）が多すぎるため、セッションが作成できませんでした...
 
-# Try reducing pane count:
-mst create feature/api --tmux-h-panes 3
-
-# Or use vertical splitting for better space usage:
-mst create feature/api --tmux-v-panes 4 --tmux-layout main-vertical
+# These will pass validation:
+mst create feature/api --tmux-h-panes 8    # Within horizontal limit
+mst create feature/api --tmux-v-panes 12   # Within vertical limit
+mst create feature/api --tmux-h-panes 6 --tmux-layout tiled  # Efficient layout
 ```
+
+**Benefits of Early Validation**:
+- **Prevents Resource Waste**: No worktrees created when validation fails
+- **Better Performance**: Immediate feedback without tmux operations
+- **Clean State**: Repository remains unchanged during validation failures
+- **Clear Guidance**: Error messages include specific solutions
 
 ## Related Commands
 

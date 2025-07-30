@@ -191,7 +191,8 @@ mst create feature/testing --tmux-h-panes 4 --tmux-layout tiled
 - `tiled` - Tiled layout that balances all panes
 
 **Multi-Pane Features:**
-- Supports 2-10 panes per worktree creation (recommended: 2-6)
+- **Smart Validation**: Validates pane limits (10 horizontal, 15 vertical) before creating resources
+- **Early Exit**: Command exits immediately if validation fails, preventing resource waste
 - Automatic layout application for optimal space usage
 - **Unified pane titles**: All panes display the branch name consistently
 - **Improved focus management**: First pane (top-left) is automatically focused
@@ -313,31 +314,44 @@ tmux kill-session -t session-name
    mst create feature/branch
    ```
 
-### Multi-Pane Creation Errors
+### Multi-Pane Validation and Error Handling
 
-When using `mst create` with multi-pane options (`--tmux-h-panes` or `--tmux-v-panes`), you may encounter space-related errors. The create command now provides enhanced error handling with user-friendly Japanese messages:
+The `mst create` command now includes **early validation for tmux pane creation** to prevent resource waste and provide better user experience:
 
-4. **No space for new pane**
+**Smart Pre-Validation**:
+- **Early Detection**: Validates pane count limits BEFORE creating any resources (worktree, branch, tmux session)
+- **Prevents Resource Creation**: Command exits with error code 1 immediately when validation fails
+- **No Cleanup Needed**: Since no resources are created, no rollback is required
+- **Maximum Limits**: 10 panes for horizontal splits, 15 panes for vertical splits
+
+4. **Pane count validation error (new enhanced validation)**
    ```
-   Error: 画面サイズに対してペイン数（4個）が多すぎます。ターミナルウィンドウを大きくするか、ペイン数を減らしてください。（水平分割）
+   Error: 画面サイズに対してペイン数（20個）が多すぎるため、セッションが作成できませんでした。ターミナルウィンドウを大きくするか、ペイン数を減らしてください。（水平分割）
    ```
 
    **Enhanced Error Message Features**:
+   - **Early validation** prevents creation of ANY resources
    - Displays in Japanese for better user experience
-   - Shows the exact number of panes that couldn't be created
+   - Shows the exact number of panes that was requested
    - Indicates split direction: 水平分割 (horizontal) or 垂直分割 (vertical)
    - Provides immediate solutions in the error message itself
+   - **No cleanup required** since no resources were created
 
    **Immediate Solutions**:
-   - Resize terminal window (drag corners or maximize)
-   - Reduce pane count: `--tmux-h-panes 2` instead of `--tmux-h-panes 4`
-   - Switch split direction: `--tmux-v-panes` may fit better than `--tmux-h-panes`
+   - Reduce pane count to within limits: `--tmux-h-panes 8` instead of `--tmux-h-panes 20`
+   - Switch to vertical splitting for higher limits: `--tmux-v-panes 12` instead of `--tmux-h-panes 12`
    - Use efficient layouts: `--tmux-layout main-vertical` or `--tmux-layout tiled`
 
-   **Terminal Size Guidelines**:
-   - **80x24 (small)**: Maximum 2-3 panes
-   - **120x40 (medium)**: Optimal for 4-6 panes  
-   - **200x60+ (large)**: Supports 6+ panes comfortably
+   **Validation Benefits**:
+   - **Clean Exit**: Command exits with error code 1 when validation fails
+   - **No Resource Waste**: Prevents creation of worktrees that would need cleanup
+   - **Better Performance**: Immediate feedback without waiting for tmux operations
+   - **Clear Guidance**: Specific error messages with actionable solutions
+
+   **Pane Limits**:
+   - **Horizontal splits (`--tmux-h-panes`)**: Maximum 10 panes (smaller screen space per pane)
+   - **Vertical splits (`--tmux-v-panes`)**: Maximum 15 panes (more vertical space available)
+   - **Validation triggers**: Only for multi-pane options (> 2 panes)
 
 5. **General tmux pane errors**
    ```
@@ -348,6 +362,7 @@ When using `mst create` with multi-pane options (`--tmux-h-panes` or `--tmux-v-p
    - Generic fallback for all other tmux pane creation failures
    - Preserves original tmux error message for debugging purposes
    - Consistent Japanese error messaging throughout the application
+   - **Automatic rollback**: Created worktrees are automatically deleted when tmux errors occur
 
    **Troubleshooting Steps**:
    ```bash
