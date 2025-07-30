@@ -603,8 +603,11 @@ export async function executeCreateCommand(
   }
 
   // Worktreeの作成
+  let worktreeCreated = false
+  let worktreePath = ''
+
   try {
-    await createWorktreeWithProgress(
+    const result = await createWorktreeWithProgress(
       manager,
       enhancedBranchName,
       options,
@@ -612,6 +615,8 @@ export async function executeCreateCommand(
       githubMetadata,
       issueNumber
     )
+    worktreeCreated = true
+    worktreePath = result
   } catch (error) {
     // ブランチ名衝突のエラーハンドリング
     if (error instanceof Error && error.message.includes('競合します')) {
@@ -632,6 +637,33 @@ export async function executeCreateCommand(
 
     // その他のエラー
     // エラーは既に下位層で表示済みなので、ここでは何も表示せずにexit
+    process.exit(1)
+  }
+
+  // 後処理の実行（tmuxセッション作成など）
+  try {
+    await executePostCreationTasks(worktreePath, enhancedBranchName, options, config)
+  } catch {
+    // tmuxセッション作成などのエラーが発生した場合、作成したworktreeをロールバック
+    if (worktreeCreated) {
+      console.log(
+        chalk.yellow(
+          '\n⚠️  後処理でエラーが発生したため、作成したリソースをクリーンアップします...'
+        )
+      )
+      try {
+        await manager.deleteWorktree(enhancedBranchName, true)
+        console.log(chalk.green('✅ クリーンアップが完了しました'))
+      } catch {
+        console.error(
+          chalk.red(
+            `\n❌ クリーンアップに失敗しました。手動で以下のコマンドを実行してください:\n` +
+              `   git worktree remove --force ${worktreePath}\n` +
+              `   git branch -D ${enhancedBranchName}`
+          )
+        )
+      }
+    }
     process.exit(1)
   }
 }
@@ -674,7 +706,7 @@ export async function createWorktreeWithProgress(
   config: Config,
   githubMetadata: GithubMetadata | null,
   issueNumber: string | null
-): Promise<void> {
+): Promise<string> {
   const spinner = ora('新しい演奏者を招集中...').start()
 
   try {
@@ -691,8 +723,7 @@ export async function createWorktreeWithProgress(
     const displayPath = formatPath(worktreePath, config)
     spinner.succeed(chalk.green(`✨ 新しい演奏者を招集しました: ${displayPath}`))
 
-    // 後処理の実行
-    await executePostCreationTasks(worktreePath, branchName, options, config)
+    return worktreePath
   } catch (error) {
     // spinnerを失敗状態にするが、エラーメッセージは上位層で処理
     spinner.fail(chalk.red('演奏者の招集に失敗しました'))
