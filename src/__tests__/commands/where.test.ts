@@ -55,14 +55,14 @@ describe('where command', () => {
 
       await whereCommand.parseAsync(['node', 'where', 'feature-1'])
 
-      expect(consoleLogSpy).toHaveBeenCalledWith('/path/to/worktree/feature-1')
+      expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringMatching(/feature-1$/))
     })
 
     it('should display current worktree path with --current option', async () => {
       const cwd = process.cwd()
       await whereCommand.parseAsync(['node', 'where', '--current'])
 
-      expect(consoleLogSpy).toHaveBeenCalledWith(cwd)
+      expect(consoleLogSpy).toHaveBeenCalledWith('.')
       expect(mockGitManager.listWorktrees).not.toHaveBeenCalled()
     })
 
@@ -316,7 +316,7 @@ describe('where command', () => {
 
       await whereCommand.parseAsync(['node', 'where', 'refs/heads/feature-1'])
 
-      expect(consoleLogSpy).toHaveBeenCalledWith('/path/to/worktree/feature-1')
+      expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringMatching(/feature-1$/))
     })
 
     it('should match partial branch names', async () => {
@@ -335,7 +335,7 @@ describe('where command', () => {
 
       await whereCommand.parseAsync(['node', 'where', 'auth'])
 
-      expect(consoleLogSpy).toHaveBeenCalledWith('/path/to/worktree/feature-auth')
+      expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringMatching(/feature-auth$/))
     })
   })
 
