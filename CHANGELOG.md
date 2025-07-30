@@ -1,5 +1,17 @@
 # Changelog
 
+## 3.5.7
+
+### Patch Changes
+
+- Fix unwanted cleanup when Ctrl+C during tmux attach prompt
+  - Prevent automatic rollback from post-creation task errors
+  - Add try-catch handling for attach prompts
+  - Preserve created resources (worktree, branch, tmux session) when Ctrl+C is pressed
+  - Show manual attachment instructions instead of deleting resources
+
+  Fixes #173
+
 ## 3.5.6
 
 ### Patch Changes
