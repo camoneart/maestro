@@ -13,6 +13,17 @@ vi.mock('../../core/git.js', () => ({
   GitWorktreeManager: vi.fn(),
 }))
 
+vi.mock('../../core/config.js', () => ({
+  ConfigManager: vi.fn(() => ({
+    loadProjectConfig: vi.fn().mockResolvedValue(undefined),
+    getAll: vi.fn().mockReturnValue({
+      ui: {
+        pathDisplay: 'relative'
+      }
+    })
+  }))
+}))
+
 describe('where command', () => {
   let consoleLogSpy: Mock
   let consoleErrorSpy: Mock
