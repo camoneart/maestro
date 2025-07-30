@@ -172,7 +172,7 @@ function getPaneConfiguration(options?: CreateOptions) {
 function validatePaneCount(paneCount: number, isHorizontal: boolean): void {
   // 簡易的な画面サイズ検証（より厳密にはtmuxの実際の画面サイズを取得すべき）
   const maxReasonablePanes = isHorizontal ? 10 : 15 // 水平分割の方が制限が厳しい
-  
+
   if (paneCount > maxReasonablePanes) {
     const splitType = isHorizontal ? '水平' : '垂直'
     throw new Error(
