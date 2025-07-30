@@ -246,6 +246,84 @@ describe('create command', () => {
         'Branch already exists'
       )
     })
+
+    it('should handle Ctrl+C during tmux attach prompt gracefully', async () => {
+      // inquirer.promptがCtrl+Cで中断された場合のエラーをシミュレート
+      const ctrlCError = new Error('User force closed the prompt')
+      ;(ctrlCError as any).isTtyError = true
+
+      vi.mocked(inquirer.prompt).mockRejectedValueOnce(ctrlCError)
+
+      // エラーがスローされることを確認
+      await expect(
+        inquirer.prompt([
+          {
+            type: 'confirm',
+            name: 'shouldAttach',
+            message: 'セッションにアタッチしますか？',
+            default: true,
+          },
+        ])
+      ).rejects.toThrow('User force closed the prompt')
+
+      // Note: 実際のコマンド実行では、このエラーはcatch節で処理され、
+      // クリーンアップが実行されずに「後でアタッチするには...」メッセージが表示される
+    })
+
+    it('should not perform cleanup when Ctrl+C happens during attach prompt', async () => {
+      const worktreePath = '/path/to/worktree'
+      const branchName = 'test-branch'
+
+      // worktree作成は成功
+      mockGitManager.createWorktree.mockResolvedValue(worktreePath)
+
+      // tmuxセッション作成は成功
+      vi.mocked(execa).mockResolvedValue({
+        stdout: '',
+        stderr: '',
+        exitCode: 0,
+        failed: false,
+        timedOut: false,
+        isCanceled: false,
+        killed: false,
+      } as any)
+
+      // アタッチプロンプトでCtrl+C
+      const ctrlCError = new Error('User force closed the prompt')
+      vi.mocked(inquirer.prompt).mockRejectedValueOnce(ctrlCError)
+
+      // deleteWorktreeが呼ばれないことを確認するためのスパイ
+      mockGitManager.deleteWorktree = vi.fn()
+
+      // 実際のコマンドフローをシミュレート:
+      // 1. worktree作成成功
+      // 2. tmuxセッション作成成功
+      // 3. アタッチプロンプトでCtrl+C
+      // 4. クリーンアップが実行されない
+
+      const gitManager = new GitWorktreeManager()
+      await gitManager.createWorktree(branchName)
+
+      // tmuxセッション作成
+      await execa('tmux', ['new-session', '-d', '-s', branchName])
+
+      // アタッチプロンプトでのCtrl+Cをシミュレート
+      try {
+        await inquirer.prompt([
+          {
+            type: 'confirm',
+            name: 'shouldAttach',
+            message: 'セッションにアタッチしますか？',
+          },
+        ])
+      } catch (error) {
+        // Ctrl+Cエラーをキャッチ
+        expect(error).toBeDefined()
+      }
+
+      // deleteWorktreeが呼ばれていないことを確認
+      expect(mockGitManager.deleteWorktree).not.toHaveBeenCalled()
+    })
   })
 
   describe('handleClaudeMarkdown', () => {

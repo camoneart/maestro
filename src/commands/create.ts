@@ -362,19 +362,28 @@ export async function createTmuxSession(
 
         // アタッチメント処理
         if (process.stdout.isTTY && process.stdin.isTTY) {
-          const { shouldAttach } = await inquirer.prompt([
-            {
-              type: 'confirm',
-              name: 'shouldAttach',
-              message: 'セッションにアタッチしますか？',
-              default: true,
-            },
-          ])
+          try {
+            const { shouldAttach } = await inquirer.prompt([
+              {
+                type: 'confirm',
+                name: 'shouldAttach',
+                message: 'セッションにアタッチしますか？',
+                default: true,
+              },
+            ])
 
-          if (shouldAttach) {
-            console.log(chalk.cyan(`🎵 tmuxセッション '${sessionName}' にアタッチしています...`))
-            await attachToTmuxSession(sessionName)
-          } else {
+            if (shouldAttach) {
+              console.log(chalk.cyan(`🎵 tmuxセッション '${sessionName}' にアタッチしています...`))
+              await attachToTmuxSession(sessionName)
+            } else {
+              console.log(
+                chalk.yellow(`\n📝 後でアタッチするには以下のコマンドを実行してください:`)
+              )
+              console.log(chalk.white(`   tmux attach -t ${sessionName}`))
+              console.log(chalk.gray(`\n💡 ヒント: Ctrl+B, D でセッションからデタッチできます`))
+            }
+          } catch {
+            // Ctrl+Cでキャンセルされた場合も正常な終了として扱う
             console.log(chalk.yellow(`\n📝 後でアタッチするには以下のコマンドを実行してください:`))
             console.log(chalk.white(`   tmux attach -t ${sessionName}`))
             console.log(chalk.gray(`\n💡 ヒント: Ctrl+B, D でセッションからデタッチできます`))
@@ -416,24 +425,31 @@ export async function createTmuxSession(
     console.log(chalk.green(`✨ tmuxセッション '${sessionName}' を作成しました`))
 
     if (process.stdout.isTTY && process.stdin.isTTY) {
-      const { shouldAttach } = await inquirer.prompt([
-        {
-          type: 'confirm',
-          name: 'shouldAttach',
-          message: 'セッションにアタッチしますか？',
-          default: true,
-        },
-      ])
+      try {
+        const { shouldAttach } = await inquirer.prompt([
+          {
+            type: 'confirm',
+            name: 'shouldAttach',
+            message: 'セッションにアタッチしますか？',
+            default: true,
+          },
+        ])
 
-      if (shouldAttach) {
-        console.log(chalk.cyan(`🎵 tmuxセッション '${sessionName}' にアタッチしています...`))
-        const isInsideTmux = process.env.TMUX !== undefined
-        if (isInsideTmux) {
-          await switchTmuxClient(sessionName)
+        if (shouldAttach) {
+          console.log(chalk.cyan(`🎵 tmuxセッション '${sessionName}' にアタッチしています...`))
+          const isInsideTmux = process.env.TMUX !== undefined
+          if (isInsideTmux) {
+            await switchTmuxClient(sessionName)
+          } else {
+            await attachToTmuxSession(sessionName)
+          }
         } else {
-          await attachToTmuxSession(sessionName)
+          console.log(chalk.yellow(`\n📝 後でアタッチするには以下のコマンドを実行してください:`))
+          console.log(chalk.white(`   tmux attach -t ${sessionName}`))
+          console.log(chalk.gray(`\n💡 ヒント: Ctrl+B, D でセッションからデタッチできます`))
         }
-      } else {
+      } catch {
+        // Ctrl+Cでキャンセルされた場合も正常な終了として扱う
         console.log(chalk.yellow(`\n📝 後でアタッチするには以下のコマンドを実行してください:`))
         console.log(chalk.white(`   tmux attach -t ${sessionName}`))
         console.log(chalk.gray(`\n💡 ヒント: Ctrl+B, D でセッションからデタッチできます`))
@@ -639,7 +655,6 @@ export async function executeCreateCommand(
   }
 
   // Worktreeの作成
-  let worktreeCreated = false
   let worktreePath = ''
 
   try {
@@ -651,7 +666,6 @@ export async function executeCreateCommand(
       githubMetadata,
       issueNumber
     )
-    worktreeCreated = true
     worktreePath = result
   } catch (error) {
     // ブランチ名衝突のエラーハンドリング
@@ -677,31 +691,7 @@ export async function executeCreateCommand(
   }
 
   // 後処理の実行（tmuxセッション作成など）
-  try {
-    await executePostCreationTasks(worktreePath, enhancedBranchName, options, config)
-  } catch {
-    // tmuxセッション作成などのエラーが発生した場合、作成したworktreeをロールバック
-    if (worktreeCreated) {
-      console.log(
-        chalk.yellow(
-          '\n⚠️  後処理でエラーが発生したため、作成したリソースをクリーンアップします...'
-        )
-      )
-      try {
-        await manager.deleteWorktree(enhancedBranchName, true)
-        console.log(chalk.green('✅ クリーンアップが完了しました'))
-      } catch {
-        console.error(
-          chalk.red(
-            `\n❌ クリーンアップに失敗しました。手動で以下のコマンドを実行してください:\n` +
-              `   git worktree remove --force ${worktreePath}\n` +
-              `   git branch -D ${enhancedBranchName}`
-          )
-        )
-      }
-    }
-    process.exit(1)
-  }
+  await executePostCreationTasks(worktreePath, enhancedBranchName, options, config)
 }
 
 // 確認プロンプトが必要かどうかを判定
