@@ -4,12 +4,14 @@
 [![npm version](https://img.shields.io/npm/v/@camoneart/maestro?color=007EC5&labelColor=555555&style=flat&logoColor=FFFFFF)](https://www.npmjs.com/package/@camoneart/maestro)
 [![License MIT](https://img.shields.io/badge/License-MIT-yellow?labelColor=555555&style=flat)](https://opensource.org/licenses/MIT)
 
+**[English](/README.md)** | **日本語**
+
 ![maestro](public/image/logo/maestro-logo.png)
 **Git worktreeを“オーケストラ”のように操り、Claude Codeとの並列開発を加速するCLIツール。**
 
-![Demo Animation](https://via.placeholder.com/800x400/2D3748/FFFFFF?text=Demo+Animation+Coming+Soon)
+<br />
 
-**[English](/README.md)** | **日本語**
+https://github.com/user-attachments/assets/c8662cc2-733e-4c77-9d3d-3738983731a4
 
 ## 目次
 
