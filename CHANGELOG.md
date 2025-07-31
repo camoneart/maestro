@@ -1,5 +1,14 @@
 # Changelog
 
+## 3.5.9
+
+### Patch Changes
+
+- Update README with demo video and improved descriptions
+  - Added demo video link to help users understand the tool visually
+  - Improved Japanese description for better clarity
+  - Enhanced documentation for better user experience
+
 ## 3.5.8
 
 ### Patch Changes
