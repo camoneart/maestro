@@ -14,15 +14,19 @@ mst rm <branch-name> [options]  # alias
 When you delete an orchestra member, Maestro performs a **complete cleanup**:
 
 1. **Worktree directory** - The physical directory containing the branch's files
-2. **Local branch** - The Git branch associated with the worktree
+2. **Empty parent directories** - Any empty directories left behind after worktree deletion
+   - Automatically cleans up empty parent directories (useful for branches like `feature/api` which would leave empty `feature/` directory)
+   - Recursively removes empty directories up to the repository base directory
+   - Provides visual feedback showing which directories were cleaned up with the message: `🧹 Removed empty directory: {directory-name}`
+3. **Local branch** - The Git branch associated with the worktree
    - First attempts safe deletion with `git branch -d`
    - Automatically retries with `git branch -D` if the branch is not fully merged
    - Ensures complete cleanup without manual intervention
-3. **tmux session** - The tmux session with the same name as the worktree (if exists)
+4. **tmux session** - The tmux session with the same name as the worktree (if exists)
    - Automatically terminates the session when deleting the worktree
    - Use `--keep-session` to preserve the tmux session after deletion
 
-This ensures no orphaned branches or sessions remain after worktree deletion.
+This ensures no orphaned branches, sessions, or empty directories remain after worktree deletion.
 
 ## Usage Examples
 
@@ -80,6 +84,7 @@ Normally, a confirmation prompt is displayed before deletion. The path display f
 
    ⚠️  This will delete:
    • Worktree directory and all its contents
+   • Any empty parent directories (e.g., empty 'feature/' directory)
    • Local branch 'feature/old-feature'
 
    This action cannot be undone.
@@ -96,6 +101,7 @@ Normally, a confirmation prompt is displayed before deletion. The path display f
 
    ⚠️  This will delete:
    • Worktree directory and all its contents
+   • Any empty parent directories (e.g., empty 'feature/' directory)
    • Local branch 'feature/old-feature'
 
    This action cannot be undone.
@@ -151,6 +157,7 @@ mst delete feature/my-feature
 
 # Example output:
 # ✅ Worktree 'feature/my-feature' deleted
+# 🧹 Removed empty directory: feature
 # ✅ tmux session 'feature/my-feature' terminated
 ```
 
@@ -164,6 +171,7 @@ mst delete feature/my-feature --keep-session
 
 # Example output:
 # ✅ Worktree 'feature/my-feature' deleted
+# 🧹 Removed empty directory: feature
 # ℹ️  tmux session 'feature/my-feature' preserved
 ```
 
@@ -233,9 +241,9 @@ You can set hooks before and after deletion in `.mst.json`:
 2. **Attempting to delete current orchestra member**
 
    ```
-   Error: 現在のディレクトリが削除対象のworktree内にあります。
-   別のディレクトリから実行してください。
-   例: cd .. && mst delete feature/current-branch
+   Error: Current directory is inside the worktree to be deleted.
+   Please run from a different directory.
+   Example: cd .. && mst delete feature/current-branch
    ```
 
    Solution: Move to a different directory (outside the worktree) before deletion
