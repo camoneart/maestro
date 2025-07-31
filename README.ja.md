@@ -7,7 +7,7 @@
 **[English](/README.md)** | **日本語**
 
 ![maestro](public/image/logo/maestro-logo.png)
-**Git worktreeを“オーケストラ”のように操り、Claude Codeとの並列開発を加速するCLIツール。**
+**Git worktreeを “オーケストラ” のように操り、Claude Codeとの並列開発を加速させるCLIツール。**
 
 <br />
 
