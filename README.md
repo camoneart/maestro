@@ -4,12 +4,14 @@
 [![npm version](https://img.shields.io/npm/v/@camoneart/maestro?color=007EC5&labelColor=555555&style=flat&logoColor=FFFFFF)](https://www.npmjs.com/package/@camoneart/maestro)
 [![License MIT](https://img.shields.io/badge/License-MIT-yellow?labelColor=555555&style=flat)](https://opensource.org/licenses/MIT)
 
+**English** | **[Japanese](/README.ja.md)**
+
 ![maestro](public/image/logo/maestro-logo.png)
 **A CLI tool that “conducts” Git worktrees like an orchestra and turbo-charges parallel development with Claude Code.**
 
-![Demo Animation](https://via.placeholder.com/800x400/2D3748/FFFFFF?text=Demo+Animation+Coming+Soon)
+<br />
 
-**English** | **[Japanese](/README.ja.md)**
+https://github.com/user-attachments/assets/7cae63ee-382c-4346-b627-ff66eefe0f9f
 
 ## Table of Contents
 
