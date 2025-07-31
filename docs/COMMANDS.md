@@ -148,8 +148,8 @@ The `create` command includes **intelligent automatic rollback functionality** t
 mst create feature/new-feature --tmux
 
 # Automatic rollback output:
-⚠️  後処理でエラーが発生したため、作成したリソースをクリーンアップします...
-✅ クリーンアップが完了しました
+⚠️  An error occurred during post-processing. Cleaning up created resources...
+✅ Cleanup completed
 ```
 
 **Benefits:**
@@ -170,7 +170,7 @@ The `create` command now includes **early validation for tmux pane creation** to
 **Enhanced Error Messages**:
 ```bash
 # Early validation error message:
-Error: 画面サイズに対してペイン数（20個）が多すぎるため、セッションが作成できませんでした。ターミナルウィンドウを大きくするか、ペイン数を減らしてください。（水平分割）
+Error: Unable to create session with 20 panes due to terminal size. Please resize your terminal window or reduce the number of panes. (horizontal split)
 
 # Command exits immediately - no resources created
 ```
@@ -292,13 +292,14 @@ mst rm [branch-name] [options]  # alias
 
 #### Features
 - **Complete cleanup**: Automatically deletes both worktree directory, associated local branch, and tmux session
+- **Empty directory cleanup**: Automatically removes empty parent directories (useful for branches like `feature/api` which leave empty `feature/` directories)
 - **tmux Session Management**: Automatically terminates associated tmux sessions (use `--keep-session` to preserve)
 - **Wildcard support**: Use patterns like `"feature/old-*"` to delete multiple branches
 - **Safe deletion**: Uses `git branch -d` to prevent deletion of unmerged branches
 
 #### Examples
 ```bash
-# Basic delete (removes worktree, local branch, and tmux session)
+# Basic delete (removes worktree, local branch, tmux session, and empty directories)
 mst delete feature/old-feature
 
 # Force delete (even with uncommitted changes)
@@ -753,9 +754,9 @@ mst graph
 mst graph --format dot --output graph.dot
 
 # When circular dependencies are detected, warnings are automatically shown:
-# ⚠️  循環参照が検出されました:
+# ⚠️  Circular reference detected:
 #   - feature-a → feature-b → feature-c → feature-a
-# 循環参照のあるブランチは main から派生するよう調整されました
+# Branches with circular references have been adjusted to derive from main
 ```
 
 ### 🔸 history
@@ -966,7 +967,7 @@ The `create` command now includes **early validation for tmux pane creation** to
 **Enhanced Error Messages**:
 ```bash
 # Early validation error message:
-Error: 画面サイズに対してペイン数（20個）が多すぎるため、セッションが作成できませんでした。ターミナルウィンドウを大きくするか、ペイン数を減らしてください。（水平分割）
+Error: Unable to create session with 20 panes due to terminal size. Please resize your terminal window or reduce the number of panes. (horizontal split)
 
 # Command exits immediately - no resources created
 ```

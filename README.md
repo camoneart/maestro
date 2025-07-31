@@ -9,7 +9,7 @@
 
 ![Demo Animation](https://via.placeholder.com/800x400/2D3748/FFFFFF?text=Demo+Animation+Coming+Soon)
 
-**English** | **[日本語](/README.ja.md)**
+**English** | **[Japanese](/README.ja.md)**
 
 ## Table of Contents
 
@@ -165,7 +165,7 @@ See the full [Command Reference](./docs/COMMANDS.md).
 | `init`      | Initialize project config    | `mst init --yes`               |
 | `create`    | Create a new worktree        | `mst create feature/login`     |
 | `list`      | List worktrees               | `mst list`                     |
-| `delete`    | Delete worktree, branch & tmux session | `mst delete feature/old --keep-session` |
+| `delete`    | Delete worktree & cleanup empty directories | `mst delete feature/old --keep-session` |
 | `tmux`      | Open in tmux                 | `mst tmux`                     |
 | `sync`      | Real-time file sync          | `mst sync --auto`              |
 | `push`      | Push and create PR           | `mst push --pr`                |
@@ -360,8 +360,8 @@ Maestro includes **intelligent automatic rollback functionality** that prevents 
 mst create feature/new-feature --tmux
 
 # Maestro automatically cleans up:
-⚠️  後処理でエラーが発生したため、作成したリソースをクリーンアップします...
-✅ クリーンアップが完了しました
+⚠️  An error occurred during post-processing. Cleaning up created resources...
+✅ Cleanup completed
 ```
 
 **Benefits:**
@@ -377,7 +377,7 @@ mst create feature/new-feature --tmux
 | **fzf not found**                              | fzf not installed                       | `brew install fzf`                |
 | **tmux not found**                             | tmux not installed                      | `brew install tmux`               |
 | **Claude Code won't start**                    | MCP server not running or port conflict | `mst mcp status` → `mst mcp stop` |
-| **Too many tmux panes** <br>`画面サイズに対してペイン数（N個）が多すぎるため、セッションが作成できませんでした` | Terminal window too small for requested panes | Resize window or reduce panes (max: 10 horizontal, 15 vertical) |
+| **Too many tmux panes** <br>`Unable to create session with N panes due to terminal size` | Terminal window too small for requested panes | Resize window or reduce panes (max: 10 horizontal, 15 vertical) |
 
 ### Other error codes
 
@@ -399,7 +399,7 @@ Maestro now includes **early validation for tmux pane creation** to prevent reso
 **Enhanced Error Messages**:
 ```bash
 # Early validation error message:
-Error: 画面サイズに対してペイン数（20個）が多すぎるため、セッションが作成できませんでした。ターミナルウィンドウを大きくするか、ペイン数を減らしてください。（水平分割）
+Error: Unable to create session with 20 panes due to terminal size. Please resize your terminal window or reduce the number of panes. (horizontal split)
 
 # Command exits immediately - no resources created
 ```

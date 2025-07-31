@@ -430,6 +430,194 @@ locked reason`
       expect(branchMock).toHaveBeenNthCalledWith(1, ['-d', branchName])
       expect(branchMock).toHaveBeenNthCalledWith(2, ['-D', branchName])
     })
+
+    it('should cleanup empty parent directories after deleting worktree (issue #175)', async () => {
+      const branchName = 'feature/api'
+      const mockRepoRoot = '/test/repo'
+      const worktreePath = '/test/feature/api'
+
+      // listWorktreesをモック
+      vi.spyOn(gitManager, 'listWorktrees').mockResolvedValueOnce([
+        {
+          path: worktreePath,
+          head: 'abcdef1234567890',
+          branch: 'refs/heads/feature/api',
+          isCurrentDirectory: false,
+          detached: false,
+          locked: false,
+          prunable: false,
+        },
+      ])
+
+      // getRepositoryRootをモック
+      vi.spyOn(gitManager, 'getRepositoryRoot').mockResolvedValueOnce(mockRepoRoot)
+
+      // git操作をモック
+      ;(gitManager as any).git.raw = vi.fn().mockResolvedValue('')
+      ;(gitManager as any).git.branch = vi.fn().mockResolvedValue('')
+
+      // ファイルシステム操作をモック
+      vi.mocked(fs.readdir).mockResolvedValueOnce([]) // 親ディレクトリが空
+      vi.mocked(fs.rmdir).mockResolvedValueOnce(undefined)
+
+      await gitManager.deleteWorktree(branchName)
+
+      // worktreeの削除が呼び出されることを確認
+      expect((gitManager as any).git.raw).toHaveBeenCalledWith(['worktree', 'remove', worktreePath])
+
+      // 空ディレクトリの確認と削除が呼び出されることを確認
+      expect(fs.readdir).toHaveBeenCalledWith('/test/feature')
+      expect(fs.rmdir).toHaveBeenCalledWith('/test/feature')
+    })
+
+    it('should not cleanup non-empty parent directories', async () => {
+      const branchName = 'feature/api'
+      const mockRepoRoot = '/test/repo'
+      const worktreePath = '/test/feature/api'
+
+      // listWorktreesをモック
+      vi.spyOn(gitManager, 'listWorktrees').mockResolvedValueOnce([
+        {
+          path: worktreePath,
+          head: 'abcdef1234567890',
+          branch: 'refs/heads/feature/api',
+          isCurrentDirectory: false,
+          detached: false,
+          locked: false,
+          prunable: false,
+        },
+      ])
+
+      // getRepositoryRootをモック
+      vi.spyOn(gitManager, 'getRepositoryRoot').mockResolvedValueOnce(mockRepoRoot)
+
+      // git操作をモック
+      ;(gitManager as any).git.raw = vi.fn().mockResolvedValue('')
+      ;(gitManager as any).git.branch = vi.fn().mockResolvedValue('')
+
+      // ファイルシステム操作をモック - 親ディレクトリに他のファイルがある
+      vi.mocked(fs.readdir).mockResolvedValueOnce(['other-file.txt'] as any)
+
+      await gitManager.deleteWorktree(branchName)
+
+      // 空でないディレクトリは削除されないことを確認
+      expect(fs.readdir).toHaveBeenCalledWith('/test/feature')
+      expect(fs.rmdir).not.toHaveBeenCalled()
+    })
+
+    it('should cleanup nested empty directories recursively', async () => {
+      const branchName = 'feature/deep/nested/api'
+      const mockRepoRoot = '/test/repo'
+      const worktreePath = '/test/feature/deep/nested/api'
+
+      // listWorktreesをモック
+      vi.spyOn(gitManager, 'listWorktrees').mockResolvedValueOnce([
+        {
+          path: worktreePath,
+          head: 'abcdef1234567890',
+          branch: 'refs/heads/feature/deep/nested/api',
+          isCurrentDirectory: false,
+          detached: false,
+          locked: false,
+          prunable: false,
+        },
+      ])
+
+      // getRepositoryRootをモック
+      vi.spyOn(gitManager, 'getRepositoryRoot').mockResolvedValueOnce(mockRepoRoot)
+
+      // git操作をモック
+      ;(gitManager as any).git.raw = vi.fn().mockResolvedValue('')
+      ;(gitManager as any).git.branch = vi.fn().mockResolvedValue('')
+
+      // ファイルシステム操作をモック - すべての親ディレクトリが空
+      vi.mocked(fs.readdir)
+        .mockResolvedValueOnce([]) // /test/feature/deep/nested
+        .mockResolvedValueOnce([]) // /test/feature/deep
+        .mockResolvedValueOnce([]) // /test/feature
+        .mockResolvedValueOnce([]) // /test (baseDir)
+      vi.mocked(fs.rmdir).mockResolvedValue(undefined)
+
+      await gitManager.deleteWorktree(branchName)
+
+      // 各レベルのディレクトリが確認・削除されることを確認
+      expect(fs.readdir).toHaveBeenCalledWith('/test/feature/deep/nested')
+      expect(fs.readdir).toHaveBeenCalledWith('/test/feature/deep')
+      expect(fs.readdir).toHaveBeenCalledWith('/test/feature')
+      expect(fs.rmdir).toHaveBeenCalledWith('/test/feature/deep/nested')
+      expect(fs.rmdir).toHaveBeenCalledWith('/test/feature/deep')
+      expect(fs.rmdir).toHaveBeenCalledWith('/test/feature')
+
+      // ベースディレクトリ(/test)は削除されないことを確認
+      expect(fs.rmdir).not.toHaveBeenCalledWith('/test')
+    })
+
+    it('should stop at base directory and not go above it', async () => {
+      const branchName = 'single-level'
+      const mockRepoRoot = '/test/repo'
+      const worktreePath = '/test/single-level'
+
+      // listWorktreesをモック
+      vi.spyOn(gitManager, 'listWorktrees').mockResolvedValueOnce([
+        {
+          path: worktreePath,
+          head: 'abcdef1234567890',
+          branch: 'refs/heads/single-level',
+          isCurrentDirectory: false,
+          detached: false,
+          locked: false,
+          prunable: false,
+        },
+      ])
+
+      // getRepositoryRootをモック
+      vi.spyOn(gitManager, 'getRepositoryRoot').mockResolvedValueOnce(mockRepoRoot)
+
+      // git操作をモック
+      ;(gitManager as any).git.raw = vi.fn().mockResolvedValue('')
+      ;(gitManager as any).git.branch = vi.fn().mockResolvedValue('')
+
+      await gitManager.deleteWorktree(branchName)
+
+      // ベースディレクトリ(/test)は確認も削除もされないことを確認
+      expect(fs.readdir).not.toHaveBeenCalled()
+      expect(fs.rmdir).not.toHaveBeenCalled()
+    })
+
+    it('should handle errors gracefully during cleanup', async () => {
+      const branchName = 'feature/error-case'
+      const mockRepoRoot = '/test/repo'
+      const worktreePath = '/test/feature/error-case'
+
+      // listWorktreesをモック
+      vi.spyOn(gitManager, 'listWorktrees').mockResolvedValueOnce([
+        {
+          path: worktreePath,
+          head: 'abcdef1234567890',
+          branch: 'refs/heads/feature/error-case',
+          isCurrentDirectory: false,
+          detached: false,
+          locked: false,
+          prunable: false,
+        },
+      ])
+
+      // getRepositoryRootをモック
+      vi.spyOn(gitManager, 'getRepositoryRoot').mockResolvedValueOnce(mockRepoRoot)
+
+      // git操作をモック
+      ;(gitManager as any).git.raw = vi.fn().mockResolvedValue('')
+      ;(gitManager as any).git.branch = vi.fn().mockResolvedValue('')
+
+      // ファイルシステム操作をモック - readdirでエラーを発生させる
+      vi.mocked(fs.readdir).mockRejectedValueOnce(new Error('Permission denied'))
+
+      // エラーが発生してもdeleteWorktreeは成功することを確認
+      await expect(gitManager.deleteWorktree(branchName)).resolves.toBeUndefined()
+
+      // rmdirが呼ばれないことを確認
+      expect(fs.rmdir).not.toHaveBeenCalled()
+    })
   })
 
   describe('getAllBranches', () => {
