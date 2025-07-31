@@ -2,6 +2,8 @@ import simpleGit, { SimpleGit } from 'simple-git'
 import { Worktree } from '../types/index.js'
 import { ConfigManager } from './config.js'
 import path from 'path'
+import fs from 'fs/promises'
+import chalk from 'chalk'
 
 export class GitWorktreeManager {
   private git: SimpleGit
@@ -115,11 +117,14 @@ export class GitWorktreeManager {
 
     await this.git.raw(args)
 
-    // ローカルブランチも削除
+    // Cleanup empty directories
+    await this.cleanupEmptyDirectories(worktree.path)
+
+    // Delete local branch as well
     try {
       await this.git.branch(['-d', branchName])
     } catch (error) {
-      // -d で削除できない場合は -D で強制削除を試みる
+      // If -d fails, try force delete with -D
       if (error instanceof Error && error.message.includes('not fully merged')) {
         await this.git.branch(['-D', branchName])
       } else {
@@ -254,5 +259,27 @@ export class GitWorktreeManager {
     }
 
     return alternativeName
+  }
+
+  private async cleanupEmptyDirectories(worktreePath: string): Promise<void> {
+    const repoRoot = await this.getRepositoryRoot()
+    const baseDir = path.join(repoRoot, '..')
+    let currentDir = path.dirname(worktreePath)
+
+    // Recursively remove empty directories up to base directory
+    while (currentDir !== baseDir && currentDir !== path.dirname(currentDir)) {
+      try {
+        const entries = await fs.readdir(currentDir)
+        if (entries.length === 0) {
+          await fs.rmdir(currentDir)
+          console.log(chalk.gray(`🧹 Removed empty directory: ${path.basename(currentDir)}`))
+          currentDir = path.dirname(currentDir)
+        } else {
+          break // Stop if directory is not empty
+        }
+      } catch {
+        break // Stop on error
+      }
+    }
   }
 }
