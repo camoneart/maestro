@@ -1,5 +1,18 @@
 # Changelog
 
+## 3.5.8
+
+### Patch Changes
+
+- Add automatic empty directory cleanup after worktree deletion
+
+  When deleting worktrees with slash-separated branch names (e.g., `feature/api`), empty parent directories are now automatically removed. This keeps the file system clean without manual intervention.
+  - Recursively removes empty directories up to the worktree base directory
+  - Safe operation that stops at non-empty directories
+  - Displays cleanup messages for transparency
+
+  Fixes #175
+
 ## 3.5.7
 
 ### Patch Changes
