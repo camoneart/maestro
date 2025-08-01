@@ -1,5 +1,14 @@
 # Changelog
 
+## 3.5.12
+
+### Patch Changes
+
+- fix: github command improvements and bug fixes
+  - Fixed github command to only open editor with explicit --open flag (#185)
+  - Fixed github pr command worktree creation error (#188)
+  - Removed unused worktrees.path configuration for clarity
+
 ## 3.5.11
 
 ### Patch Changes
