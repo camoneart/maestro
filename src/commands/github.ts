@@ -609,17 +609,14 @@ async function processWorktreeCreation(
         )
       )
       console.log(chalk.yellow('エディタでのオープンに進みます...'))
-      // tmuxが失敗した場合はエディタオープンにフォールバック
-      const shouldOpen =
-        options?.open ||
-        (options?.open === undefined && config.development?.defaultEditor !== 'none')
-      await openInEditor(worktreePath, config, !!shouldOpen)
+      // tmuxが失敗した場合はエディタオープンにフォールバック（-oフラグが明示的に指定された場合のみ）
+      if (options?.open) {
+        await openInEditor(worktreePath, config, true)
+      }
     }
-  } else {
-    // エディタで開く
-    const shouldOpen =
-      options?.open || (options?.open === undefined && config.development?.defaultEditor !== 'none')
-    await openInEditor(worktreePath, config, !!shouldOpen)
+  } else if (options?.open) {
+    // エディタで開く（-oフラグが明示的に指定された場合のみ）
+    await openInEditor(worktreePath, config, true)
   }
 
   console.log(chalk.green('\n✨ GitHub統合による演奏者の招集が完了しました！'))
