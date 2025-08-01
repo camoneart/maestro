@@ -48,6 +48,7 @@ Maestro is a CLI that makes Git worktree management intuitive. When working on m
 | 🤖 **Claude AI**          | AI diff reviews & code suggestions                  |
 | 🔗 **GitHub integration** | Generate worktrees from Issues / PRs                |
 | 🎯 **tmux / fzf**         | Keyboard-only, lightning-fast switching             |
+| 🚀 **Fast & Efficient**   | Optimize parallel development workflows             |
 | 📊 **Status**             | Real-time worktree status and health monitoring     |
 | 🔄 **Auto Sync**          | Propagate file changes in real time                 |
 | 📸 **Snapshot**           | Save / restore any state with one command           |
