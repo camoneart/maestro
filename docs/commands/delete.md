@@ -24,6 +24,7 @@ When you delete an orchestra member, Maestro performs a **complete cleanup**:
    - Ensures complete cleanup without manual intervention
 4. **tmux session** - The tmux session with the same name as the worktree (if exists)
    - Automatically terminates the session when deleting the worktree
+   - Session names are normalized to handle special characters (e.g., `feature/api-auth` becomes `feature-api-auth`)
    - Use `--keep-session` to preserve the tmux session after deletion
 
 This ensures no orphaned branches, sessions, or empty directories remain after worktree deletion.
@@ -147,7 +148,7 @@ mst delete --merged --yes
 
 ## tmux Session Management
 
-By default, Maestro automatically cleans up tmux sessions when deleting worktrees to prevent orphaned sessions:
+By default, Maestro automatically cleans up tmux sessions when deleting worktrees to prevent orphaned sessions. Session names are normalized to handle special characters in branch names (slashes, spaces, etc. are converted to hyphens):
 
 ### Default Behavior (Auto-cleanup)
 
@@ -158,7 +159,16 @@ mst delete feature/my-feature
 # Example output:
 # ✅ Worktree 'feature/my-feature' deleted
 # 🧹 Removed empty directory: feature
-# ✅ tmux session 'feature/my-feature' terminated
+# ✅ tmux session 'feature-my-feature' terminated
+
+# Works with complex branch names too
+mst delete feature/api/auth-handler
+
+# Example output:
+# ✅ Worktree 'feature/api/auth-handler' deleted
+# 🧹 Removed empty directory: feature/api
+# 🧹 Removed empty directory: feature
+# ✅ tmux session 'feature-api-auth-handler' terminated
 ```
 
 ### Preserving tmux Sessions
@@ -172,7 +182,16 @@ mst delete feature/my-feature --keep-session
 # Example output:
 # ✅ Worktree 'feature/my-feature' deleted
 # 🧹 Removed empty directory: feature
-# ℹ️  tmux session 'feature/my-feature' preserved
+# ℹ️  tmux session 'feature-my-feature' preserved
+
+# Works with complex branch names too
+mst delete feature/api/user-management --keep-session
+
+# Example output:
+# ✅ Worktree 'feature/api/user-management' deleted
+# 🧹 Removed empty directory: feature/api
+# 🧹 Removed empty directory: feature
+# ℹ️  tmux session 'feature-api-user-management' preserved
 ```
 
 ### Use Cases for --keep-session

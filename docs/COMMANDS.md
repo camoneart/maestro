@@ -293,7 +293,8 @@ mst rm [branch-name] [options]  # alias
 #### Features
 - **Complete cleanup**: Automatically deletes both worktree directory, associated local branch, and tmux session
 - **Empty directory cleanup**: Automatically removes empty parent directories (useful for branches like `feature/api` which leave empty `feature/` directories)
-- **tmux Session Management**: Automatically terminates associated tmux sessions (use `--keep-session` to preserve)
+- **tmux Session Management**: Automatically terminates associated tmux sessions with normalized names (special characters converted to hyphens)
+- **Smart session handling**: Handles complex branch names like `feature/api/auth` by normalizing to `feature-api-auth`
 - **Wildcard support**: Use patterns like `"feature/old-*"` to delete multiple branches
 - **Safe deletion**: Uses `git branch -d` to prevent deletion of unmerged branches
 
