@@ -1,5 +1,15 @@
 # Changelog
 
+## 3.5.10
+
+### Patch Changes
+
+- Improve list command UI with clearer worktree labeling
+  - Update header to show "オーケストラ編成(worktree):" for clarity
+  - Change individual worktree icons from 🎼 to 🎷 (keeping 📍 for current position)
+  - Fix English documentation that had Japanese text mixed in
+  - Maintain consistent orchestra theme throughout the UI
+
 ## 3.5.9
 
 ### Patch Changes
