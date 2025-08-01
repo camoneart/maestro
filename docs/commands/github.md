@@ -44,7 +44,7 @@ mst github 123 --tmux-v
 # Create and open in horizontal split
 mst github 123 --tmux-h
 
-# Create with automatic setup
+# Create with automatic setup and explicitly open in editor
 mst github 123 --open --setup
 ```
 
@@ -52,7 +52,7 @@ mst github 123 --open --setup
 
 | Option                | Short      | Description                              | Default |
 | --------------------- | ---------- | ---------------------------------------- | ------- |
-| `--open`              | `-o`       | Open in editor after creation            | `false` |
+| `--open`              | `-o`       | Open in editor after creation (only when explicitly specified) | `false` |
 | `--setup`             | `-s`       | Execute environment setup                | `false` |
 | `--message <message>` | `-m`       | Comment message (for comment subcommand) | none    |
 | `--reopen`            |            | Reopen PR/Issue                          | `false` |
@@ -60,6 +60,10 @@ mst github 123 --open --setup
 | `--tmux`              | `-t`       | Open in new tmux window                  | `false` |
 | `--tmux-vertical`     | `--tmux-v` | Open in vertical split pane              | `false` |
 | `--tmux-horizontal`   | `--tmux-h` | Open in horizontal split pane            | `false` |
+
+### Editor Opening Behavior
+
+The `--open` flag only opens the editor when explicitly specified. Unlike some other commands, the GitHub command does not automatically open in the editor based on the `development.defaultEditor` configuration setting. You must use the `--open` flag to open the created worktree in your editor.
 
 ## Listing GitHub Items
 

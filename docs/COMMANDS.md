@@ -416,7 +416,7 @@ mst gh [type] [number] [options]  # alias
 #### Options
 | Option | Short | Description |
 |--------|-------|-------------|
-| `--open` | `-o` | Open in editor |
+| `--open` | `-o` | Open in editor (only when explicitly specified) |
 | `--setup` | `-s` | Execute environment setup |
 | `--message <message>` | `-m` | Comment message |
 | `--reopen` | | Reopen PR/Issue |
@@ -447,6 +447,8 @@ mst github 123 --tmux-v
 # Add comment to PR/Issue
 mst github comment 123 -m "LGTM!"
 ```
+
+**Note:** The `--open` flag only opens the editor when explicitly specified. The GitHub command does not automatically open in the editor based on `development.defaultEditor` configuration.
 
 ### 🔸 tmux
 
