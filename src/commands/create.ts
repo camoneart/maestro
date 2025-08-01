@@ -422,6 +422,8 @@ export async function createTmuxSession(
     await execa('tmux', ['new-session', '-d', '-s', sessionName, '-c', worktreePath, shell, '-l'])
 
     await execa('tmux', ['rename-window', '-t', sessionName, branchName])
+    // ペインタイトルを設定
+    await setTitleForAllPanes(sessionName, branchName, 1)
     console.log(chalk.green(`✨ tmuxセッション '${sessionName}' を作成しました`))
 
     if (process.stdout.isTTY && process.stdin.isTTY) {
