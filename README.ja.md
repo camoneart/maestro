@@ -46,7 +46,7 @@ Maestroは、Git worktreeをより直感的に管理できるCLIツールです�
 | ----------------------- | ---------------------------------- |
 | 🎼 **オーケストラUI**   | Worktree を演奏者として直感操作    |
 | 🤖 **Claude AI 連携**   | AI による差分レビュー & コード提案 |
-| 🔗 **GitHub 連携**      | Issue / PR からワークツリーを生成  |
+| 🔗 **GitHub 連携**      | Issue / PR から安全なワークツリー生成  |
 | 🎯 **tmux / fzf**       | キーボードだけで高速セッション切替 |
 | 📊 **ステータス**       | リアルタイムの worktree 状態監視   |
 | 🔄 **自動同期**         | 変更をリアルタイムで全演奏者へ反映 |
@@ -195,7 +195,7 @@ Maestro が提供する “もう一歩進んだ” 機能を一覧で把握で�
 | 機能                         | コマンド例                                                     | やってくれること                                                                 |
 | ---------------------------- | -------------------------------------------------------------- | -------------------------------------------------------------------------------- |
 | **自動レビュー & マージ 🚀** | `mst review --auto-flow`                                       | fetch → rebase → AI レビュー → Conventional Commit → PR 作成をワンコマンドで実行 |
-| **GitHub連携 🔗**           | `mst github list` <br>`mst github checkout 123`                | GitHub issue/PR一覧表示・チェックアウト、リポジトリワークフロー自動化          |
+| **GitHub連携 🔗**           | `mst github list` <br>`mst github checkout 123`                | GitHub issue/PR一覧表示・安全なチェックアウト、リポジトリワークフロー自動化          |
 | **スナップショット 📸**      | `mst snapshot -m "前の状態"` <br>`mst snapshot --restore <id>` | 任意時点の状態を保存し、いつでも復元                                             |
 | **健全性チェック 🏥**        | `mst health` <br>`mst health --fix`                            | stale / orphaned / conflict などを検出し、自動修復                               |
 

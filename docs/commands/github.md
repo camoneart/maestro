@@ -122,6 +122,16 @@ mst github pr 123
 mst shell pr-123
 ```
 
+### PR Worktree Creation Process
+
+When creating a worktree from a Pull Request, maestro uses an optimized process:
+
+1. **Temporary checkout**: Creates a temporary branch to fetch the PR code
+2. **Worktree creation**: Creates the worktree using `createWorktree` with the temporary branch as base
+3. **Cleanup**: Removes the temporary branch and restores the original branch state
+
+This approach ensures reliable PR worktree creation by properly handling the base branch relationship and avoiding common Git worktree issues.
+
 ### Automatically Retrieved Information
 
 - PR title
