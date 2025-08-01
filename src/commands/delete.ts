@@ -384,11 +384,13 @@ async function executeWorktreesDeletion(
       // tmuxセッションの削除
       if (!options.keepSession) {
         try {
+          // create.tsと同じ正規化ロジックを適用
+          const tmuxSessionName = branch.replace(/[^a-zA-Z0-9_-]/g, '-')
           // tmuxセッションが存在するかチェック
-          await execa('tmux', ['has-session', '-t', branch])
+          await execa('tmux', ['has-session', '-t', tmuxSessionName])
           // 存在する場合は削除
-          await execa('tmux', ['kill-session', '-t', branch])
-          console.log(`  ${chalk.gray(`tmuxセッション '${branch}' を削除しました`)}`)
+          await execa('tmux', ['kill-session', '-t', tmuxSessionName])
+          console.log(`  ${chalk.gray(`tmuxセッション '${tmuxSessionName}' を削除しました`)}`)
         } catch {
           // セッションが存在しない場合は何もしない
         }
