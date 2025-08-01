@@ -214,7 +214,7 @@ async function selectWorktreesWithFzf(
     [
       '--ansi',
       '--multi',
-      '--header=解散する演奏者を選択 (Tab で複数選択, Ctrl-C でキャンセル)',
+      '--header=退場させる演奏者を選択 (Tab で複数選択, Ctrl-C でキャンセル)',
       '--preview',
       'echo {} | cut -d"|" -f2 | xargs ls -la',
       '--preview-window=right:50%:wrap',
@@ -335,7 +335,7 @@ async function determineTargetWorktrees(
 
 // 削除対象の詳細を表示
 async function displayDeletionDetails(targetWorktrees: Worktree[], config: Config): Promise<void> {
-  console.log(chalk.bold('\n🗑️  解散対象の演奏者:\n'))
+  console.log(chalk.bold('\n🪽  退場対象の演奏者:\n'))
 
   const deletionDetails = await Promise.all(
     targetWorktrees.map(async wt => {
@@ -368,14 +368,14 @@ async function executeWorktreesDeletion(
 
   for (const worktree of targetWorktrees) {
     const branch = worktree.branch?.replace('refs/heads/', '') || worktree.branch || 'unknown'
-    const deleteSpinner = ora(`演奏者 '${chalk.cyan(branch)}' を解散中...`).start()
+    const deleteSpinner = ora(`演奏者 '${chalk.cyan(branch)}' が退場中...`).start()
 
     try {
       await gitManager.deleteWorktree(
         worktree.branch?.replace('refs/heads/', '') || '',
         options.force
       )
-      deleteSpinner.succeed(`演奏者 '${chalk.cyan(branch)}' を解散しました`)
+      deleteSpinner.succeed(`演奏者 '${chalk.cyan(branch)}' が退場しました`)
 
       if (options.removeRemote && worktree.branch) {
         await deleteRemoteBranch(worktree.branch.replace('refs/heads/', ''))
@@ -384,11 +384,13 @@ async function executeWorktreesDeletion(
       // tmuxセッションの削除
       if (!options.keepSession) {
         try {
+          // create.tsと同じ正規化ロジックを適用
+          const tmuxSessionName = branch.replace(/[^a-zA-Z0-9_-]/g, '-')
           // tmuxセッションが存在するかチェック
-          await execa('tmux', ['has-session', '-t', branch])
+          await execa('tmux', ['has-session', '-t', tmuxSessionName])
           // 存在する場合は削除
-          await execa('tmux', ['kill-session', '-t', branch])
-          console.log(`  ${chalk.gray(`tmuxセッション '${branch}' を削除しました`)}`)
+          await execa('tmux', ['kill-session', '-t', tmuxSessionName])
+          console.log(`  ${chalk.gray(`tmuxセッション '${tmuxSessionName}' を削除しました`)}`)
         } catch {
           // セッションが存在しない場合は何もしない
         }
@@ -396,7 +398,7 @@ async function executeWorktreesDeletion(
 
       results.push({ branch, status: 'success' })
     } catch (error) {
-      deleteSpinner.fail(`演奏者 '${chalk.cyan(branch)}' の解散に失敗しました`)
+      deleteSpinner.fail(`演奏者 '${chalk.cyan(branch)}' が退場できませんでした`)
       results.push({
         branch,
         status: 'failed',
@@ -406,7 +408,7 @@ async function executeWorktreesDeletion(
   }
 
   // 結果サマリー
-  console.log(chalk.bold('\n🎼 解散結果:\n'))
+  console.log(chalk.bold('\n🎼 退場結果:\n'))
 
   const successCount = results.filter(r => r.status === 'success').length
   const failedCount = results.filter(r => r.status === 'failed').length
@@ -424,13 +426,15 @@ async function executeWorktreesDeletion(
   console.log(chalk.gray(`\n合計: ${successCount} 成功, ${failedCount} 失敗`))
 
   if (successCount > 0) {
-    console.log(chalk.green('\n✨ 演奏者の解散が完了しました！'))
+    const message =
+      successCount === 1 ? '1名の演奏者が退場しました' : `${successCount}名の演奏者が退場しました`
+    console.log(chalk.green(`\n✨ ${message}`))
   }
 }
 
 export const deleteCommand = new Command('delete')
   .alias('rm')
-  .description('演奏者（worktree）を解散')
+  .description('演奏者（worktree）が退場')
   .argument('[branch-name]', '削除するブランチ名（ワイルドカード使用可: feature/demo-*）')
   .option('-f, --force', '強制削除')
   .option('-r, --remove-remote', 'リモートブランチも削除')
@@ -505,7 +509,7 @@ export const deleteCommand = new Command('delete')
             {
               type: 'confirm',
               name: 'confirmDelete',
-              message: chalk.yellow('本当にこれらの演奏者を解散しますか？'),
+              message: chalk.yellow('本当に演奏者を退場させますか？'),
               default: false,
             },
           ])

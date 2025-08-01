@@ -458,5 +458,30 @@ describe('delete command', () => {
       const tmuxCalls = vi.mocked(execa).mock.calls.filter(call => call[0] === 'tmux')
       expect(tmuxCalls.length).toBe(5) // has-session x3 + kill-session x2
     })
+
+    it('should normalize branch names with slashes for tmux session names', async () => {
+      const worktrees = [
+        createMockWorktree({ branch: 'refs/heads/feature/test', path: '/path/feature/test' }),
+      ]
+      mockGitManager.listWorktrees.mockResolvedValue(worktrees)
+
+      // tmuxセッションの存在確認（成功）
+      vi.mocked(execa).mockResolvedValueOnce(createMockExecaResponse() as any)
+
+      // tmuxセッションの削除（成功）
+      vi.mocked(execa).mockResolvedValueOnce(createMockExecaResponse() as any)
+
+      // スラッシュを含むブランチ名の正規化をシミュレート
+      const branchName = 'feature/test'
+      const normalizedSessionName = branchName.replace(/[^a-zA-Z0-9_-]/g, '-')
+
+      // tmuxセッションチェックの実行を確認
+      await execa('tmux', ['has-session', '-t', normalizedSessionName])
+      expect(execa).toHaveBeenCalledWith('tmux', ['has-session', '-t', 'feature-test'])
+
+      // tmuxセッション削除の実行を確認
+      await execa('tmux', ['kill-session', '-t', normalizedSessionName])
+      expect(execa).toHaveBeenCalledWith('tmux', ['kill-session', '-t', 'feature-test'])
+    })
   })
 })

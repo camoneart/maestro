@@ -52,7 +52,7 @@ Maestroは、Git worktreeをより直感的に管理できるCLIツールです�
 | 🔄 **自動同期**         | 変更をリアルタイムで全演奏者へ反映 |
 | 📸 **スナップショット** | 任意の状態を保存・ワンクリック復元 |
 | 🏥 **ヘルスチェック**   | 孤立ブランチや競合を検出・自動修復 |
-| 🛡️ **自動ロールバック** | 失敗時に孤立ワークツリーを自動削除 |
+| 🛡️ **自動ロールバック** | 失敗時に孤立ワークツリーを自動退場 |
 
 ## インストール
 
@@ -165,7 +165,7 @@ mst create feature/awesome-feature --tmux --claude-md
 | `init`      | プロジェクト設定を初期化    | `mst init --yes`               |
 | `create`    | 新しい worktree を作成     | `mst create feature/login`     |
 | `list`      | worktree を一覧表示        | `mst list`                     |
-| `delete`    | worktree削除と空ディレクトリのクリーンアップ | `mst delete feature/old --keep-session` |
+| `delete`    | 演奏者の退場とスマートなtmuxセッション処理 | `mst delete feature/old --keep-session` |
 | `tmux`      | tmux セッションで開く      | `mst tmux`                     |
 | `sync`      | ファイルをリアルタイム同期 | `mst sync --auto`              |
 | `push`      | Push してPR作成            | `mst push --pr`                |
@@ -254,7 +254,7 @@ mst config init                                    # プロジェクト設定を
 |             | `branchNaming.issueTemplate` | Issueブランチ名テンプレート | `issue-{number}`                    |
 | ui          | `pathDisplay`  | 全コマンドでのパス表示形式              | `absolute` (`absolute` または `relative`) |
 | hooks       | `afterCreate`  | 作成後に実行する任意コマンド            | `npm install`                       |
-|             | `beforeDelete` | 削除前フック                            | `echo "Deleting $ORCHESTRA_MEMBER"` |
+|             | `beforeDelete` | 退場前フック                            | `echo "Exiting $ORCHESTRA_MEMBER"` |
 
 #### デフォルト値付き完全なサンプル
 
@@ -290,7 +290,7 @@ mst config init                                    # プロジェクト設定を
   },
   "hooks": {
     "afterCreate": "npm install",
-    "beforeDelete": "echo \"演奏者を削除します: $ORCHESTRA_MEMBER\""
+    "beforeDelete": "echo \"演奏者が退場します: $ORCHESTRA_MEMBER\""
   }
 }
 ```

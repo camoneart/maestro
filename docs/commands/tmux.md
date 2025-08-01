@@ -362,7 +362,7 @@ The `mst create` command now includes **early validation for tmux pane creation*
    - Generic fallback for all other tmux pane creation failures
    - Preserves original tmux error message for debugging purposes
    - Consistent Japanese error messaging throughout the application
-   - **Automatic rollback**: Created worktrees are automatically deleted when tmux errors occur
+   - **Automatic rollback**: Created worktrees are automatically cleaned up when tmux errors occur
 
    **Troubleshooting Steps**:
    ```bash

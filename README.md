@@ -167,7 +167,7 @@ See the full [Command Reference](./docs/COMMANDS.md).
 | `init`      | Initialize project config    | `mst init --yes`               |
 | `create`    | Create a new worktree        | `mst create feature/login`     |
 | `list`      | List worktrees               | `mst list`                     |
-| `delete`    | Delete worktree & cleanup empty directories | `mst delete feature/old --keep-session` |
+| `delete`    | Orchestra members exit the stage with smart tmux cleanup | `mst delete feature/old --keep-session` |
 | `tmux`      | Open in tmux                 | `mst tmux`                     |
 | `sync`      | Real-time file sync          | `mst sync --auto`              |
 | `push`      | Push and create PR           | `mst push --pr`                |

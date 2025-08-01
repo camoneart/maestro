@@ -189,4 +189,4 @@ Located at `src/mcp/server.ts`, the server provides:
 
 - [`mst create`](./create.md) - Create worktrees (available via MCP)
 - [`mst list`](./list.md) - List worktrees (available via MCP)
-- [`mst delete`](./delete.md) - Delete worktrees (available via MCP)
+- [`mst delete`](./delete.md) - Orchestra members exit (available via MCP)

@@ -1,6 +1,6 @@
 # 🔸 delete
 
-Command to delete orchestra members (Git worktrees). Provides complete cleanup by removing both the worktree directory and associated local branch.
+Command for orchestra members (Git worktrees) to exit the stage. Provides complete cleanup by removing both the worktree directory and associated local branch.
 
 ## Overview
 
@@ -11,7 +11,7 @@ mst rm <branch-name> [options]  # alias
 
 ### What gets deleted
 
-When you delete an orchestra member, Maestro performs a **complete cleanup**:
+When an orchestra member exits the stage, Maestro performs a **complete cleanup**:
 
 1. **Worktree directory** - The physical directory containing the branch's files
 2. **Empty parent directories** - Any empty directories left behind after worktree deletion
@@ -24,6 +24,7 @@ When you delete an orchestra member, Maestro performs a **complete cleanup**:
    - Ensures complete cleanup without manual intervention
 4. **tmux session** - The tmux session with the same name as the worktree (if exists)
    - Automatically terminates the session when deleting the worktree
+   - Session names are normalized to handle special characters (e.g., `feature/api-auth` becomes `feature-api-auth`)
    - Use `--keep-session` to preserve the tmux session after deletion
 
 This ensures no orphaned branches, sessions, or empty directories remain after worktree deletion.
@@ -33,29 +34,29 @@ This ensures no orphaned branches, sessions, or empty directories remain after w
 ### Basic Usage
 
 ```bash
-# Delete orchestra member (removes both worktree and local branch)
+# Orchestra member exits the stage (removes both worktree and local branch)
 mst delete feature/old-feature
 
-# Force delete (delete even with uncommitted changes)
+# Force exit (even with uncommitted changes)
 mst delete feature/old-feature --force
 
-# Keep tmux session after deleting worktree
+# Keep tmux session after worktree exits
 mst delete feature/old-feature --keep-session
 
-# Select with fzf and delete
+# Select with fzf for exit
 mst delete --fzf
 ```
 
-### Batch Deletion
+### Batch Exit
 
 ```bash
-# Delete merged orchestra members in batch
+# Merged orchestra members exit in batch
 mst delete --merged
 
-# Delete orchestra members older than 30 days
+# Orchestra members older than 30 days exit
 mst delete --older-than 30
 
-# Dry run (don't actually delete)
+# Dry run (don't actually process exits)
 mst delete --merged --dry-run
 ```
 
@@ -63,69 +64,69 @@ mst delete --merged --dry-run
 
 | Option                | Short | Description                                        | Default |
 | --------------------- | ----- | -------------------------------------------------- | ------- |
-| `--force`             | `-f`  | Force delete (ignore uncommitted changes)          | `false` |
+| `--force`             | `-f`  | Force exit (ignore uncommitted changes)           | `false` |
 | `--remove-remote`     | `-r`  | Also delete remote branch                          | `false` |
-| `--keep-session`      |       | Keep tmux session after deleting worktree         | `false` |
-| `--fzf`               |       | Select with fzf and delete                         | `false` |
-| `--current`           |       | Delete current worktree                            | `false` |
-| `--dry-run`           | `-n`  | Show deletion targets without actually deleting    | `false` |
+| `--keep-session`      |       | Keep tmux session after worktree exits            | `false` |
+| `--fzf`               |       | Select with fzf for exit                           | `false` |
+| `--current`           |       | Current worktree exits                             | `false` |
+| `--dry-run`           | `-n`  | Show exit targets without actually processing      | `false` |
 | `--yes`               | `-y`  | Skip confirmation prompts                          | `false` |
 
-## Deletion Confirmation
+## Exit Confirmation
 
-Normally, a confirmation prompt is displayed before deletion. The path display format follows the `ui.pathDisplay` configuration setting in `.maestro.json`:
+Normally, a confirmation prompt is displayed before orchestra members exit. The path display format follows the `ui.pathDisplay` configuration setting in `.maestro.json`:
 
 **With `"pathDisplay": "absolute"` (default):**
 ```
-🗑️  Are you sure you want to delete worktree 'feature/old-feature'?
+🪽  Are you sure you want orchestra member 'feature/old-feature' to exit?
    Branch: feature/old-feature
    Path: /Users/user/project/.git/orchestra-members/feature-old-feature
    Status: 3 uncommitted changes
 
-   ⚠️  This will delete:
+   ⚠️  This will remove:
    • Worktree directory and all its contents
    • Any empty parent directories (e.g., empty 'feature/' directory)
    • Local branch 'feature/old-feature'
 
    This action cannot be undone.
 
-? Delete worktree? (y/N)
+? Orchestra member exits? (y/N)
 ```
 
 **With `"pathDisplay": "relative"`:**
 ```
-🗑️  Are you sure you want to delete worktree 'feature/old-feature'?
+🪽  Are you sure you want orchestra member 'feature/old-feature' to exit?
    Branch: feature/old-feature
    Path: .git/orchestra-members/feature-old-feature
    Status: 3 uncommitted changes
 
-   ⚠️  This will delete:
+   ⚠️  This will remove:
    • Worktree directory and all its contents
    • Any empty parent directories (e.g., empty 'feature/' directory)
    • Local branch 'feature/old-feature'
 
    This action cannot be undone.
 
-? Delete worktree? (y/N)
+? Orchestra member exits? (y/N)
 ```
 
-## Safe Deletion
+## Safe Exit
 
 ### When There Are Uncommitted Changes
 
 ```bash
-# Normal deletion fails
+# Normal exit fails
 mst delete feature/work-in-progress
-# Error: Worktree has uncommitted changes. Use --force to delete anyway.
+# Error: Worktree has uncommitted changes. Use --force to process exit anyway.
 
 # Check changes
 mst exec feature/work-in-progress git status
 
-# Save changes before deletion
+# Save changes before exit
 mst exec feature/work-in-progress git stash
 mst delete feature/work-in-progress
 
-# Or force delete
+# Or force exit
 mst delete feature/work-in-progress --force
 ```
 
@@ -136,43 +137,61 @@ mst delete feature/work-in-progress --force
 mst delete --merged --dry-run
 
 # Example output:
-# Would delete the following merged worktrees:
+# The following merged worktrees would exit:
 # - feature/completed-feature (merged to main)
 # - bugfix/fixed-bug (merged to main)
 # - feature/old-feature (merged to develop)
 
-# Actually delete
+# Actually process exits
 mst delete --merged --yes
 ```
 
 ## tmux Session Management
 
-By default, Maestro automatically cleans up tmux sessions when deleting worktrees to prevent orphaned sessions:
+By default, Maestro automatically cleans up tmux sessions when orchestra members exit to prevent orphaned sessions. Session names are normalized to handle special characters in branch names (slashes, spaces, etc. are converted to hyphens):
 
 ### Default Behavior (Auto-cleanup)
 
 ```bash
-# Deletes both worktree and tmux session (if it exists)
+# Orchestra member exits with cleanup of both worktree and tmux session (if it exists)
 mst delete feature/my-feature
 
 # Example output:
-# ✅ Worktree 'feature/my-feature' deleted
+# ✅ Orchestra member 'feature/my-feature' exited
 # 🧹 Removed empty directory: feature
-# ✅ tmux session 'feature/my-feature' terminated
+# ✅ tmux session 'feature-my-feature' terminated
+
+# Works with complex branch names too
+mst delete feature/api/auth-handler
+
+# Example output:
+# ✅ Orchestra member 'feature/api/auth-handler' exited
+# 🧹 Removed empty directory: feature/api
+# 🧹 Removed empty directory: feature
+# ✅ tmux session 'feature-api-auth-handler' terminated
 ```
 
 ### Preserving tmux Sessions
 
-If you want to keep the tmux session active after deleting the worktree:
+If you want to keep the tmux session active after orchestra member exits:
 
 ```bash
-# Keep tmux session after deleting worktree
+# Keep tmux session after orchestra member exits
 mst delete feature/my-feature --keep-session
 
 # Example output:
-# ✅ Worktree 'feature/my-feature' deleted
+# ✅ Orchestra member 'feature/my-feature' exited
 # 🧹 Removed empty directory: feature
-# ℹ️  tmux session 'feature/my-feature' preserved
+# ℹ️  tmux session 'feature-my-feature' preserved
+
+# Works with complex branch names too
+mst delete feature/api/user-management --keep-session
+
+# Example output:
+# ✅ Orchestra member 'feature/api/user-management' exited
+# 🧹 Removed empty directory: feature/api
+# 🧹 Removed empty directory: feature
+# ℹ️  tmux session 'feature-api-user-management' preserved
 ```
 
 ### Use Cases for --keep-session
@@ -183,11 +202,11 @@ mst delete feature/my-feature --keep-session
 
 ```bash
 # Example workflow
-mst delete feature/temp-branch --keep-session  # Delete worktree, keep session
+mst delete feature/temp-branch --keep-session  # Orchestra member exits, keep session
 mst create feature/new-branch --tmux           # Create new worktree in existing session
 ```
 
-## Utilizing Batch Deletion
+## Utilizing Batch Exit
 
 ### Cleanup Old Orchestra Members
 
@@ -195,19 +214,19 @@ mst create feature/new-branch --tmux           # Create new worktree in existing
 # Check orchestra members not updated for 60+ days
 mst delete --older-than 60 --dry-run
 
-# Confirm and delete
+# Confirm and process exits
 mst delete --older-than 60
 ```
 
-### Custom Condition Deletion
+### Custom Condition Exit
 
 ```bash
-# Delete orchestra members with specific prefix
+# Orchestra members with specific prefix exit
 mst list --json | jq -r '.worktrees[] | select(.branch | startswith("experiment/")) | .branch' | while read branch; do
   mst delete "$branch" --yes
 done
 
-# Delete PR-related orchestra members that are closed
+# PR-related orchestra members that are closed exit
 mst list --json | jq -r '.worktrees[] | select(.metadata.githubPR.state == "closed") | .branch' | while read branch; do
   mst delete "$branch"
 done
@@ -215,13 +234,13 @@ done
 
 ## Hook Feature
 
-You can set hooks before and after deletion in `.mst.json`:
+You can set hooks before and after orchestra member exits in `.mst.json`:
 
 ```json
 {
   "hooks": {
-    "beforeDelete": "echo \"Deleting worktree: $ORCHESTRA_MEMBER\"",
-    "afterDelete": "echo \"Worktree deleted: $ORCHESTRA_MEMBER\""
+    "beforeDelete": "echo \"Orchestra member exiting: $ORCHESTRA_MEMBER\"",
+    "afterDelete": "echo \"Orchestra member exited: $ORCHESTRA_MEMBER\""
   }
 }
 ```
@@ -238,15 +257,15 @@ You can set hooks before and after deletion in `.mst.json`:
 
    Solution: Check the correct branch name with `mst list`
 
-2. **Attempting to delete current orchestra member**
+2. **Attempting to exit current orchestra member**
 
    ```
-   Error: Current directory is inside the worktree to be deleted.
+   Error: Current directory is inside the worktree to be exited.
    Please run from a different directory.
    Example: cd .. && mst delete feature/current-branch
    ```
 
-   Solution: Move to a different directory (outside the worktree) before deletion
+   Solution: Move to a different directory (outside the worktree) before exit
 
 3. **Remote branch still exists**
    ```
@@ -275,10 +294,10 @@ echo "Remaining worktrees:"
 mst list | grep -c "^  "
 ```
 
-### 2. Pre-deletion Confirmation Flow
+### 2. Pre-exit Confirmation Flow
 
 ```bash
-# Check deletion target
+# Check exit target
 BRANCH="feature/to-delete"
 
 # 1. Check status
@@ -290,35 +309,35 @@ mst exec "$BRANCH" git log --oneline -5
 # 3. Check differences with remote
 mst exec "$BRANCH" git log origin/main..HEAD --oneline
 
-# 4. Delete if no issues
+# 4. Process exit if no issues
 mst delete "$BRANCH"
 ```
 
-### 3. Safe Deletion Aliases
+### 3. Safe Exit Aliases
 
 ```bash
 # Add to ~/.bashrc or ~/.zshrc
-alias mst-safe-delete='mst delete --dry-run'
+alias mst-safe-exit='mst delete --dry-run'
 alias mst-cleanup='mst delete --merged --older-than 30'
 
 # Usage examples
-mst-safe-delete feature/old  # Check deletion targets
+mst-safe-exit feature/old    # Check exit targets
 mst-cleanup --yes            # Cleanup old orchestra members
 ```
 
 ## Tips & Tricks
 
-### Delete Both Remote and Local
+### Exit Both Remote and Local
 
 ```bash
 # Since v2.7.3, the --remove-remote option makes this simpler
 mst delete feature/old-feature --remove-remote
 
 # Or use a function for more control
-delete_worktree_and_remote() {
+exit_worktree_and_remote() {
   local branch=$1
 
-  # Delete local orchestra member (worktree + local branch)
+  # Orchestra member exits (worktree + local branch)
   mst delete "$branch" --yes
 
   # Also delete remote branch
@@ -326,16 +345,16 @@ delete_worktree_and_remote() {
 }
 
 # Usage example
-delete_worktree_and_remote feature/old-feature
+exit_worktree_and_remote feature/old-feature
 ```
 
-### Record Deletion History
+### Record Exit History
 
 ```bash
-# Record information before deletion
+# Record information before exit
 mst list --json > worktrees-backup-$(date +%Y%m%d).json
 
-# Execute deletion
+# Execute exit
 mst delete feature/old-feature
 
 # Reference restoration information if needed
@@ -347,4 +366,4 @@ cat worktrees-backup-*.json | jq '.worktrees[] | select(.branch == "feature/old-
 - [`mst list`](./list.md) - Display list of orchestra members
 - [`mst create`](./create.md) - Create new orchestra members
 - [`mst health`](./health.md) - Check orchestra member health
-- [`mst snapshot`](./snapshot.md) - Create snapshots before deletion
+- [`mst snapshot`](./snapshot.md) - Create snapshots before exit
