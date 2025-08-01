@@ -211,7 +211,7 @@ export const listCommand = new Command('list')
           return
         }
 
-        console.log(chalk.bold('\n🎼 オーケストラ編成:\n'))
+        console.log(chalk.bold('\n🎼 オーケストラ編成(worktree):\n'))
 
         // メインワークツリーを先頭に表示
         const mainWorktree = worktrees.find(
@@ -293,7 +293,7 @@ async function displayWorktree(
   showMetadata?: boolean,
   showFullPath?: boolean
 ) {
-  const prefix = isMain ? '📍' : '🎼'
+  const prefix = isMain ? '📍' : '🎷'
   const branchName = worktree.branch || '(detached)'
   const status = []
 

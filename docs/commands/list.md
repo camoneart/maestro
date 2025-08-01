@@ -51,22 +51,22 @@ Path display format depends on the `ui.pathDisplay` configuration setting in `.m
 
 **With `"pathDisplay": "absolute"` (default):**
 ```
-🎼 Orchestra Members:
+🎼 Orchestra Members (worktree):
 
 📍 refs/heads/main                /Users/user/project
-🎼 feature/auth                   /Users/user/project/.git/orchestrations/feature-auth
-🎼 bugfix/login                   /Users/user/project/.git/orchestrations/bugfix-login
-🎼 issue-123                      /Users/user/project/.git/orchestrations/issue-123
+🎷 feature/auth                   /Users/user/project/.git/orchestrations/feature-auth
+🎷 bugfix/login                   /Users/user/project/.git/orchestrations/bugfix-login
+🎷 issue-123                      /Users/user/project/.git/orchestrations/issue-123
 ```
 
 **With `"pathDisplay": "relative"`:**
 ```
-🎼 Orchestra Members:
+🎼 Orchestra Members (worktree):
 
 📍 refs/heads/main                .
-🎼 feature/auth                   .git/orchestrations/feature-auth
+🎷 feature/auth                   .git/orchestrations/feature-auth
 🎼 bugfix/login                   .git/orchestrations/bugfix-login
-🎼 issue-123                      .git/orchestrations/issue-123
+🎷 issue-123                      .git/orchestrations/issue-123
 ```
 
 ### Full Path Output (`--full-path`)
@@ -74,12 +74,12 @@ Path display format depends on the `ui.pathDisplay` configuration setting in `.m
 The `--full-path` option always shows absolute paths regardless of the `ui.pathDisplay` configuration:
 
 ```
-🎼 Orchestra Members:
+🎼 Orchestra Members (worktree):
 
 📍 refs/heads/main                /Users/user/project
-🎼 feature/auth                   /Users/user/project/.git/orchestrations/feature-auth
+🎷 feature/auth                   /Users/user/project/.git/orchestrations/feature-auth
 🎼 bugfix/login                   /Users/user/project/.git/orchestrations/bugfix-login
-🎼 issue-123                      /Users/user/project/.git/orchestrations/issue-123
+🎷 issue-123                      /Users/user/project/.git/orchestrations/issue-123
 ```
 
 ### JSON Output (`--json`)
@@ -145,17 +145,17 @@ The `--full-path` option always shows absolute paths regardless of the `ui.pathD
 ### Output with Metadata (`--metadata`)
 
 ```
-🎼 Orchestra Members:
+🎼 Orchestra Members (worktree):
 
 📍 refs/heads/main                .
 
-🎼 feature/auth                   .git/orchestrations/feature-auth
+🎷 feature/auth                   .git/orchestrations/feature-auth
     GitHub: PR #45 - Add authentication module
     Labels: enhancement, backend
     Assignees: user123
     Created: 2025-01-15 10:30:00
 
-🎼 issue-123                      .git/orchestrations/issue-123
+🎷 issue-123                      .git/orchestrations/issue-123
     GitHub: Issue #123 - Implement authentication
     Labels: enhancement, backend
     Assignees: user123
@@ -165,12 +165,12 @@ The `--full-path` option always shows absolute paths regardless of the `ui.pathD
 ### Output with Last Commit (`--last-commit`)
 
 ```
-🎼 Orchestra Members:
+🎼 Orchestra Members (worktree):
 
 📍 refs/heads/main                .
     Last commit: 2025-01-20 14:23:45 abc1234: Update README
 
-🎼 feature/auth                   .git/orchestrations/feature-auth
+🎷 feature/auth                   .git/orchestrations/feature-auth
     Last commit: 2025-01-19 10:15:30 def5678: Add login endpoint
 ```
 

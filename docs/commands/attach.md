@@ -61,7 +61,7 @@ mst attach feature/new --shell
 When no branch name is provided, displays an interactive menu:
 
 ```
-? どのブランチから演奏者を招集しますか？
+? Which branch would you like to attach to?
 ❯ [local] feature/authentication
   [local] bugfix/login-issue
   [remote] origin/feature/api-v2
@@ -81,9 +81,9 @@ The command only shows branches that are not already attached as worktrees:
 If a branch name is specified but doesn't exist:
 
 ```
-エラー: ブランチ 'feature/nonexistent' が見つかりません
+Error: Branch 'feature/nonexistent' not found
 
-利用可能なブランチ:
+Available branches:
   - feature/authentication
   - feature/api-integration
 ```
@@ -249,14 +249,14 @@ mst list
 
 3. **No available branches**
    ```
-   利用可能なブランチがありません
-   すべてのブランチは既に演奏者として存在します
+   No available branches
+   All branches already exist as orchestra members
    ```
    Solution: All branches are already attached as worktrees
 
 4. **Environment setup failure**
    ```
-   npm install をスキップ
+   Skipping npm install
    ```
    Solution: This is a warning, not an error. Setup continues normally
 

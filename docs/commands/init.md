@@ -146,7 +146,7 @@ The init command creates a `.maestro.json` file with structure like:
   },
   "hooks": {
     "afterCreate": "pnpm install",
-    "beforeDelete": "echo \"演奏者を削除します: $ORCHESTRA_MEMBER\""
+    "beforeDelete": "echo \"Deleting orchestra member: $ORCHESTRA_MEMBER\""
   }
 }
 ```
@@ -234,14 +234,14 @@ When running `mst init` without flags, you'll see prompts like:
 After successful initialization, the command will show:
 
 ```
-🎉 Maestro の設定が完了しました！
+🎉 Maestro setup complete!
 
-次のステップ:
-  mst create <branch-name>  # 新しい演奏者を招集
-  mst list                  # 演奏者一覧を表示
-  mst --help               # その他のコマンドを確認
+Next steps:
+  mst create <branch-name>  # Create new orchestra member
+  mst list                  # List orchestra members
+  mst --help               # Show other commands
 
-💡 worktree作成時に自動で実行されるコマンド: pnpm install
+💡 Auto-setup command on worktree creation: pnpm install
 ```
 
 ## Error Handling

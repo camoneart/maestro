@@ -161,7 +161,7 @@ if (!isTestEnvironment) {
                 type: 'text',
                 text:
                   orchestraMembers.length > 0
-                    ? `🎼 オーケストラ編成:\n${list}\n\n合計: ${orchestraMembers.length} 名の演奏者`
+                    ? `🎼 オーケストラ編成(worktree):\n${list}\n\n合計: ${orchestraMembers.length} 名の演奏者`
                     : '演奏者が存在しません',
               },
             ],

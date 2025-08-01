@@ -107,11 +107,11 @@ describe('list command', () => {
     it('worktreeの一覧を表示する', async () => {
       await listCommand.parseAsync(['node', 'test'])
 
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('🎼 オーケストラ編成:'))
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('🎼 オーケストラ編成(worktree):'))
       expect(console.log).toHaveBeenCalledWith(expect.stringContaining('📍 refs/heads/main'))
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('🎼 refs/heads/feature-a'))
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('🎼 refs/heads/feature-b'))
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('🎼 refs/heads/feature-c'))
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('🎷 refs/heads/feature-a'))
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('🎷 refs/heads/feature-b'))
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('🎷 refs/heads/feature-c'))
       expect(console.log).toHaveBeenCalledWith(expect.stringContaining('合計: 4 名の演奏者'))
     })
 
@@ -399,7 +399,7 @@ describe('list command', () => {
       // エラーが発生してもコマンドは正常に完了する
       await listCommand.parseAsync(['node', 'test', '--metadata'])
 
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('🎼 オーケストラ編成:'))
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('🎼 オーケストラ編成(worktree):'))
     })
 
     it('最終コミット取得エラーを無視する', async () => {
@@ -408,7 +408,7 @@ describe('list command', () => {
       // エラーが発生してもコマンドは正常に完了する
       await listCommand.parseAsync(['node', 'test', '--last-commit'])
 
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('🎼 オーケストラ編成:'))
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('🎼 オーケストラ編成(worktree):'))
     })
   })
 })

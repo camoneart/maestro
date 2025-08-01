@@ -90,9 +90,9 @@ mst gh list  # alias
   #122 Add documentation
     by maintainer
 
-使用例:
-  mst github pr 123   # PRから演奏者を招集
-  mst github issue 456 # Issueから演奏者を招集
+Usage:
+  mst github pr 123   # Create from PR
+  mst github issue 456 # Create from Issue
 ```
 
 #### Features
