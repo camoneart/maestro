@@ -438,8 +438,8 @@ async function createWorktreeForPR(
   // 一時的にcheckout
   await execa('gh', ['pr', 'checkout', number, '-b', tempBranch])
 
-  // worktreeを作成
-  const worktreePath = await gitManager.attachWorktree(branchName)
+  // worktreeを作成 (tempBranchをベースに新しいブランチを作成)
+  const worktreePath = await gitManager.createWorktree(branchName, tempBranch)
 
   // 元のブランチに戻る
   await execa('git', ['checkout', '-'])
