@@ -1,6 +1,5 @@
 {
   "worktrees": {
-    "path": "../maestro-{branch}",
     "branchPrefix": "",
     "directoryPrefix": ""
   },
