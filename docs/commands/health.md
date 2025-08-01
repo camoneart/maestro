@@ -213,7 +213,7 @@ mst health --prune --days 60
 Confirmation during pruning:
 
 ```
-The following stale worktrees will be deleted:
+The following stale worktrees will exit:
 - feature/old-ui (60 days old)
 - experiment/abandoned (45 days old)
 - bugfix/fixed-long-ago (90 days old)

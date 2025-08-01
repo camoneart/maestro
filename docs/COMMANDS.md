@@ -9,7 +9,7 @@ Detailed usage of all maestro (mst) commands.
 - [create](#-create) - Create new orchestra member (worktree)
 - [push](#-push) - Push current branch and create PR
 - [list](#-list) - Display all orchestra members
-- [delete](#-delete) - Delete orchestra members
+- [delete](#-delete) - Orchestra members exit the stage
 - [sync](#-sync) - Sync files between members
 - [shell](#-shell) - Enter member shell
 
@@ -275,7 +275,7 @@ done
 
 ### 🔸 delete
 
-Delete orchestra members.
+Orchestra members exit the stage.
 
 ```bash
 mst delete [branch-name] [options]
@@ -284,35 +284,35 @@ mst rm [branch-name] [options]  # alias
 
 | Option | Description |
 |--------|-------------|
-| `--force`, `-f` | Force delete even with uncommitted changes |
+| `--force`, `-f` | Force exit even with uncommitted changes |
 | `--remove-remote`, `-r` | Also delete remote branch |
-| `--keep-session` | Keep tmux session after deleting worktree |
+| `--keep-session` | Keep tmux session after worktree exits |
 | `--fzf` | Select with fzf (multiple selection) |
-| `--current` | Delete current worktree |
+| `--current` | Current worktree exits |
 
 #### Features
-- **Complete cleanup**: Automatically deletes both worktree directory, associated local branch, and tmux session
+- **Complete cleanup**: Automatically processes exit for both worktree directory, associated local branch, and tmux session
 - **Empty directory cleanup**: Automatically removes empty parent directories (useful for branches like `feature/api` which leave empty `feature/` directories)
 - **tmux Session Management**: Automatically terminates associated tmux sessions with normalized names (special characters converted to hyphens)
 - **Smart session handling**: Handles complex branch names like `feature/api/auth` by normalizing to `feature-api-auth`
-- **Wildcard support**: Use patterns like `"feature/old-*"` to delete multiple branches
-- **Safe deletion**: Uses `git branch -d` to prevent deletion of unmerged branches
+- **Wildcard support**: Use patterns like `"feature/old-*"` to process multiple exits
+- **Safe exit**: Uses `git branch -d` to prevent exit of unmerged branches
 
 #### Examples
 ```bash
-# Basic delete (removes worktree, local branch, tmux session, and empty directories)
+# Basic exit (removes worktree, local branch, tmux session, and empty directories)
 mst delete feature/old-feature
 
-# Force delete (even with uncommitted changes)
+# Force exit (even with uncommitted changes)
 mst delete feature/broken --force
 
-# Keep tmux session after deleting worktree
+# Keep tmux session after worktree exits
 mst delete feature/old-feature --keep-session
 
-# Delete with wildcards
+# Exit with wildcards
 mst delete "feature/old-*"
 
-# Select multiple with fzf
+# Select multiple with fzf for exit
 mst delete --fzf
 ```
 

@@ -109,7 +109,7 @@ This project maintains implementation logs in `_docs/templates/` with format `yy
 The project includes MCP (Model Context Protocol) server functionality in `src/mcp/server.ts` for Claude Code integration. The MCP server exposes orchestral-themed tools:
 
 - `create_orchestra_member` - Create new worktrees with optional base branch
-- `delete_orchestra_member` - Remove worktrees with force option
+- `delete_orchestra_member` - Orchestra members exit with force option
 - `exec_in_orchestra_member` - Execute commands within specific worktrees
 - `list_orchestra_members` - List all active worktrees with status
 
