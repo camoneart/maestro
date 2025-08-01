@@ -135,7 +135,7 @@ mst create feature/awesome-feature --tmux --claude-md
 #### ポイント
 
 - `mst shell <ブランチ名>` でいつでも演奏者に入れます（省略すると fzf で選択）。
-- `--tmux` を付けると専用 tmux セッションを作成してアタッチを確認し（非TTY環境では自動アタッチ）、`--claude-md` を併用すると Claude Code ワークスペースファイルを設定します。
+- `--tmux` を付けると専用 tmux セッションをブランチ名タイトル付きで作成してアタッチを確認し（非TTY環境では自動アタッチ）、`--claude-md` を併用すると Claude Code ワークスペースファイルを設定します。
 - `--tmux-h`/`--tmux-v` は現在の tmux ペインを水平/垂直分割し、新しいペインに自動フォーカスして即座に開発開始できます。
 - `--tmux-h-panes <数>`/`--tmux-v-panes <数>` は指定数の水平/垂直ペインを作成します。
 - `--tmux-layout <種類>` は特定の tmux レイアウト（even-horizontal、even-vertical、main-horizontal、main-vertical、tiled）を適用します。

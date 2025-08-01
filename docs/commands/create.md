@@ -97,7 +97,7 @@ Retrieved information:
 
 ### Session Creation with Interactive Attachment
 
-Using the `--tmux` option creates a new tmux session and prompts for attachment:
+Using the `--tmux` option creates a new tmux session with branch name title and prompts for attachment:
 
 ```bash
 # Creates session and prompts for attachment
@@ -114,6 +114,7 @@ mst create feature/new-feature --tmux
   - If outside tmux: Attaches using `tmux attach`
   - If inside tmux: Switches using `tmux switch-client`
 - **Shell Environment**: Sessions are created with login shells to inherit your custom PS1 prompts, environment variables, and shell configuration files
+- **Pane Titles**: The tmux pane is automatically titled with the branch name for easy identification
 
 ### Pane Splitting (when already in tmux)
 

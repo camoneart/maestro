@@ -94,7 +94,7 @@ mst create <branch-name> [options]
 | `--base <branch>` | Specify base branch (default: main) |
 | `--open` | Automatically open in editor |
 | `--setup` | Auto-setup development environment |
-| `--tmux` | Create tmux session with attachment prompt (TTY) or auto-attach (non-TTY) |
+| `--tmux` | Create tmux session with branch name title and attachment prompt (TTY) or auto-attach (non-TTY) |
 | `--tmux-h` | Create in horizontal tmux pane split (preserves shell environment) |
 | `--tmux-v` | Create in vertical tmux pane split (preserves shell environment) |
 | `--tmux-h-panes <number>` | Create specified number of horizontal tmux panes |

@@ -60,6 +60,7 @@ The command integrates with tmux to provide:
 - **Window management**: Creates new windows or splits panes as needed
 - **Worktree navigation**: Changes directory to selected worktree
 - **Environment setup**: Sets appropriate environment variables
+- **Pane Titles**: All tmux panes are automatically titled with branch names for consistent identification (applies to both regular sessions and multi-pane splits)
 
 ### Session Information
 
