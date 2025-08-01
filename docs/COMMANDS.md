@@ -400,7 +400,7 @@ mst shell feature/test --tmux-h
 
 ### 🔸 github
 
-Provides GitHub integration features.
+Provides GitHub integration features with reliable PR/Issue worktree creation.
 
 ```bash
 mst github [type] [number] [options]
@@ -431,7 +431,7 @@ mst gh [type] [number] [options]  # alias
 mst github list
 mst gh list
 
-# Create from PR #123
+# Create from PR #123 (uses optimized worktree creation process)
 mst github checkout 123
 mst gh 123  # shorthand
 
@@ -447,6 +447,14 @@ mst github 123 --tmux-v
 # Add comment to PR/Issue
 mst github comment 123 -m "LGTM!"
 ```
+
+#### PR Worktree Creation
+
+The GitHub command uses an optimized process for creating worktrees from Pull Requests:
+- Creates temporary branch to fetch PR code
+- Uses `createWorktree` with proper base branch handling
+- Automatically cleans up temporary branches
+- Ensures reliable worktree creation without Git conflicts
 
 **Note:** The `--open` flag only opens the editor when explicitly specified. The GitHub command does not automatically open in the editor based on `development.defaultEditor` configuration.
 

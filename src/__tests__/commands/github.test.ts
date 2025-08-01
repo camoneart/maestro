@@ -147,7 +147,70 @@ describe('github command', () => {
         '--json',
         'number,title,headRefName,author',
       ])
-      expect(mockGitWorktreeManagerInstance.attachWorktree).toHaveBeenCalledWith('pr-123')
+      expect(mockGitWorktreeManagerInstance.createWorktree).toHaveBeenCalledWith(
+        'pr-123',
+        'pr-123-checkout'
+      )
+    })
+
+    it('should create worktree from PR with actual code', async () => {
+      const mockPR = {
+        number: 183,
+        title: 'Add fast & efficient feature to key features table',
+        headRefName: 'pr-183',
+        author: { login: 'user1' },
+      }
+
+      mockExeca.mockImplementation((cmd: string, args: string[]) => {
+        if (cmd === 'gh' && args[0] === '--version') {
+          return Promise.resolve(mockGhVersion())
+        }
+        if (cmd === 'gh' && args[0] === 'auth' && args[1] === 'status') {
+          return Promise.resolve(mockGhAuthStatus())
+        }
+        if (cmd === 'gh' && args[0] === 'pr' && args[1] === 'view') {
+          return Promise.resolve({
+            stdout: JSON.stringify(mockPR),
+            stderr: '',
+            exitCode: 0,
+          } as any)
+        }
+        if (cmd === 'gh' && args[0] === 'pr' && args[1] === 'checkout') {
+          return Promise.resolve({
+            stdout: 'Switched to branch pr-183-checkout',
+            stderr: '',
+            exitCode: 0,
+          } as any)
+        }
+        if (cmd === 'git' && args[0] === 'checkout' && args[1] === '-') {
+          return Promise.resolve({ stdout: '', stderr: '', exitCode: 0 } as any)
+        }
+        if (cmd === 'git' && args[0] === 'branch' && args[1] === '-D') {
+          return Promise.resolve({ stdout: '', stderr: '', exitCode: 0 } as any)
+        }
+        return Promise.resolve({ stdout: '', stderr: '', exitCode: 0 } as any)
+      })
+
+      // inquirerのモック設定 (確認プロンプト)
+      mockInquirer.prompt.mockResolvedValueOnce({ confirmCreate: true })
+
+      await program.parseAsync(['node', 'test', 'github', 'pr', '183'])
+
+      // PR checkoutが実行されること
+      expect(mockExeca).toHaveBeenCalledWith('gh', [
+        'pr',
+        'checkout',
+        '183',
+        '-b',
+        'pr-183-checkout',
+      ])
+      // createWorktreeが一時ブランチをベースとして実行されること
+      expect(mockGitWorktreeManagerInstance.createWorktree).toHaveBeenCalledWith(
+        'pr-183',
+        'pr-183-checkout'
+      )
+      // 一時ブランチが削除されること
+      expect(mockExeca).toHaveBeenCalledWith('git', ['branch', '-D', 'pr-183-checkout'])
     })
 
     it('should handle interactive PR selection', async () => {

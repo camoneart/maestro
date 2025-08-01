@@ -46,7 +46,7 @@ Maestro is a CLI that makes Git worktree management intuitive. When working on m
 | ------------------------- | --------------------------------------------------- |
 | 🎼 **Orchestra UI**       | Operate worktrees as performers in an intuitive way |
 | 🤖 **Claude AI**          | AI diff reviews & code suggestions                  |
-| 🔗 **GitHub integration** | Generate worktrees from Issues / PRs                |
+| 🔗 **GitHub integration** | Reliable worktree creation from Issues / PRs        |
 | 🎯 **tmux / fzf**         | Keyboard-only, lightning-fast switching             |
 | 📊 **Status**             | Real-time worktree status and health monitoring     |
 | 🔄 **Auto Sync**          | Propagate file changes in real time                 |
@@ -196,7 +196,7 @@ Maestro ships with **power commands** that automate tedious tasks in a single li
 | Feature                     | Command Example                                                       | What It Automates                                                           |
 | --------------------------- | --------------------------------------------------------------------- | --------------------------------------------------------------------------- |
 | **Auto Review & Merge 🚀**  | `mst review --auto-flow`                                              | Fetch → rebase → AI review → Conventional Commit → open PR — all in one go  |
-| **GitHub Integration 🔗**   | `mst github list` <br>`mst github checkout 123`                       | List and checkout GitHub issues/PRs, automate repository workflows         |
+| **GitHub Integration 🔗**   | `mst github list` <br>`mst github checkout 123`                       | List and checkout GitHub issues/PRs with reliable worktree creation        |
 | **Snapshot 📸**             | `mst snapshot -m "before-refactor"` <br>`mst snapshot --restore <id>` | Save / restore any working state instantly                                  |
 | **Health Check 🏥**         | `mst health` <br>`mst health --fix`                                   | Detects stale / orphaned / conflicted branches and fixes them automatically |
 

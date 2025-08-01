@@ -316,7 +316,7 @@ describe('github command error paths', () => {
       await program.parseAsync(['node', 'test', 'github', 'checkout', '123', '--setup'])
 
       // Should complete successfully despite npm install failure
-      expect(mockGitWorktreeManagerInstance.attachWorktree).toHaveBeenCalled()
+      expect(mockGitWorktreeManagerInstance.createWorktree).toHaveBeenCalled()
     })
 
     it('should handle sync file copy failure gracefully', async () => {
@@ -399,7 +399,7 @@ describe('github command error paths', () => {
       await program.parseAsync(['node', 'test', 'github', 'checkout', '123', '--open'])
 
       // Should complete successfully despite editor error
-      expect(mockGitWorktreeManagerInstance.attachWorktree).toHaveBeenCalled()
+      expect(mockGitWorktreeManagerInstance.createWorktree).toHaveBeenCalled()
     })
 
     it('should handle custom editor failure', async () => {
