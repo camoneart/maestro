@@ -426,9 +426,8 @@ async function executeWorktreesDeletion(
   console.log(chalk.gray(`\n合計: ${successCount} 成功, ${failedCount} 失敗`))
 
   if (successCount > 0) {
-    const message = successCount === 1 
-      ? '1名の演奏者が退場しました' 
-      : `${successCount}名の演奏者が退場しました`
+    const message =
+      successCount === 1 ? '1名の演奏者が退場しました' : `${successCount}名の演奏者が退場しました`
     console.log(chalk.green(`\n✨ ${message}`))
   }
 }
