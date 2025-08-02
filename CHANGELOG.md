@@ -1,5 +1,29 @@
 # Changelog
 
+## 3.5.13
+
+### Patch Changes
+
+- 🚨 Critical Fix: Prevent infinite directory creation in watch command
+
+  This patch fixes a critical bug where the watch command could create 65,535 subdirectories (macOS filesystem limit), causing filesystem corruption that cannot be cleaned up with normal methods.
+
+  **Root Cause:**
+  - Slash-containing branch names (e.g., `feature/awesome-feature`) caused problematic directory structures
+  - Watch command's relative path calculation could generate paths like `../feature/awesome-feature/...`
+  - This triggered infinite directory creation loops
+
+  **Security Improvements:**
+  - Added path validation to prevent directory traversal attacks (`../` patterns)
+  - Implemented loop detection to stop infinite directory creation
+  - Added path depth limits (maximum 10 levels)
+  - Ensures all file operations stay within worktree boundaries
+
+  **User Impact:**
+  Users running `mst watch` with worktrees created from slash-containing branch names will no longer experience filesystem corruption.
+
+  Fixes #189
+
 ## 3.5.12
 
 ### Patch Changes
