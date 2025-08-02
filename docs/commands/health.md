@@ -104,6 +104,8 @@ Orchestra members without existing directories:
 
 ## Output Formats
 
+File paths in all output formats respect the `ui.pathDisplay` configuration setting (absolute/relative paths).
+
 ### Normal Output
 
 ```

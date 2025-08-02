@@ -131,6 +131,7 @@ Usage:
 - **Author Information**: Displays the author of each PR/Issue
 - **Usage Examples**: Provides helpful examples for next steps
 - **Error Handling**: Graceful handling of network errors or authentication issues
+- **Configurable Path Display**: File paths respect the `ui.pathDisplay` configuration setting (absolute/relative)
 
 ## Creating from Pull Requests
 

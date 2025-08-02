@@ -1,6 +1,7 @@
 import { Command } from 'commander'
 import chalk from 'chalk'
 import { GitWorktreeManager } from '../core/git.js'
+import { ConfigManager } from '../core/config.js'
 import { spawn } from 'child_process'
 import inquirer from 'inquirer'
 import { execa } from 'execa'
@@ -8,6 +9,7 @@ import { ErrorFactory, handleError } from '../utils/errors.js'
 import { startTmuxShell, isInTmuxSession, TmuxPaneType } from '../utils/tmux.js'
 import { selectWorktreeWithFzf, isFzfAvailable } from '../utils/fzf.js'
 import { attachToTmuxWithProperTTY, createAndAttachTmuxSession } from '../utils/tty.js'
+import { formatPath } from '../utils/path.js'
 
 interface ShellOptions {
   fzf?: boolean
@@ -94,8 +96,10 @@ export const shellCommand = new Command('shell')
               message: 'どの演奏者に入りますか？',
               choices: orchestraMembers.map(wt => {
                 const branchName = wt.branch?.replace('refs/heads/', '') || wt.branch
+                const configManager = new ConfigManager()
+                const config = configManager.getAll()
                 return {
-                  name: `${chalk.cyan(branchName)} ${chalk.gray(wt.path)}`,
+                  name: `${chalk.cyan(branchName)} ${chalk.gray(formatPath(wt.path, config))}`,
                   value: branchName,
                 }
               }),
@@ -123,8 +127,10 @@ export const shellCommand = new Command('shell')
         throw ErrorFactory.worktreeNotFound(branchName || '', similarBranches)
       }
 
+      const configManager = new ConfigManager()
+      const config = configManager.getAll()
       console.log(chalk.green(`\n🎼 演奏者 '${chalk.cyan(branchName)}' に入ります...`))
-      console.log(chalk.gray(`📁 ${targetWorktree.path}\n`))
+      console.log(chalk.gray(`📁 ${formatPath(targetWorktree.path, config)}\n`))
 
       // --cmd オプションの処理
       if (options.cmd) {
@@ -206,7 +212,7 @@ export const shellCommand = new Command('shell')
           console.log(
             chalk.green(`\n🎼 演奏者 '${chalk.cyan(branchName)}' でtmux ${paneType}シェルを開始`)
           )
-          console.log(chalk.gray(`📁 ${targetWorktree.path}\n`))
+          console.log(chalk.gray(`📁 ${formatPath(targetWorktree.path, config)}\n`))
 
           try {
             await startTmuxShell({

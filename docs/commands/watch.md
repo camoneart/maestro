@@ -88,6 +88,8 @@ The watch command monitors for:
 - **File deletions**: Removal of watched files
 - **Directory changes**: New or removed directories
 
+File paths in change notifications respect the `ui.pathDisplay` configuration setting (absolute/relative paths).
+
 ### Synchronization Strategy
 
 ```bash

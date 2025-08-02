@@ -3,7 +3,9 @@ import chalk from 'chalk'
 import ora from 'ora'
 import inquirer from 'inquirer'
 import { GitWorktreeManager } from '../core/git.js'
+import { ConfigManager } from '../core/config.js'
 import { execa } from 'execa'
+import { formatPath } from '../utils/path.js'
 
 // 型定義
 interface ReviewOptions {
@@ -55,7 +57,9 @@ async function checkoutPR(pr: PullRequest, gitManager: GitWorktreeManager): Prom
 
     if (existingWorktree) {
       checkoutSpinner.warn(`演奏者 '${prBranchName}' は既に存在します`)
-      console.log(chalk.gray(`📁 ${existingWorktree.path}`))
+      const configManager = new ConfigManager()
+      const config = configManager.getAll()
+      console.log(chalk.gray(`📁 ${formatPath(existingWorktree.path, config)}`))
     } else {
       // gh pr checkoutを使用してPRをフェッチ
       await execa('gh', ['pr', 'checkout', pr.number.toString(), '--recurse-submodules'])
@@ -67,8 +71,10 @@ async function checkoutPR(pr: PullRequest, gitManager: GitWorktreeManager): Prom
       const worktreePath = await gitManager.createWorktree(currentBranch)
 
       checkoutSpinner.succeed(`PR #${pr.number} を演奏者 '${currentBranch}' として招集しました`)
-      console.log(chalk.gray(`📁 ${worktreePath}`))
-      console.log(chalk.green(`\ncd ${worktreePath} で移動できます`))
+      const configManager = new ConfigManager()
+      const config = configManager.getAll()
+      console.log(chalk.gray(`📁 ${formatPath(worktreePath, config)}`))
+      console.log(chalk.green(`\ncd ${formatPath(worktreePath, config)} で移動できます`))
     }
   } catch (error) {
     checkoutSpinner.fail('PRのチェックアウトに失敗しました')

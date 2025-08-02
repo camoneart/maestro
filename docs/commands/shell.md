@@ -159,6 +159,7 @@ When using `--tmux-v` or `--tmux-h`:
 
 - tmux options require being inside an existing tmux session
 - The shell inherits your normal shell configuration (.bashrc, .zshrc, etc.)
+- File paths displayed during selection respect the `ui.pathDisplay` configuration setting (absolute/relative)
 - Use `mst where` inside a shell to confirm current location
 
 ## Related Commands
