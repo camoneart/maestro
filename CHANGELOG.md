@@ -1,5 +1,18 @@
 # Changelog
 
+## 3.5.14
+
+### Patch Changes
+
+- Fix multiple GitHub and tmux integration issues:
+  - fix: prevent command execution with invalid options (fixes #191)
+  - feat: add enhanced tmux options to github command (--tmux-h, --tmux-v, --tmux-h-panes, --tmux-v-panes, --tmux-layout) (fixes #192)
+  - fix: handle 'list' argument as --list option in issue command (fixes #193)
+  - fix: prevent unnecessary selection prompt in github issue/pr commands (fixes #194)
+  - fix: prevent interactive mode when non-existent Issue/PR number is specified (fixes #195)
+  - feat: automatic tmux session cleanup when deleting worktrees (with --keep-session override option)
+    EOF < /dev/null
+
 ## 3.5.13
 
 ### Patch Changes
