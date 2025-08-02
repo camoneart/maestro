@@ -1,7 +1,6 @@
 import { execa } from 'execa'
 import chalk from 'chalk'
 import inquirer from 'inquirer'
-import { CreateOptions } from '../types/index.js'
 import { setupTmuxStatusLine } from './tmux.js'
 import { attachToTmuxWithProperTTY, switchTmuxClientWithProperTTY } from './tty.js'
 
