@@ -26,6 +26,7 @@ const mockCommand = vi.fn(() => ({
   description: vi.fn().mockReturnThis(),
   argument: vi.fn().mockReturnThis(),
   option: vi.fn().mockReturnThis(),
+  exitOverride: vi.fn().mockReturnThis(),
   action: vi.fn().mockReturnThis(),
 }))
 

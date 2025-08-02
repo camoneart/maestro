@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach, Mock } from 'vitest'
 import { Command } from 'commander'
 import { githubCommand } from '../../commands/github.js'
 import * as git from '../../core/git.js'
@@ -46,8 +46,8 @@ describe('GitHub Command Error Handling', () => {
     vi.mocked(git.GitWorktreeManager).mockImplementation(() => mockGitManager)
     vi.mocked(config.ConfigManager).mockImplementation(() => mockConfigManager)
 
-    // Mock gh CLI
-    vi.mocked(execa).mockImplementation(async (cmd: string | URL, args?: any) => {
+    // Mock gh CLI - type assertion to avoid complex type mismatch
+    ;(vi.mocked(execa) as Mock).mockImplementation(async (cmd: string | URL, args?: any) => {
       const cmdStr = cmd.toString()
       if (cmdStr === 'gh' && args?.[0] === '--version') {
         return { stdout: 'gh version 2.0.0', stderr: '', exitCode: 0 } as any
