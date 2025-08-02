@@ -650,7 +650,6 @@ async function executeGithubCommand(
   let finalType = type
   let finalNumber = number
 
-
   if (!finalNumber) {
     try {
       const result = await handleInteractiveMode()
