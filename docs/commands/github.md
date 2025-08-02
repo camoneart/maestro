@@ -54,6 +54,16 @@ mst github 123 --tmux-v
 # Create and open in horizontal split
 mst github 123 --tmux-h
 
+# Create with multiple horizontal panes
+mst github 123 --tmux-h-panes 3
+
+# Create with multiple vertical panes
+mst github 123 --tmux-v-panes 4
+
+# Create with specific tmux layout
+mst github 123 --tmux-h-panes 3 --tmux-layout even-horizontal
+mst github 123 --tmux-v-panes 2 --tmux-layout main-vertical
+
 # Create with automatic setup and explicitly open in editor
 mst github 123 --open --setup
 ```
@@ -68,8 +78,13 @@ mst github 123 --open --setup
 | `--reopen`            |            | Reopen PR/Issue                          | `false` |
 | `--close`             |            | Close PR/Issue                           | `false` |
 | `--tmux`              | `-t`       | Open in new tmux window                  | `false` |
-| `--tmux-vertical`     | `--tmux-v` | Open in vertical split pane              | `false` |
-| `--tmux-horizontal`   | `--tmux-h` | Open in horizontal split pane            | `false` |
+| `--tmux-vertical`     | `--tmux-v` | Open in vertical split pane (legacy, use --tmux-v) | `false` |
+| `--tmux-horizontal`   | `--tmux-h` | Open in horizontal split pane (legacy, use --tmux-h) | `false` |
+| `--tmux-h`            |            | Create horizontal tmux panes             | `false` |
+| `--tmux-v`            |            | Create vertical tmux panes               | `false` |
+| `--tmux-h-panes <number>` |        | Create specified number of horizontal panes | none |
+| `--tmux-v-panes <number>` |        | Create specified number of vertical panes | none |
+| `--tmux-layout <type>` |           | Apply tmux layout (even-horizontal, even-vertical, main-horizontal, main-vertical, tiled) | none |
 
 ### Editor Opening Behavior
 
@@ -334,6 +349,9 @@ mst github issue --filter "label:priority:high"
 
 # 2. Create orchestra member and start development
 mst github issue 456 --tmux --claude
+
+# 2b. Alternative: Create with multiple panes for complex development
+mst github issue 456 --tmux-h-panes 3 --tmux-layout even-horizontal
 
 # 3. Create PR after development completion
 gh pr create --title "Fix #456: Authentication bug" --body "Closes #456"

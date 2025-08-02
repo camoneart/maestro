@@ -149,6 +149,7 @@ mst create feature/awesome-feature --tmux --claude-md
 | **高速切替** tmux セッションへ          | `mst tmux`                                                                   |
 | **GitHub Issue から作成**               | `mst create 123`                                                             |
 | **GitHub PR から作成**                  | `mst github checkout 456`                                                    |
+| **GitHub PR から作成（tmux付き）**       | `mst github checkout 456 --tmux-h`                                           |
 | **GitHub issues/PRs一覧表示**           | `mst github list`                                                            |
 | **Push with PR**                      | `mst push --pr`                                                              |
 | **Push with draft PR**                | `mst push --draft-pr`                                                        |
@@ -195,7 +196,7 @@ Maestro が提供する “もう一歩進んだ” 機能を一覧で把握で�
 | 機能                         | コマンド例                                                     | やってくれること                                                                 |
 | ---------------------------- | -------------------------------------------------------------- | -------------------------------------------------------------------------------- |
 | **自動レビュー & マージ 🚀** | `mst review --auto-flow`                                       | fetch → rebase → AI レビュー → Conventional Commit → PR 作成をワンコマンドで実行 |
-| **GitHub連携 🔗**           | `mst github list` <br>`mst github checkout 123`                | GitHub issue/PR一覧表示・安全なチェックアウト、リポジトリワークフロー自動化          |
+| **GitHub連携 🔗**           | `mst github list` <br>`mst github checkout 123 --tmux-h`       | GitHub issue/PR一覧表示・安全なチェックアウト・tmux連携、リポジトリワークフロー自動化 |
 | **スナップショット 📸**      | `mst snapshot -m "前の状態"` <br>`mst snapshot --restore <id>` | 任意時点の状態を保存し、いつでも復元                                             |
 | **健全性チェック 🏥**        | `mst health` <br>`mst health --fix`                            | stale / orphaned / conflict などを検出し、自動修復                               |
 

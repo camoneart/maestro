@@ -7,7 +7,8 @@ import { ConfigManager } from '../core/config.js'
 import { execa } from 'execa'
 import path from 'path'
 import fs from 'fs/promises'
-import { startTmuxShell, isInTmuxSession, TmuxPaneType } from '../utils/tmux.js'
+import { isInTmuxSession } from '../utils/tmux.js'
+import { createTmuxSession, validateTmuxOptions } from '../utils/tmuxSession.js'
 import { detectPackageManager } from '../utils/packageManager.js'
 
 // 型定義
@@ -20,6 +21,11 @@ interface GithubOptions {
   tmux?: boolean
   tmuxVertical?: boolean
   tmuxHorizontal?: boolean
+  tmuxH?: boolean
+  tmuxV?: boolean
+  tmuxHPanes?: number
+  tmuxVPanes?: number
+  tmuxLayout?: 'even-horizontal' | 'even-vertical' | 'main-horizontal' | 'main-vertical' | 'tiled'
 }
 
 interface ItemInfo {
@@ -559,19 +565,38 @@ async function processWorktreeCreation(
   config: ProjectConfig,
   gitManager: GitWorktreeManager
 ): Promise<void> {
-  // tmuxオプションの検証
-  const tmuxOptionsCount = [options.tmux, options.tmuxVertical, options.tmuxHorizontal].filter(
-    Boolean
-  ).length
+  // tmuxオプションの検証（新しいオプションも含む）
+  const tmuxOptionsCount = [
+    options.tmux,
+    options.tmuxVertical,
+    options.tmuxHorizontal,
+    options.tmuxH,
+    options.tmuxV,
+  ].filter(Boolean).length
+
   if (tmuxOptionsCount > 1) {
     console.error(chalk.red('エラー: tmuxオプションは一つだけ指定してください'))
     process.exit(1)
   }
 
-  const isUsingTmux = options.tmux || options.tmuxVertical || options.tmuxHorizontal
-  if (isUsingTmux && !(await isInTmuxSession())) {
+  const isUsingTmux =
+    options.tmux ||
+    options.tmuxVertical ||
+    options.tmuxHorizontal ||
+    options.tmuxH ||
+    options.tmuxV ||
+    options.tmuxHPanes ||
+    options.tmuxVPanes ||
+    options.tmuxLayout
+
+  // 新しいtmuxオプションの場合、tmuxセッション内にいる必要はない
+  const requiresInsideTmux = options.tmuxVertical || options.tmuxHorizontal
+
+  if (requiresInsideTmux && !(await isInTmuxSession())) {
     console.error(
-      chalk.red('エラー: tmuxオプションを使用するにはtmuxセッション内にいる必要があります')
+      chalk.red(
+        'エラー: --tmux-v/--tmux-hオプションを使用するにはtmuxセッション内にいる必要があります'
+      )
     )
     process.exit(1)
   }
@@ -584,28 +609,48 @@ async function processWorktreeCreation(
     options?.setup || (options?.setup === undefined && config.development?.autoSetup)
   await setupEnvironment(worktreePath, config, !!shouldSetup)
 
-  // tmuxでシェルを開く処理
+  // tmuxでシェルを開く処理（新しいオプションも対応）
   if (isUsingTmux) {
-    let paneType: TmuxPaneType = 'new-window'
-    if (options.tmuxVertical) paneType = 'vertical-split'
-    if (options.tmuxHorizontal) paneType = 'horizontal-split'
-
     const branchName = path.basename(worktreePath)
 
-    console.log(chalk.green(`\n🎼 GitHub統合による演奏者招集完了！tmux ${paneType}シェルで開始`))
+    // tmuxオプションの検証
+    try {
+      validateTmuxOptions({
+        sessionName: branchName,
+        worktreePath,
+        tmux: options.tmux,
+        tmuxH: options.tmuxH || options.tmuxHorizontal,
+        tmuxV: options.tmuxV || options.tmuxVertical,
+        tmuxHPanes: options.tmuxHPanes,
+        tmuxVPanes: options.tmuxVPanes,
+        tmuxLayout: options.tmuxLayout,
+      })
+    } catch (error) {
+      if (error instanceof Error) {
+        console.error(chalk.red(`✖ ${error.message}`))
+      }
+      process.exit(1)
+    }
+
+    console.log(chalk.green(`\n🎼 GitHub統合による演奏者招集完了！`))
     console.log(chalk.gray(`📁 ${worktreePath}\n`))
 
     try {
-      await startTmuxShell({
-        cwd: worktreePath,
-        branchName,
-        paneType,
+      await createTmuxSession({
         sessionName: branchName,
+        worktreePath,
+        tmux: options.tmux,
+        tmuxH: options.tmuxH || options.tmuxHorizontal,
+        tmuxV: options.tmuxV || options.tmuxVertical,
+        tmuxHPanes: options.tmuxHPanes,
+        tmuxVPanes: options.tmuxVPanes,
+        tmuxLayout: options.tmuxLayout,
+        interactiveAttach: true,
       })
     } catch (error) {
       console.error(
         chalk.red(
-          `❌ tmux ${paneType}の起動に失敗: ${error instanceof Error ? error.message : '不明なエラー'}`
+          `❌ tmuxセッションの作成に失敗: ${error instanceof Error ? error.message : '不明なエラー'}`
         )
       )
       console.log(chalk.yellow('エディタでのオープンに進みます...'))
@@ -695,9 +740,17 @@ export const githubCommand = new Command('github')
   .option('-m, --message <message>', 'コメントメッセージ')
   .option('--reopen', 'PR/Issueを再開')
   .option('--close', 'PR/Issueをクローズ')
-  .option('-t, --tmux', 'tmuxの新しいウィンドウで開く')
-  .option('--tmux-vertical, --tmux-v', 'tmuxの縦分割ペインで開く')
-  .option('--tmux-horizontal, --tmux-h', 'tmuxの横分割ペインで開く')
+  .option('-t, --tmux', 'tmuxセッションを作成')
+  .option('--tmux-vertical', 'tmuxの縦分割ペインで開く（tmuxセッション内でのみ）')
+  .option('--tmux-horizontal', 'tmuxの横分割ペインで開く（tmuxセッション内でのみ）')
+  .option('--tmux-h', 'tmuxペインを水平分割して作成')
+  .option('--tmux-v', 'tmuxペインを垂直分割して作成')
+  .option('--tmux-h-panes <number>', 'tmuxペインを指定数で水平分割', parseInt)
+  .option('--tmux-v-panes <number>', 'tmuxペインを指定数で垂直分割', parseInt)
+  .option(
+    '--tmux-layout <type>',
+    'tmuxレイアウトタイプ (even-horizontal, even-vertical, main-horizontal, main-vertical, tiled)'
+  )
   .exitOverride()
   .action(async (type?: string, number?: string, options: GithubOptions = {}) => {
     const spinner = ora('オーケストレーション！').start()
