@@ -3,8 +3,10 @@ import chalk from 'chalk'
 import ora, { Ora } from 'ora'
 import inquirer from 'inquirer'
 import { GitWorktreeManager } from '../core/git.js'
+import { ConfigManager } from '../core/config.js'
 import { execa } from 'execa'
 import fs from 'fs/promises'
+import { formatPath } from '../utils/path.js'
 
 interface HealthOptions {
   fix?: boolean
@@ -305,9 +307,11 @@ async function handlePruneOption(
 
   console.log(chalk.bold(`\n🗑️  ${staleWorktrees.length}件の古いworktreeがあります\n`))
 
+  const configManager = new ConfigManager()
+  const config = configManager.getAll()
   staleWorktrees.forEach(wt => {
     const branch = wt.branch?.replace('refs/heads/', '') || wt.branch
-    console.log(chalk.gray(`  - ${branch} (${wt.path})`))
+    console.log(chalk.gray(`  - ${branch} (${formatPath(wt.path, config)})`))
   })
 
   const { confirmPrune } = await inquirer.prompt([
@@ -387,9 +391,11 @@ function displayHealthReport(allIssues: HealthIssue[], verbose: boolean): void {
     groupedIssues.get(branch)?.push(issue)
   })
 
+  const configManager = new ConfigManager()
+  const config = configManager.getAll()
   groupedIssues.forEach((issues, branch) => {
     console.log(chalk.cyan(`📁 ${branch}`))
-    console.log(chalk.gray(`   ${issues[0]?.worktree.path || 'unknown'}`))
+    console.log(chalk.gray(`   ${formatPath(issues[0]?.worktree.path || 'unknown', config)}`))
 
     issues.forEach(issue => {
       const icon =

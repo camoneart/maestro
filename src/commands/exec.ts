@@ -1,11 +1,13 @@
 import { Command } from 'commander'
 import chalk from 'chalk'
 import { GitWorktreeManager } from '../core/git.js'
+import { ConfigManager } from '../core/config.js'
 import { execa } from 'execa'
 import ora from 'ora'
 import { Worktree } from '../types/index.js'
 import { executeTmuxCommandInPane, isInTmuxSession, TmuxPaneType } from '../utils/tmux.js'
 import { selectWorktreeWithFzf, isFzfAvailable } from '../utils/fzf.js'
+import { formatPath } from '../utils/path.js'
 
 // すべての演奏者でコマンドを実行
 async function executeOnAllMembers(
@@ -73,8 +75,10 @@ async function executeOnSpecificMember(
     targetWorktree.branch?.replace('refs/heads/', '') || targetWorktree.branch
 
   if (!silent) {
+    const configManager = new ConfigManager()
+    const config = configManager.getAll()
     console.log(chalk.green(`\n🎼 演奏者 '${chalk.cyan(displayBranchName)}' でコマンドを実行`))
-    console.log(chalk.gray(`📁 ${targetWorktree.path}`))
+    console.log(chalk.gray(`📁 ${formatPath(targetWorktree.path, config)}`))
     console.log(chalk.gray(`$ ${command}\n`))
   }
 
@@ -261,12 +265,14 @@ export const execCommand = new Command('exec')
           if (options.tmuxVertical) paneType = 'vertical-split'
           if (options.tmuxHorizontal) paneType = 'horizontal-split'
 
+          const configManager = new ConfigManager()
+          const config = configManager.getAll()
           console.log(
             chalk.green(
               `\n🎼 演奏者 '${chalk.cyan(displayBranchName)}' でtmux ${paneType}コマンドを実行`
             )
           )
-          console.log(chalk.gray(`📁 ${targetWorktree.path}`))
+          console.log(chalk.gray(`📁 ${formatPath(targetWorktree.path, config)}`))
           console.log(chalk.gray(`$ ${command}\n`))
 
           await executeTmuxCommandInPane(command, {

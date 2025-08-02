@@ -117,6 +117,7 @@ When reviewing, maestro automatically fetches:
 - **Review status**: Current reviewers and approvals
 - **CI status**: Build and test results
 - **File changes**: Modified files and diff
+- **Path display**: File paths are shown according to the `ui.pathDisplay` configuration setting (absolute/relative)
 
 ## Auto-flow Review
 

@@ -147,6 +147,7 @@ When executing commands, these environment variables are automatically set:
 - Combine `--fzf` with tmux options for interactive workflow
 - Use quotes for complex commands: `mst exec feature "npm run build && npm test"`
 - The command is executed with `sh -c`, so shell features like pipes and redirects work
+- File paths displayed during selection respect the `ui.pathDisplay` configuration setting (absolute/relative)
 
 ## Error Handling
 

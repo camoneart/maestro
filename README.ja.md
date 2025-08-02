@@ -234,6 +234,9 @@ mst config path                                    # 設定ファイルの場所
 mst config init                                    # プロジェクト設定を作成
 ```
 
+**パス表示設定:**  
+`ui.pathDisplay` 設定は、すべてのコマンドでファイルパスがどのように表示されるかを制御します。`"relative"` に設定すると、現在の作業ディレクトリからの相対パスで表示されます。`"absolute"`（デフォルト）に設定すると、フル絶対パスで表示されます。この設定は `github`、`review`、`shell`、`exec`、`health`、`watch` などのコマンドに影響します。
+
 **Claude設定:**
 - `markdownMode: "shared"` - メインリポジトリのCLAUDE.mdへのシンボリックリンクを作成（デフォルト）
 - `markdownMode: "split"` - 各worktreeに独立したCLAUDE.mdファイルを作成
@@ -253,7 +256,7 @@ mst config init                                    # プロジェクト設定を
 | github      | `autoFetch`    | 操作前に自動でfetch                     | `true`                              |
 |             | `branchNaming.prTemplate` | PRブランチ名テンプレート      | `pr-{number}`                       |
 |             | `branchNaming.issueTemplate` | Issueブランチ名テンプレート | `issue-{number}`                    |
-| ui          | `pathDisplay`  | 全コマンドでのパス表示形式              | `absolute` (`absolute` または `relative`) |
+| ui          | `pathDisplay`  | パスを表示するすべてのコマンドでの表示形式 | `absolute` (`absolute` または `relative`) |
 | hooks       | `afterCreate`  | 作成後に実行する任意コマンド            | `npm install`                       |
 |             | `beforeDelete` | 退場前フック                            | `echo "Exiting $ORCHESTRA_MEMBER"` |
 
@@ -287,7 +290,7 @@ mst config init                                    # プロジェクト設定を
     }
   },
   "ui": {
-    "pathDisplay": "absolute"           // デフォルト: "absolute" (オプション: "absolute" | "relative")
+    "pathDisplay": "absolute"           // デフォルト: "absolute" - コマンドでのパス形式を制御 (オプション: "absolute" | "relative")
   },
   "hooks": {
     "afterCreate": "npm install",

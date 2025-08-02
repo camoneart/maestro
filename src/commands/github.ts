@@ -10,6 +10,7 @@ import fs from 'fs/promises'
 import { isInTmuxSession } from '../utils/tmux.js'
 import { createTmuxSession, validateTmuxOptions } from '../utils/tmuxSession.js'
 import { detectPackageManager } from '../utils/packageManager.js'
+import { formatPath } from '../utils/path.js'
 
 // 型定義
 interface GithubOptions {
@@ -509,7 +510,7 @@ async function createWorktreeFromGithub(
 
   spinner.succeed(
     `演奏者 '${chalk.cyan(branchName)}' を招集しました！\n` +
-      `  📁 ${chalk.gray(worktreePath)}\n` +
+      `  📁 ${chalk.gray(formatPath(worktreePath, config))}\n` +
       `  🔗 ${chalk.blue(`${type === 'pr' ? 'PR' : 'Issue'} #${number}`)}`
   )
 
@@ -633,7 +634,7 @@ async function processWorktreeCreation(
     }
 
     console.log(chalk.green(`\n🎼 GitHub統合による演奏者招集完了！`))
-    console.log(chalk.gray(`📁 ${worktreePath}\n`))
+    console.log(chalk.gray(`📁 ${formatPath(worktreePath, config)}\n`))
 
     try {
       await createTmuxSession({
@@ -665,7 +666,7 @@ async function processWorktreeCreation(
   }
 
   console.log(chalk.green('\n✨ GitHub統合による演奏者の招集が完了しました！'))
-  console.log(chalk.gray(`\ncd ${worktreePath} で移動できます`))
+  console.log(chalk.gray(`\ncd ${formatPath(worktreePath, config)} で移動できます`))
 }
 
 // メイン処理

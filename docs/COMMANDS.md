@@ -949,6 +949,12 @@ This setting affects path display in the following commands:
 - `where` - Path display and fzf selection screen
 - `delete` - Deletion confirmation screen paths
 - `sync` - Sync target selection screen paths
+- `github` - Worktree creation and setup paths
+- `review` - PR checkout and review workflow paths
+- `shell` - Interactive selection screen paths
+- `exec` - Command execution target paths
+- `health` - Health check output paths
+- `watch` - File change notification paths
 
 Note: The `--full-path` option in the `list` command will always show absolute paths regardless of this setting.
 

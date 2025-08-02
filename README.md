@@ -235,6 +235,9 @@ mst config path                                    # Show config file locations
 mst config init                                    # Create project configuration
 ```
 
+**Path Display Configuration:**  
+The `ui.pathDisplay` setting controls how file paths are shown across all commands. When set to `"relative"`, paths are displayed relative to the current working directory. When set to `"absolute"` (default), full absolute paths are shown. This affects commands like `github`, `review`, `shell`, `exec`, `health`, and `watch`.
+
 **Claude Configuration:**
 - `markdownMode: "shared"` - Creates symlink to main repository's CLAUDE.md (default)
 - `markdownMode: "split"` - Creates independent CLAUDE.md for each worktree
@@ -254,7 +257,7 @@ mst config init                                    # Create project configuratio
 | github      | `autoFetch`    | Auto-fetch before operations          | `true`                              |
 |             | `branchNaming.prTemplate` | PR branch naming template    | `pr-{number}`                       |
 |             | `branchNaming.issueTemplate` | Issue branch naming template | `issue-{number}`                 |
-| ui          | `pathDisplay`  | Path display format across commands   | `absolute` (`absolute` or `relative`) |
+| ui          | `pathDisplay`  | Path display format in all commands that show paths | `absolute` (`absolute` or `relative`) |
 | hooks       | `afterCreate`  | Command after creation                | `npm install`                       |
 |             | `beforeDelete` | Command before deletion               | `echo "Deleting $ORCHESTRA_MEMBER"` |
 
@@ -288,7 +291,7 @@ mst config init                                    # Create project configuratio
     }
   },
   "ui": {
-    "pathDisplay": "absolute"           // Default: "absolute" (options: "absolute" | "relative")
+    "pathDisplay": "absolute"           // Default: "absolute" - Controls path format in commands (options: "absolute" | "relative")
   },
   "hooks": {
     "afterCreate": "npm install",

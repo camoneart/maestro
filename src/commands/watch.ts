@@ -10,6 +10,7 @@ import fs from 'fs/promises'
 import { createHash } from 'crypto'
 import { processManager } from '../utils/process.js'
 import { validatePath, safeRelativePath, loopTracker } from '../utils/path-validator.js'
+import { formatPath } from '../utils/path.js'
 
 interface WatchOptions {
   patterns?: string[]
@@ -167,13 +168,14 @@ export const watchCommand = new Command('watch')
           process.exit(0)
         }
 
+        const config = configManager.getAll()
         const { selected } = await inquirer.prompt([
           {
             type: 'checkbox',
             name: 'selected',
             message: '同期先のworktreeを選択:',
             choices: otherWorktrees.map(wt => ({
-              name: `${chalk.cyan(wt.branch)} ${chalk.gray(wt.path)}`,
+              name: `${chalk.cyan(wt.branch)} ${chalk.gray(formatPath(wt.path, config))}`,
               value: wt,
               checked: true,
             })),
