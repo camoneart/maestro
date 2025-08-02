@@ -380,6 +380,7 @@ mst create feature/new-feature --tmux
 | **tmux not found**                             | tmux not installed                      | `brew install tmux`               |
 | **Claude Code won't start**                    | MCP server not running or port conflict | `mst mcp status` → `mst mcp stop` |
 | **Too many tmux panes** <br>`Unable to create session with N panes due to terminal size` | Terminal window too small for requested panes | Resize window or reduce panes (max: 10 horizontal, 15 vertical) |
+| **GitHub PR/Issue not found** <br>`Error: PR/Issue #999 が見つかりません` | Specified non-existent Issue/PR number | Check correct number or verify repository |
 
 ### Other error codes
 

@@ -206,6 +206,12 @@ mst github issue issue-456
 mst github
 ```
 
+Interactive mode is triggered when:
+- No arguments are provided (`mst github`)
+- The command is run without specifying a PR/Issue number
+
+Note: Interactive mode will NOT be triggered if a specific PR/Issue number is provided but doesn't exist. In such cases, an error message is displayed instead.
+
 Displayed menu:
 
 ```
@@ -333,10 +339,12 @@ done
 2. **PR/Issue not found**
 
    ```
-   Error: Pull request #999 not found
+   Error: PR/Issue #999 が見つかりません
    ```
 
-   Solution: Check correct number or verify repository is correct
+   Solution: Check correct number or verify repository is correct. When a specific PR/Issue number is provided but doesn't exist, the command now properly displays an error message and exits instead of entering interactive selection mode.
+
+   **Improved Behavior (v3.5.14+)**: Fixed issue #195 where specifying a non-existent Issue/PR number would incorrectly enter interactive mode. The command now validates the existence of the specified PR/Issue first and displays a clear error message if not found, preventing unintended interactive prompts.
 
 3. **Orchestra member already exists**
    ```
