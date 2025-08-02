@@ -151,6 +151,7 @@ mst create feature/awesome-feature --tmux --claude-md
 | **Fast switch** via tmux          | `mst tmux`                                                                   |
 | **Create from GitHub Issue**      | `mst create 123`                                                             |
 | **Create from PR**                | `mst github checkout 456`                                                    |
+| **Create from PR with tmux**      | `mst github checkout 456 --tmux-h`                                           |
 | **List GitHub issues/PRs**        | `mst github list`                                                            |
 | **Push with PR**                  | `mst push --pr`                                                              |
 | **Push with draft PR**            | `mst push --draft-pr`                                                        |
@@ -196,7 +197,7 @@ Maestro ships with **power commands** that automate tedious tasks in a single li
 | Feature                     | Command Example                                                       | What It Automates                                                           |
 | --------------------------- | --------------------------------------------------------------------- | --------------------------------------------------------------------------- |
 | **Auto Review & Merge 🚀**  | `mst review --auto-flow`                                              | Fetch → rebase → AI review → Conventional Commit → open PR — all in one go  |
-| **GitHub Integration 🔗**   | `mst github list` <br>`mst github checkout 123`                       | List and checkout GitHub issues/PRs with reliable worktree creation        |
+| **GitHub Integration 🔗**   | `mst github list` <br>`mst github checkout 123 --tmux-h`              | List and checkout GitHub issues/PRs with reliable worktree creation and tmux integration |
 | **Snapshot 📸**             | `mst snapshot -m "before-refactor"` <br>`mst snapshot --restore <id>` | Save / restore any working state instantly                                  |
 | **Health Check 🏥**         | `mst health` <br>`mst health --fix`                                   | Detects stale / orphaned / conflicted branches and fixes them automatically |
 

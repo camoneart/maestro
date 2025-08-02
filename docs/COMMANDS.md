@@ -422,8 +422,13 @@ mst gh [type] [number] [options]  # alias
 | `--reopen` | | Reopen PR/Issue |
 | `--close` | | Close PR/Issue |
 | `--tmux` | `-t` | Open in new tmux window |
-| `--tmux-vertical` | `--tmux-v` | Open in vertical split pane |
-| `--tmux-horizontal` | `--tmux-h` | Open in horizontal split pane |
+| `--tmux-vertical` | `--tmux-v` | Open in vertical split pane (legacy, use --tmux-v) |
+| `--tmux-horizontal` | `--tmux-h` | Open in horizontal split pane (legacy, use --tmux-h) |
+| `--tmux-h` | | Create horizontal tmux panes |
+| `--tmux-v` | | Create vertical tmux panes |
+| `--tmux-h-panes <number>` | | Create specified number of horizontal panes |
+| `--tmux-v-panes <number>` | | Create specified number of vertical panes |
+| `--tmux-layout <type>` | | Specify tmux layout (even-horizontal, even-vertical, main-horizontal, main-vertical, tiled) |
 
 #### Examples
 ```bash
@@ -443,6 +448,18 @@ mst github 123 --tmux
 
 # Create and open in vertical split
 mst github 123 --tmux-v
+
+# Create and open in horizontal split
+mst github 123 --tmux-h
+
+# Create with multiple horizontal panes
+mst github 123 --tmux-h-panes 3
+
+# Create with multiple vertical panes
+mst github 123 --tmux-v-panes 4
+
+# Create with specific tmux layout
+mst github 123 --tmux-h-panes 3 --tmux-layout even-horizontal
 
 # Add comment to PR/Issue
 mst github comment 123 -m "LGTM!"
