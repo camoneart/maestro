@@ -436,3 +436,4 @@ mst tmux logs --split-pane --vertical # Split: logs
 - [`mst shell`](./shell.md) - Enter worktree shell without tmux
 - [`mst where`](./where.md) - Get worktree paths for tmux navigation
 - [`mst list`](./list.md) - List available worktrees for tmux sessions
+- [`mst delete`](./delete.md) - **NEW**: Automatically cleans up tmux sessions when worktrees exit (use `--keep-session` to preserve)

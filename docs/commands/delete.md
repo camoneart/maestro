@@ -23,7 +23,7 @@ When an orchestra member exits the stage, Maestro performs a **complete cleanup*
    - Automatically retries with `git branch -D` if the branch is not fully merged
    - Ensures complete cleanup without manual intervention
 4. **tmux session** - The tmux session with the same name as the worktree (if exists)
-   - Automatically terminates the session when deleting the worktree
+   - **Default behavior**: Automatically terminates the session when deleting the worktree
    - Session names are normalized to handle special characters (e.g., `feature/api-auth` becomes `feature-api-auth`)
    - Use `--keep-session` to preserve the tmux session after deletion
 
@@ -148,7 +148,7 @@ mst delete --merged --yes
 
 ## tmux Session Management
 
-By default, Maestro automatically cleans up tmux sessions when orchestra members exit to prevent orphaned sessions. Session names are normalized to handle special characters in branch names (slashes, spaces, etc. are converted to hyphens):
+**NEW**: By default, Maestro automatically cleans up tmux sessions when orchestra members exit to prevent orphaned sessions. Session names are normalized to handle special characters in branch names (slashes, spaces, etc. are converted to hyphens):
 
 ### Default Behavior (Auto-cleanup)
 

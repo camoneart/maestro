@@ -291,9 +291,11 @@ mst rm [branch-name] [options]  # alias
 | `--current` | Current worktree exits |
 
 #### Features
-- **Complete cleanup**: Automatically processes exit for both worktree directory, associated local branch, and tmux session
+- **Complete cleanup**: Automatically processes exit for both worktree directory, associated local branch, and tmux session (by default)
 - **Empty directory cleanup**: Automatically removes empty parent directories (useful for branches like `feature/api` which leave empty `feature/` directories)
-- **tmux Session Management**: Automatically terminates associated tmux sessions with normalized names (special characters converted to hyphens)
+- **tmux Session Management**: **NEW** - Automatically terminates associated tmux sessions with normalized names (special characters converted to hyphens)
+  - **Default behavior**: Auto-cleanup tmux sessions when worktrees exit
+  - **Override option**: Use `--keep-session` to preserve tmux sessions after deletion
 - **Smart session handling**: Handles complex branch names like `feature/api/auth` by normalizing to `feature-api-auth`
 - **Wildcard support**: Use patterns like `"feature/old-*"` to process multiple exits
 - **Safe exit**: Uses `git branch -d` to prevent exit of unmerged branches
