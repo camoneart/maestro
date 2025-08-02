@@ -303,6 +303,7 @@ export const historyCommand = new Command('history')
   .option('-c, --cleanup', '不要な履歴をクリーンアップ')
   .option('--sync', '履歴を正しいパスに同期')
   .option('-j, --json', 'JSON形式で出力')
+  .exitOverride()
   .action(async (options: HistoryOptions) => {
     try {
       const gitManager = new GitWorktreeManager()

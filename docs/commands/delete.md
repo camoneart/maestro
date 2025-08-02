@@ -247,6 +247,26 @@ You can set hooks before and after orchestra member exits in `.mst.json`:
 
 ## Error Handling
 
+### CLI Option Validation
+
+The delete command implements **strict option validation** to prevent execution with invalid options:
+
+**Immediate Exit on Invalid Options**:
+- **Early Detection**: Command exits immediately when unknown or invalid options are provided
+- **Prevents Execution**: Command will not proceed with delete operations when invalid options are detected
+- **Clear Error Messages**: Specific feedback about which options are invalid
+
+**Example Error Behavior**:
+```bash
+# Invalid option provided:
+mst delete feature/test --invalid-option
+
+# Output:
+error: unknown option '--invalid-option'
+
+# Command exits with error code 1 - no deletion performed
+```
+
 ### Common Errors
 
 1. **Orchestra member not found**

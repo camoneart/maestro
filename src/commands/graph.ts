@@ -229,6 +229,7 @@ export const graphCommand = new Command('graph')
   .option('--show-commits', '最新コミットを表示')
   .option('--show-dates', '最終更新日を表示')
   .option('-d, --depth <number>', '表示する階層の深さ', '3')
+  .exitOverride()
   .action(async (options: GraphOptions) => {
     const spinner = ora('worktree関係を分析中...').start()
 

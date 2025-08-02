@@ -186,6 +186,7 @@ export const pushCommand = new Command('push')
   .option('--force', 'force pushを実行（--force-with-lease）')
   .option('--all', 'すべての演奏者（worktree）をプッシュ')
   .option('--issue <number>', '関連Issue番号を指定', parseInt)
+  .exitOverride()
   .action(async (options: PushOptions) => {
     try {
       const gitManager = new GitWorktreeManager()

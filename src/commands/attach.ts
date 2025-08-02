@@ -105,6 +105,7 @@ export const attachCommand = new Command('attach')
   .option('-s, --setup', '環境セットアップを実行')
   .option('--shell', 'アタッチ後にシェルに入る')
   .option('--exec <command>', 'アタッチ後にコマンドを実行')
+  .exitOverride()
   .action(
     async (
       branchName?: string,

@@ -692,6 +692,7 @@ export const githubCommand = new Command('github')
   .option('-t, --tmux', 'tmuxの新しいウィンドウで開く')
   .option('--tmux-vertical, --tmux-v', 'tmuxの縦分割ペインで開く')
   .option('--tmux-horizontal, --tmux-h', 'tmuxの横分割ペインで開く')
+  .exitOverride()
   .action(async (type?: string, number?: string, options: GithubOptions = {}) => {
     const spinner = ora('オーケストレーション！').start()
 

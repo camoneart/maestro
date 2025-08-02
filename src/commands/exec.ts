@@ -130,6 +130,7 @@ export const execCommand = new Command('exec')
   .option('-t, --tmux', 'tmuxの新しいウィンドウで実行')
   .option('--tmux-vertical, --tmux-v', 'tmuxの縦分割ペインで実行')
   .option('--tmux-horizontal, --tmux-h', 'tmuxの横分割ペインで実行')
+  .exitOverride()
   .action(
     async (branchName: string | undefined, commandParts: string[], options: ExecOptions = {}) => {
       try {
