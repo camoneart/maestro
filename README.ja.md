@@ -354,6 +354,7 @@ mst completion fish > ~/.config/fish/completions/mst.fish
 | **tmux が見つからない**                   | tmux 未インストール              | `brew install tmux`               |
 | **Claude Code が起動しない**              | MCP サーバー未起動 or ポート競合 | `mst mcp status` → `mst mcp stop` |
 | **tmux ペインが多すぎる**<br>`画面サイズに対してペイン数（N個）が多すぎるため、セッションが作成できませんでした` | ターミナルウィンドウに対してペイン数が過多 | ウィンドウのリサイズまたはペイン数を削減（最大：水平10個、垂直15個） |
+| **GitHub PR/Issue が見つからない**<br>`Error: PR/Issue #999 が見つかりません` | 存在しないIssue/PR番号を指定 | 正しい番号を確認するか、リポジトリを確認 |
 
 ### その他のエラーコード例
 

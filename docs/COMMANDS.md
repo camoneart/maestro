@@ -458,6 +458,8 @@ The GitHub command uses an optimized process for creating worktrees from Pull Re
 
 **Note:** The `--open` flag only opens the editor when explicitly specified. The GitHub command does not automatically open in the editor based on `development.defaultEditor` configuration.
 
+**Improved Error Handling (v3.5.14+)**: Fixed issue #195 where specifying a non-existent Issue/PR number would incorrectly enter interactive mode. The command now validates the existence of the specified PR/Issue first and displays a clear error message if not found.
+
 ### 🔸 tmux
 
 Manage orchestra members with tmux sessions.
