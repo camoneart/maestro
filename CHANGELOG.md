@@ -1,5 +1,21 @@
 # Changelog
 
+## 3.5.15
+
+### Patch Changes
+
+- fix: apply ui.pathDisplay setting to all commands (fixes #201)
+
+  All commands now respect the ui.pathDisplay configuration setting for consistent path display:
+  - github command: 3 path displays now use formatPath()
+  - review command: PR checkout path display
+  - shell command: 2 path displays for worktree entry
+  - exec command: 2 path displays for command execution
+  - health command: 2 path displays in worktree lists
+  - watch command: Path display in worktree selection
+
+  Users can now use `mst config set ui.pathDisplay relative` to see relative paths consistently across all commands.
+
 ## 3.5.14
 
 ### Patch Changes
