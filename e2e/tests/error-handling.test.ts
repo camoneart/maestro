@@ -54,7 +54,7 @@ fi
 
   it('should reject unknown options and not create worktree', async () => {
     try {
-      await execa('node', [CLI_PATH, 'github', 'issue', '182', '--tmux-h-panes', '4'], {
+      await execa('node', [CLI_PATH, 'github', 'issue', '182', '--unknown-option', '4'], {
         cwd: testDir,
         reject: true,
       })
@@ -64,7 +64,7 @@ fi
     } catch (error: any) {
       // Check error output contains unknown option message
       expect(error.stderr).toContain('unknown option')
-      expect(error.stderr).toContain('--tmux-h-panes')
+      expect(error.stderr).toContain('--unknown-option')
       
       // Verify worktree was not created
       const { stdout } = await execa('git', ['worktree', 'list'], { cwd: testDir })
