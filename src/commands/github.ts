@@ -651,15 +651,22 @@ async function executeGithubCommand(
   let finalNumber = number
 
   if (!finalNumber) {
-    try {
-      const result = await handleInteractiveMode()
-      finalType = result.type
-      finalNumber = result.number
-    } catch (error) {
-      if (error instanceof Error && error.message === 'INTERACTIVE_COMMENT_COMPLETE') {
-        return // コメント処理完了
+    // pr/issueが明示的に指定された場合は、その型に応じたアイテムを直接選択
+    if (finalType === 'pr' || finalType === 'issue') {
+      const items = await fetchItems(finalType as 'pr' | 'issue')
+      finalNumber = await selectItem(items, finalType as 'pr' | 'issue')
+    } else {
+      // typeも指定されていない場合のみ、完全なインタラクティブモード
+      try {
+        const result = await handleInteractiveMode()
+        finalType = result.type
+        finalNumber = result.number
+      } catch (error) {
+        if (error instanceof Error && error.message === 'INTERACTIVE_COMMENT_COMPLETE') {
+          return // コメント処理完了
+        }
+        throw error
       }
-      throw error
     }
   }
 
