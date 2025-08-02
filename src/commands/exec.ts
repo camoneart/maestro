@@ -76,6 +76,7 @@ async function executeOnSpecificMember(
 
   if (!silent) {
     const configManager = new ConfigManager()
+    await configManager.loadProjectConfig()
     const config = configManager.getAll()
     console.log(chalk.green(`\n🎼 演奏者 '${chalk.cyan(displayBranchName)}' でコマンドを実行`))
     console.log(chalk.gray(`📁 ${formatPath(targetWorktree.path, config)}`))
@@ -266,6 +267,7 @@ export const execCommand = new Command('exec')
           if (options.tmuxHorizontal) paneType = 'horizontal-split'
 
           const configManager = new ConfigManager()
+          await configManager.loadProjectConfig()
           const config = configManager.getAll()
           console.log(
             chalk.green(

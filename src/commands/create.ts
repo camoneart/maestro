@@ -272,6 +272,7 @@ export async function executeCreateCommand(
 ): Promise<void> {
   const manager = new GitWorktreeManager()
   const configManager = new ConfigManager()
+  await configManager.loadProjectConfig()
 
   // Git リポジトリの確認
   if (!(await manager.isGitRepository())) {

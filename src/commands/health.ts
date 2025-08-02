@@ -308,6 +308,7 @@ async function handlePruneOption(
   console.log(chalk.bold(`\n🗑️  ${staleWorktrees.length}件の古いworktreeがあります\n`))
 
   const configManager = new ConfigManager()
+  await configManager.loadProjectConfig()
   const config = configManager.getAll()
   staleWorktrees.forEach(wt => {
     const branch = wt.branch?.replace('refs/heads/', '') || wt.branch

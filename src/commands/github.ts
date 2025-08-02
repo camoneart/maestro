@@ -509,6 +509,7 @@ async function createWorktreeFromGithub(
   }
 
   const configManager = new ConfigManager()
+  await configManager.loadProjectConfig()
   const fullConfig = configManager.getAll()
   spinner.succeed(
     `演奏者 '${chalk.cyan(branchName)}' を招集しました！\n` +
@@ -636,6 +637,7 @@ async function processWorktreeCreation(
     }
 
     const configManager = new ConfigManager()
+    await configManager.loadProjectConfig()
     const fullConfig = configManager.getAll()
     console.log(chalk.green(`\n🎼 GitHub統合による演奏者招集完了！`))
     console.log(chalk.gray(`📁 ${formatPath(worktreePath, fullConfig)}\n`))
@@ -670,6 +672,7 @@ async function processWorktreeCreation(
   }
 
   const configManager = new ConfigManager()
+  await configManager.loadProjectConfig()
   const fullConfig = configManager.getAll()
   console.log(chalk.green('\n✨ GitHub統合による演奏者の招集が完了しました！'))
   console.log(chalk.gray(`\ncd ${formatPath(worktreePath, fullConfig)} で移動できます`))
