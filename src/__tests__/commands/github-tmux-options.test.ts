@@ -145,7 +145,9 @@ describe('github command with new tmux options', () => {
   })
 
   it('should validate tmux options before creating session', async () => {
-    const { validateTmuxOptions: mockValidateTmuxOptions } = await import('../../utils/tmuxSession.js')
+    const { validateTmuxOptions: mockValidateTmuxOptions } = await import(
+      '../../utils/tmuxSession.js'
+    )
 
     await githubCommand.parseAsync(['node', 'test', 'issue', '123', '--tmux-h-panes', '10'])
 
@@ -191,7 +193,9 @@ describe('github command with new tmux options', () => {
     }
 
     expect(console.error).toHaveBeenCalledWith(
-      chalk.red('エラー: --tmux-v/--tmux-hオプションを使用するにはtmuxセッション内にいる必要があります')
+      chalk.red(
+        'エラー: --tmux-v/--tmux-hオプションを使用するにはtmuxセッション内にいる必要があります'
+      )
     )
   })
 

@@ -142,11 +142,7 @@ describe('tmuxSession', () => {
 
       await createTmuxSession(defaultOptions)
 
-      expect(mockExeca).toHaveBeenCalledWith('tmux', [
-        'has-session',
-        '-t',
-        'test-session',
-      ])
+      expect(mockExeca).toHaveBeenCalledWith('tmux', ['has-session', '-t', 'test-session'])
       expect(mockExeca).toHaveBeenCalledWith('tmux', [
         'new-session',
         '-d',
