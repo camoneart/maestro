@@ -9,6 +9,7 @@ import path from 'path'
 import fs from 'fs/promises'
 import { createHash } from 'crypto'
 import { processManager } from '../utils/process.js'
+import { validatePath, safeRelativePath, loopTracker } from '../utils/path-validator.js'
 
 interface WatchOptions {
   patterns?: string[]
@@ -56,12 +57,24 @@ async function syncFileChange(
   targetWorktrees: Worktree[],
   dryRun: boolean
 ): Promise<void> {
-  const relativePath = path.relative(sourceWorktree, change.path)
+  // 安全な相対パス計算
+  const relativePath = safeRelativePath(sourceWorktree, change.path)
+  if (!relativePath) {
+    console.error(chalk.red(`🚨 危険なパスをスキップ: ${change.path}`))
+    return
+  }
 
   for (const worktree of targetWorktrees) {
     if (worktree.path === sourceWorktree) continue
 
     const targetPath = path.join(worktree.path, relativePath)
+
+    // パスバリデーション
+    const validation = validatePath(targetPath, sourceWorktree, worktree.path)
+    if (!validation.isValid) {
+      console.error(chalk.red(`  ✗ ${worktree.branch}: ${validation.error}`))
+      continue
+    }
 
     try {
       switch (change.type) {
@@ -216,6 +229,9 @@ export const watchCommand = new Command('watch')
 
         const changes = Array.from(changeBuffer.values())
         changeBuffer.clear()
+
+        // ループトラッカーをリセット（新しいバッチ処理開始）
+        loopTracker.reset()
 
         console.log(chalk.bold(`\n🔄 ${changes.length}個の変更を検出:\n`))
 

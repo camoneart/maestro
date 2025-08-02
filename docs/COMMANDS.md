@@ -557,28 +557,38 @@ mst snapshot --restore <snapshot-id>
 
 ### 🔸 watch
 
-Watch file changes and auto-sync.
+Watch file changes and auto-sync with built-in security protection.
 
 ```bash
 mst watch [options]
 ```
 
 #### Options
-- `--files <pattern>` - File pattern to watch
-- `--ignore <pattern>` - Pattern to ignore
+- `--patterns <patterns...>` - File patterns to watch (comma-separated)
+- `--exclude <patterns...>` - Patterns to exclude (comma-separated)  
+- `--all` - Watch all worktrees
 - `--auto` - Auto-sync without confirmation
 - `--dry` - Dry run mode
 
+#### Security Features
+- **Directory Traversal Protection**: Prevents `../` path attacks
+- **Loop Detection**: Stops infinite directory creation loops
+- **Path Validation**: Validates all file operations within worktree boundaries
+- **Safe Sync**: Ensures file operations stay within designated worktree directories
+
 #### Examples
 ```bash
-# Basic watch
+# Basic watch with security protection
 mst watch
 
-# Watch specific files
-mst watch --files "src/**/*.ts"
+# Watch specific files with automatic validation
+mst watch --patterns "src/**/*.ts,*.json"
 
-# Auto-sync mode
-mst watch --auto
+# Auto-sync mode with built-in security
+mst watch --auto --all
+
+# Dry run to preview changes safely
+mst watch --dry --patterns "src/**/*.js"
 ```
 
 ## 🛠️ Utility Commands
