@@ -137,6 +137,12 @@ export const issueCommand = new Command('issue')
         throw new IssueCommandError('GitHubリポジトリへのアクセスに失敗しました')
       }
 
+      // 'list' という引数が渡された場合は --list オプションとして扱う
+      if (issueNumber === 'list') {
+        options.list = true
+        issueNumber = undefined
+      }
+
       // Issue一覧を表示
       if (options.list) {
         spinner.text = 'Issue一覧を取得中...'
