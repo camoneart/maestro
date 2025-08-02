@@ -117,6 +117,7 @@ export const tmuxCommand = new Command('tmux')
   .option('-v, --vertical', '垂直分割（-pと併用）')
   .option('-e, --editor <editor>', 'エディタを自動起動 (nvim, vim, code, emacs)')
   .option('-d, --detach', '新セッション作成のみ (attachしない)')
+  .exitOverride()
   .action(async (branchName?: string, options: TmuxOptions = {}) => {
     const spinner = ora('オーケストレーション！').start()
 

@@ -519,6 +519,11 @@ async function createWorktreeFromGithub(
 // ====== 引数解析 ======
 
 function parseArguments(type?: string, number?: string): { type?: string; number?: string } {
+  // typeが数値の場合（maestro github 123）
+  if (type && !isNaN(parseInt(type)) && !number) {
+    return { type: undefined, number: type }
+  }
+
   // typeとnumberの正規化
   if (!type || type === 'checkout') {
     // checkout または引数なしの場合
@@ -526,11 +531,6 @@ function parseArguments(type?: string, number?: string): { type?: string; number
       console.error(chalk.red('PR/Issue番号を指定してください'))
       console.log(chalk.gray('使い方: maestro github checkout <number>'))
       process.exit(1)
-    }
-
-    // typeが番号の場合（maestro github 123）
-    if (type && !isNaN(parseInt(type))) {
-      return { type: 'checkout', number: type }
     }
   }
 
@@ -696,21 +696,27 @@ async function executeGithubCommand(
   let finalNumber = number
 
   if (!finalNumber) {
-    try {
-      const result = await handleInteractiveMode()
-      finalType = result.type
-      finalNumber = result.number
-    } catch (error) {
-      if (error instanceof Error && error.message === 'INTERACTIVE_COMMENT_COMPLETE') {
-        return // コメント処理完了
+    // pr/issueが明示的に指定された場合は、その型に応じたアイテムを直接選択
+    if (finalType === 'pr' || finalType === 'issue') {
+      const items = await fetchItems(finalType as 'pr' | 'issue')
+      finalNumber = await selectItem(items, finalType as 'pr' | 'issue')
+    } else {
+      // typeも指定されていない場合のみ、完全なインタラクティブモード
+      try {
+        const result = await handleInteractiveMode()
+        finalType = result.type
+        finalNumber = result.number
+      } catch (error) {
+        if (error instanceof Error && error.message === 'INTERACTIVE_COMMENT_COMPLETE') {
+          return // コメント処理完了
+        }
+        throw error
       }
-      throw error
     }
-  }
-
-  // typeの自動判定（明示的にpr/issueが指定された場合はスキップ）
-  if (finalType === 'checkout' || !finalType) {
-    finalType = await detectType(finalNumber!)
+  } else if (finalType === 'checkout' || !finalType) {
+    // 番号が指定されている場合、まず存在チェックを行う
+    // typeの自動判定（明示的にpr/issueが指定された場合はスキップ）
+    finalType = await detectType(finalNumber)
   }
 
   await processWorktreeCreation(
@@ -745,6 +751,7 @@ export const githubCommand = new Command('github')
     '--tmux-layout <type>',
     'tmuxレイアウトタイプ (even-horizontal, even-vertical, main-horizontal, main-vertical, tiled)'
   )
+  .exitOverride()
   .action(async (type?: string, number?: string, options: GithubOptions = {}) => {
     const spinner = ora('オーケストレーション！').start()
 
@@ -770,10 +777,10 @@ export const githubCommand = new Command('github')
 
       if (error instanceof GithubCommandError) {
         console.error(chalk.red(error.message))
-        process.exitCode = 1
+        process.exit(1)
       } else {
         console.error(chalk.red(error instanceof Error ? error.message : '不明なエラー'))
-        process.exitCode = 1
+        process.exit(1)
       }
     }
   })

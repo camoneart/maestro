@@ -36,7 +36,6 @@ program
   .name('maestro')
   .description('🎼 Maestro - Git worktreeオーケストレーションでClaude Codeとパラレル開発')
   .version(packageJson.version)
-  .allowUnknownOption()
 
 // サブコマンドを追加
 program.addCommand(initCommand)

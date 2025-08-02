@@ -116,6 +116,44 @@ describe('issue command', () => {
         '30',
       ])
     })
+
+    it('should handle "list" as an argument instead of option', async () => {
+      const mockIssues = [
+        {
+          number: 1,
+          title: 'Bug: Something is broken',
+          state: 'OPEN',
+          author: { login: 'user1' },
+          labels: [{ name: 'bug', color: 'ff0000' }],
+          assignees: [],
+        },
+      ]
+
+      mockExeca.mockImplementation((cmd: string, args: string[]) => {
+        if (cmd === 'gh' && args[0] === 'repo' && args[1] === 'view') {
+          return Promise.resolve(mockGhRepoView())
+        }
+        if (cmd === 'gh' && args[0] === 'issue' && args[1] === 'list') {
+          return Promise.resolve({
+            stdout: JSON.stringify(mockIssues),
+            stderr: '',
+            exitCode: 0,
+          } as any)
+        }
+        return Promise.resolve({ stdout: '', stderr: '', exitCode: 0 } as any)
+      })
+
+      await program.parseAsync(['node', 'test', 'issue', 'list'])
+
+      expect(mockExeca).toHaveBeenCalledWith('gh', [
+        'issue',
+        'list',
+        '--json',
+        'number,title,author,state,labels,assignees',
+        '--limit',
+        '30',
+      ])
+    })
   })
 
   describe('create option', () => {

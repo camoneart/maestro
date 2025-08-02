@@ -7,6 +7,13 @@ Command to create orchestra members (Git worktrees) directly from GitHub Issues 
 ```bash
 mst github [type] [number] [options]
 mst gh [type] [number] [options]  # alias
+
+# Direct type selection (no type selection prompt)
+mst github pr [number]    # Shows PR list directly
+mst github issue [number] # Shows Issue list directly
+
+# Full interactive mode (shows type selection prompt)
+mst github               # Shows "What would you like to summon performers from?"
 ```
 
 ## Usage Examples
@@ -22,10 +29,13 @@ mst gh list
 mst github checkout 123
 mst gh 123  # shorthand
 
-# Create orchestra member from Issue
+# Create orchestra member from Issue (shows Issue list directly)
 mst github issue 456
 
-# Interactive selection
+# Create orchestra member from PR (shows PR list directly)
+mst github pr 123
+
+# Interactive selection (shows type selection first)
 mst github
 
 # Add comment to PR/Issue
@@ -183,10 +193,10 @@ This approach ensures reliable PR worktree creation by properly handling the bas
 ### Basic Flow
 
 ```bash
-# 1. Check Issue list
-gh issue list
+# 1. Check Issue list using maestro
+mst github list
 
-# 2. Create orchestra member from Issue
+# 2. Create orchestra member from Issue (shows Issue list directly)
 mst github issue 456
 
 # 3. Branch name is auto-generated
@@ -216,24 +226,48 @@ mst github issue issue-456
 
 ## Interactive Mode
 
+The GitHub command supports different interaction modes depending on how it's invoked:
+
+### Direct Type Selection
+
+When the type is explicitly specified, it directly shows the appropriate list without a type selection prompt:
+
 ```bash
-# Select from menu
+# Directly shows Issue list
+mst github issue
+
+# Directly shows PR list  
+mst github pr
+```
+
+### Full Interactive Mode
+
+When no arguments are provided, it shows the type selection menu first:
+
+```bash
+# Shows type selection menu
 mst github
 ```
+
+Interactive mode is triggered when:
+- No arguments are provided (`mst github`)
+- The command is run without specifying a PR/Issue number
+
+Note: Interactive mode will NOT be triggered if a specific PR/Issue number is provided but doesn't exist. In such cases, an error message is displayed instead.
 
 Displayed menu:
 
 ```
-? What would you like to create a worktree from?
+? 何から演奏者を招集しますか？
 ❯ Pull Request
   Issue
-  Cancel
+  コメントを追加
 ```
 
-Then select from list:
+Then select from the chosen type's list:
 
 ```
-? Select a Pull Request:
+? Pull Requestを選択:
 ❯ #125 feat: Add dark mode support (enhancement, ui)
   #124 fix: Memory leak in background worker (bug, critical)
   #123 docs: Update API documentation (documentation)
@@ -351,10 +385,12 @@ done
 2. **PR/Issue not found**
 
    ```
-   Error: Pull request #999 not found
+   Error: PR/Issue #999 が見つかりません
    ```
 
-   Solution: Check correct number or verify repository is correct
+   Solution: Check correct number or verify repository is correct. When a specific PR/Issue number is provided but doesn't exist, the command now properly displays an error message and exits instead of entering interactive selection mode.
+
+   **Improved Behavior (v3.5.14+)**: Fixed issue #195 where specifying a non-existent Issue/PR number would incorrectly enter interactive mode. The command now validates the existence of the specified PR/Issue first and displays a clear error message if not found, preventing unintended interactive prompts.
 
 3. **Orchestra member already exists**
    ```

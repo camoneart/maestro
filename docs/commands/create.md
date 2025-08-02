@@ -467,6 +467,31 @@ mst create feature/testing --tmux-h-panes 4 --tmux-layout even-horizontal
 
 ## Error Handling
 
+### CLI Option Validation
+
+The create command implements **strict option validation** to prevent execution with invalid options:
+
+**Immediate Exit on Invalid Options**:
+- **Early Detection**: Command exits immediately when unknown or invalid options are provided
+- **Prevents Resource Creation**: Command will not create worktrees, branches, or tmux sessions when invalid options are detected
+- **Clear Error Messages**: Specific feedback about which options are invalid
+
+**Example Error Behavior**:
+```bash
+# Invalid option provided:
+mst create feature/test --invalid-option value
+
+# Output:
+error: unknown option '--invalid-option'
+
+# Command exits with error code 1 - no resources created
+```
+
+**Benefits**:
+- **Prevents Unintended Operations**: Commands won't execute with typos in option names
+- **Clean Exit**: Command exits with error code 1 when invalid options are detected
+- **Better Developer Experience**: Immediate feedback about command usage errors
+
 ### Automatic Rollback Functionality
 
 The create command includes intelligent automatic rollback functionality to prevent orphaned worktrees when post-creation tasks fail. This ensures your repository remains clean even when errors occur during tmux session creation or other post-processing steps.

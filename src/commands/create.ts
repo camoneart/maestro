@@ -735,6 +735,7 @@ export const createCommand = new Command('create')
     '現在のworktreeからファイルをコピー（複数回使用可）',
     (value, previous: string[] = []) => [...previous, value]
   )
+  .exitOverride()
   .action(async (branchName: string, options: CreateOptions & { template?: string }) => {
     await executeCreateCommand(branchName, options)
   })

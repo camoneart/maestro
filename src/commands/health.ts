@@ -418,6 +418,7 @@ export const healthCommand = new Command('health')
   .option('-d, --days <number>', '古いと判定する日数', '30')
   .option('-v, --verbose', '詳細情報を表示')
   .option('-j, --json', 'JSON形式で出力')
+  .exitOverride()
   .action(async (options: HealthOptions) => {
     const spinner = ora('worktreeの健全性をチェック中...').start()
 

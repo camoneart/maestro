@@ -338,6 +338,7 @@ export const snapshotCommand = new Command('snapshot')
   .option('-r, --restore <id>', 'スナップショットを復元')
   .option('-d, --delete <id>', 'スナップショットを削除')
   .option('-j, --json', 'JSON形式で出力')
+  .exitOverride()
   .action(
     async (options: SnapshotOptions & { list?: boolean; restore?: string; delete?: string }) => {
       try {

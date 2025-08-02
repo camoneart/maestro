@@ -632,5 +632,82 @@ describe('github command', () => {
       expect(consoleSpy).toHaveBeenCalled()
       consoleSpy.mockRestore()
     })
+
+    it('should show error message when non-existent PR/Issue number is specified', async () => {
+      // 存在しない番号を指定した場合のテスト
+      mockExeca.mockImplementation((cmd: string, args: string[]) => {
+        if (cmd === 'gh' && args[0] === '--version') {
+          return Promise.resolve(mockGhVersion())
+        }
+        if (cmd === 'gh' && args[0] === 'auth' && args[1] === 'status') {
+          return Promise.resolve(mockGhAuthStatus())
+        }
+        // PR view が失敗
+        if (cmd === 'gh' && args[0] === 'pr' && args[1] === 'view' && args[2] === '999') {
+          throw new Error('no pull requests found')
+        }
+        // Issue view も失敗
+        if (cmd === 'gh' && args[0] === 'issue' && args[1] === 'view' && args[2] === '999') {
+          throw new Error('no issues found')
+        }
+        return Promise.resolve({ stdout: '', stderr: '', exitCode: 0 } as any)
+      })
+
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+
+      try {
+        await program.parseAsync(['node', 'test', 'github', '999'])
+      } catch {
+        // エラーがスローされることを期待
+      }
+
+      expect(consoleSpy).toHaveBeenCalledWith(
+        expect.stringContaining('PR/Issue #999 が見つかりません')
+      )
+      consoleSpy.mockRestore()
+    })
+
+    it('should not enter interactive mode when number is specified but not found', async () => {
+      // 番号を指定したがPR/Issueが見つからない場合
+      mockExeca.mockImplementation((cmd: string, args: string[]) => {
+        if (cmd === 'gh' && args[0] === '--version') {
+          return Promise.resolve(mockGhVersion())
+        }
+        if (cmd === 'gh' && args[0] === 'auth' && args[1] === 'status') {
+          return Promise.resolve(mockGhAuthStatus())
+        }
+        // PR viewが失敗
+        if (cmd === 'gh' && args[0] === 'pr' && args[1] === 'view' && args[2] === '123') {
+          throw new Error('no pull requests found')
+        }
+        // Issue viewも失敗
+        if (cmd === 'gh' && args[0] === 'issue' && args[1] === 'view' && args[2] === '123') {
+          throw new Error('no issues found')
+        }
+        // listは呼ばれてはいけない
+        if (cmd === 'gh' && args[1] === 'list') {
+          throw new Error('list should not be called when number is specified')
+        }
+        return Promise.resolve({ stdout: '', stderr: '', exitCode: 0 } as any)
+      })
+
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+
+      try {
+        await program.parseAsync(['node', 'test', 'github', '123'])
+      } catch {
+        // エラーがスローされることを期待
+      }
+
+      // エラーメッセージが表示される
+      expect(consoleSpy).toHaveBeenCalledWith(
+        expect.stringContaining('PR/Issue #123 が見つかりません')
+      )
+
+      // inquirer.promptが呼ばれていないことを確認（インタラクティブモードに入っていない）
+      expect(mockInquirer.prompt).not.toHaveBeenCalled()
+
+      consoleSpy.mockRestore()
+    })
   })
 })

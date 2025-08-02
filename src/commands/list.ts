@@ -53,6 +53,7 @@ export const listCommand = new Command('list')
   .option('--last-commit', '最終コミット情報を表示')
   .option('--metadata', 'メタデータ情報を表示')
   .option('--full-path', '完全パスを表示')
+  .exitOverride()
   .action(
     async (
       options: {

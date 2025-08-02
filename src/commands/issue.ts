@@ -115,6 +115,7 @@ export const issueCommand = new Command('issue')
   .option('-a, --assign <user>', 'Issueをアサイン')
   .option('--label <label>', 'ラベルを追加（カンマ区切りで複数指定可）')
   .option('--milestone <milestone>', 'マイルストーンを設定')
+  .exitOverride()
   .action(async (issueNumber?: string, options: IssueOptions = {}) => {
     const spinner = ora('Issue情報を取得中...').start()
 
@@ -134,6 +135,12 @@ export const issueCommand = new Command('issue')
         spinner.fail('GitHubリポジトリではありません')
         console.log(chalk.yellow('gh CLIがインストールされていないか、認証されていません'))
         throw new IssueCommandError('GitHubリポジトリへのアクセスに失敗しました')
+      }
+
+      // 'list' という引数が渡された場合は --list オプションとして扱う
+      if (issueNumber === 'list') {
+        options.list = true
+        issueNumber = undefined
       }
 
       // Issue一覧を表示

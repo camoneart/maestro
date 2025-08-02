@@ -10,6 +10,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 export const mcpCommand = new Command('mcp')
   .description('MCPサーバーを起動')
   .argument('[subcommand]', 'サブコマンド (serve)')
+  .exitOverride()
   .action(async (subcommand?: string) => {
     if (subcommand !== 'serve') {
       console.log(chalk.yellow('使い方: maestro mcp serve'))

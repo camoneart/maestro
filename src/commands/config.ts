@@ -195,6 +195,7 @@ export const configCommand = new Command('config')
   .option('-g, --global', 'グローバル設定を対象にする')
   .option('-u, --user', 'ユーザー設定（.maestro.local.json）を対象にする')
   .option('-p, --project', 'プロジェクト設定（.maestro.json）を対象にする')
+  .exitOverride()
   .action(
     async (
       action?: string,

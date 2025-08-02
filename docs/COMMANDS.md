@@ -440,8 +440,14 @@ mst gh list
 mst github checkout 123
 mst gh 123  # shorthand
 
-# Create from Issue #456
+# Create from Issue #456 (shows Issue list directly)
 mst github issue 456
+
+# Create from PR (shows PR list directly)  
+mst github pr 123
+
+# Interactive selection (shows type selection prompt)
+mst github
 
 # Create and open in tmux
 mst github 123 --tmux
@@ -474,6 +480,8 @@ The GitHub command uses an optimized process for creating worktrees from Pull Re
 - Ensures reliable worktree creation without Git conflicts
 
 **Note:** The `--open` flag only opens the editor when explicitly specified. The GitHub command does not automatically open in the editor based on `development.defaultEditor` configuration.
+
+**Improved Error Handling (v3.5.14+)**: Fixed issue #195 where specifying a non-existent Issue/PR number would incorrectly enter interactive mode. The command now validates the existence of the specified PR/Issue first and displays a clear error message if not found.
 
 ### 🔸 tmux
 
@@ -825,25 +833,37 @@ mst history --limit 10
 GitHub Issue integration.
 
 ```bash
-mst issue <command> [options]
+mst issue [issue-number] [options]
 ```
 
-#### Subcommands
-- `create` - Create issue
-- `list` - List issues
-- `view <number>` - View issue
-- `close <number>` - Close issue
+#### Options
+| Option | Short | Description | Default |
+|--------|-------|-------------|---------|
+| `--list` | `-l` | List open issues | `false` |
+| `--create` | `-c` | Create new issue | `false` |
+| `--close` | | Close issue | `false` |
+| `--web` | `-w` | Open issue in web browser | `false` |
+| `--assign <user>` | `-a` | Assign issue to user | none |
+| `--label <labels>` | | Add labels (comma-separated) | none |
+| `--milestone <milestone>` | | Set milestone | none |
 
 #### Examples
 ```bash
-# Create issue
-mst issue create
-
-# List issues
+# List issues (both syntaxes supported)
+mst issue --list
 mst issue list
 
+# Create issue
+mst issue --create
+
 # View Issue #123
-mst issue view 123
+mst issue 123
+
+# Close issue
+mst issue --close 123
+
+# Open issue in browser
+mst issue 123 --web
 ```
 
 ### 🔸 review
@@ -989,8 +1009,40 @@ maestro properly handles the following errors:
 - Network errors
 - Permission errors
 - Configuration errors
+- **CLI option validation errors** (unknown or invalid options)
 - **tmux pane creation errors** (enhanced in latest version)
 - **Automatic rollback protection** (prevents orphaned worktrees)
+
+### CLI Option Validation
+
+All maestro commands now implement **strict option validation** to prevent execution with invalid options:
+
+**Immediate Exit on Invalid Options**:
+- **Early Detection**: Commands exit immediately when unknown or invalid options are provided
+- **Prevents Execution**: Commands will not proceed with creation or modification operations when invalid options are detected
+- **Clear Error Messages**: Specific feedback about which options are invalid and what options are available
+
+**Example Error Behavior**:
+```bash
+# Invalid option provided:
+mst create feature/test --invalid-option value
+
+# Output:
+error: unknown option '--invalid-option'
+
+# Command exits with error code 1 - no resources created
+```
+
+**Benefits of Option Validation**:
+- **Prevents Unintended Operations**: Commands won't execute with typos in option names
+- **Clean Exit**: Command exits with error code 1 when invalid options are detected
+- **No Resource Creation**: Prevents creation of worktrees, branches, or sessions when command arguments are invalid
+- **Better Developer Experience**: Immediate feedback about command usage errors
+
+**Common Invalid Option Scenarios**:
+- Typos in option names: `--tmux-h-panes` instead of `--tmux-h-panes-count`
+- Using unavailable options for specific commands
+- Mixing incompatible option combinations
 
 ### tmux Multi-Pane Validation and Error Handling
 
