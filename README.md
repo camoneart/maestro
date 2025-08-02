@@ -388,9 +388,34 @@ mst create feature/new-feature --tmux
 | `EADDRINUSE` | MCP server port in use | `mst mcp stop` to kill previous process |
 | `ENOENT`     | Git binary not found   | Check PATH or reinstall Git             |
 
+### ⚠️ CLI Option Validation and Error Handling
+
+Maestro now includes **strict CLI option validation** to prevent execution with invalid options:
+
+**Immediate Exit on Invalid Options**:
+- **Early Detection**: Commands exit immediately when unknown or invalid options are provided
+- **Prevents Execution**: Commands will not proceed with any operations when invalid options are detected
+- **Clear Error Messages**: Specific feedback about which options are invalid
+
+**Example**:
+```bash
+# Invalid option provided:
+mst create feature/test --invalid-option value
+
+# Output:
+error: unknown option '--invalid-option'
+
+# Command exits with error code 1 - no resources created
+```
+
+**Benefits**:
+- **Prevents Unintended Operations**: Commands won't execute with typos in option names
+- **Clean Exit**: Immediate feedback with error code 1
+- **Better Developer Experience**: Immediate feedback about command usage errors
+
 ### ⚠️ tmux Multi-Pane Validation and Error Handling
 
-Maestro now includes **early validation for tmux pane creation** to prevent resource waste and provide better user experience:
+Maestro also includes **early validation for tmux pane creation** to prevent resource waste and provide better user experience:
 
 **Smart Pre-Validation**:
 - **Early Detection**: Validates pane count limits BEFORE creating any resources (worktree, branch, tmux session)

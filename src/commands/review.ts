@@ -271,6 +271,7 @@ export const reviewCommand = new Command('review')
   .option('--comment <comment>', 'コメントを追加')
   .option('--assign <user>', 'レビュアーを追加')
   .option('--auto-flow', '自動レビュー&マージフローを実行')
+  .exitOverride()
   .action(async (prNumber?: string, options: ReviewOptions = {}) => {
     const spinner = ora('PR情報を取得中...').start()
 

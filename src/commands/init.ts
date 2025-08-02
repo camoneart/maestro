@@ -27,6 +27,7 @@ export const initCommand = new Command('init')
   .option('-p, --package-manager <manager>', 'パッケージマネージャーを指定 (pnpm/npm/yarn/none)')
   .option('-t, --template <name>', 'テンプレートを指定')
   .option('-y, --yes', 'プロンプトをスキップしてデフォルト値を使用')
+  .exitOverride()
   .action(async (options: InitOptions) => {
     try {
       console.log(chalk.cyan('🎼 Welcome to Maestro Setup!\n'))

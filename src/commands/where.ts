@@ -11,6 +11,7 @@ export const whereCommand = new Command('where')
   .argument('[branch-name]', 'ブランチ名')
   .option('--fzf', 'fzfで選択')
   .option('--current', '現在のworktreeのパスを表示')
+  .exitOverride()
   .action(async (branchName?: string, options: { fzf?: boolean; current?: boolean } = {}) => {
     try {
       const gitManager = new GitWorktreeManager()

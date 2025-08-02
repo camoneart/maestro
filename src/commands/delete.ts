@@ -441,6 +441,7 @@ export const deleteCommand = new Command('delete')
   .option('--keep-session', 'tmuxセッションを保持')
   .option('--fzf', 'fzfで選択（複数選択可）')
   .option('--current', '現在のworktreeを削除')
+  .exitOverride()
   .action(
     async (
       branchName?: string,

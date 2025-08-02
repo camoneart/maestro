@@ -300,6 +300,7 @@ const FISH_COMPLETION = [
 export const completionCommand = new Command('completion')
   .description('シェル補完スクリプトを生成')
   .argument('[shell]', 'シェルの種類 (bash, zsh, fish)')
+  .exitOverride()
   .action(async (shell?: string) => {
     if (!shell) {
       console.log(chalk.bold('🎼 maestro シェル補完\n'))

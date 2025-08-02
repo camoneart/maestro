@@ -398,6 +398,7 @@ export const syncCommand = new Command('sync')
   .option('-i, --interactive', 'インタラクティブモードで同期するファイルを選択')
   .option('-p, --preset <name>', '同期プリセットを使用（env, config, all）')
   .option('-c, --concurrency <number>', '並列実行数 (デフォルト: 5)', parseInt)
+  .exitOverride()
   .action(async (branchName?: string, options: SyncOptions = {}) => {
     await executeSyncCommand(branchName, options)
   })

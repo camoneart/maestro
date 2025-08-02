@@ -26,6 +26,7 @@ export const shellCommand = new Command('shell')
   .option('-t, --tmux', '既存tmuxセッションにアタッチ（存在しなければ作成）')
   .option('--tmux-vertical, --tmux-v', 'tmuxの縦分割ペインでシェルを開始')
   .option('--tmux-horizontal, --tmux-h', 'tmuxの横分割ペインでシェルを開始')
+  .exitOverride()
   .action(async (branchName?: string, options: ShellOptions = {}) => {
     try {
       const gitManager = new GitWorktreeManager()

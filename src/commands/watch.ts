@@ -126,6 +126,7 @@ export const watchCommand = new Command('watch')
   .option('-a, --all', '全てのworktreeに同期')
   .option('-d, --dry', 'ドライラン（実際の同期は行わない）')
   .option('--auto', '確認なしで自動同期')
+  .exitOverride()
   .action(async (options: WatchOptions) => {
     const spinner = ora('worktreeを確認中...').start()
 

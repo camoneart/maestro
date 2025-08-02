@@ -150,6 +150,17 @@ When executing commands, these environment variables are automatically set:
 
 ## Error Handling
 
+### CLI Option Validation
+
+The exec command implements **strict option validation** to prevent execution with invalid options:
+
+**Immediate Exit on Invalid Options**:
+- **Early Detection**: Command exits immediately when unknown or invalid options are provided
+- **Prevents Execution**: Command will not proceed with command execution when invalid options are detected
+- **Clear Error Messages**: Specific feedback about which options are invalid
+
+### Common Error Handling
+
 - If the specified branch doesn't exist, suggestions for similar branches are shown
 - Exit codes from executed commands are preserved
 - Use `--all` carefully as it executes in all worktrees sequentially

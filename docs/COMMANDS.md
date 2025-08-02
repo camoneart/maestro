@@ -972,8 +972,40 @@ maestro properly handles the following errors:
 - Network errors
 - Permission errors
 - Configuration errors
+- **CLI option validation errors** (unknown or invalid options)
 - **tmux pane creation errors** (enhanced in latest version)
 - **Automatic rollback protection** (prevents orphaned worktrees)
+
+### CLI Option Validation
+
+All maestro commands now implement **strict option validation** to prevent execution with invalid options:
+
+**Immediate Exit on Invalid Options**:
+- **Early Detection**: Commands exit immediately when unknown or invalid options are provided
+- **Prevents Execution**: Commands will not proceed with creation or modification operations when invalid options are detected
+- **Clear Error Messages**: Specific feedback about which options are invalid and what options are available
+
+**Example Error Behavior**:
+```bash
+# Invalid option provided:
+mst create feature/test --invalid-option value
+
+# Output:
+error: unknown option '--invalid-option'
+
+# Command exits with error code 1 - no resources created
+```
+
+**Benefits of Option Validation**:
+- **Prevents Unintended Operations**: Commands won't execute with typos in option names
+- **Clean Exit**: Command exits with error code 1 when invalid options are detected
+- **No Resource Creation**: Prevents creation of worktrees, branches, or sessions when command arguments are invalid
+- **Better Developer Experience**: Immediate feedback about command usage errors
+
+**Common Invalid Option Scenarios**:
+- Typos in option names: `--tmux-h-panes` instead of `--tmux-h-panes-count`
+- Using unavailable options for specific commands
+- Mixing incompatible option combinations
 
 ### tmux Multi-Pane Validation and Error Handling
 
