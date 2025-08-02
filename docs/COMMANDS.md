@@ -435,8 +435,14 @@ mst gh list
 mst github checkout 123
 mst gh 123  # shorthand
 
-# Create from Issue #456
+# Create from Issue #456 (shows Issue list directly)
 mst github issue 456
+
+# Create from PR (shows PR list directly)  
+mst github pr 123
+
+# Interactive selection (shows type selection prompt)
+mst github
 
 # Create and open in tmux
 mst github 123 --tmux
