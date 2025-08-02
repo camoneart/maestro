@@ -508,9 +508,11 @@ async function createWorktreeFromGithub(
     throw error
   }
 
+  const configManager = new ConfigManager()
+  const fullConfig = configManager.getAll()
   spinner.succeed(
     `演奏者 '${chalk.cyan(branchName)}' を招集しました！\n` +
-      `  📁 ${chalk.gray(formatPath(worktreePath, config))}\n` +
+      `  📁 ${chalk.gray(formatPath(worktreePath, fullConfig))}\n` +
       `  🔗 ${chalk.blue(`${type === 'pr' ? 'PR' : 'Issue'} #${number}`)}`
   )
 
@@ -633,8 +635,10 @@ async function processWorktreeCreation(
       process.exit(1)
     }
 
+    const configManager = new ConfigManager()
+    const fullConfig = configManager.getAll()
     console.log(chalk.green(`\n🎼 GitHub統合による演奏者招集完了！`))
-    console.log(chalk.gray(`📁 ${formatPath(worktreePath, config)}\n`))
+    console.log(chalk.gray(`📁 ${formatPath(worktreePath, fullConfig)}\n`))
 
     try {
       await createTmuxSession({
@@ -665,8 +669,10 @@ async function processWorktreeCreation(
     await openInEditor(worktreePath, config, true)
   }
 
+  const configManager = new ConfigManager()
+  const fullConfig = configManager.getAll()
   console.log(chalk.green('\n✨ GitHub統合による演奏者の招集が完了しました！'))
-  console.log(chalk.gray(`\ncd ${formatPath(worktreePath, config)} で移動できます`))
+  console.log(chalk.gray(`\ncd ${formatPath(worktreePath, fullConfig)} で移動できます`))
 }
 
 // メイン処理
