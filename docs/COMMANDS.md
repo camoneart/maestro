@@ -808,25 +808,37 @@ mst history --limit 10
 GitHub Issue integration.
 
 ```bash
-mst issue <command> [options]
+mst issue [issue-number] [options]
 ```
 
-#### Subcommands
-- `create` - Create issue
-- `list` - List issues
-- `view <number>` - View issue
-- `close <number>` - Close issue
+#### Options
+| Option | Short | Description | Default |
+|--------|-------|-------------|---------|
+| `--list` | `-l` | List open issues | `false` |
+| `--create` | `-c` | Create new issue | `false` |
+| `--close` | | Close issue | `false` |
+| `--web` | `-w` | Open issue in web browser | `false` |
+| `--assign <user>` | `-a` | Assign issue to user | none |
+| `--label <labels>` | | Add labels (comma-separated) | none |
+| `--milestone <milestone>` | | Set milestone | none |
 
 #### Examples
 ```bash
-# Create issue
-mst issue create
-
-# List issues
+# List issues (both syntaxes supported)
+mst issue --list
 mst issue list
 
+# Create issue
+mst issue --create
+
 # View Issue #123
-mst issue view 123
+mst issue 123
+
+# Close issue
+mst issue --close 123
+
+# Open issue in browser
+mst issue 123 --web
 ```
 
 ### 🔸 review

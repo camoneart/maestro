@@ -5,8 +5,13 @@ Command to manage GitHub Issues directly from maestro. Provides seamless integra
 ## Overview
 
 ```bash
-mst issue [options]
+mst issue [issue-number] [options]
+mst issue [command] [options]
 ```
+
+**Arguments:**
+- `issue-number` - Issue number to view or interact with
+- `command` - Special commands like `list` (equivalent to `--list`)
 
 ## Usage Examples
 
@@ -15,6 +20,7 @@ mst issue [options]
 ```bash
 # List open issues
 mst issue --list
+mst issue list     # Alternative syntax
 
 # Create new issue
 mst issue --create
@@ -43,13 +49,15 @@ mst issue
 
 | Option | Short | Description | Default |
 |--------|-------|-------------|---------|
-| `--list` | | List open issues | `false` |
-| `--create` | | Create new issue | `false` |
+| `--list` | `-l` | List open issues | `false` |
+| `--create` | `-c` | Create new issue | `false` |
 | `--close` | | Close issue by number | none |
-| `--web` | | Open issue in web browser | `false` |
-| `--assign <user>` | | Assign issue to user | none |
+| `--web` | `-w` | Open issue in web browser | `false` |
+| `--assign <user>` | `-a` | Assign issue to user | none |
 | `--label <labels>` | | Add labels (comma-separated) | none |
 | `--milestone <name>` | | Set milestone | none |
+
+**Note:** You can use `mst issue list` as an alternative to `mst issue --list`.
 
 ## Issue Management
 
@@ -58,6 +66,7 @@ mst issue
 ```bash
 # List all open issues
 mst issue --list
+mst issue list     # Alternative syntax
 
 # Filter by labels
 mst issue --list --label bug
@@ -93,6 +102,7 @@ mst issue --close 123 --message "Fixed in latest commit"
 ```bash
 # 1. List issues to work on
 mst issue --list
+# or: mst issue list
 
 # 2. Create worktree from issue
 mst create issue-123
