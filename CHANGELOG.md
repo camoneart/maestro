@@ -1,5 +1,23 @@
 # Changelog
 
+## 3.5.16
+
+### Patch Changes
+
+- fix: ensure ConfigManager loads project config on new instances
+
+  Fixed issue where ConfigManager new instances weren't loading project configuration files (`.maestro.local.json` and `.maestro.json`). This ensures user settings like `ui.pathDisplay` are properly applied across all commands.
+
+  Affected commands:
+  - `mst github` - Path display now respects user settings
+  - `mst create` - Configuration properly loaded
+  - `mst exec` - Path display fixed
+  - `mst shell` - Path display fixed
+  - `mst review` - Path display fixed
+  - `mst health` - Partial fix for async functions
+
+  Fixes #203
+
 ## 3.5.15
 
 ### Patch Changes
