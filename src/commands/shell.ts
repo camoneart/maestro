@@ -128,6 +128,7 @@ export const shellCommand = new Command('shell')
       }
 
       const configManager = new ConfigManager()
+      await configManager.loadProjectConfig()
       const config = configManager.getAll()
       console.log(chalk.green(`\n🎼 演奏者 '${chalk.cyan(branchName)}' に入ります...`))
       console.log(chalk.gray(`📁 ${formatPath(targetWorktree.path, config)}\n`))

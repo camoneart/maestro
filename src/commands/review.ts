@@ -58,6 +58,7 @@ async function checkoutPR(pr: PullRequest, gitManager: GitWorktreeManager): Prom
     if (existingWorktree) {
       checkoutSpinner.warn(`演奏者 '${prBranchName}' は既に存在します`)
       const configManager = new ConfigManager()
+      await configManager.loadProjectConfig()
       const config = configManager.getAll()
       console.log(chalk.gray(`📁 ${formatPath(existingWorktree.path, config)}`))
     } else {
@@ -72,6 +73,7 @@ async function checkoutPR(pr: PullRequest, gitManager: GitWorktreeManager): Prom
 
       checkoutSpinner.succeed(`PR #${pr.number} を演奏者 '${currentBranch}' として招集しました`)
       const configManager = new ConfigManager()
+      await configManager.loadProjectConfig()
       const config = configManager.getAll()
       console.log(chalk.gray(`📁 ${formatPath(worktreePath, config)}`))
       console.log(chalk.green(`\ncd ${formatPath(worktreePath, config)} で移動できます`))
