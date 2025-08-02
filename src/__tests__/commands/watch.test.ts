@@ -128,6 +128,129 @@ describe('watch command', () => {
     vi.restoreAllMocks()
   })
 
+  describe('Path validation tests - Critical Bug #189', () => {
+    it('should prevent directory traversal attacks with ../ patterns', async () => {
+      // slash付きブランチ名でのworktree構成をモック
+      mockGitManager.listWorktrees.mockResolvedValue([
+        createMockWorktree({
+          path: '/repo/main',
+          branch: 'refs/heads/main',
+        }),
+        createMockWorktree({
+          path: '/repo/.git/orchestra-members/feature/awesome-feature',
+          branch: 'refs/heads/feature/awesome-feature',
+        }),
+      ])
+
+      // feature/awesome-featureブランチからの実行をシミュレート
+      vi.spyOn(process, 'cwd').mockReturnValue(
+        '/repo/.git/orchestra-members/feature/awesome-feature'
+      )
+
+      // 自動同期モードで実行
+      const watchPromise = watchCommand.parseAsync(['node', 'test', '--all', '--auto'])
+      await new Promise(resolve => setTimeout(resolve, 100))
+
+      // 危険なパスを含むファイル変更をトリガー
+      const dangerousPath = '../../../etc/passwd'
+      mockWatcher.emit('add', dangerousPath)
+
+      // バッチ処理のタイムアウトを待つ
+      await new Promise(resolve => setTimeout(resolve, 1500))
+
+      // パスバリデーションが動作して、危険なパスでfs.mkdirが呼ばれないことを確認
+      expect(vi.mocked(fs.mkdir)).not.toHaveBeenCalled()
+      expect(vi.mocked(fs.copyFile)).not.toHaveBeenCalled()
+
+      mockWatcher.emit('error', new Error('Test complete'))
+    })
+
+    it('should detect and prevent infinite directory creation loops', async () => {
+      // ループを引き起こす可能性のあるパス構成
+      const loopPath = 'subdir/../../subdir/../../subdir'
+
+      const watchPromise = watchCommand.parseAsync(['node', 'test', '--all', '--auto'])
+      await new Promise(resolve => setTimeout(resolve, 100))
+
+      mockWatcher.emit('add', loopPath)
+      await new Promise(resolve => setTimeout(resolve, 1500))
+
+      // ループ検出が動作して、ファイル操作が実行されないことを確認
+      expect(vi.mocked(fs.mkdir)).not.toHaveBeenCalled()
+      expect(vi.mocked(fs.copyFile)).not.toHaveBeenCalled()
+
+      mockWatcher.emit('error', new Error('Test complete'))
+    })
+
+    it('should properly handle slash-containing branch names', async () => {
+      // slash付きブランチでの正常なファイル同期をテスト
+      mockGitManager.listWorktrees.mockResolvedValue([
+        createMockWorktree({
+          path: '/repo/.git/orchestra-members/feature-test',
+          branch: 'refs/heads/feature/test',
+        }),
+        createMockWorktree({
+          path: '/repo/.git/orchestra-members/main',
+          branch: 'refs/heads/main',
+        }),
+      ])
+
+      vi.spyOn(process, 'cwd').mockReturnValue('/repo/.git/orchestra-members/feature-test')
+
+      const watchPromise = watchCommand.parseAsync(['node', 'test', '--all', '--auto'])
+      await new Promise(resolve => setTimeout(resolve, 100))
+
+      // 正常なファイルパス
+      mockWatcher.emit('add', 'src/index.ts')
+      await new Promise(resolve => setTimeout(resolve, 1500))
+
+      // 正常なパスでのみfs.mkdirが呼ばれることを確認
+      expect(vi.mocked(fs.mkdir)).toHaveBeenCalledWith(
+        expect.stringMatching(/^\/repo\/.git\/orchestra-members\/main\/src$/),
+        { recursive: true }
+      )
+
+      mockWatcher.emit('error', new Error('Test complete'))
+    })
+
+    it('should validate target paths stay within worktree boundaries', async () => {
+      const watchPromise = watchCommand.parseAsync(['node', 'test', '--all', '--auto'])
+      await new Promise(resolve => setTimeout(resolve, 100))
+
+      // worktree境界を超えるパス
+      const outsidePath = '../../../../outside/worktree/file.txt'
+      mockWatcher.emit('add', outsidePath)
+      await new Promise(resolve => setTimeout(resolve, 1500))
+
+      // worktree外へのファイル作成が阻止されることを確認
+      expect(vi.mocked(fs.mkdir)).not.toHaveBeenCalled()
+      expect(vi.mocked(fs.copyFile)).not.toHaveBeenCalled()
+
+      mockWatcher.emit('error', new Error('Test complete'))
+    })
+
+    it('should normalize paths before mkdir to prevent loops', async () => {
+      // path.relativeが危険なパスを返す異常なケース
+      // safeRelativePathから呼ばれるpath.relativeをモック
+      vi.spyOn(path, 'relative').mockReturnValue('../feature/awesome-feature/src/index.ts')
+
+      const watchPromise = watchCommand.parseAsync(['node', 'test', '--all', '--auto'])
+      await new Promise(resolve => setTimeout(resolve, 100))
+
+      mockWatcher.emit('add', 'src/index.ts')
+      await new Promise(resolve => setTimeout(resolve, 1500))
+
+      // 危険な相対パスがフィルタリングされることを確認
+      expect(vi.mocked(fs.mkdir)).not.toHaveBeenCalled()
+      expect(vi.mocked(fs.copyFile)).not.toHaveBeenCalled()
+
+      // path.relativeのモックをリストア
+      vi.mocked(path.relative).mockRestore()
+
+      mockWatcher.emit('error', new Error('Test complete'))
+    })
+  })
+
   describe('基本的な動作', () => {
     it('現在のworktreeの変更を監視する', async () => {
       // --allオプションを追加して確認プロンプトをスキップ

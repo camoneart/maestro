@@ -348,6 +348,105 @@ if [ -s sync-report.txt ]; then
 fi
 ```
 
+## Security Features
+
+### Path Validation and Protection
+
+The watch command includes comprehensive security measures to prevent malicious file operations:
+
+#### Directory Traversal Protection
+
+```bash
+# Automatically prevents dangerous path patterns
+# These are blocked automatically:
+- "../sensitive-file.txt"
+- "../../etc/passwd"
+- "worktree/../../../root/.ssh/"
+```
+
+**Protection Features:**
+- **Path Pattern Detection**: Automatically detects and blocks `../` and `..` patterns
+- **Boundary Enforcement**: Ensures all file operations stay within worktree boundaries
+- **Safe Path Resolution**: Uses absolute path resolution to prevent traversal attacks
+- **Real-time Validation**: Validates every file operation before execution
+
+#### Loop Detection and Prevention
+
+```bash
+# Prevents infinite directory creation loops
+# Automatically detects patterns like:
+- feature/api/feature/api/feature/api/...
+- Deep nesting beyond safe limits (max 10 levels)
+- Repeated directory creation attempts (max 3 per path)
+```
+
+**Loop Protection Features:**
+- **Depth Limiting**: Maximum directory depth of 10 levels
+- **Creation Tracking**: Monitors directory creation patterns
+- **Automatic Termination**: Stops operations when loops are detected
+- **Resource Protection**: Prevents filesystem exhaustion from infinite loops
+
+#### Safe Path Computation
+
+```bash
+# All relative paths are computed safely
+# Dangerous paths are rejected with warnings:
+🚨 危険なパスをスキップ: ../../../sensitive-data
+🚨 ディレクトリトラバーサル攻撃の可能性があるパスを検出しました
+🚨 ディレクトリ作成ループを検出しました
+```
+
+**Safety Measures:**
+- **Relative Path Validation**: All relative paths are checked for safety
+- **Worktree Boundary Checks**: Ensures operations stay within designated worktree directories
+- **Error Reporting**: Clear security warnings with actionable information
+- **Graceful Degradation**: Skips dangerous operations while continuing safe ones
+
+### Branch Name Security
+
+The security improvements specifically address vulnerabilities from branch names containing slashes:
+
+```bash
+# Branch names that previously caused issues:
+feature/api/auth        # Could create: ../../feature/api/auth
+hotfix/security/patch   # Could create: ../../../hotfix/security/patch
+
+# Now safely handled with path validation:
+✓ feature-api-auth      # Normalized and validated
+✓ hotfix-security-patch # Properly contained within worktree
+```
+
+### Security Configuration
+
+Configure security settings in `.maestro.json`:
+
+```json
+{
+  "watch": {
+    "security": {
+      "maxDepth": 10,              // Maximum directory depth (default: 10)
+      "maxSamePathCount": 3,       // Maximum same path creation attempts (default: 3)
+      "enablePathValidation": true, // Enable path validation (default: true)
+      "strictBoundaryCheck": true   // Strict worktree boundary enforcement (default: true)
+    }
+  }
+}
+```
+
+### Use Case: Secure Multi-Worktree Development
+
+```bash
+# Safe development workflow with security protection
+mst watch --patterns "src/**/*.ts" --auto
+
+# Security features automatically:
+# 1. Validate all file paths before sync
+# 2. Prevent directory traversal attempts
+# 3. Detect and prevent infinite directory loops
+# 4. Ensure all operations stay within worktree boundaries
+# 5. Provide clear security warnings for blocked operations
+```
+
 ## Related Commands
 
 - [`mst list`](./list.md) - View worktrees for synchronization

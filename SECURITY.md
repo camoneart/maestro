@@ -46,15 +46,41 @@ Please include the following information in your report:
 3. A new release will be prepared with the security fix
 4. The vulnerability will be publicly disclosed after the fix is available
 
+## Built-in Security Features
+
+Maestro includes several built-in security measures to protect against common vulnerabilities:
+
+### Path Validation and Directory Traversal Protection
+
+- **Automatic Path Validation**: All file operations are validated to prevent directory traversal attacks
+- **Boundary Enforcement**: File operations are restricted to stay within designated worktree directories
+- **Pattern Detection**: Automatically detects and blocks dangerous path patterns like `../` and `..`
+- **Safe Path Resolution**: Uses absolute path resolution to prevent traversal attacks
+
+### Loop Detection and Prevention
+
+- **Infinite Loop Protection**: Detects and prevents infinite directory creation loops
+- **Depth Limiting**: Enforces maximum directory depth limits (configurable, default: 10 levels)
+- **Creation Tracking**: Monitors directory creation patterns to detect suspicious behavior
+- **Resource Protection**: Prevents filesystem exhaustion from malicious or accidental loops
+
+### Branch Name Security
+
+- **Slash-containing Branch Names**: Safely handles branch names with slashes that could cause path traversal
+- **Path Normalization**: Automatically normalizes dangerous branch names to safe equivalents
+- **Boundary Validation**: Ensures branch-based directory operations stay within worktree boundaries
+
 ## Security Best Practices
 
 When using maestro, please follow these security best practices:
 
-1. **Keep the tool updated**: Always use the latest version
+1. **Keep the tool updated**: Always use the latest version to get security patches
 2. **Secure your Git credentials**: Use SSH keys or secure credential managers
 3. **Review worktree permissions**: Ensure proper file permissions on created worktrees
 4. **Audit third-party integrations**: Be cautious when integrating with external services
 5. **Use secure communication**: Always use HTTPS for Git operations when possible
+6. **Monitor file sync operations**: Review file synchronization patterns, especially with `--auto` mode
+7. **Validate branch names**: Be cautious with branch names containing special characters or unusual patterns
 
 ## Scope
 
