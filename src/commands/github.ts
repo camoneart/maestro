@@ -662,12 +662,10 @@ async function executeGithubCommand(
       }
       throw error
     }
-  } else {
+  } else if (finalType === 'checkout' || !finalType) {
     // 番号が指定されている場合、まず存在チェックを行う
     // typeの自動判定（明示的にpr/issueが指定された場合はスキップ）
-    if (finalType === 'checkout' || !finalType) {
-      finalType = await detectType(finalNumber)
-    }
+    finalType = await detectType(finalNumber)
   }
 
   await processWorktreeCreation(
