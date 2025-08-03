@@ -1,7 +1,7 @@
 {
   "name": "@camoneart/maestro",
   "version": "3.5.16",
-  "description": "Git worktreeを「オーケストラ」のように指揮し、Claude Codeとの並列開発を加速させるCLIツール",
+  "description": "A CLI tool that conducts Git worktrees like an orchestra and accelerates parallel development with Claude Code",
   "type": "module",
   "bin": {
     "maestro": "./dist/cli.js",

@@ -418,6 +418,41 @@ error: unknown option '--invalid-option'
 - **Clean Exit**: Immediate feedback with error code 1
 - **Better Developer Experience**: Immediate feedback about command usage errors
 
+### ⚠️ Directory Existence Checking and Interactive Handling
+
+Maestro includes **intelligent directory existence checking** with interactive resolution options when creating worktrees:
+
+**Smart Directory Management**:
+- **Early Detection**: Checks if target directory already exists before worktree creation
+- **Interactive Resolution**: Presents user with multiple resolution options when conflicts occur
+- **Clean Handling**: Ensures consistent behavior across create, github, and review commands
+- **Safe Operations**: All operations include confirmation prompts and clear feedback
+
+**Available Resolution Options**:
+When a directory already exists, Maestro offers these interactive choices:
+- **Delete and Recreate**: Removes existing directory and creates fresh worktree
+- **Use Alternative Name**: Automatically generates unique directory name (e.g., `branch-name-2`)
+- **Cancel Operation**: Safely exits without making any changes
+
+**Enhanced User Experience**:
+```bash
+# Example interaction when directory exists:
+mst create feature/new-feature
+
+⚠️  Directory '../feature/new-feature' already exists
+
+? How would you like to proceed?
+❯ Delete existing directory and create new
+  Use alternative name (feature/new-feature-2)
+  Cancel
+```
+
+**Benefits**:
+- **Prevents Conflicts**: No more worktree creation failures due to existing directories
+- **User Control**: Clear choices for handling existing directories
+- **Automatic Alternatives**: Smart generation of alternative names when needed
+- **Safe Cancellation**: Easy exit option when conflicts can't be resolved
+
 ### ⚠️ tmux Multi-Pane Validation and Error Handling
 
 Maestro also includes **early validation for tmux pane creation** to prevent resource waste and provide better user experience:

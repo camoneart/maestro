@@ -91,6 +91,51 @@ Retrieved information:
 - Milestone
 - Author information
 
+## Directory Existence Handling
+
+The create command intelligently handles cases where the target directory already exists:
+
+### Automatic Detection
+
+Before creating a worktree, Maestro checks if the target directory exists and provides interactive resolution options:
+
+```bash
+# When directory already exists
+mst create feature/auth
+
+⚠️  Directory '../feature/auth' already exists
+
+? How would you like to proceed?
+❯ Delete existing directory and create new
+  Use alternative name (feature/auth-2)
+  Cancel
+```
+
+### Resolution Options
+
+1. **Delete and Recreate**
+   - Removes the existing directory completely
+   - Creates a fresh worktree in its place
+   - Useful when you want to start over
+
+2. **Use Alternative Name**
+   - Automatically generates a unique name (e.g., `feature/auth-2`)
+   - Creates the worktree with the new name
+   - Preserves the existing directory
+
+3. **Cancel**
+   - Exits without making any changes
+   - Allows you to manually handle the situation
+
+### Common Scenarios
+
+This feature is particularly useful when:
+
+- A previous `mst delete` didn't complete successfully
+- You manually deleted a worktree directory
+- Other tools created directories with the same name
+- You want to recreate a worktree from scratch
+
 
 
 ## tmux Integration
