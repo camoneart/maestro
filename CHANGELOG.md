@@ -1,5 +1,18 @@
 # Changelog
 
+## 3.5.17
+
+### Patch Changes
+
+- fix: improve error handling for existing directories during worktree creation
+  - Added intelligent directory existence checking before creating worktrees
+  - Implemented interactive resolution options when directory conflicts are detected
+  - Users can now choose to delete existing directory, use an alternative name, or cancel
+  - Prevents Git errors and improves user experience when creating worktrees
+  - Applied to `mst create`, `mst github`, and `mst review` commands
+
+  Fixes #205
+
 ## 3.5.16
 
 ### Patch Changes
