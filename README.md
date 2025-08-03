@@ -7,7 +7,7 @@
 **English** | **[Japanese](/README.ja.md)**
 
 ![maestro](public/image/logo/maestro-logo.png)
-**A CLI tool that “conducts” Git worktrees like an orchestra and turbo-charges parallel development with Claude Code.**
+**A CLI tool that conducts Git worktrees like an orchestra and accelerates parallel development with Claude Code.**
 
 <br />
 
