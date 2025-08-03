@@ -131,6 +131,41 @@ mst create feature/mobile --tmux-v-panes 2 --tmux-layout main-vertical
 mst create feature/api --copy-file .env --copy-file .env.local
 ```
 
+#### Directory Existence Checking and Interactive Resolution
+
+The `create` command includes **intelligent directory existence checking** with interactive resolution options:
+
+**How It Works:**
+- **Pre-Creation Check**: Validates if target directory already exists before creating worktree
+- **Interactive Options**: Presents user with multiple choices when conflicts are detected
+- **Smart Alternatives**: Automatically generates unique names when requested
+- **Safe Operations**: All operations include confirmation and clear feedback
+
+**Resolution Options:**
+When a directory already exists, the following options are presented:
+- **Delete and Recreate**: Removes existing directory and creates fresh worktree
+- **Use Alternative Name**: Generates unique name (e.g., `feature-name-2`)
+- **Cancel Operation**: Exits without making any changes
+
+**Example Interaction:**
+```bash
+# Directory exists scenario:
+mst create feature/auth
+
+⚠️  Directory '../feature/auth' already exists
+
+? How would you like to proceed?
+❯ Delete existing directory and create new
+  Use alternative name (feature/auth-2)
+  Cancel
+```
+
+**Benefits:**
+- **Prevents Failures**: No more Git errors due to existing directories
+- **User Control**: Clear choices for conflict resolution
+- **Automatic Recovery**: Smart generation of alternative names
+- **Clean Exit**: Easy cancellation when needed
+
 #### Automatic Rollback Protection
 
 The `create` command includes **intelligent automatic rollback functionality** that prevents orphaned worktrees when post-creation tasks fail:

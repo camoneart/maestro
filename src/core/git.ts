@@ -4,6 +4,7 @@ import { ConfigManager } from './config.js'
 import path from 'path'
 import fs from 'fs/promises'
 import chalk from 'chalk'
+import inquirer from 'inquirer'
 
 export class GitWorktreeManager {
   private git: SimpleGit
@@ -14,7 +15,7 @@ export class GitWorktreeManager {
     this.configManager = new ConfigManager()
   }
 
-  async createWorktree(branchName: string, baseBranch?: string): Promise<string> {
+  async createWorktree(branchName: string, baseBranch?: string, skipDirCheck?: boolean): Promise<string> {
     // ブランチ名の衝突をチェック
     await this.checkBranchNameCollision(branchName)
 
@@ -26,6 +27,29 @@ export class GitWorktreeManager {
     // リポジトリルートを取得して絶対パスを生成
     const repoRoot = await this.getRepositoryRoot()
     const worktreePath = path.join(repoRoot, '..', `${directoryPrefix}${branchName}`)
+
+    // ディレクトリの存在をチェック（スキップオプションが false の場合のみ）
+    if (!skipDirCheck) {
+      const dirExists = await this.checkDirectoryExists(worktreePath)
+      if (dirExists) {
+        const action = await this.handleExistingDirectory(worktreePath, branchName)
+        
+        if (action === 'cancel') {
+          throw new Error('ワークツリーの作成がキャンセルされました')
+        } else if (action === 'rename') {
+          // 別名を生成して再帰的に呼び出し
+          const branches = await this.getAllBranches()
+          const allBranches = [...branches.local, ...branches.remote.map(r => r.replace(/^[^/]+\//, ''))]
+          const alternativeName = this.generateAlternativeBranchName(branchName, allBranches)
+          console.log(chalk.yellow(`\n新しいブランチ名: ${alternativeName}`))
+          return this.createWorktree(alternativeName, baseBranch, true)
+        } else if (action === 'delete') {
+          // ディレクトリを削除
+          await fs.rm(worktreePath, { recursive: true, force: true })
+          console.log(chalk.gray(`🗑️  既存ディレクトリを削除しました: ${path.basename(worktreePath)}`))
+        }
+      }
+    }
 
     // ベースブランチが指定されていない場合は現在のブランチを使用
     if (!baseBranch) {
@@ -39,7 +63,7 @@ export class GitWorktreeManager {
     return path.resolve(worktreePath)
   }
 
-  async attachWorktree(existingBranch: string): Promise<string> {
+  async attachWorktree(existingBranch: string, skipDirCheck?: boolean): Promise<string> {
     // 設定を読み込み
     await this.configManager.loadProjectConfig()
     const worktreeConfig = this.configManager.get('worktrees')
@@ -50,6 +74,33 @@ export class GitWorktreeManager {
     // ワークツリーのパスを生成（ブランチ名からスラッシュを置換）
     const safeBranchName = existingBranch.replace(/\//g, '-')
     const worktreePath = path.join(repoRoot, '..', `${directoryPrefix}${safeBranchName}`)
+
+    // ディレクトリの存在をチェック（スキップオプションが false の場合のみ）
+    if (!skipDirCheck) {
+      const dirExists = await this.checkDirectoryExists(worktreePath)
+      if (dirExists) {
+        const action = await this.handleExistingDirectory(worktreePath, safeBranchName)
+        
+        if (action === 'cancel') {
+          throw new Error('ワークツリーの作成がキャンセルされました')
+        } else if (action === 'rename') {
+          // 別名を生成して再帰的に呼び出し
+          const branches = await this.getAllBranches()
+          const allBranches = [...branches.local, ...branches.remote.map(r => r.replace(/^[^/]+\//, ''))]
+          const alternativeName = this.generateAlternativeBranchName(safeBranchName, allBranches)
+          const newWorktreePath = path.join(repoRoot, '..', `${directoryPrefix}${alternativeName}`)
+          console.log(chalk.yellow(`\n新しいディレクトリ名: ${alternativeName}`))
+          
+          // 別名のディレクトリでワークツリーを作成
+          await this.git.raw(['worktree', 'add', newWorktreePath, existingBranch])
+          return path.resolve(newWorktreePath)
+        } else if (action === 'delete') {
+          // ディレクトリを削除
+          await fs.rm(worktreePath, { recursive: true, force: true })
+          console.log(chalk.gray(`🗑️  既存ディレクトリを削除しました: ${path.basename(worktreePath)}`))
+        }
+      }
+    }
 
     // 既存のブランチでワークツリーを作成
     await this.git.raw(['worktree', 'add', worktreePath, existingBranch])
@@ -281,5 +332,37 @@ export class GitWorktreeManager {
         break // Stop on error
       }
     }
+  }
+
+  private async checkDirectoryExists(dirPath: string): Promise<boolean> {
+    try {
+      const stats = await fs.stat(dirPath)
+      return stats.isDirectory()
+    } catch {
+      return false
+    }
+  }
+
+  private async handleExistingDirectory(dirPath: string, branchName: string): Promise<'delete' | 'rename' | 'cancel'> {
+    const repoRoot = await this.getRepositoryRoot()
+    const relativePath = path.relative(repoRoot, dirPath)
+    console.log(chalk.yellow(`\n⚠️  ディレクトリ '${relativePath}' は既に存在します`))
+    
+    const choices = [
+      { name: '既存ディレクトリを削除して新規作成', value: 'delete' },
+      { name: `別の名前を使用（${branchName}-2など）`, value: 'rename' },
+      { name: 'キャンセル', value: 'cancel' }
+    ]
+
+    const answer = await inquirer.prompt([
+      {
+        type: 'list',
+        name: 'action',
+        message: 'どのように処理しますか？',
+        choices
+      }
+    ])
+
+    return answer.action
   }
 }
