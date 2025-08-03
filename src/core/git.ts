@@ -15,7 +15,11 @@ export class GitWorktreeManager {
     this.configManager = new ConfigManager()
   }
 
-  async createWorktree(branchName: string, baseBranch?: string, skipDirCheck?: boolean): Promise<string> {
+  async createWorktree(
+    branchName: string,
+    baseBranch?: string,
+    skipDirCheck?: boolean
+  ): Promise<string> {
     // ブランチ名の衝突をチェック
     await this.checkBranchNameCollision(branchName)
 
@@ -33,20 +37,25 @@ export class GitWorktreeManager {
       const dirExists = await this.checkDirectoryExists(worktreePath)
       if (dirExists) {
         const action = await this.handleExistingDirectory(worktreePath, branchName)
-        
+
         if (action === 'cancel') {
           throw new Error('ワークツリーの作成がキャンセルされました')
         } else if (action === 'rename') {
           // 別名を生成して再帰的に呼び出し
           const branches = await this.getAllBranches()
-          const allBranches = [...branches.local, ...branches.remote.map(r => r.replace(/^[^/]+\//, ''))]
+          const allBranches = [
+            ...branches.local,
+            ...branches.remote.map(r => r.replace(/^[^/]+\//, '')),
+          ]
           const alternativeName = this.generateAlternativeBranchName(branchName, allBranches)
           console.log(chalk.yellow(`\n新しいブランチ名: ${alternativeName}`))
           return this.createWorktree(alternativeName, baseBranch, true)
         } else if (action === 'delete') {
           // ディレクトリを削除
           await fs.rm(worktreePath, { recursive: true, force: true })
-          console.log(chalk.gray(`🗑️  既存ディレクトリを削除しました: ${path.basename(worktreePath)}`))
+          console.log(
+            chalk.gray(`🗑️  既存ディレクトリを削除しました: ${path.basename(worktreePath)}`)
+          )
         }
       }
     }
@@ -80,24 +89,29 @@ export class GitWorktreeManager {
       const dirExists = await this.checkDirectoryExists(worktreePath)
       if (dirExists) {
         const action = await this.handleExistingDirectory(worktreePath, safeBranchName)
-        
+
         if (action === 'cancel') {
           throw new Error('ワークツリーの作成がキャンセルされました')
         } else if (action === 'rename') {
           // 別名を生成して再帰的に呼び出し
           const branches = await this.getAllBranches()
-          const allBranches = [...branches.local, ...branches.remote.map(r => r.replace(/^[^/]+\//, ''))]
+          const allBranches = [
+            ...branches.local,
+            ...branches.remote.map(r => r.replace(/^[^/]+\//, '')),
+          ]
           const alternativeName = this.generateAlternativeBranchName(safeBranchName, allBranches)
           const newWorktreePath = path.join(repoRoot, '..', `${directoryPrefix}${alternativeName}`)
           console.log(chalk.yellow(`\n新しいディレクトリ名: ${alternativeName}`))
-          
+
           // 別名のディレクトリでワークツリーを作成
           await this.git.raw(['worktree', 'add', newWorktreePath, existingBranch])
           return path.resolve(newWorktreePath)
         } else if (action === 'delete') {
           // ディレクトリを削除
           await fs.rm(worktreePath, { recursive: true, force: true })
-          console.log(chalk.gray(`🗑️  既存ディレクトリを削除しました: ${path.basename(worktreePath)}`))
+          console.log(
+            chalk.gray(`🗑️  既存ディレクトリを削除しました: ${path.basename(worktreePath)}`)
+          )
         }
       }
     }
@@ -343,15 +357,18 @@ export class GitWorktreeManager {
     }
   }
 
-  private async handleExistingDirectory(dirPath: string, branchName: string): Promise<'delete' | 'rename' | 'cancel'> {
+  private async handleExistingDirectory(
+    dirPath: string,
+    branchName: string
+  ): Promise<'delete' | 'rename' | 'cancel'> {
     const repoRoot = await this.getRepositoryRoot()
     const relativePath = path.relative(repoRoot, dirPath)
     console.log(chalk.yellow(`\n⚠️  ディレクトリ '${relativePath}' は既に存在します`))
-    
+
     const choices = [
       { name: '既存ディレクトリを削除して新規作成', value: 'delete' },
       { name: `別の名前を使用（${branchName}-2など）`, value: 'rename' },
-      { name: 'キャンセル', value: 'cancel' }
+      { name: 'キャンセル', value: 'cancel' },
     ]
 
     const answer = await inquirer.prompt([
@@ -359,8 +376,8 @@ export class GitWorktreeManager {
         type: 'list',
         name: 'action',
         message: 'どのように処理しますか？',
-        choices
-      }
+        choices,
+      },
     ])
 
     return answer.action
