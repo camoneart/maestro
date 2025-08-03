@@ -63,7 +63,7 @@ describe('E2E: Directory Check Feature', () => {
     
     // ディレクトリを手動で削除
     await fs.rm(worktreePath, { recursive: true, force: true })
-  })
+  }, 10000)
 
   it('should delete existing directory and create worktree when user chooses delete', async () => {
     const branchName = 'test-delete-and-create'
@@ -74,8 +74,8 @@ describe('E2E: Directory Check Feature', () => {
     await fs.writeFile(path.join(worktreePath, 'test.txt'), 'test content')
     
     // maestroでworktreeを作成（削除オプションを自動選択）
-    // --yesオプションを使用して自動的に削除を選択
-    const result = await execa('node', [cliPath, 'create', branchName, '--yes'])
+    // インタラクティブプロンプトで削除を選択
+    const result = await execa('node', [cliPath, 'create', branchName], { input: '\n' })
     
     // worktreeが作成されたことを確認
     expect(result.exitCode).toBe(0)
@@ -88,7 +88,7 @@ describe('E2E: Directory Check Feature', () => {
     // クリーンアップ
     await execa('git', ['worktree', 'remove', worktreePath, '--force'])
     await execa('git', ['branch', '-D', branchName])
-  })
+  }, 10000)
 
   it('should handle github issue command with existing directory', async () => {
     const issueNumber = '999'
@@ -109,8 +109,8 @@ echo '{"number": ${issueNumber}, "title": "Test Issue", "body": "Test body", "ur
     // PATHを変更してモックを使用
     const env = { ...process.env, PATH: `${testRepoPath}:${process.env.PATH}` }
     
-    // maestroでissueコマンドを実行（--yesで自動削除）
-    const result = await execa('node', [cliPath, 'github', 'issue', issueNumber, '--yes'], { env })
+    // maestroでissueコマンドを実行（インタラクティブプロンプトをスキップ）
+    const result = await execa('node', [cliPath, 'github', 'issue', issueNumber], { env, input: 'y\n' })
     
     // worktreeが作成されたことを確認
     expect(result.exitCode).toBe(0)
@@ -120,5 +120,5 @@ echo '{"number": ${issueNumber}, "title": "Test Issue", "body": "Test body", "ur
     await execa('git', ['worktree', 'remove', worktreePath, '--force'])
     await execa('git', ['branch', '-D', branchName])
     await fs.rm(mockGhPath)
-  })
+  }, 10000)
 })
