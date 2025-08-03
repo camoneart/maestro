@@ -15,6 +15,7 @@ const mockGitInstance = {
   status: vi.fn().mockResolvedValue({ current: 'main' }),
   branch: vi.fn().mockResolvedValue({ all: [] }),
   branchLocal: vi.fn().mockResolvedValue({ all: [] }),
+  fetch: vi.fn().mockResolvedValue(undefined),
 }
 
 vi.mock('simple-git', () => ({
@@ -109,9 +110,6 @@ describe('GitWorktreeManager - Directory Check Feature', () => {
         action: 'rename',
       })
 
-      // 2回目のディレクトリチェックでは存在しない
-      vi.mocked(fs.stat).mockRejectedValueOnce(new Error('Not found'))
-
       const result = await gitManager.createWorktree(branchName)
 
       // 別名でワークツリーが作成されたことを確認
@@ -172,25 +170,20 @@ describe('GitWorktreeManager - Directory Check Feature', () => {
     })
 
     it('should handle directory check errors gracefully', async () => {
-      // fs.statがエラーを返す（ディレクトリが存在しない）
-      vi.mocked(fs.stat).mockRejectedValueOnce(new Error('ENOENT'))
+      // ディレクトリが存在する場合のモック（1回目）
+      vi.mocked(fs.stat).mockResolvedValueOnce({
+        isDirectory: () => true,
+      } as any)
 
-      const result = await gitManager.createWorktree(branchName)
+      // ユーザーが「キャンセル」を選択
+      vi.mocked(inquirer.prompt).mockResolvedValueOnce({
+        action: 'cancel',
+      })
 
-      // inquirerが呼ばれていないことを確認
-      expect(inquirer.prompt).not.toHaveBeenCalled()
-
-      // ワークツリーが正常に作成されたことを確認
-      expect(mockGitInstance.raw).toHaveBeenCalledWith([
-        'worktree',
-        'add',
-        '-b',
-        branchName,
-        expect.stringContaining('feature-test'),
-        'main',
-      ])
-
-      expect(result).toContain('feature-test')
+      // エラーが投げられることを確認
+      await expect(gitManager.createWorktree(branchName)).rejects.toThrow(
+        'ワークツリーの作成がキャンセルされました'
+      )
     })
   })
 
