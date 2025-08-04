@@ -52,7 +52,28 @@ Claude CodeやCursorの設定に以下を追加してください:
 
 ### Claude Code Integration
 
-Add to your Claude Code MCP configuration:
+Add Maestro as an MCP server using the modern command:
+
+```bash
+# User scope (available across all projects on the machine)
+claude mcp add maestro -s user -- npx -y @camoneart/maestro mcp serve
+
+# Project scope (saved in .mcp.json for team sharing via version control)
+claude mcp add maestro -s project -- npx -y @camoneart/maestro mcp serve
+
+# Local scope (default - only for current project, private to you)
+claude mcp add maestro -s local -- npx -y @camoneart/maestro mcp serve
+
+# For global installation (use 'maestro' instead of 'npx')
+claude mcp add maestro -s user -- maestro mcp serve
+```
+
+**Scope options explained:**
+- `user`: Available across all projects on the machine, private to your user account
+- `project`: Saved in `.mcp.json` at project root, designed for team sharing via version control
+- `local`: Default setting, only accessible when working within the current project directory, private to you
+
+Or manually configure in `.claude/mcp_settings.json` (legacy method):
 
 ```json
 {

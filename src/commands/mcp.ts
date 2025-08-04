@@ -21,7 +21,20 @@ export const mcpCommand = new Command('mcp')
     }
 
     console.log(chalk.green('🎼 orchestra-conductor MCPサーバーを起動中...'))
-    console.log(chalk.gray('\nClaude CodeやCursorの設定に以下を追加してください:'))
+    console.log(chalk.gray('\nClaude Codeに追加するには以下のコマンドを使用してください:'))
+    console.log(
+      chalk.cyan(`
+# ユーザースコープ（マシン上の全プロジェクトで利用可能）
+claude mcp add maestro -s user -- npx -y @camoneart/maestro mcp serve
+
+# プロジェクトスコープ（.mcp.jsonに保存、バージョン管理でチーム共有）
+claude mcp add maestro -s project -- npx -y @camoneart/maestro mcp serve
+
+# ローカルスコープ（デフォルト - 現在のプロジェクトでのみ、個人専用）
+claude mcp add maestro -s local -- npx -y @camoneart/maestro mcp serve
+`)
+    )
+    console.log(chalk.gray('\nまたは手動で .claude/mcp_settings.json に設定:'))
     console.log(
       chalk.cyan(`
 {

@@ -336,18 +336,23 @@ mst config init                                    # プロジェクト設定を
 
 ### 🤖 MCP統合設定
 
-Claude Codeの設定（`.claude/mcp_settings.json`）に追加:
+最新のコマンドを使用してClaude CodeにMaestroをMCPサーバーとして追加:
 
-```json
-{
-  "mcpServers": {
-    "maestro": {
-      "command": "mst",
-      "args": ["mcp", "serve"]
-    }
-  }
-}
+```bash
+# ユーザースコープ（マシン上の全プロジェクトで利用可能）
+claude mcp add maestro -s user -- npx -y @camoneart/maestro mcp serve
+
+# プロジェクトスコープ（.mcp.jsonに保存、バージョン管理でチーム共有）
+claude mcp add maestro -s project -- npx -y @camoneart/maestro mcp serve
+
+# ローカルスコープ（デフォルト - 現在のプロジェクトでのみ、個人専用）
+claude mcp add maestro -s local -- npx -y @camoneart/maestro mcp serve
+
+# グローバルインストールの場合（npxの代わりにmaestroを使用）
+claude mcp add maestro -s user -- maestro mcp serve
 ```
+
+これによりClaude CodeがMaestroのMCPサーバーを選択したスコープレベルで使用できるよう自動設定されます。
 
 ### シェル補完
 

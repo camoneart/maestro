@@ -337,18 +337,23 @@ All available configuration options for `.maestro.json`:
 
 ### 🤖 MCP Integration Setup
 
-Add the following to your Claude Code config (`.claude/mcp_settings.json`):
+Add Maestro as an MCP server to Claude Code using the modern command:
 
-```json
-{
-  "mcpServers": {
-    "maestro": {
-      "command": "mst",
-      "args": ["mcp", "serve"]
-    }
-  }
-}
+```bash
+# User scope (available across all projects on the machine)
+claude mcp add maestro -s user -- npx -y @camoneart/maestro mcp serve
+
+# Project scope (saved in .mcp.json for team sharing via version control)
+claude mcp add maestro -s project -- npx -y @camoneart/maestro mcp serve
+
+# Local scope (default - only for current project, private to you)
+claude mcp add maestro -s local -- npx -y @camoneart/maestro mcp serve
+
+# For global installation (use 'maestro' instead of 'npx')
+claude mcp add maestro -s user -- maestro mcp serve
 ```
+
+This will automatically configure Claude Code to use Maestro's MCP server for orchestra management at the chosen scope level.
 
 ### 🐚 Shell Completion
 
