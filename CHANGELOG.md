@@ -1,5 +1,18 @@
 # Changelog
 
+## 3.5.18
+
+### Patch Changes
+
+- fix: update MCP documentation and remove unsupported manual configuration
+  - Updated all MCP setup instructions to use modern `claude mcp add` command
+  - Removed references to unsupported `.claude/mcp_settings.json` manual configuration
+  - Fixed mcp serve command output to match actual implementation
+  - Added support for all MCP scopes (user, project, local) with accurate descriptions
+  - Replaced legacy configuration with `claude mcp add-json` alternative method
+
+  This ensures users follow the current best practices for MCP server setup as documented in Anthropic's official documentation.
+
 ## 3.5.17
 
 ### Patch Changes
