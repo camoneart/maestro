@@ -34,19 +34,6 @@ claude mcp add maestro -s project -- npx -y @camoneart/maestro mcp serve
 claude mcp add maestro -s local -- npx -y @camoneart/maestro mcp serve
 `)
     )
-    console.log(chalk.gray('\nまたは手動で .claude/mcp_settings.json に設定:'))
-    console.log(
-      chalk.cyan(`
-{
-  "mcpServers": {
-    "maestro": {
-      "command": "maestro",
-      "args": ["mcp", "serve"]
-    }
-  }
-}
-`)
-    )
 
     // MCPサーバーを起動
     const serverPath = path.join(__dirname, 'mcp', 'server.js')

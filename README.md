@@ -355,6 +355,8 @@ claude mcp add maestro -s user -- maestro mcp serve
 
 This will automatically configure Claude Code to use Maestro's MCP server for orchestra management at the chosen scope level.
 
+**Note**: The traditional manual configuration in `.claude/mcp_settings.json` is no longer supported. Use the `claude mcp add` command instead.
+
 ### 🐚 Shell Completion
 
 Maestro provides completion scripts for **bash / zsh / fish**.

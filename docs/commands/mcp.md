@@ -38,16 +38,16 @@ mst mcp serve
 ```
 🎼 orchestra-conductor MCPサーバーを起動中...
 
-Claude CodeやCursorの設定に以下を追加してください:
+Claude Codeに追加するには以下のコマンドを使用してください:
 
-{
-  "mcpServers": {
-    "maestro": {
-      "command": "maestro",
-      "args": ["mcp", "serve"]
-    }
-  }
-}
+# ユーザースコープ（マシン上の全プロジェクトで利用可能）
+claude mcp add maestro -s user -- npx -y @camoneart/maestro mcp serve
+
+# プロジェクトスコープ（.mcp.jsonに保存、バージョン管理でチーム共有）
+claude mcp add maestro -s project -- npx -y @camoneart/maestro mcp serve
+
+# ローカルスコープ（デフォルト - 現在のプロジェクトでのみ、個人専用）
+claude mcp add maestro -s local -- npx -y @camoneart/maestro mcp serve
 ```
 
 ### Claude Code Integration
@@ -73,17 +73,10 @@ claude mcp add maestro -s user -- maestro mcp serve
 - `project`: Saved in `.mcp.json` at project root, designed for team sharing via version control
 - `local`: Default setting, only accessible when working within the current project directory, private to you
 
-Or manually configure in `.claude/mcp_settings.json` (legacy method):
+Alternatively, you can use JSON configuration with the `claude mcp add-json` command:
 
-```json
-{
-  "mcpServers": {
-    "maestro": {
-      "command": "maestro",
-      "args": ["mcp", "serve"]
-    }
-  }
-}
+```bash
+claude mcp add-json maestro -s user '{"type":"stdio","command":"npx","args":["-y","@camoneart/maestro","mcp","serve"]}'
 ```
 
 ### Cursor Integration

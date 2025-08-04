@@ -354,6 +354,8 @@ claude mcp add maestro -s user -- maestro mcp serve
 
 これによりClaude CodeがMaestroのMCPサーバーを選択したスコープレベルで使用できるよう自動設定されます。
 
+**注意**: 従来の`.claude/mcp_settings.json`への手動設定はサポートされなくなりました。`claude mcp add`コマンドを使用してください。
+
 ### シェル補完
 
 Maestro は **Bash / zsh / fish** の補完スクリプトを提供します。

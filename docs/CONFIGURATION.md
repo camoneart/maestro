@@ -426,20 +426,19 @@ claude mcp add maestro -s local -- npx -y @camoneart/maestro mcp serve
 claude mcp add maestro -s user -- maestro mcp serve
 ```
 
-### Manual Configuration (Legacy)
+### JSON Configuration Alternative
 
-Alternatively, add to `.claude/mcp_settings.json`:
+You can also use JSON configuration with the `claude mcp add-json` command:
 
-```json
-{
-  "mcpServers": {
-    "maestro": {
-      "command": "maestro",
-      "args": ["mcp", "serve"]
-    }
-  }
-}
+```bash
+# Using JSON format
+claude mcp add-json maestro -s user '{"type":"stdio","command":"npx","args":["-y","@camoneart/maestro","mcp","serve"]}'
+
+# For global installation
+claude mcp add-json maestro -s user '{"type":"stdio","command":"maestro","args":["mcp","serve"]}'
 ```
+
+**Note**: The traditional manual configuration in `.claude/mcp_settings.json` is no longer supported.
 
 ### Available MCP Tools
 
