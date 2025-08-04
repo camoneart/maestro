@@ -266,39 +266,74 @@ The `ui.pathDisplay` setting controls how file paths are shown across all comman
 ```json
 {
   "worktrees": {
-    "path": "../maestro-{branch}",     // Default: "../maestro-{branch}"
-    "directoryPrefix": "",              // Default: "" (empty string)
-    "branchPrefix": "feature/"          // Custom prefix for new branches
+    "path": "../maestro-{branch}",
+    "directoryPrefix": "",
+    "branchPrefix": "feature/"
   },
   "development": {
-    "autoSetup": true,                  // Default: true
-    "syncFiles": [".env", ".env.local"], // Default: [".env", ".env.local"]
-    "defaultEditor": "cursor"           // Default: "cursor"
+    "autoSetup": true,
+    "syncFiles": [".env", ".env.local"],
+    "defaultEditor": "cursor"
   },
   "tmux": {
-    "enabled": false,                   // Default: false
-    "openIn": "window",                 // Default: "window" (options: "window" | "pane")
-    "sessionNaming": "{branch}"         // Default: "{branch}"
+    "enabled": false,
+    "openIn": "window",
+    "sessionNaming": "{branch}"
   },
   "claude": {
-    "markdownMode": "shared"            // Default: "shared" (options: "shared" | "split")
+    "markdownMode": "shared"
   },
   "github": {
-    "autoFetch": true,                  // Default: true
+    "autoFetch": true,
     "branchNaming": {
-      "prTemplate": "pr-{number}",       // Default: "pr-{number}"
-      "issueTemplate": "issue-{number}"  // Default: "issue-{number}"
+      "prTemplate": "pr-{number}",
+      "issueTemplate": "issue-{number}"
     }
   },
   "ui": {
-    "pathDisplay": "absolute"           // Default: "absolute" - Controls path format in commands (options: "absolute" | "relative")
+    "pathDisplay": "absolute"
   },
   "hooks": {
     "afterCreate": "npm install",
-    "beforeDelete": "echo \"Deleting performer: $ORCHESTRA_MEMBER\""
+    "beforeDelete": "echo \\\"Deleting performer: $ORCHESTRA_MEMBER\\\""
   }
 }
 ```
+
+### 📋 Complete Configuration Reference
+
+All available configuration options for `.maestro.json`:
+
+| Category | Key | Type | Default | Description |
+|----------|-----|------|---------|-------------|
+| **worktrees** | | | | Worktree location and naming |
+| | `path` | string | `"../maestro-{branch}"` | Directory pattern for worktrees (`{branch}` is replaced with branch name) |
+| | `directoryPrefix` | string | `""` | Prefix added to all worktree directory names |
+| | `branchPrefix` | string | `""` | Default prefix for new branch names |
+| **development** | | | | Development environment settings |
+| | `autoSetup` | boolean | `true` | Auto-run setup commands after worktree creation |
+| | `syncFiles` | string[] | `[".env", ".env.local"]` | Files to sync across worktrees |
+| | `defaultEditor` | string | `"cursor"` | Default editor (`vscode`, `cursor`, `none`) |
+| **postCreate** | | | *(not in defaults)* | Post-creation automation |
+| | `copyFiles` | string[] | - | Files to copy from main worktree after creation |
+| | `commands` | string[] | - | Commands to execute after worktree creation |
+| **tmux** | | | | tmux integration settings |
+| | `enabled` | boolean | `false` | Enable tmux integration |
+| | `openIn` | string | `"window"` | Open in `window` or `pane` |
+| | `sessionNaming` | string | `"{branch}"` | Session naming pattern |
+| **claude** | | | | Claude Code integration |
+| | `markdownMode` | string | `"shared"` | CLAUDE.md mode: `shared` (symlink) or `split` (independent) |
+| **github** | | | | GitHub integration settings |
+| | `autoFetch` | boolean | `true` | Auto-fetch before operations |
+| | `branchNaming.prTemplate` | string | `"pr-{number}"` | PR branch naming template |
+| | `branchNaming.issueTemplate` | string | `"issue-{number}"` | Issue branch naming template |
+| **ui** | | | | User interface settings |
+| | `pathDisplay` | string | `"absolute"` | Path display format: `absolute` or `relative` |
+| **hooks** | | | | Lifecycle hooks |
+| | `afterCreate` | string \| string[] | - | Commands to run after worktree creation |
+| | `beforeDelete` | string | - | Command to run before worktree deletion |
+
+> **Note**: For detailed configuration examples and advanced usage, see [Configuration Guide](./docs/CONFIGURATION.md).
 
 ### 🤖 MCP Integration Setup
 

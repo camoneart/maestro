@@ -265,39 +265,74 @@ mst config init                                    # プロジェクト設定を
 ```json
 {
   "worktrees": {
-    "path": "../maestro-{branch}",     // デフォルト: "../maestro-{branch}"
-    "directoryPrefix": "",              // デフォルト: "" (空文字列)
-    "branchPrefix": "feature/"          // カスタムブランチプレフィックス
+    "path": "../maestro-{branch}",
+    "directoryPrefix": "",
+    "branchPrefix": "feature/"
   },
   "development": {
-    "autoSetup": true,                  // デフォルト: true
-    "syncFiles": [".env", ".env.local"], // デフォルト: [".env", ".env.local"]
-    "defaultEditor": "cursor"           // デフォルト: "cursor"
+    "autoSetup": true,
+    "syncFiles": [".env", ".env.local"],
+    "defaultEditor": "cursor"
   },
   "tmux": {
-    "enabled": false,                   // デフォルト: false
-    "openIn": "window",                 // デフォルト: "window" (オプション: "window" | "pane")
-    "sessionNaming": "{branch}"         // デフォルト: "{branch}"
+    "enabled": false,
+    "openIn": "window",
+    "sessionNaming": "{branch}"
   },
   "claude": {
-    "markdownMode": "shared"            // デフォルト: "shared" (オプション: "shared" | "split")
+    "markdownMode": "shared"
   },
   "github": {
-    "autoFetch": true,                  // デフォルト: true
+    "autoFetch": true,
     "branchNaming": {
-      "prTemplate": "pr-{number}",       // デフォルト: "pr-{number}"
-      "issueTemplate": "issue-{number}"  // デフォルト: "issue-{number}"
+      "prTemplate": "pr-{number}",
+      "issueTemplate": "issue-{number}"
     }
   },
   "ui": {
-    "pathDisplay": "absolute"           // デフォルト: "absolute" - コマンドでのパス形式を制御 (オプション: "absolute" | "relative")
+    "pathDisplay": "absolute"
   },
   "hooks": {
     "afterCreate": "npm install",
-    "beforeDelete": "echo \"演奏者が退場します: $ORCHESTRA_MEMBER\""
+    "beforeDelete": "echo \\\"演奏者が退場します: $ORCHESTRA_MEMBER\\\""
   }
 }
 ```
+
+### 📋 完全な設定リファレンス
+
+`.maestro.json`で利用可能なすべての設定オプション：
+
+| カテゴリ | キー | 型 | デフォルト | 説明 |
+|----------|-----|------|---------|-------------|
+| **worktrees** | | | | worktreeの場所と命名 |
+| | `path` | string | `"../maestro-{branch}"` | worktreeのディレクトリパターン（`{branch}`はブランチ名に置換） |
+| | `directoryPrefix` | string | `""` | すべてのworktreeディレクトリ名に付加される接頭辞 |
+| | `branchPrefix` | string | `""` | 新規ブランチ名のデフォルト接頭辞 |
+| **development** | | | | 開発環境設定 |
+| | `autoSetup` | boolean | `true` | worktree作成後にセットアップコマンドを自動実行 |
+| | `syncFiles` | string[] | `[".env", ".env.local"]` | worktree間で同期するファイル |
+| | `defaultEditor` | string | `"cursor"` | デフォルトエディタ（`vscode`、`cursor`、`none`） |
+| **postCreate** | | | *(デフォルトなし)* | 作成後の自動化 |
+| | `copyFiles` | string[] | - | 作成後にメインworktreeからコピーするファイル |
+| | `commands` | string[] | - | worktree作成後に実行するコマンド |
+| **tmux** | | | | tmux統合設定 |
+| | `enabled` | boolean | `false` | tmux統合を有効化 |
+| | `openIn` | string | `"window"` | `window`または`pane`で開く |
+| | `sessionNaming` | string | `"{branch}"` | セッション名のパターン |
+| **claude** | | | | Claude Code統合 |
+| | `markdownMode` | string | `"shared"` | CLAUDE.mdモード：`shared`（シンボリックリンク）または`split`（独立） |
+| **github** | | | | GitHub統合設定 |
+| | `autoFetch` | boolean | `true` | 操作前の自動フェッチ |
+| | `branchNaming.prTemplate` | string | `"pr-{number}"` | PRブランチ名テンプレート |
+| | `branchNaming.issueTemplate` | string | `"issue-{number}"` | Issueブランチ名テンプレート |
+| **ui** | | | | ユーザーインターフェース設定 |
+| | `pathDisplay` | string | `"absolute"` | パス表示形式：`absolute`または`relative` |
+| **hooks** | | | | ライフサイクルフック |
+| | `afterCreate` | string \| string[] | - | worktree作成後に実行するコマンド |
+| | `beforeDelete` | string | - | worktree削除前に実行するコマンド |
+
+> **注**: 詳細な設定例と高度な使用方法については、[設定ガイド](./docs/CONFIGURATION.md)を参照してください。
 
 ### 🤖 MCP統合設定
 
