@@ -49,15 +49,18 @@ Controls where and how worktrees are created.
 | `branchPrefix` | string | `""` | Default prefix for new branch names |
 
 **Examples:**
+
+Place worktrees in a dedicated directory:
 ```json
-// Place worktrees in a dedicated directory
 {
   "worktrees": {
     "path": "../workspaces/{branch}"
   }
 }
+```
 
-// Add team prefix to branches
+Add team prefix to branches:
+```json
 {
   "worktrees": {
     "branchPrefix": "team-alpha/"
@@ -86,15 +89,18 @@ Development environment configuration.
 | `defaultEditor` | string | `"cursor"` | Default editor: `"vscode"`, `"cursor"`, or `"none"` |
 
 **Examples:**
+
+Disable auto-setup for manual control:
 ```json
-// Disable auto-setup for manual control
 {
   "development": {
     "autoSetup": false
   }
 }
+```
 
-// Sync additional configuration files
+Sync additional configuration files:
+```json
 {
   "development": {
     "syncFiles": [".env", ".env.local", "config/local.json"]
@@ -123,16 +129,19 @@ Automation that runs after worktree creation. This is separate from `hooks.after
 **Note:** `postCreate` runs before `hooks.afterCreate`.
 
 **Examples:**
+
+Python project setup:
 ```json
-// Python project setup
 {
   "postCreate": {
     "copyFiles": [".env", "config.ini"],
     "commands": ["python -m venv venv", "pip install -r requirements.txt"]
   }
 }
+```
 
-// Monorepo setup
+Monorepo setup:
+```json
 {
   "postCreate": {
     "commands": ["pnpm install", "pnpm build:deps"]
@@ -161,8 +170,9 @@ tmux integration settings.
 | `sessionNaming` | string | `"{branch}"` | Session naming pattern |
 
 **Examples:**
+
+Always use tmux with custom naming:
 ```json
-// Always use tmux with custom naming
 {
   "tmux": {
     "enabled": true,
@@ -188,8 +198,9 @@ Claude Code integration settings.
 | `markdownMode` | string | `"shared"` | `"shared"` (symlink to main) or `"split"` (independent files) |
 
 **Examples:**
+
+Use independent CLAUDE.md for each worktree:
 ```json
-// Use independent CLAUDE.md for each worktree
 {
   "claude": {
     "markdownMode": "split"
@@ -220,8 +231,9 @@ GitHub integration configuration.
 | `branchNaming.issueTemplate` | string | `"issue-{number}"` | Issue branch naming template |
 
 **Examples:**
+
+Custom branch naming convention:
 ```json
-// Custom branch naming convention
 {
   "github": {
     "branchNaming": {
@@ -249,8 +261,9 @@ User interface preferences.
 | `pathDisplay` | string | `"absolute"` | Path display: `"absolute"` or `"relative"` |
 
 **Examples:**
+
+Show relative paths for cleaner output:
 ```json
-// Show relative paths for cleaner output
 {
   "ui": {
     "pathDisplay": "relative"
@@ -281,8 +294,9 @@ Lifecycle hooks for custom automation.
 - `$WORKTREE_PATH` - Full path to the worktree
 
 **Examples:**
+
+Multiple commands after creation:
 ```json
-// Multiple commands after creation
 {
   "hooks": {
     "afterCreate": [
@@ -292,8 +306,10 @@ Lifecycle hooks for custom automation.
     ]
   }
 }
+```
 
-// Cleanup before deletion
+Cleanup before deletion:
+```json
 {
   "hooks": {
     "beforeDelete": "npm run cleanup && git stash"
@@ -395,16 +411,14 @@ Lifecycle hooks for custom automation.
 While Maestro doesn't support conditional configuration directly, you can use different approaches:
 
 1. **Environment-specific files**
-   ```bash
-   # .maestro.json for production
-   # .maestro.local.json for local overrides (gitignored)
-   ```
+   - `.maestro.json` for production
+   - `.maestro.local.json` for local overrides (gitignored)
 
 2. **Branch-based configuration**
+   Create different configs for different branch patterns:
    ```bash
-   # Create different configs for different branch patterns
-   mst init --minimal  # For feature branches
-   mst init           # For main development
+   mst init --minimal
+   mst init
    ```
 
 ### Using with CI/CD
@@ -412,7 +426,7 @@ While Maestro doesn't support conditional configuration directly, you can use di
 ```json
 {
   "development": {
-    "autoSetup": false  // Disable for CI environments
+    "autoSetup": false
   },
   "hooks": {
     "afterCreate": [
