@@ -968,7 +968,7 @@ Options available for all commands:
 
 ## ⚙️ Configuration File
 
-Customize settings with `.maestro.json`:
+Customize settings with `.maestro.json`. For comprehensive configuration documentation, see the [Configuration Guide](./CONFIGURATION.md).
 
 ### Claude Configuration
 - `markdownMode: "shared"` - Creates symlink to main repository's CLAUDE.md (default)
@@ -1156,3 +1156,6 @@ For detailed usage of each command, see the following documentation:
 - [Issue Integration Details](./commands/issue.md)
 - [Review Management Details](./commands/review.md)
 - [Completion Setup Details](./commands/completion.md)
+
+### 📖 Configuration Reference
+- [Complete Configuration Guide](./CONFIGURATION.md)

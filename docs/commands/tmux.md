@@ -229,6 +229,8 @@ tmux -V
 
 Optional tmux configuration for better maestro integration:
 
+> For tmux integration settings in `.maestro.json`, see the [Configuration Guide](../CONFIGURATION.md).
+
 ```bash
 # Add to ~/.tmux.conf
 set-option -g default-shell $SHELL

@@ -94,6 +94,8 @@ Forces use of specific package manager regardless of detection.
 
 The init command creates a `.maestro.json` file with structure like:
 
+> For detailed configuration options and examples, see the [Configuration Guide](../CONFIGURATION.md).
+
 ### Minimal Configuration
 
 ```json
@@ -259,6 +261,8 @@ After initialization, the generated configuration will be used by:
 
 - `mst create` - Uses `branchPrefix` and `postCreate` settings
 - `mst config` - Can modify the generated configuration
+
+For complete configuration options and advanced usage patterns, refer to the [Configuration Guide](../CONFIGURATION.md).
 
 ## Best Practices
 

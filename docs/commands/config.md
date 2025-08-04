@@ -2,6 +2,8 @@
 
 Command to manage maestro configuration settings. Handles both global user settings and project-specific configurations to customize maestro behavior for different development environments.
 
+> For comprehensive configuration documentation with examples and schema details, see the [Configuration Guide](../CONFIGURATION.md).
+
 ## Overview
 
 ```bash
@@ -276,3 +278,8 @@ Common configuration keys that can be used with `get`, `set`, and `reset`:
 
 - [`mst create`](./create.md) - Uses configuration for worktree creation
 - [`mst init`](./init.md) - Creates initial configuration file
+
+## Documentation
+
+For complete configuration schema, advanced examples, and detailed usage patterns:
+- [Configuration Guide](../CONFIGURATION.md) - Complete reference with schema and examples

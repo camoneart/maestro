@@ -389,6 +389,8 @@ Features:
 
 Settings from `.maestro.json` are automatically applied:
 
+> For complete configuration options and examples, see the [Configuration Guide](../CONFIGURATION.md).
+
 ```json
 {
   "worktrees": {
