@@ -489,9 +489,9 @@ describe('github command', () => {
         { number: 124, title: 'Feature B', author: { login: 'user2' }, isDraft: true },
       ]
       const mockIssues = [
-        { 
-          number: 456, 
-          title: 'Bug Report', 
+        {
+          number: 456,
+          title: 'Bug Report',
           author: { login: 'user3' },
           body: 'Bug description',
           labels: [],
@@ -499,9 +499,9 @@ describe('github command', () => {
           milestone: null,
           url: 'https://github.com/test/repo/issues/456',
         },
-        { 
-          number: 789, 
-          title: 'Enhancement', 
+        {
+          number: 789,
+          title: 'Enhancement',
           author: { login: 'user4' },
           body: 'Enhancement description',
           labels: [],
@@ -551,7 +551,7 @@ describe('github command', () => {
         'issue',
         'list',
         '--json',
-        'number,title,author,body,labels,assignees,milestone,url',
+        'number,title,author',
         '--limit',
         '20',
       ])
