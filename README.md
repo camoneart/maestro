@@ -237,7 +237,7 @@ mst config init                                    # Create project configuratio
 ```
 
 **Path Display Configuration:**  
-The `ui.pathDisplay` setting controls how file paths are shown across all commands. When set to `"relative"`, paths are displayed relative to the current working directory. When set to `"absolute"` (default), full absolute paths are shown. This affects commands like `github`, `review`, `shell`, `exec`, `health`, and `watch`.
+The `ui.pathDisplay` setting controls how file paths are shown across all commands. When set to `"relative"`, paths are displayed relative to the current working directory. When set to `"absolute"` (default), full absolute paths are shown. This affects commands like `github`, `review`, `shell`, `exec`, and `health`.
 
 **Claude Configuration:**
 - `markdownMode: "shared"` - Creates symlink to main repository's CLAUDE.md (default)

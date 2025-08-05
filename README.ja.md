@@ -236,7 +236,7 @@ mst config init                                    # プロジェクト設定を
 ```
 
 **パス表示設定:**  
-`ui.pathDisplay` 設定は、すべてのコマンドでファイルパスがどのように表示されるかを制御します。`"relative"` に設定すると、現在の作業ディレクトリからの相対パスで表示されます。`"absolute"`（デフォルト）に設定すると、フル絶対パスで表示されます。この設定は `github`、`review`、`shell`、`exec`、`health`、`watch` などのコマンドに影響します。
+`ui.pathDisplay` 設定は、すべてのコマンドでファイルパスがどのように表示されるかを制御します。`"relative"` に設定すると、現在の作業ディレクトリからの相対パスで表示されます。`"absolute"`（デフォルト）に設定すると、フル絶対パスで表示されます。この設定は `github`、`review`、`shell`、`exec`、`health` などのコマンドに影響します。
 
 **Claude設定:**
 - `markdownMode: "shared"` - メインリポジトリのCLAUDE.mdへのシンボリックリンクを作成（デフォルト）

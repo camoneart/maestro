@@ -408,4 +408,3 @@ sync_if_tests_pass feature-branch
 - [`mst list`](./list.md) - Check orchestra members needing sync
 - [`mst health`](./health.md) - Check sync status health
 - [`mst snapshot`](./snapshot.md) - Create snapshots before sync
-- [`mst watch`](./watch.md) - Auto-sync file changes
