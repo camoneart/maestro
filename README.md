@@ -339,18 +339,27 @@ All available configuration options for `.maestro.json`:
 
 Add Maestro as an MCP server to Claude Code using the modern command:
 
+#### Local Scope (Default - only for current project, private to you)
 ```bash
-# User scope (available across all projects on the machine)
-claude mcp add maestro -s user -- npx -y @camoneart/maestro mcp serve
+claude mcp add maestro -s local -- npx -y @camoneart/maestro maestro-mcp-server
+# Or without -s flag (local is default)
+claude mcp add maestro -- npx -y @camoneart/maestro maestro-mcp-server
+```
 
-# Project scope (saved in .mcp.json for team sharing via version control)
-claude mcp add maestro -s project -- npx -y @camoneart/maestro mcp serve
+#### Project Scope (saved in .mcp.json for team sharing via version control)
+```bash
+claude mcp add maestro -s project -- npx -y @camoneart/maestro maestro-mcp-server
+```
 
-# Local scope (default - only for current project, private to you)
-claude mcp add maestro -s local -- npx -y @camoneart/maestro mcp serve
+#### User Scope (available across all projects on the machine)
+```bash
+claude mcp add maestro -s user -- npx -y @camoneart/maestro maestro-mcp-server
+```
 
-# For global installation (use 'maestro' instead of 'npx')
-claude mcp add maestro -s user -- maestro mcp serve
+#### For global installation users
+If you've installed Maestro globally, use:
+```bash
+claude mcp add maestro -s user -- maestro-mcp-server
 ```
 
 This will automatically configure Claude Code to use Maestro's MCP server for orchestra management at the chosen scope level.
@@ -424,7 +433,6 @@ mst create feature/new-feature --tmux
 | **Git is too old** <br>`fatal: unknown option` | Git < 2.22                              | `brew install git`                |
 | **fzf not found**                              | fzf not installed                       | `brew install fzf`                |
 | **tmux not found**                             | tmux not installed                      | `brew install tmux`               |
-| **Claude Code won't start**                    | MCP server not running or port conflict | `mst mcp status` → `mst mcp stop` |
 | **Too many tmux panes** <br>`Unable to create session with N panes due to terminal size` | Terminal window too small for requested panes | Resize window or reduce panes (max: 10 horizontal, 15 vertical) |
 | **GitHub PR/Issue not found** <br>`Error: PR/Issue #999 が見つかりません` | Specified non-existent Issue/PR number | Check correct number or verify repository |
 
@@ -432,7 +440,6 @@ mst create feature/new-feature --tmux
 
 | Code         | Cause                  | Fix                                     |
 | ------------ | ---------------------- | --------------------------------------- |
-| `EADDRINUSE` | MCP server port in use | `mst mcp stop` to kill previous process |
 | `ENOENT`     | Git binary not found   | Check PATH or reinstall Git             |
 
 ### ⚠️ CLI Option Validation and Error Handling

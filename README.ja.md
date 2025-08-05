@@ -338,18 +338,27 @@ mst config init                                    # プロジェクト設定を
 
 最新のコマンドを使用してClaude CodeにMaestroをMCPサーバーとして追加:
 
+#### ローカルスコープ（デフォルト - 現在のプロジェクトでのみ、個人専用）
 ```bash
-# ユーザースコープ（マシン上の全プロジェクトで利用可能）
-claude mcp add maestro -s user -- npx -y @camoneart/maestro mcp serve
+claude mcp add maestro -s local -- npx -y @camoneart/maestro maestro-mcp-server
+# または -s フラグなし（localがデフォルト）
+claude mcp add maestro -- npx -y @camoneart/maestro maestro-mcp-server
+```
 
-# プロジェクトスコープ（.mcp.jsonに保存、バージョン管理でチーム共有）
-claude mcp add maestro -s project -- npx -y @camoneart/maestro mcp serve
+#### プロジェクトスコープ（.mcp.jsonに保存、バージョン管理でチーム共有）
+```bash
+claude mcp add maestro -s project -- npx -y @camoneart/maestro maestro-mcp-server
+```
 
-# ローカルスコープ（デフォルト - 現在のプロジェクトでのみ、個人専用）
-claude mcp add maestro -s local -- npx -y @camoneart/maestro mcp serve
+#### ユーザースコープ（マシン上の全プロジェクトで利用可能）
+```bash
+claude mcp add maestro -s user -- npx -y @camoneart/maestro maestro-mcp-server
+```
 
-# グローバルインストールの場合（npxの代わりにmaestroを使用）
-claude mcp add maestro -s user -- maestro mcp serve
+#### グローバルインストールの場合
+Maestroをグローバルインストールしている場合は以下を使用:
+```bash
+claude mcp add maestro -s user -- maestro-mcp-server
 ```
 
 これによりClaude CodeがMaestroのMCPサーバーを選択したスコープレベルで使用できるよう自動設定されます。
@@ -398,7 +407,6 @@ mst completion fish > ~/.config/fish/completions/mst.fish
 | **Git が古い**<br>`fatal: unknown option` | Git バージョン < 2.22            | `brew install git`                |
 | **fzf が見つからない**                    | fzf 未インストール               | `brew install fzf`                |
 | **tmux が見つからない**                   | tmux 未インストール              | `brew install tmux`               |
-| **Claude Code が起動しない**              | MCP サーバー未起動 or ポート競合 | `mst mcp status` → `mst mcp stop` |
 | **tmux ペインが多すぎる**<br>`画面サイズに対してペイン数（N個）が多すぎるため、セッションが作成できませんでした` | ターミナルウィンドウに対してペイン数が過多 | ウィンドウのリサイズまたはペイン数を削減（最大：水平10個、垂直15個） |
 | **GitHub PR/Issue が見つからない**<br>`Error: PR/Issue #999 が見つかりません` | 存在しないIssue/PR番号を指定 | 正しい番号を確認するか、リポジトリを確認 |
 
@@ -406,7 +414,6 @@ mst completion fish > ~/.config/fish/completions/mst.fish
 
 | エラーコード | 原因                           | 解決策                              |
 | ------------ | ------------------------------ | ----------------------------------- |
-| `EADDRINUSE` | MCP サーバーのポート競合       | `mst mcp stop` で既存プロセスを停止 |
 | `ENOENT`     | Git 実行ファイルが見つからない | Git の PATH を確認、再インストール  |
 
 ### ⚠️ CLIオプション検証とエラーハンドリング

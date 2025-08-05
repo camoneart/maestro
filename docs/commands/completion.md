@@ -59,7 +59,7 @@ All main commands and aliases are completed:
 ```bash
 mst <TAB>
 # Suggests: create, list, delete, shell, exec, attach, github,
-#          config, mcp, completion, tmux, where
+#          config, completion, tmux, where
 #          ls, rm, sh, e, a, gh, t, w (aliases)
 ```
 
