@@ -46,7 +46,7 @@ Maestro is a CLI that makes Git worktree management intuitive. When working on m
 | ------------------------- | --------------------------------------------------- |
 | 🎼 **Orchestra UI**       | Operate worktrees as performers in an intuitive way |
 | 🤖 **Claude AI**          | AI diff reviews & code suggestions                  |
-| 🔗 **GitHub integration** | Reliable worktree creation from Issues / PRs        |
+| 🔗 **GitHub integration** | Reliable worktree creation from Issues / PRs with rich metadata |
 | 🎯 **tmux / fzf**         | Keyboard-only, lightning-fast switching             |
 | 📊 **Status**             | Real-time worktree status and health monitoring     |
 | 🔄 **Auto Sync**          | Propagate file changes in real time                 |
@@ -148,6 +148,7 @@ mst create feature/awesome-feature --tmux --claude-md
 | --------------------------------- | ---------------------------------------------------------------------------- |
 | **Parallel dev** Feature + bugfix | `mst create feature/auth --tmux --claude-md`<br>`mst create bugfix/login-issue` |
 | **List performers**               | `mst list`                                                                   |
+| **List with GitHub metadata**     | `mst list --metadata`                                                       |
 | **Fast switch** via tmux          | `mst tmux`                                                                   |
 | **Create from GitHub Issue**      | `mst create 123`                                                             |
 | **Create from PR**                | `mst github checkout 456`                                                    |
@@ -197,7 +198,7 @@ Maestro ships with **power commands** that automate tedious tasks in a single li
 | Feature                     | Command Example                                                       | What It Automates                                                           |
 | --------------------------- | --------------------------------------------------------------------- | --------------------------------------------------------------------------- |
 | **Auto Review & Merge 🚀**  | `mst review --auto-flow`                                              | Fetch → rebase → AI review → Conventional Commit → open PR — all in one go  |
-| **GitHub Integration 🔗**   | `mst github list` <br>`mst github checkout 123 --tmux-h`              | List and checkout GitHub issues/PRs with reliable worktree creation and tmux integration |
+| **GitHub Integration 🔗**   | `mst github list` <br>`mst github checkout 123 --tmux-h` <br>`mst list --metadata` | List and checkout GitHub issues/PRs with reliable worktree creation, comprehensive metadata storage, and tmux integration |
 | **Snapshot 📸**             | `mst snapshot -m "before-refactor"` <br>`mst snapshot --restore <id>` | Save / restore any working state instantly                                  |
 | **Health Check 🏥**         | `mst health` <br>`mst health --fix`                                   | Detects stale / orphaned / conflicted branches and fixes them automatically |
 
