@@ -20,7 +20,6 @@ Detailed usage of all maestro (mst) commands.
 ### 📊 Advanced Features
 - [health](#-health) - Health status checking
 - [snapshot](#-snapshot) - Work state snapshots
-- [watch](#-watch) - File watching and auto-sync
 
 ### 🛠️ Utility Commands
 - [config](#-config) - Configuration management
@@ -634,41 +633,6 @@ mst snapshot --list
 mst snapshot --restore <snapshot-id>
 ```
 
-### 🔸 watch
-
-Watch file changes and auto-sync with built-in security protection.
-
-```bash
-mst watch [options]
-```
-
-#### Options
-- `--patterns <patterns...>` - File patterns to watch (comma-separated)
-- `--exclude <patterns...>` - Patterns to exclude (comma-separated)  
-- `--all` - Watch all worktrees
-- `--auto` - Auto-sync without confirmation
-- `--dry` - Dry run mode
-
-#### Security Features
-- **Directory Traversal Protection**: Prevents `../` path attacks
-- **Loop Detection**: Stops infinite directory creation loops
-- **Path Validation**: Validates all file operations within worktree boundaries
-- **Safe Sync**: Ensures file operations stay within designated worktree directories
-
-#### Examples
-```bash
-# Basic watch with security protection
-mst watch
-
-# Watch specific files with automatic validation
-mst watch --patterns "src/**/*.ts,*.json"
-
-# Auto-sync mode with built-in security
-mst watch --auto --all
-
-# Dry run to preview changes safely
-mst watch --dry --patterns "src/**/*.js"
-```
 
 ## 🛠️ Utility Commands
 
@@ -985,7 +949,6 @@ This setting affects path display in the following commands:
 - `shell` - Interactive selection screen paths
 - `exec` - Command execution target paths
 - `health` - Health check output paths
-- `watch` - File change notification paths
 
 Note: The `--full-path` option in the `list` command will always show absolute paths regardless of this setting.
 
@@ -1139,7 +1102,6 @@ For detailed usage of each command, see the following documentation:
 ### 📊 Advanced Features
 - [Health Check Details](./commands/health.md)
 - [Snapshot Details](./commands/snapshot.md)
-- [Watch Details](./commands/watch.md)
 
 ### 🛠️ Utility Commands
 - [Config Management Details](./commands/config.md)
