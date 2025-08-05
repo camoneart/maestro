@@ -160,34 +160,90 @@ This approach ensures reliable PR worktree creation by properly handling the bas
 
 ### Automatically Retrieved Information
 
-- PR title
-- PR description
+- PR title and description (body)
 - Author information
-- Reviewers
-- Labels
-- Milestone
-- Related Issues
-- Base branch
-- Merge status
+- Labels (all associated labels)
+- Assignees (users assigned to the PR/Issue)
+- Milestone information
+- Direct URL to the GitHub item
+- Reviewers (for PRs)
+- Base and head branch information (for PRs)
+- Merge status (for PRs)
 
-### Metadata Storage
+### Enhanced Metadata Storage
+
+Maestro now automatically saves comprehensive GitHub metadata when creating worktrees from Issues or Pull Requests. This metadata is displayed when using `mst list --metadata` and includes:
 
 ```json
 {
-  "githubPR": {
-    "number": 123,
+  "github": {
+    "type": "pr",
     "title": "Add authentication feature",
-    "state": "open",
-    "draft": false,
+    "body": "This PR implements user authentication with JWT tokens and includes comprehensive test coverage.",
     "author": "username",
-    "baseRef": "main",
-    "headRef": "feature/auth",
-    "labels": ["enhancement", "backend"],
-    "reviewers": ["reviewer1", "reviewer2"],
-    "url": "https://github.com/org/repo/pull/123"
+    "labels": ["enhancement", "backend", "security"],
+    "assignees": ["reviewer1", "maintainer2"],
+    "milestone": "v2.0.0",
+    "url": "https://github.com/org/repo/pull/123",
+    "issueNumber": "123"
   }
 }
 ```
+
+For Issues:
+```json
+{
+  "github": {
+    "type": "issue",
+    "title": "Implement user authentication",
+    "body": "Need to add JWT-based authentication system with login and signup functionality.",
+    "author": "contributor",
+    "labels": ["feature-request", "backend"],
+    "assignees": ["developer1"],
+    "milestone": "v2.0.0",
+    "url": "https://github.com/org/repo/issues/456",
+    "issueNumber": "456"
+  }
+}
+```
+
+**Key Benefits:**
+- **Rich Context**: See full GitHub information without leaving the terminal
+- **Better Organization**: Quickly identify worktrees by their GitHub context
+- **Persistent Links**: Direct URLs to GitHub items for easy access
+- **Label-based Filtering**: Use metadata for advanced worktree management
+
+### Viewing GitHub Metadata
+
+Once worktrees are created from GitHub Issues or PRs, you can view their metadata using the list command:
+
+```bash
+# Display GitHub metadata for all worktrees
+mst list --metadata
+
+# Output example:
+🎼 Orchestra Members (worktree):
+
+📍 refs/heads/main                .
+
+🎷 pr-123                         .git/orchestrations/pr-123
+    GitHub: PR #123 - Add authentication feature
+    Labels: enhancement, backend, security
+    Assignees: reviewer1, maintainer2
+    Milestone: v2.0.0
+    URL: https://github.com/org/repo/pull/123
+    Created: 2025-01-15 10:30:00
+
+🎷 issue-456                      .git/orchestrations/issue-456
+    GitHub: Issue #456 - Implement user authentication
+    Labels: feature-request, backend
+    Assignees: developer1
+    Milestone: v2.0.0
+    URL: https://github.com/org/repo/issues/456
+    Created: 2025-01-16 14:00:00
+```
+
+This metadata persists across sessions and provides valuable context for worktree management and development workflows.
 
 ## Creating from Issues
 
@@ -216,14 +272,14 @@ mst github issue issue-456
 
 ### Automatically Retrieved Information
 
-- Issue title
-- Issue body
-- Author
-- Assignees
-- Labels
-- Milestone
-- Project
-- Related PRs
+- Issue title and description (body)
+- Author information  
+- Assignees (users assigned to the Issue)
+- Labels (all associated labels)
+- Milestone information
+- Direct URL to the GitHub Issue
+- Project associations
+- Related PRs and references
 
 ## Interactive Mode
 
