@@ -337,15 +337,34 @@ All available configuration options for `.maestro.json`:
 
 ### 🤖 MCP Integration Setup
 
-Maestro includes a built-in MCP server that provides AI assistant integration for Claude Code. The MCP server allows Claude to:
-- Create and manage worktrees (orchestra members)
-- Execute commands in specific worktrees  
-- List all active worktrees with status
-- Delete worktrees safely
+Add Maestro as an MCP server to Claude Code using the modern command:
 
-**Note**: Due to recent changes in Maestro's command structure, MCP integration setup instructions are being updated. The MCP server functionality remains available through Maestro's internal API, but the command-line interface has been streamlined.
+#### Local Scope (Default - only for current project, private to you)
+```bash
+claude mcp add maestro -s local -- npx -y @camoneart/maestro maestro-mcp-server
+# Or without -s flag (local is default)
+claude mcp add maestro -- npx -y @camoneart/maestro maestro-mcp-server
+```
 
-For the latest MCP integration instructions, please refer to the [Configuration Guide](./docs/CONFIGURATION.md#mcp-integration) or check the project documentation for updated setup procedures.
+#### Project Scope (saved in .mcp.json for team sharing via version control)
+```bash
+claude mcp add maestro -s project -- npx -y @camoneart/maestro maestro-mcp-server
+```
+
+#### User Scope (available across all projects on the machine)
+```bash
+claude mcp add maestro -s user -- npx -y @camoneart/maestro maestro-mcp-server
+```
+
+#### For global installation users
+If you've installed Maestro globally, use:
+```bash
+claude mcp add maestro -s user -- maestro-mcp-server
+```
+
+This will automatically configure Claude Code to use Maestro's MCP server for orchestra management at the chosen scope level.
+
+**Note**: The traditional manual configuration in `.claude/mcp_settings.json` is no longer supported. Use the `claude mcp add` command instead.
 
 ### 🐚 Shell Completion
 

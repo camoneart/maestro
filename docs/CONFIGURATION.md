@@ -408,39 +408,55 @@ Cleanup before deletion:
 
 Maestro includes a Model Context Protocol (MCP) server for AI assistant integration.
 
-### Current Status
+### Setup Instructions
 
-**Important**: The `mcp serve` command has been removed from Maestro's CLI interface as part of recent architectural changes. The MCP server functionality is still available through Maestro's internal systems, but the setup process is being updated.
+Use the modern `claude mcp add` command:
 
-### Pending Updates
+#### Local Scope (Default - only for current project, private to you)
+```bash
+claude mcp add maestro -s local -- npx -y @camoneart/maestro maestro-mcp-server
+# Or without -s flag (local is default)
+claude mcp add maestro -- npx -y @camoneart/maestro maestro-mcp-server
+```
 
-MCP integration setup instructions are currently being updated to reflect the new architecture. The following features remain available through alternative integration methods:
+#### Project Scope (saved in .mcp.json for team sharing via version control)
+```bash
+claude mcp add maestro -s project -- npx -y @camoneart/maestro maestro-mcp-server
+```
 
-- Orchestra member (worktree) creation and management
-- Command execution within specific worktrees  
-- Status listing of all active worktrees
-- Safe worktree deletion operations
+#### User Scope (available across all projects on the machine)
+```bash
+claude mcp add maestro -s user -- npx -y @camoneart/maestro maestro-mcp-server
+```
 
-### Alternative Integration
+#### For global installation
+If you've installed Maestro globally:
+```bash
+claude mcp add maestro -s user -- maestro-mcp-server
+```
 
-While the direct `mcp serve` command is no longer available, users can still leverage Maestro's capabilities through:
+### Alternative Setup
 
-1. **Direct CLI Usage**: Use Maestro commands directly within Claude Code sessions
-2. **Script Integration**: Create wrapper scripts that use Maestro commands
-3. **Future MCP Updates**: Watch for upcoming releases that will restore MCP integration with the new architecture
+You can also use JSON configuration with the `claude mcp add-json` command:
 
-**Note**: The traditional manual configuration in `.claude/mcp_settings.json` is no longer supported. Please check the project documentation for updates on MCP integration alternatives.
+```bash
+# Using JSON format
+claude mcp add-json maestro -s user '{"type":"stdio","command":"npx","args":["-y","@camoneart/maestro","maestro-mcp-server"]}'
+
+# For global installation
+claude mcp add-json maestro -s user '{"type":"stdio","command":"maestro-mcp-server","args":[]}'
+```
+
+**Note**: The traditional manual configuration in `.claude/mcp_settings.json` is no longer supported.
 
 ### Available MCP Tools
 
-**Note**: MCP tools are temporarily unavailable while the integration architecture is being updated. Previously available functionality included:
+- `create_orchestra_member` - Create new worktrees with optional base branch
+- `delete_orchestra_member` - Remove worktrees with force option
+- `exec_in_orchestra_member` - Execute commands within specific worktrees
+- `list_orchestra_members` - List all active worktrees with status
 
-- Create and manage worktrees
-- Execute commands in specific worktrees
-- List all orchestra members with status
-- Delete worktrees safely
-
-When MCP integration is restored, the server will respect all Maestro configuration settings including hooks, sync files, and Claude markdown modes.
+The MCP server respects all Maestro configuration settings including hooks, sync files, and Claude markdown modes.
 
 ## Advanced Usage
 

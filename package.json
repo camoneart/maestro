@@ -5,7 +5,8 @@
   "type": "module",
   "bin": {
     "maestro": "./dist/cli.js",
-    "mst": "./dist/cli.js"
+    "mst": "./dist/cli.js",
+    "maestro-mcp-server": "./dist/mcp/server.js"
   },
   "files": [
     "dist",

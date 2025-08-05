@@ -336,15 +336,34 @@ mst config init                                    # プロジェクト設定を
 
 ### 🤖 MCP統合設定
 
-MaestroにはClaude CodeとのAIアシスタント統合を提供する組み込みMCPサーバーが含まれています。MCPサーバーはClaudeに以下の機能を提供します：
-- worktree（オーケストラメンバー）の作成と管理
-- 特定のworktree内でのコマンド実行  
-- すべてのアクティブなworktreeのステータス表示
-- worktreeの安全な削除
+最新のコマンドを使用してClaude CodeにMaestroをMCPサーバーとして追加:
 
-**注意**: Maestroのコマンド構造の最近の変更により、MCP統合のセットアップ手順を更新中です。MCPサーバー機能はMaestroの内部APIを通じて引き続き利用可能ですが、コマンドラインインターフェースが合理化されました。
+#### ローカルスコープ（デフォルト - 現在のプロジェクトでのみ、個人専用）
+```bash
+claude mcp add maestro -s local -- npx -y @camoneart/maestro maestro-mcp-server
+# または -s フラグなし（localがデフォルト）
+claude mcp add maestro -- npx -y @camoneart/maestro maestro-mcp-server
+```
 
-最新のMCP統合手順については、[設定ガイド](./docs/CONFIGURATION.md#mcp-integration)を参照するか、プロジェクトドキュメントで更新されたセットアップ手順をご確認ください。
+#### プロジェクトスコープ（.mcp.jsonに保存、バージョン管理でチーム共有）
+```bash
+claude mcp add maestro -s project -- npx -y @camoneart/maestro maestro-mcp-server
+```
+
+#### ユーザースコープ（マシン上の全プロジェクトで利用可能）
+```bash
+claude mcp add maestro -s user -- npx -y @camoneart/maestro maestro-mcp-server
+```
+
+#### グローバルインストールの場合
+Maestroをグローバルインストールしている場合は以下を使用:
+```bash
+claude mcp add maestro -s user -- maestro-mcp-server
+```
+
+これによりClaude CodeがMaestroのMCPサーバーを選択したスコープレベルで使用できるよう自動設定されます。
+
+**注意**: 従来の`.claude/mcp_settings.json`への手動設定はサポートされなくなりました。`claude mcp add`コマンドを使用してください。
 
 ### シェル補完
 
