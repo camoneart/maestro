@@ -337,25 +337,15 @@ All available configuration options for `.maestro.json`:
 
 ### 🤖 MCP Integration Setup
 
-Add Maestro as an MCP server to Claude Code using the modern command:
+Maestro includes a built-in MCP server that provides AI assistant integration for Claude Code. The MCP server allows Claude to:
+- Create and manage worktrees (orchestra members)
+- Execute commands in specific worktrees  
+- List all active worktrees with status
+- Delete worktrees safely
 
-```bash
-# User scope (available across all projects on the machine)
-claude mcp add maestro -s user -- npx -y @camoneart/maestro mcp serve
+**Note**: Due to recent changes in Maestro's command structure, MCP integration setup instructions are being updated. The MCP server functionality remains available through Maestro's internal API, but the command-line interface has been streamlined.
 
-# Project scope (saved in .mcp.json for team sharing via version control)
-claude mcp add maestro -s project -- npx -y @camoneart/maestro mcp serve
-
-# Local scope (default - only for current project, private to you)
-claude mcp add maestro -s local -- npx -y @camoneart/maestro mcp serve
-
-# For global installation (use 'maestro' instead of 'npx')
-claude mcp add maestro -s user -- maestro mcp serve
-```
-
-This will automatically configure Claude Code to use Maestro's MCP server for orchestra management at the chosen scope level.
-
-**Note**: The traditional manual configuration in `.claude/mcp_settings.json` is no longer supported. Use the `claude mcp add` command instead.
+For the latest MCP integration instructions, please refer to the [Configuration Guide](./docs/CONFIGURATION.md#mcp-integration) or check the project documentation for updated setup procedures.
 
 ### 🐚 Shell Completion
 
@@ -424,7 +414,6 @@ mst create feature/new-feature --tmux
 | **Git is too old** <br>`fatal: unknown option` | Git < 2.22                              | `brew install git`                |
 | **fzf not found**                              | fzf not installed                       | `brew install fzf`                |
 | **tmux not found**                             | tmux not installed                      | `brew install tmux`               |
-| **Claude Code won't start**                    | MCP server not running or port conflict | `mst mcp status` → `mst mcp stop` |
 | **Too many tmux panes** <br>`Unable to create session with N panes due to terminal size` | Terminal window too small for requested panes | Resize window or reduce panes (max: 10 horizontal, 15 vertical) |
 | **GitHub PR/Issue not found** <br>`Error: PR/Issue #999 が見つかりません` | Specified non-existent Issue/PR number | Check correct number or verify repository |
 
@@ -432,7 +421,6 @@ mst create feature/new-feature --tmux
 
 | Code         | Cause                  | Fix                                     |
 | ------------ | ---------------------- | --------------------------------------- |
-| `EADDRINUSE` | MCP server port in use | `mst mcp stop` to kill previous process |
 | `ENOENT`     | Git binary not found   | Check PATH or reinstall Git             |
 
 ### ⚠️ CLI Option Validation and Error Handling

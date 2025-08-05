@@ -26,7 +26,6 @@ Detailed usage of all maestro (mst) commands.
 - [config](#-config) - Configuration management
 - [where](#-where) - Check current location
 - [exec](#-exec) - Execute commands in members
-- [mcp](#-mcp) - MCP server management
 - [attach](#-attach) - Attach to existing branch
 - [graph](#-graph) - Display relationships
 - [history](#-history) - Operation history
@@ -761,27 +760,6 @@ mst exec --fzf --tmux-v npm test
 ```
 
 
-### 🔸 mcp
-
-Manage MCP server.
-
-```bash
-mst mcp <command> [options]
-```
-
-| Subcommand | Description |
-|------------|-------------|
-| `serve` | Start MCP server for Claude Code/Cursor integration |
-
-#### Examples
-```bash
-# Start MCP server
-mst mcp serve
-
-# Display usage information
-mst mcp
-```
-
 ### 🔸 attach
 
 Attach to existing branch.
@@ -1149,7 +1127,6 @@ For detailed usage of each command, see the following documentation:
 - [Config Management Details](./commands/config.md)
 - [Where Command Details](./commands/where.md)
 - [Exec Command Details](./commands/exec.md)
-- [MCP Server Details](./commands/mcp.md)
 - [Attach Command Details](./commands/attach.md)
 - [Graph Display Details](./commands/graph.md)
 - [History Management Details](./commands/history.md)
