@@ -13,7 +13,6 @@ import { deleteCommand } from './commands/delete.js'
 import { shellCommand } from './commands/shell.js'
 import { execCommand } from './commands/exec.js'
 import { attachCommand } from './commands/attach.js'
-import { mcpCommand } from './commands/mcp.js'
 import { configCommand } from './commands/config.js'
 import { githubCommand } from './commands/github.js'
 import { completionCommand } from './commands/completion.js'
@@ -45,7 +44,6 @@ program.addCommand(deleteCommand)
 program.addCommand(shellCommand)
 program.addCommand(execCommand)
 program.addCommand(attachCommand)
-program.addCommand(mcpCommand)
 program.addCommand(configCommand)
 program.addCommand(githubCommand)
 program.addCommand(completionCommand)
