@@ -23,7 +23,6 @@ import { reviewCommand } from './commands/review.js'
 import { issueCommand } from './commands/issue.js'
 import { historyCommand } from './commands/history.js'
 import { graphCommand } from './commands/graph.js'
-import { watchCommand } from './commands/watch.js'
 import { healthCommand } from './commands/health.js'
 import { snapshotCommand } from './commands/snapshot.js'
 import { initCommand } from './commands/init.js'
@@ -54,7 +53,6 @@ program.addCommand(reviewCommand)
 program.addCommand(issueCommand)
 program.addCommand(historyCommand)
 program.addCommand(graphCommand)
-program.addCommand(watchCommand)
 program.addCommand(healthCommand)
 program.addCommand(snapshotCommand)
 program.addCommand(pushCommand)
