@@ -11,6 +11,7 @@ import { isInTmuxSession } from '../utils/tmux.js'
 import { createTmuxSession, validateTmuxOptions } from '../utils/tmuxSession.js'
 import { detectPackageManager } from '../utils/packageManager.js'
 import { formatPath } from '../utils/path.js'
+import { saveWorktreeMetadata } from './create.js'
 
 // 型定義
 interface GithubOptions {
@@ -35,6 +36,11 @@ interface ItemInfo {
   author: { login: string }
   isDraft?: boolean
   headRefName?: string
+  body?: string
+  labels?: Array<{ name: string }>
+  assignees?: Array<{ login: string }>
+  milestone?: { title: string }
+  url?: string
 }
 
 interface ProjectConfig {
@@ -125,7 +131,9 @@ async function detectType(number: string): Promise<'pr' | 'issue'> {
 
 // PR/Issue情報を取得
 async function fetchItemInfo(number: string, type: 'pr' | 'issue'): Promise<ItemInfo> {
-  const fields = type === 'pr' ? 'number,title,headRefName,author' : 'number,title,author'
+  const fields = type === 'pr' 
+    ? 'number,title,headRefName,author,body,labels,assignees,milestone,url' 
+    : 'number,title,author,body,labels,assignees,milestone,url'
   try {
     const result = await execa('gh', [type, 'view', number, '--json', fields])
     return JSON.parse(result.stdout)
@@ -506,6 +514,26 @@ async function createWorktreeFromGithub(
   } catch (error) {
     spinner.fail('演奏者の招集に失敗しました')
     throw error
+  }
+
+  // メタデータを保存
+  try {
+    await saveWorktreeMetadata(worktreePath, branchName, {
+      github: {
+        type,
+        title: info.title,
+        body: info.body || '',
+        author: info.author.login,
+        labels: info.labels?.map(l => l.name) || [],
+        assignees: info.assignees?.map(a => a.login) || [],
+        milestone: info.milestone?.title,
+        url: info.url || '',
+        issueNumber: number,
+      },
+    })
+  } catch (error) {
+    // メタデータ保存の失敗は警告のみ表示し、処理は続行
+    console.warn(chalk.yellow(`⚠️  メタデータの保存に失敗しました: ${error instanceof Error ? error.message : '不明なエラー'}`))
   }
 
   const configManager = new ConfigManager()
