@@ -145,7 +145,7 @@ describe('github command', () => {
         'view',
         '123',
         '--json',
-        'number,title,headRefName,author',
+        'number,title,headRefName,author,body,labels,assignees,milestone,url',
       ])
       expect(mockGitWorktreeManagerInstance.createWorktree).toHaveBeenCalledWith(
         'pr-123',
@@ -159,6 +159,11 @@ describe('github command', () => {
         title: 'Add fast & efficient feature to key features table',
         headRefName: 'pr-183',
         author: { login: 'user1' },
+        body: 'Test PR description',
+        labels: [],
+        assignees: [],
+        milestone: null,
+        url: 'https://github.com/test/repo/pull/183',
       }
 
       mockExeca.mockImplementation((cmd: string, args: string[]) => {
@@ -273,6 +278,12 @@ describe('github command', () => {
       const mockIssue = {
         number: 456,
         title: 'Bug report',
+        author: { login: 'user1' },
+        body: 'Test issue description',
+        labels: [],
+        assignees: [],
+        milestone: null,
+        url: 'https://github.com/test/repo/issues/456',
       }
 
       // inquirer.promptのモック設定
@@ -306,7 +317,7 @@ describe('github command', () => {
         'view',
         '456',
         '--json',
-        'number,title,author',
+        'number,title,author,body,labels,assignees,milestone,url',
       ])
       expect(mockGitWorktreeManagerInstance.createWorktree).toHaveBeenCalledWith('issue-456')
     })
@@ -323,6 +334,12 @@ describe('github command', () => {
       const mockIssue = {
         number: 789,
         title: 'Feature Request',
+        author: { login: 'user1' },
+        body: 'Test feature request',
+        labels: [],
+        assignees: [],
+        milestone: null,
+        url: 'https://github.com/test/repo/issues/789',
       }
 
       // inquirer.promptのモック設定
@@ -472,8 +489,26 @@ describe('github command', () => {
         { number: 124, title: 'Feature B', author: { login: 'user2' }, isDraft: true },
       ]
       const mockIssues = [
-        { number: 456, title: 'Bug Report', author: { login: 'user3' } },
-        { number: 789, title: 'Enhancement', author: { login: 'user4' } },
+        { 
+          number: 456, 
+          title: 'Bug Report', 
+          author: { login: 'user3' },
+          body: 'Bug description',
+          labels: [],
+          assignees: [],
+          milestone: null,
+          url: 'https://github.com/test/repo/issues/456',
+        },
+        { 
+          number: 789, 
+          title: 'Enhancement', 
+          author: { login: 'user4' },
+          body: 'Enhancement description',
+          labels: [],
+          assignees: [],
+          milestone: null,
+          url: 'https://github.com/test/repo/issues/789',
+        },
       ]
 
       mockExeca.mockImplementation((cmd: string, args: string[]) => {
@@ -516,7 +551,7 @@ describe('github command', () => {
         'issue',
         'list',
         '--json',
-        'number,title,author',
+        'number,title,author,body,labels,assignees,milestone,url',
         '--limit',
         '20',
       ])

@@ -131,9 +131,10 @@ async function detectType(number: string): Promise<'pr' | 'issue'> {
 
 // PR/Issue情報を取得
 async function fetchItemInfo(number: string, type: 'pr' | 'issue'): Promise<ItemInfo> {
-  const fields = type === 'pr' 
-    ? 'number,title,headRefName,author,body,labels,assignees,milestone,url' 
-    : 'number,title,author,body,labels,assignees,milestone,url'
+  const fields =
+    type === 'pr'
+      ? 'number,title,headRefName,author,body,labels,assignees,milestone,url'
+      : 'number,title,author,body,labels,assignees,milestone,url'
   try {
     const result = await execa('gh', [type, 'view', number, '--json', fields])
     return JSON.parse(result.stdout)
@@ -533,7 +534,11 @@ async function createWorktreeFromGithub(
     })
   } catch (error) {
     // メタデータ保存の失敗は警告のみ表示し、処理は続行
-    console.warn(chalk.yellow(`⚠️  メタデータの保存に失敗しました: ${error instanceof Error ? error.message : '不明なエラー'}`))
+    console.warn(
+      chalk.yellow(
+        `⚠️  メタデータの保存に失敗しました: ${error instanceof Error ? error.message : '不明なエラー'}`
+      )
+    )
   }
 
   const configManager = new ConfigManager()
