@@ -122,13 +122,16 @@ The `--full-path` option always shows absolute paths regardless of the `ui.pathD
       "metadata": {
         "createdAt": "2025-01-16T14:00:00Z",
         "createdBy": "mst",
-        "githubIssue": {
-          "number": 123,
+        "github": {
+          "type": "issue",
           "title": "Implement authentication",
-          "state": "open",
+          "body": "Need to add JWT-based authentication system with login and signup functionality.",
+          "author": "contributor",
           "labels": ["enhancement", "backend"],
           "assignees": ["user123"],
-          "url": "https://github.com/org/repo/issues/123"
+          "milestone": "v2.0.0",
+          "url": "https://github.com/org/repo/issues/123",
+          "issueNumber": "123"
         }
       }
     }
@@ -144,6 +147,8 @@ The `--full-path` option always shows absolute paths regardless of the `ui.pathD
 
 ### Output with Metadata (`--metadata`)
 
+When using the `--metadata` flag, the list command displays comprehensive information about each worktree, including GitHub metadata for worktrees created from Issues or Pull Requests:
+
 ```
 🎼 Orchestra Members (worktree):
 
@@ -151,16 +156,31 @@ The `--full-path` option always shows absolute paths regardless of the `ui.pathD
 
 🎷 feature/auth                   .git/orchestrations/feature-auth
     GitHub: PR #45 - Add authentication module
-    Labels: enhancement, backend
-    Assignees: user123
+    Body: This PR implements user authentication with JWT tokens and includes comprehensive test coverage.
+    Labels: enhancement, backend, security
+    Assignees: user123, reviewer2
+    Milestone: v2.0.0
+    URL: https://github.com/org/repo/pull/45
     Created: 2025-01-15 10:30:00
 
 🎷 issue-123                      .git/orchestrations/issue-123
     GitHub: Issue #123 - Implement authentication
-    Labels: enhancement, backend
-    Assignees: user123
+    Body: Need to add JWT-based authentication system with login and signup functionality.
+    Labels: feature-request, backend
+    Assignees: developer1
+    Milestone: v2.0.0
+    URL: https://github.com/org/repo/issues/123
     Created: 2025-01-16 14:00:00
 ```
+
+**Enhanced GitHub Metadata Display:**
+- **Type and Number**: Clearly identifies whether it's a PR or Issue with its number
+- **Description**: Shows the full body/description of the GitHub item
+- **Labels**: All associated labels for easy categorization
+- **Assignees**: Current assignees for the GitHub item
+- **Milestone**: Associated milestone information
+- **URL**: Direct link to the GitHub item for quick access
+- **Creation Time**: When the worktree was created locally
 
 ### Output with Last Commit (`--last-commit`)
 
@@ -218,6 +238,35 @@ mst exec $(mst list --fzf) npm test
 - **behind X**: X commits behind remote branch
 - **Issue #X**: Associated with GitHub Issue #X
 - **PR #X**: Associated with GitHub PR #X
+
+## GitHub Metadata Integration
+
+When worktrees are created from GitHub Issues or Pull Requests using `mst github` commands, comprehensive metadata is automatically saved and displayed:
+
+### Metadata Benefits
+
+- **Context Awareness**: Quickly understand what each worktree is for without switching contexts
+- **Link Preservation**: Direct URLs to GitHub items for instant navigation
+- **Label-based Organization**: See GitHub labels to understand priority, type, or category
+- **Assignment Tracking**: Know who's responsible for each GitHub item
+- **Milestone Visibility**: Track progress towards project milestones
+- **Rich Descriptions**: Access full GitHub descriptions directly from the terminal
+
+### Advanced Usage Examples
+
+```bash
+# Filter worktrees with GitHub metadata using jq
+mst list --json | jq '.worktrees[] | select(.metadata.github != null)'
+
+# Find worktrees for specific GitHub labels
+mst list --json | jq '.worktrees[] | select(.metadata.github.labels[]? == "bug")'
+
+# List worktrees assigned to specific user
+mst list --json | jq '.worktrees[] | select(.metadata.github.assignees[]? == "username")'
+
+# Find worktrees for specific milestone
+mst list --json | jq '.worktrees[] | select(.metadata.github.milestone == "v2.0.0")'
+```
 
 ## CI/CD Integration
 

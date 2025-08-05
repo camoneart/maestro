@@ -282,7 +282,7 @@ mst ls [options]  # alias
 | `--sort <field>` | Sort by field (branch, age, size) |
 | `--filter <pattern>` | Filter by pattern |
 | `--last-commit` | Show last commit info |
-| `--metadata` | Show metadata info |
+| `--metadata` | Show metadata info including GitHub data |
 | `--full-path` | Show full paths instead of relative paths |
 | `--fzf` | Select with fzf (outputs selected branch name) |
 | `--names` | Machine-readable output (for scripting) |
@@ -292,7 +292,7 @@ mst ls [options]  # alias
 # Basic list
 mst list
 
-# Show with details
+# Show with GitHub metadata and commit details
 mst list --last-commit --metadata
 
 # Sort by size
@@ -301,10 +301,16 @@ mst list --sort size
 # Show full paths
 mst list --full-path
 
+# Display GitHub metadata for worktrees created from Issues/PRs
+mst list --metadata
+
 # For scripting
 for worktree in $(mst list --names); do
   echo "Processing $worktree"
 done
+
+# Filter worktrees with GitHub metadata using JSON output
+mst list --json | jq '.worktrees[] | select(.metadata.github != null)'
 ```
 
 ### 🔸 delete
@@ -514,6 +520,18 @@ The GitHub command uses an optimized process for creating worktrees from Pull Re
 - Uses `createWorktree` with proper base branch handling
 - Automatically cleans up temporary branches
 - Ensures reliable worktree creation without Git conflicts
+
+#### Enhanced GitHub Metadata Storage
+
+Maestro now automatically saves comprehensive GitHub metadata when creating worktrees from Issues or Pull Requests, including:
+- **Full descriptions**: PR/Issue body content for rich context
+- **Labels**: All associated GitHub labels for categorization
+- **Assignees**: Current assignees for responsibility tracking
+- **Milestones**: Project milestone associations
+- **Direct URLs**: Links to GitHub items for quick access
+- **Author information**: Creator of the GitHub item
+
+This metadata can be viewed using `mst list --metadata` and provides valuable context for worktree management.
 
 **Note:** The `--open` flag only opens the editor when explicitly specified. The GitHub command does not automatically open in the editor based on `development.defaultEditor` configuration.
 
