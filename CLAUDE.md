@@ -171,6 +171,7 @@ Follow semantic commit prefixes for this project:
 - Removing or deprecating commands
 
 **Auto-trigger Rules**:
+
 1. After ANY changes to files in `src/commands/`, immediately use the Task tool to launch the `command-docs-updater` agent
 2. The agent will automatically identify and update:
    - README.md files at various levels
@@ -181,6 +182,7 @@ Follow semantic commit prefixes for this project:
    - Any markdown files referencing the commands
 
 **Example Usage**:
+
 ```
 After modifying src/commands/create.ts to add a --template option:
 Use Task tool: "I've updated the create command to add a new --template option. Please use the command-docs-updater agent to update all related documentation."
@@ -205,7 +207,6 @@ This ensures documentation always stays in sync with implementation changes with
 - **fzf**: Fuzzy finding for interactive selection across commands
 - **Shell Completion**: bash/zsh/fish completion scripts available via `mst completion`
 
-
 ## Pre-Release Testing Guidelines
 
 **CRITICAL**: Before releasing any version, especially with critical bug fixes, thorough testing must be performed to ensure quality and prevent regressions.
@@ -213,47 +214,52 @@ This ensures documentation always stays in sync with implementation changes with
 ### Local Testing Workflow
 
 1. **Build and Test Locally**
+
    ```bash
    # Build the project
    pnpm build
-   
+
    # Run the built CLI directly
    node dist/cli.js create test-branch --tmux
-   
+
    # Or use npm link for global testing
    npm link
    mst create test-branch --tmux-h
    ```
 
 2. **Run Comprehensive Test Suite**
+
    ```bash
    # Unit tests
    pnpm test
-   
+
    # E2E tests
    pnpm test:e2e
-   
+
    # Coverage report
    pnpm test:coverage
-   
+
    # Type checking
    pnpm typecheck
-   
+
    # Linting
    pnpm lint
    ```
 
 3. **Manual Testing Checklist**
    Create a checklist for critical features being modified:
+
    ```markdown
    ## Manual Test Checklist for [Feature]
+
    - [ ] Basic functionality works as expected
    - [ ] Edge cases are handled properly
    - [ ] No regressions in related features
    - [ ] Performance is acceptable
    - [ ] Error messages are helpful
-   
+
    ## Example: tmux Integration Testing
+
    - [ ] `mst create test --tmux` creates session and attaches
    - [ ] Keyboard input works normally (no escape sequences)
    - [ ] Ctrl+C interrupts commands without detaching
@@ -268,11 +274,12 @@ This ensures documentation always stays in sync with implementation changes with
    ```
 
 4. **Pre-Release Testing**
+
    ```bash
    # Create a beta/canary release for testing
    pnpm changeset version --snapshot beta
    pnpm release --tag beta
-   
+
    # Users can test with:
    npm install -g @camoneart/maestro@beta
    ```
@@ -290,11 +297,12 @@ This ensures documentation always stays in sync with implementation changes with
 For features that interact with external systems (tmux, GitHub, etc.):
 
 1. **Create dedicated test scripts**
+
    ```bash
    # scripts/test-tmux-integration.sh
    #!/bin/bash
    set -e
-   
+
    echo "Testing tmux integration..."
    mst create test-tmux --tmux
    # Add automated checks here
@@ -326,36 +334,40 @@ For major changes or critical fixes:
 **IMPORTANT**: Always follow these formats when creating releases.
 
 ### Git Tag Format
+
 - **Tag name**: `maestro@{version}` (e.g., `maestro@3.3.2`)
 - Created by changeset as `v{version}`, then manually corrected
 
 ### GitHub Release Format
+
 - **Title**: `maestro@{version}` (e.g., `maestro@3.3.2`)
 - **Body format**:
+
   ```
   ### {Major|Minor|Patch} Changes
 
   - #{PR_number} {short_SHA} Thanks @{username}! - {change_summary}
 
     {detailed_description}
-    
+
     **Changes:**
     - {specific_changes}
-    
+
     **Fixed behavior:**
     - {what_was_fixed}
-    
+
     Fixes #{issue_number}
   ```
 
 ### Release Process
+
 1. **TEST THOROUGHLY** (see Pre-Release Testing above)
 2. `pnpm changeset` - Create a changeset
 3. `pnpm changeset version` - Update version
 4. `git add` and `git commit` - Commit changes
 5. `git push` - Push to main
 6. `pnpm release` - Publish to npm and create tag
-7. Fix tag format: 
+7. Fix tag format:
    ```bash
    git tag -d v{version}
    git push origin --delete v{version}
@@ -385,3 +397,78 @@ Feature: <feature name here>
 - Side Effects: <any concerns or side effects>
 - Related Files: <file locations>
 ```
+
+## Release Notes Generation Rules (Changesets & GitHub Release)
+
+- All repositories must use **Changesets** for version management and automatic release notes generation.
+- Tag naming convention: `package-name@x.y.z` to ensure unique identification even in MonoRepos.
+- `/.changeset/config.json` must include the following configuration:
+
+```json
+{
+  "changelog": ["@changesets/changelog-github", { "repo": "<owner>/<repo>" }],
+  "commit": false,
+  "linked": [],
+  "access": "public",
+  "baseBranch": "main",
+  "updateInternalDependencies": "patch"
+}
+```
+
+- In GitHub Actions, enable `createGithubReleases: true` in `changesets/action@v1` to automatically create Release pages.
+- ### Format Requirements (shadcn-ui style)
+
+1. **Title / Tag**
+   - Title and tag name must follow `package-name@x.y.z` format.
+   - `Latest` badge is automatically assigned by GitHub; no manual action required.
+
+2. **Heading Order**
+   1. Breaking Changes (if any)
+   2. Major Changes (for major version bumps)
+   3. Minor Changes
+   4. Patch Changes
+
+3. **Entry Line Format**
+
+   ```md
+   - #<PR number> <short SHA> Thanks @<handle>! - <change summary>
+   ```
+
+   Example:
+
+   ```md
+   - #7782 06d03d6 Thanks @shadcn! - add universal registry items support
+   ```
+
+4. **Entry Ordering**
+   - Sort by PR number in ascending order. This applies even when multiple packages are released simultaneously.
+
+5. **Assets Section**
+   - Verify that only `Source code (zip)` / `(tar.gz)` automatically attached by GitHub Release UI are displayed.
+
+6. **Example (Complete Format)**
+
+   ```md
+   shadcn@2.9.0
+
+   ### Major Changes
+
+   - #7780 123abcd Thanks @shadcn! - implement registry synchronization
+
+   ### Minor Changes
+
+   - #7782 06d03d6 Thanks @shadcn! - add universal registry items support
+
+   ### Patch Changes
+
+   - #7795 6c341c1 Thanks @shadcn! - fix safe target handling
+   - #7757 db93787 Thanks @shadcn! - implement registry path validation
+   ```
+
+   > Strictly follow the **indentation / spacing / line breaks** shown above.
+
+7. **No Manual Editing After Auto-Generation**
+   - Avoid manual edits as they can break formatting. If additional notes are needed, add an "Additional Notes" section at the bottom.
+
+8. **Verification Steps**
+   - Run `gh release view <tag>` to verify that Markdown renders correctly. If issues arise, delete the tag and re-release.
